@@ -30,3 +30,10 @@ TypeScript + Vite + Preact + Vitest + Playwright；ExcelJS、docx、fflate；PDF
 - 版本記錄：每次發布更新 `CHANGELOG.md` 並建立 GitHub Release；完成待辦要同步更新 `todo.md`。
 - 介面與輸出文件的設計走設計員流程，設計系統完成後記錄於 `docs/design-system/`。
 - Commit 署名依全域規範（`Claude-<裝置簡稱>`）。
+
+## 設計規範（改頁面前必讀）
+
+- 本專案的設計規範在 [docs/design/DESIGN.md](docs/design/DESIGN.md)，tokens 唯一來源是 [docs/design/tokens.css](docs/design/tokens.css)，定案的模擬頁在 `docs/design/mockups/`。一切頁面、版面、元件、樣式的工作以它們為準。
+- 新增、改版、調整任何頁面前，先讀它。沿用其中的 tokens 與元件規則，不寫死色碼與間距。
+- 新頁面或大改版使用 `設計員` 技能（輸入 `/設計員`）：先在對話中出設計稿給使用者確認，定案後把規範與模擬頁更新回 `docs/design/`，和程式放在同一個 PR。
+- 要偏離規範，先更新 DESIGN.md 並取得使用者確認，不要只改程式。
