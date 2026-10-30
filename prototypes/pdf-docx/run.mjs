@@ -8,9 +8,12 @@ import { renderDocx } from './lib/docx.mjs';
 import { loadFonts, DIMENSIONS_FONT } from './lib/fonts.mjs';
 
 const N = Number(process.argv[2] ?? 35);
+// PROTO_DOCX_FONT=微軟正黑體 之類：Word 版改指定系統字型，docx 輸出到 output/docx-sys/（PDF 仍用 Noto Sans TC）
+const DOCX_FONT = process.env.PROTO_DOCX_FONT;
+const DOCX_DIR = DOCX_FONT ? 'docx-sys' : 'docx';
 const out = new URL('./output/', import.meta.url).pathname.replace(/^\/([A-Z]:)/, '$1');
 mkdirSync(`${out}pdf`, { recursive: true });
-mkdirSync(`${out}docx`, { recursive: true });
+mkdirSync(`${out}${DOCX_DIR}`, { recursive: true });
 
 const students = makeStudents(N);
 const avgs = classAverages(students);
@@ -25,11 +28,11 @@ for (const s of students) {
   const p = await renderPdf(doc, fonts);
   stat.pdfMs.push(performance.now() - t);
   t = performance.now();
-  const d = await renderDocx(doc);
+  const d = await renderDocx(doc, DOCX_FONT ? { fontName: DOCX_FONT } : {});
   stat.docxMs.push(performance.now() - t);
   const id = String(s.seat).padStart(2, '0');
   writeFileSync(`${out}pdf/${id}.pdf`, p.bytes);
-  writeFileSync(`${out}docx/${id}.docx`, d);
+  writeFileSync(`${out}${DOCX_DIR}/${id}.docx`, d);
   stat.pdf.push(p.bytes.length); stat.docx.push(d.length); stat.pages.push(p.pageCount);
 }
 const sum = (a) => a.reduce((x, y) => x + y, 0);
