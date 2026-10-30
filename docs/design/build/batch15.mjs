@@ -50,11 +50,6 @@ F.push(D('D7 桌機：Google 雲端硬碟雙軌｜桌機 Chrome／Edge 可直接
 F.push(D('D8 桌機：Google 表單設計教學｜左邊五個設計技巧（步驟有先後才用編號），右邊範本表單與「複製到我的 Google 表單」連結。', 1,
   `${body(main(`${h('如何設計 Google 表單才好分析', '五個小技巧，讓統計一次就對。')}${card('<ol style="margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:10px;line-height:1.7"><li><b>姓名與座號用「簡答」並各自一欄</b>，不要合在一起。</li><li><b>量表題用「線性刻度」1–5</b>，才能算平均與分布。</li><li><b>單選與複選分開問</b>，統計方式不同。</li><li><b>票選用「選擇題」並限一人一票</b>，避免重複。</li><li><b>開放題放在最後</b>，避免同學不想填。</li></ol>')}`), rside(380, `${h('範本表單')}${rowbtn('意見調查範本', '量表＋單選＋開放題', '', false, true)}${rowbtn('幹部票選範本', '每個職位一題', '', false, true)}${rowbtn('報告互評範本', '評分規準＋留言', '', false, true)}${notice('', 'info', '範本是 Google 表單連結，開啟後選「建立副本」即可編輯。')}`))}`));
 
-// D9 空白與錯誤
-const st = (title, text, acts) => `<div class="qcard" style="gap:10px;flex:1"><b style="font-size:var(--fs-lg)">${title}</b><p style="margin:0;line-height:1.7" class="muted">${text}</p><div style="display:flex;gap:8px;margin-top:auto">${acts}</div></div>`;
-F.push(frameWH('D9 桌機：空白與錯誤狀態｜都說明原因並給下一步：沒有資料（空白）、讀不到檔案、輸出失敗。不放插圖，不道歉。', 1280, 480,
-  `${topbar(1, '')}<div style="flex:1;min-height:0;display:flex;gap:16px;padding:24px;overflow:hidden">${st('還沒有資料', '尚未開啟任何問卷檔。開啟問卷後，統計與輸出才會出現在這裡。', btn('開啟問卷檔', 'primary') + btn('用示範資料', 'secondary'))}${st('讀不到這個檔案', '請確認是 xlsx 或 csv。Google 表單可到「回覆」→「在試算表中查看」→「檔案」→「下載」→「Excel」。', btn('重新選擇', 'primary') + btn('看教學', 'secondary'))}${st('輸出失敗', '記憶體不足，無法一次產生 41 個 PDF。可改成分批（每次 10 人），或改輸出 Excel。', btn('分批輸出', 'primary') + btn('改輸出 Excel', 'secondary'))}</div>`));
-
 // D10 量表與反向計分
 F.push(D('D10 桌機：量表標籤與反向計分｜左邊標籤與預設、右邊反向題清單與反向前後的平均；改動即時預覽在下方圖上。', 3,
   `${body(main(`${h('量表標籤')}<div class="grp"><span class="gl">套用預設</span>${chips(['同意程度', '滿意度', '頻率', '自訂'], 0)}</div>${card(['非常不同意', '不同意', '普通', '同意', '非常同意'].map((t, i) => `<div style="display:flex;align-items:center;gap:10px"><b class="mono" style="width:1.2em">${i + 1}</b><div class="input" style="flex:1;min-height:44px;display:flex;align-items:center">${t}</div></div>`).join(''))}`), rside(480, `${h('反向計分', '分數換成「6 − 原分數」，原始資料不改。')}${tgl('第 3 題　分組讓我有機會表達', '', false)}${tgl('第 5 題　活動時間太趕', '平均 3.8 → 2.2', true)}${tgl('第 6 題　場地讓我不舒服', '平均 3.5 → 2.5', true)}${notice('warn', 'warn', '第 6 題標為反向後，總平均會跟著改變。若不確定，請回到題目文字確認。')}`))}${nav()}`));

@@ -1,0 +1,20 @@
+// 桌機畫面共用外框與小工具（1280 寬）
+import * as W from './wide.mjs';
+export { W };
+export const { L, miniPaper, frameWH, topbar, pane, flex1, body, foot, kbd, fchip, h, th, td, qrow, nvr, tgl, card, table, cmt, cmpbar, addPages, voteBars, vote } = W;
+export const { ic, tag, icbtn, btn, notice, tile, tiles, seg, chips, rcard, rowbtn, grp, brow, write, field, opt } = L;
+export const D = (cap, step, inner, file, H = 800) => frameWH(cap, 1280, H, `${topbar(step, file)}${inner}`);
+export const side = (w, inner) => pane(w, inner, 'padding:12px;border-right:1px solid var(--line-soft)');
+export const main = (inner, o = '') => flex1(inner, `padding:20px;overflow:hidden;${o}`);
+export const rside = (w, inner) => pane(w, inner, 'padding:20px;border-left:1px solid var(--line-soft);background:var(--card)');
+export const nav = (a = '下一步', b = '上一步') => foot(btn(b, 'secondary'), btn(a, 'primary'));
+export const modal = (w, inner, o = '') => `<div class="scrim"></div><div role="dialog" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:${w}px;background:var(--card);border-radius:var(--r-lg);padding:28px;display:flex;flex-direction:column;gap:14px;box-shadow:0 12px 40px var(--shadow-sm);${o}">${inner}</div>`;
+export const mhead = (t, close = true) => `<div style="display:flex;align-items:center"><h2 style="margin:0;font-size:var(--fs-xl)">${t}</h2>${close ? `<span style="margin-left:auto">${icbtn('x', '關閉')}</span>` : ''}</div>`;
+export const mfoot = (...b) => `<div style="display:flex;gap:8px;justify-content:flex-end">${b.join('')}</div>`;
+export const prog = (p) => `<div class="prog"><i style="width:${p}%"></i></div>`;
+export const dropzone = (inner) => `<div style="border:2px dashed var(--ink3);border-radius:var(--r-lg);padding:48px 24px;display:flex;flex-direction:column;align-items:center;gap:14px;background:var(--card)">${inner}</div>`;
+export const round = (i, bg = 'var(--accent-soft)', fg = 'var(--accent-ink)') => `<span style="width:56px;height:56px;border-radius:50%;background:${bg};color:${fg};display:grid;place-items:center;flex:none">${ic(i)}</span>`;
+export const centered = (w, inner) => `<div style="margin:auto;width:${w}px;display:flex;flex-direction:column;gap:16px">${inner}</div>`;
+export const rail = (inner) => `<div class="small muted" style="font-weight:700">${inner}</div>`;
+export const fbox = (inner) => `<div style="border:1px solid var(--line-soft);border-radius:var(--r-md);overflow:hidden;background:var(--card)">${inner}</div>`;
+export const bgOpen = () => body(flex1(centered(560, `${h('開啟問卷檔', '支援 Google 表單匯出的 xlsx 或 csv。')}${dropzone(`${round('down-arrow')}<b style="font-size:var(--fs-lg)">把 xlsx 或 csv 拖到這裡</b><span class="small muted">或</span><div style="display:flex;gap:8px">${btn('選擇檔案', 'primary')}${btn('從 Google 雲端硬碟', 'secondary')}</div>`)}`), 'padding:24px;align-items:stretch;justify-content:center'));
