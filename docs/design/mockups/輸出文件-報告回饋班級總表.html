@@ -412,6 +412,14 @@ button{font-family:inherit}
 .dtable.tight td{padding:4px 8px}
 .dtable.tight th{padding:5px 8px}
 
+.cmp{display:flex;flex-direction:column;gap:6px}
+.cmp .h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:var(--fs-sm)}
+.cmp .v{font-variant-numeric:tabular-nums}
+.cmp .tr{position:relative;height:20px;border-radius:5px;background:var(--sunk)}
+.cmp .tr i{position:absolute;left:0;top:3px;height:14px;border-radius:4px;background:var(--accent)}
+.cmp .tr u{position:absolute;top:0;bottom:0;border-left:2px dashed var(--warn-bar);text-decoration:none}
+.cmp .tr em{position:absolute;top:-2px;bottom:-2px;width:3px;border-radius:2px;background:var(--ink);font-style:normal}
+
 .pagehead{display:flex;flex-direction:column;gap:6px;max-width:72ch}.round{display:flex;flex-direction:column;gap:32px}
 .scale{position:static!important;width:auto!important;height:auto!important}
 .scale>.dev,.scale>.paper{position:relative!important;transform:none!important}
