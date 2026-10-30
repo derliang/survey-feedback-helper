@@ -51,11 +51,30 @@ function deviceArtifact() {
   const by = (id) => pages.find((p) => p.id === id);
   const sec = (id, p, figs, title, intro) => ({ id, title: title || p.title, intro: intro || p.intro, figs });
   const wide = figsOf(inner(by('flow-wide')));
+  const DESK = {};
+  const used = new Set();
+  [...wide.filter((f) => capOf(f).includes('桌機')), ...['flow-desk', 'flow-desk2', 'desk-a', 'desk-b', 'desk-c', 'desk-d'].flatMap((id) => figsOf(inner(by(id))))].forEach((f) => { DESK[capOf(f).split(' ')[0]] = f; });
+  const DESK_N = Object.keys(DESK).length;
+  const DESK_SECS = [
+    { id: 'd-open', title: '開啟問卷', intro: '第 1 步。拖放或選檔、選檔來源、讀取中、讀不到檔案、瀏覽器過舊。', keys: ['13a', 'D12', 'D13', 'D14', 'D15'] },
+    { id: 'd-prep', title: '準備資料', intro: '第 2 步。總覽、問卷類型、欄位對應、學生名單與對照、資料檢查。', keys: ['D16', 'D17', '13b', 'D18', 'D19', 'D20', 'D21', 'D22', '13c'] },
+    { id: 'd-survey', title: '意見調查統計', intro: '第 3 步。量表、複選、開放題、交叉分析、圖表另存、量表標籤與反向計分。', keys: ['12c', 'D24', 'D5', 'D4', 'D50', 'D10'] },
+    { id: 'd-vote', title: '票選統計與防弊', intro: '第 3 步。各職位結果、同票抽籤、投影唱票、防弊檢查、同人多票、計票規則。', keys: ['D1', 'D23', '13f', 'D47', 'D48', 'D49'] },
+    { id: 'd-fb', title: '報告回饋與歷次趨勢', intro: '第 3 步。以被評對象為單位的統計，與同一班多次問卷的變化。', keys: ['D2', 'D3'] },
+    { id: 'd-out', title: '審稿與輸出', intro: '第 4 步。老師審稿、改寫留言、評語與關鍵字、輸出設定、檔名與去識別化、進度、完成與失敗。', keys: ['13d', 'D25', 'D26', '12e', 'D28', 'D27', 'D6', 'D31'] },
+    { id: 'd-edit', title: '版面編輯器', intro: '三欄：區塊清單、頁面、屬性。文字與圖表屬性、加入區塊、頁面設定、個別學生版本、拖曳排序。', keys: ['12d', 'D33', 'D34', 'D35', 'D36', 'D37'] },
+    { id: 'd-tpl', title: '範本庫與專案檔', intro: '範本縮圖、選單、匯出與匯入；儲存專案檔，與開啟專案檔後的接續。', keys: ['D38', 'D39', 'D40', 'D41', 'D42', 'D43'] },
+    { id: 'd-drive', title: 'Google 雲端硬碟', intro: '雙軌（資料夾與登入）、選檔視窗、配額用完、已連線設定。', keys: ['D7', 'D44', 'D45', 'D46'] },
+    { id: 'd-set', title: '設定、教學與隱私', intro: '設定與範本、三層預設、備份與還原、隱私與關於、清除本機設定、Google 表單教學。', keys: ['13e', 'D11', 'D29', 'D54', 'D56', 'D8'] },
+    { id: 'd-sys', title: '狀態、提示與系統', intro: '空白、離開確認、快速鍵說明、安裝為應用程式、離線與新版本、第一次載入。', keys: ['D30', 'D32', '13g', 'D51', 'D52', 'D53', 'D55'] },
+  ];
   const DEV = [
     { key: 'phone', label: '手機', note: '390 × 844，單手操作、一次一個步驟，底部操作列與底部彈出面板。', secs: ['core', 'flow-data', 'flow-stats', 'flow-out', 'flow-edit', 'flow-tpl', 'flow-drive', 'flow-guard', 'flow-sys'].map((id) => sec(id, by(id), figsOf(inner(by(id))))) },
     { key: 'tablet', label: '平板', note: '820 直向／1024 橫向，左右分欄，觸控點擊區不低於 44px。', secs: [sec('t-flow', by('flow-tablet'), figsOf(inner(by('flow-tablet'))), '平板：開啟到輸出、設定、雲端硬碟、離開確認、投影唱票'), sec('t-wide', by('flow-wide'), wide.filter((f) => capOf(f).includes('平板')), '平板：統計與橫向編輯器', '直向兩欄的統計，與橫向三欄的編輯器。')] },
-    { key: 'desktop', label: '桌機', note: '1280，三欄工作台，鍵盤快速鍵，滑鼠拖曳與雙擊編輯。', secs: [sec('d-wide', by('flow-wide'), wide.filter((f) => capOf(f).includes('桌機')), '桌機：統計、編輯器、輸出工作台', '三欄工作台的三個主要畫面。'), sec('d-desk', by('flow-desk'), figsOf(inner(by('flow-desk')))), sec('d-desk2', by('flow-desk2'), figsOf(inner(by('flow-desk2'))))] },
+    { key: 'desktop', label: '桌機', note: '1280，三欄工作台，鍵盤快速鍵，滑鼠拖曳與雙擊編輯。共 ' + DESK_N + ' 個畫面，依使用順序分組，每個畫面都有對應的手機版。', secs: DESK_SECS.map((s) => sec(s.id, { title: s.title, intro: s.intro }, s.keys.map((k) => { const f = DESK[k]; if (!f) throw new Error('桌機缺畫面 ' + k); used.add(k); return f; }))) },
   ];
+  const left = Object.keys(DESK).filter((k) => !used.has(k));
+  if (left.length) throw new Error('桌機畫面未分組：' + left.join(','));
   const view = DEV.map((d) => `<section class="dev-view" id="v-${d.key}" hidden><p class="muted">${d.note}</p><nav class="chips" aria-label="${d.label}頁面索引">${d.secs.map((x) => `<a class="chip" style="display:inline-flex;align-items:center;text-decoration:none" href="#${x.id}" data-sec="${x.id}">${(x.title || '').replace(/（.*?）/g, '')}</a>`).join('')}</nav>${d.secs.map((x) => `<section class="sec" id="${x.id}"><div class="pagehead"><h2>${x.title}</h2><p class="muted small">${x.intro}</p></div><div class="figs">${x.figs.join('\n')}</div></section>`).join('\n')}</section>`).join('\n');
   const html = `<title>${G.title}</title>
 <meta name="claude:viewport-fit-sides" content="cover">
