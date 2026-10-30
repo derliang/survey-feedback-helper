@@ -426,6 +426,10 @@ button{font-family:inherit}
 .tgl[aria-checked="true"] .sw2{background:var(--accent)}
 .tgl[aria-checked="true"] .sw2::after{left:23px;background:var(--on-accent)}
 
+.pane{display:flex;flex-direction:column;gap:12px;overflow:hidden;flex:none;min-width:0}
+.qrow{display:flex;gap:10px;align-items:center;min-height:48px;padding:0 12px;border-radius:var(--r-sm);color:var(--ink);font-size:var(--fs-md)}
+.qrow[aria-current]{background:var(--accent-soft);color:var(--accent-ink);font-weight:700}
+
 .pagehead{display:flex;flex-direction:column;gap:6px;max-width:72ch}.round{display:flex;flex-direction:column;gap:32px}
 .scale{position:static!important;width:auto!important;height:auto!important}
 .scale>.dev,.scale>.paper{position:relative!important;transform:none!important}
