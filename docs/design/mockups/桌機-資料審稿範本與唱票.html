@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>桌機補完：開啟、對應、檢查、審稿、範本庫、投影唱票（模擬頁）</title>
+<style>
+:root {
+  /* 色彩：表面 */
+  --paper: #f4f5f7;       /* 頁面底 */
+  --card: #ffffff;        /* 卡片、導覽列、輸入框底 */
+  --sunk: #eceef2;        /* 凹陷底：分段控制軌道、進度軌道、停用 */
+  /* 色彩：文字 */
+  --ink: #14171f;
+  --ink2: #444b5a;
+  --ink3: #5b6373;
+  /* 色彩：線 */
+  --line: #cfd3dc;
+  --line-soft: #e3e6ec;
+  /* 色彩：強調（鈷藍，唯一的強調色；深色版用較深的藍搭白字，不用粉彩色） */
+  --accent: #2554d8;
+  --on-accent: #ffffff;
+  --accent-soft: #e7edff;
+  --accent-ink: #1b3fa6;
+  /* 色彩：語意（不算強調色） */
+  --ok: #17713f;
+  --ok-soft: #dcf1e3;
+  --warn: #7a4f00;
+  --warn-soft: #fdf0d0;
+  --bad: #a8262b;
+  --bad-soft: #fbe2e0;
+  /* 色彩：圖表資料色（色盲友善；一定要搭配文字標籤，不單靠顏色） */
+  --d1: #2554d8;
+  --d2: #cf5f12;
+  --d3: #b3367a;
+  --d4: #0c7a88;
+  --d5: #8a6a0a;
+  --d0: #7b8494;          /* 其他、未分類 */
+  --warn-bar: #e3a012;       /* 同票、需處理的長條 */
+  --bar-muted: #c3c9d6;   /* 未當選、未突顯的長條 */
+  --scrim: rgba(12, 14, 20, 0.5);
+  --shadow: rgba(20, 24, 40, 0.16);
+  --shadow-sm: rgba(20, 24, 40, 0.08);   /* 卡片的細微層次 */
+
+  /* 字型：介面一律系統字型，不載入網路字型 */
+  --font: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Heiti TC", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Consolas, "Courier New", monospace;
+  --fs-xs: 13px;
+  --fs-sm: 14px;
+  --fs-md: 16px;   /* 手機輸入框不得小於 16，避免 iOS 自動放大 */
+  --fs-lg: 18px;
+  --fs-xl: 22px;
+  --fs-2xl: 28px;
+  --lh-body: 1.65;
+  --lh-tight: 1.3;
+
+  /* 間距（4 的倍數）、圓角、點擊區、動態 */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --r-sm: 8px;     /* 按鈕、輸入框、選項 */
+  --r-md: 12px;    /* 卡片、面板、提示 */
+  --r-lg: 20px;    /* 底部彈出面板上緣 */
+  --tap: 48px;     /* 手機預設點擊高度；任何可點元件不得低於 44px */
+  --tap-min: 44px;
+  --dur: 160ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0e1014;
+    --card: #171a20;
+    --sunk: #0b0c10;
+    --ink: #eceef3;
+    --ink2: #b9bfcc;
+    --ink3: #8f97a8;
+    --line: #2b303a;
+    --line-soft: #20242c;
+    --accent: #3d68f0;
+    --on-accent: #ffffff;
+    --accent-soft: #1a2850;
+    --accent-ink: #9db8ff;
+    --ok: #6fd39a;
+    --ok-soft: #12291c;
+    --warn: #f2c35c;
+    --warn-soft: #2e2410;
+    --bad: #ff9d96;
+    --bad-soft: #3a1b1d;
+    --d1: #6f93ff;
+    --d2: #f08a47;
+    --d3: #e579b3;
+    --d4: #3fc0d0;
+    --d5: #d6b43a;
+    --d0: #8f97a8;
+    --warn-bar: #f0b429;
+    --bar-muted: #3a404d;
+    --scrim: rgba(0, 0, 0, 0.65);
+    --shadow: rgba(0, 0, 0, 0.6);
+    --shadow-sm: rgba(0, 0, 0, 0.4);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper: #0e1014;
+  --card: #171a20;
+  --sunk: #0b0c10;
+  --ink: #eceef3;
+  --ink2: #b9bfcc;
+  --ink3: #8f97a8;
+  --line: #2b303a;
+  --line-soft: #20242c;
+  --accent: #3d68f0;
+  --on-accent: #ffffff;
+  --accent-soft: #1a2850;
+  --accent-ink: #9db8ff;
+  --ok: #6fd39a;
+  --ok-soft: #12291c;
+  --warn: #f2c35c;
+  --warn-soft: #2e2410;
+  --bad: #ff9d96;
+  --bad-soft: #3a1b1d;
+  --d1: #6f93ff;
+  --d2: #f08a47;
+  --d3: #e579b3;
+  --d4: #3fc0d0;
+  --d5: #d6b43a;
+  --d0: #8f97a8;
+  --warn-bar: #f0b429;
+  --bar-muted: #3a404d;
+  --scrim: rgba(0, 0, 0, 0.65);
+  --shadow: rgba(0, 0, 0, 0.6);
+  --shadow-sm: rgba(0, 0, 0, 0.4);
+  color-scheme: dark;
+}
+
+/*
+ * 輸出文件主題「溫暖」（個人回饋單預設）：紙張永遠是淺色，不隨深色模式改變。
+ * 用法：文件預覽與 PDF／Word 輸出的容器加 class="doc-warm"。
+ */
+.doc-warm {
+  --doc-paper: #fffdf9;
+  --doc-ink: #33291f;
+  --doc-ink2: #66554a;
+  --doc-line: #ead9c3;
+  --doc-accent: #a84f00;
+  --doc-accent-soft: #ffecd2;
+  --doc-leaf: #2f6f55;
+  --doc-leaf-soft: #e1f1e8;
+}
+
+/* 版面概念：上方基礎規格（色票、字級、元件），下方手機畫面並排，最後斷點示意。畫面用真實 token。 */
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:var(--fs-md)/var(--lh-body) var(--font);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 64px}
+.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1,h2,h3,h4,p{margin:0}
+h1{font-size:var(--fs-2xl);line-height:var(--lh-tight);text-wrap:balance}
+h2{font-size:var(--fs-xl);line-height:var(--lh-tight);text-wrap:balance}
+h3{font-size:var(--fs-lg);line-height:var(--lh-tight)}
+.muted{color:var(--ink2)}
+.small{font-size:var(--fs-sm)}
+.mono{font-family:var(--font-mono);font-size:var(--fs-xs)}
+svg.ic{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+button{font-family:inherit}
+
+/* 頁首 */
+.top{display:flex;flex-direction:column;gap:16px}
+.top-row{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.top-row>div{min-width:0}
+.assump{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:12px}
+.assump p{background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r-md);padding:14px 16px;font-size:var(--fs-sm);line-height:1.6}
+.assump b{display:block;font-size:var(--fs-md);margin-bottom:4px}
+.sec{display:flex;flex-direction:column;gap:20px}
+.sec-head{display:flex;flex-direction:column;gap:4px;max-width:70ch}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr))}
+.spec{box-shadow:0 1px 2px var(--shadow-sm);background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r-md);padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.spec h3{font-size:var(--fs-md)}
+.spec .cap{font-size:var(--fs-xs);color:var(--ink3)}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+
+/* 色票 */
+.sws{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr))}
+.sw{display:flex;flex-direction:column;gap:6px;min-width:0}
+.sw i{display:block;height:48px;border-radius:var(--r-sm);border:1px solid var(--line)}
+.sw b{font:600 var(--fs-xs)/1.3 var(--font-mono);word-break:break-all}
+.sw span{font-size:var(--fs-xs);color:var(--ink2);line-height:1.4}
+.sw code{font:var(--fs-xs)/1.2 var(--font-mono);color:var(--ink3)}
+.scale-row{display:flex;gap:16px;align-items:baseline;border-bottom:1px solid var(--line-soft);padding-block:8px;flex-wrap:wrap}
+.scale-row .k{width:112px;flex:none;font-size:var(--fs-xs);color:var(--ink3)}
+.sp-demo{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap}
+.sp-demo div{background:var(--accent);border-radius:2px;width:var(--w);height:24px}
+.sp-demo figure{margin:0;display:flex;flex-direction:column;gap:6px;font-size:var(--fs-xs);color:var(--ink2)}
+
+
+/* ===== 元件（與實作共用的 class 名稱）===== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:var(--tap);padding:0 20px;border-radius:var(--r-sm);border:1px solid transparent;font:600 var(--fs-md)/1.2 var(--font);cursor:pointer;text-decoration:none;transition:background var(--dur),border-color var(--dur)}
+.btn-primary{background:var(--accent);color:var(--on-accent);box-shadow:0 1px 2px var(--shadow)}
+.btn:active:not([disabled]){filter:brightness(.92)}
+.btn-secondary{background:var(--card);color:var(--ink);border-color:var(--ink3);box-shadow:0 1px 2px var(--shadow-sm)}
+.btn-ghost{background:transparent;color:var(--accent-ink)}
+.btn-danger{background:transparent;color:var(--bad);border-color:var(--bad)}
+.btn[disabled]{background:var(--sunk);color:var(--ink3);border-color:var(--line-soft);cursor:not-allowed}
+.btn-sm{min-height:var(--tap-min);padding:0 16px;font-size:15px}
+.btn-block{width:100%}
+.icbtn{display:inline-flex;align-items:center;justify-content:center;width:var(--tap);height:var(--tap);border:0;background:transparent;color:var(--ink);border-radius:var(--r-sm);cursor:pointer;flex:none}
+.pressed{background:var(--accent-ink);color:var(--card)}
+.tag{display:inline-flex;align-items:center;gap:4px;min-height:26px;padding:0 8px;border-radius:6px;font-size:var(--fs-xs);font-weight:600;background:var(--sunk);color:var(--ink2);white-space:nowrap}
+.tag-accent{background:var(--accent-soft);color:var(--accent-ink)}
+.tag-ok{background:var(--ok-soft);color:var(--ok)}
+.tag-warn{background:var(--warn-soft);color:var(--warn)}
+.tag-bad{background:var(--bad-soft);color:var(--bad)}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-weight:600;font-size:var(--fs-sm)}
+.field .hint{font-size:var(--fs-xs);color:var(--ink3)}
+.input{min-height:var(--tap);padding:0 14px;border:1px solid var(--ink3);border-radius:var(--r-sm);background:var(--card);color:var(--ink);font:var(--fs-md)/1.2 var(--font);width:100%}
+.input.err{border-color:var(--bad);border-width:2px}
+.field .errmsg{font-size:var(--fs-xs);color:var(--bad);font-weight:600}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;padding:4px;background:var(--sunk);border-radius:var(--r-md)}
+.seg button{min-height:var(--tap-min);border:0;border-radius:var(--r-sm);background:transparent;color:var(--ink2);font:600 15px/1.2 var(--font);cursor:pointer;padding:0 8px}
+.seg button[aria-pressed="true"]{background:var(--card);color:var(--accent-ink);box-shadow:0 1px 2px var(--shadow)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{min-height:var(--tap-min);padding:0 16px;border-radius:999px;border:1px solid var(--ink3);background:var(--card);color:var(--ink);font:600 15px/1.2 var(--font);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink)}
+.rcard{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;min-height:64px;padding:12px 14px;border:1.5px solid var(--line);border-radius:var(--r-md);background:var(--card);text-align:left;cursor:pointer;color:var(--ink);width:100%;font:inherit}
+.rcard b{display:block;font-size:var(--fs-md);line-height:1.35}
+.rcard small{display:block;font-size:var(--fs-sm);color:var(--ink2);line-height:1.45}
+.rcard[aria-checked="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--ink3);display:grid;place-items:center;flex:none;background:var(--card)}
+[aria-checked="true"]>.dot,.opt[aria-checked="true"] .dot{border-color:var(--accent);background:var(--accent)}
+[aria-checked="true"]>.dot::after,.opt[aria-checked="true"] .dot::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--on-accent)}
+.notice{display:grid;grid-template-columns:auto 1fr;gap:10px;padding:12px 14px;border-radius:var(--r-md);font-size:var(--fs-sm);line-height:1.55;background:var(--accent-soft);color:var(--accent-ink)}
+.notice svg.ic{width:20px;height:20px;margin-top:2px}
+.notice.warn{background:var(--warn-soft);color:var(--warn)}
+.notice.bad{background:var(--bad-soft);color:var(--bad)}
+.notice.ok{background:var(--ok-soft);color:var(--ok)}
+.notice .acts{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
+.tile{box-shadow:0 1px 2px var(--shadow-sm);background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r-md);padding:10px 14px;min-width:0}
+.tile .l{font-size:var(--fs-xs);color:var(--ink2)}
+.tile .n{font-size:var(--fs-2xl);font-weight:700;line-height:1.2;font-variant-numeric:tabular-nums}
+.tile.warn{background:var(--warn-soft);border-color:transparent;box-shadow:none}
+.tile.warn .l,.tile.warn .n{color:var(--warn)}
+.prog{height:8px;border-radius:4px;background:var(--sunk);overflow:hidden}
+.prog>i{display:block;height:100%;background:var(--accent);border-radius:4px}
+.brow{display:flex;flex-direction:column;gap:6px}
+.brow .h{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.brow .nm{font-weight:600;display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-width:0}
+.brow .v{font-variant-numeric:tabular-nums;font-size:var(--fs-sm);color:var(--ink2);white-space:nowrap}
+.brow .v b{color:var(--ink);font-size:var(--fs-md)}
+.track{height:12px;border-radius:6px;background:var(--sunk)}
+.track>i{display:block;height:100%;border-radius:6px;background:var(--bar-muted)}
+.track>i.lead{background:var(--accent)}
+.track>i.tie{background:var(--warn-bar)}
+.rowbtn{box-shadow:0 1px 2px var(--shadow-sm);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;min-height:64px;padding:10px 14px;background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r-md);text-align:left;color:var(--ink);cursor:pointer;width:100%;font:inherit}
+.rowbtn .nm{font-weight:600;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rowbtn .sm{font-size:var(--fs-xs);color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rowbtn .rt{display:flex;align-items:center;gap:4px;color:var(--ink2)}
+.rowbtn.need{border-color:var(--warn);border-width:1.5px}
+.rowbtn>div{min-width:0}
+
+/* ===== 手機畫面框 ===== */
+.figs{display:flex;flex-wrap:wrap;gap:32px 24px;align-items:flex-start}
+.fig{display:flex;flex-direction:column;gap:10px}
+.fig figcaption{max-width:390px;font-size:var(--fs-sm);line-height:1.55}
+.fig figcaption b{display:block;font-size:var(--fs-md)}
+.scale{position:relative}
+.scale>.dev{position:absolute;left:0;top:0;transform-origin:0 0}
+.dev{width:390px;height:844px;border:1px solid var(--ink3);border-radius:34px;overflow:hidden;background:var(--paper);position:relative;display:flex;flex-direction:column;color:var(--ink)}
+.appbar{display:flex;align-items:center;gap:4px;min-height:56px;padding:0 4px 0 8px;background:var(--card);border-bottom:1px solid var(--line-soft);flex:none}
+.appbar .ttl{flex:1;font-size:17px;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-left:4px}
+.brand{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:8px;background:var(--accent);color:var(--on-accent);flex:none}
+.brand svg.ic{width:20px;height:20px;stroke-width:3}
+.stepper{padding:10px 16px 12px;background:var(--card);border-bottom:1px solid var(--line-soft);flex:none}
+.stepper .segs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.st{display:flex;flex-direction:column;gap:6px;font-size:var(--fs-xs);font-weight:600;color:var(--ink3);line-height:1.2}
+.st::before{content:"";height:4px;border-radius:2px;background:var(--line)}
+.st.on{color:var(--ink2)}
+.st.on::before{background:var(--accent)}
+.st.cur{color:var(--accent-ink)}
+.scr{flex:1;min-height:0;overflow:hidden;padding:16px;display:flex;flex-direction:column;gap:16px}
+.actbar{flex:none;padding:12px 16px 24px;background:var(--card);border-top:1px solid var(--line-soft);display:flex;gap:12px}
+.actbar .btn-primary,.actbar .btn-block{flex:1}
+.picker{box-shadow:0 1px 2px var(--shadow-sm);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:176px;border:2px dashed var(--ink3);border-radius:var(--r-md);background:var(--card);color:var(--ink);text-align:center;padding:20px;cursor:pointer;width:100%;font:inherit}
+.picker .big{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:var(--accent-soft);color:var(--accent-ink)}
+.picker .big svg.ic{width:28px;height:28px}
+.picker b{font-size:var(--fs-lg)}
+.picker small{font-size:var(--fs-sm);color:var(--ink2);line-height:1.5}
+.filechip{box-shadow:0 1px 2px var(--shadow-sm);display:flex;gap:10px;align-items:center;padding:10px 14px;background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r-md);font-size:var(--fs-sm)}
+.filechip>div{min-width:0}
+.filechip b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.filechip span{color:var(--ink2);font-size:var(--fs-xs)}
+.pager{display:grid;grid-template-columns:var(--tap) 1fr var(--tap);align-items:center;gap:4px}
+.pager .c{text-align:center;min-width:0}
+.pager .c small{display:block;font-size:var(--fs-xs);color:var(--ink2)}
+.pager .c b{font-size:var(--fs-lg)}
+.qcard{box-shadow:0 1px 2px var(--shadow-sm);background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r-md);padding:8px 14px 16px;display:flex;flex-direction:column;gap:14px}
+.grp{display:flex;flex-direction:column;gap:8px}
+.grp>.gl{font-weight:700;font-size:var(--fs-sm);color:var(--ink2)}
+.sumline{display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:var(--r-md);background:var(--sunk);font-size:var(--fs-sm);line-height:1.5}
+.scrim{position:absolute;inset:0;background:var(--scrim)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--card);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:8px 16px 24px;box-shadow:0 -8px 24px var(--shadow);display:flex;flex-direction:column;gap:4px}
+.sheet .grab{width:40px;height:4px;border-radius:2px;background:var(--ink3);margin:4px auto 8px}
+.sheet h3{font-size:var(--fs-lg);line-height:1.4}
+.sheet .sub{font-size:var(--fs-sm);color:var(--ink2);margin-bottom:4px}
+.opt{display:flex;align-items:center;gap:12px;min-height:52px;padding:0 4px;border:0;border-bottom:1px solid var(--line-soft);background:transparent;color:var(--ink);font:inherit;text-align:left;width:100%;cursor:pointer}
+.opt small{color:var(--ink3);margin-left:auto;font-size:var(--fs-xs)}
+.opt[aria-checked="true"]{font-weight:700}
+.sheet .btn{margin-top:12px}
+
+
+/* ===== 輸出文件（A4）：794 × 1123，用 .doc-warm 的 --doc-* token；紙張永遠淺色 ===== */
+.scale>.paper{position:absolute;left:0;top:0;transform-origin:0 0}
+.docfig{width:100%;display:flex;flex-wrap:wrap;gap:16px 28px;align-items:flex-start;margin:0}
+.docfig figcaption{flex:1 1 280px;max-width:380px;font-size:var(--fs-sm);line-height:1.65;display:flex;flex-direction:column;gap:8px}
+.docfig figcaption b{font-size:var(--fs-md)}
+.docfig figcaption ul{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px}
+.paper{width:794px;height:1123px;background:var(--doc-paper);color:var(--doc-ink);border:1px solid var(--doc-line);box-shadow:0 8px 24px var(--shadow-sm);padding:44px 52px 64px;display:flex;flex-direction:column;gap:18px;font:16px/1.6 var(--font);overflow:hidden;position:relative;--blue:#2554d8;--blue2:#7f9be3;--mid:#ddd5c8;--or2:#eaa06a;--or1:#cf5f12}
+.paper *{box-sizing:border-box}
+.paper h1,.paper h2,.paper h3,.paper h4,.paper p{margin:0}
+.ph{display:flex;justify-content:space-between;gap:12px;font-size:12px;color:var(--doc-ink2);padding-bottom:10px;border-bottom:1px solid var(--doc-line)}
+.pf{position:absolute;left:52px;right:52px;bottom:26px;display:flex;justify-content:space-between;gap:12px;font-size:12px;color:var(--doc-ink2)}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;color:var(--doc-accent)}
+.dt h1{font-size:32px;line-height:1.25;color:var(--doc-ink);margin-top:4px}
+.dt .meta{display:flex;gap:6px 18px;flex-wrap:wrap;font-size:13px;color:var(--doc-ink2);margin-top:8px}
+.sh{display:flex;flex-direction:column;gap:2px;margin-top:2px}
+.sh h2{font-size:20px;line-height:1.3}
+.sh p{font-size:13px;color:var(--doc-ink2)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.kpi{border:1px solid var(--doc-line);border-radius:10px;padding:10px 12px;background:#fff;display:flex;flex-direction:column;gap:2px;min-width:0}
+.kpi.hi{background:var(--doc-accent-soft);border-color:transparent}
+.kpi .n{font-size:30px;line-height:1.15;font-weight:700;font-variant-numeric:tabular-nums}
+.kpi .n small{font-size:14px;font-weight:600;color:var(--doc-ink2);margin-left:2px}
+.kpi .l{font-size:13px;font-weight:600}
+.kpi .s{font-size:12px;color:var(--doc-ink2);line-height:1.4}
+.finds{display:flex;flex-direction:column;gap:8px;padding:0;margin:0;list-style:none}
+.finds li{display:grid;grid-template-columns:10px 1fr;gap:10px;font-size:14.5px;line-height:1.55}
+.finds li::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--doc-accent);margin-top:8px}
+.finds b{color:var(--doc-accent)}
+.dtable{width:100%;border-collapse:collapse;font-size:13.3px;font-variant-numeric:tabular-nums}
+.dtable th{font-weight:700;text-align:left;color:var(--doc-ink2);font-size:12px;padding:6px 8px;border-bottom:1.5px solid var(--doc-ink);white-space:nowrap}
+.dtable td{padding:7px 8px;border-bottom:1px solid var(--doc-line);vertical-align:middle}
+.dtable .r{text-align:right}
+.dtable .c{text-align:center}
+.dtable tr.hl td{background:var(--doc-accent-soft)}
+.dtable .dim{color:var(--doc-ink2)}
+.pill{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:700;background:var(--doc-accent-soft);color:var(--doc-accent);white-space:nowrap}
+.pill.g{background:var(--doc-leaf-soft);color:var(--doc-leaf)}
+.pill.n{background:#efe8dc;color:var(--doc-ink2)}
+.pill.b{background:#e3eaff;color:#1b3fa6}
+.lk{display:flex;height:16px;border-radius:4px;overflow:hidden;gap:1px;background:var(--doc-paper);min-width:180px}
+.lk i{display:block;height:100%}
+.lkrow{display:grid;grid-template-columns:200px 1fr 64px;gap:12px;align-items:center;font-size:13.5px}
+.lkrow .q{line-height:1.4}
+.lkrow .m{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;font-size:16px}
+.lkrow .m small{display:block;font-weight:400;font-size:11px;color:var(--doc-ink2)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--doc-ink2)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+.hbar{display:grid;grid-template-columns:150px 1fr 92px;gap:10px;align-items:center;font-size:13.5px}
+.hbar .t{height:12px;border-radius:6px;background:#efe8dc}
+.hbar .t i{display:block;height:100%;border-radius:6px;background:var(--blue2)}
+.hbar .t i.k{background:var(--blue)}
+.hbar .t i.o{background:var(--doc-accent)}
+.hbar .v{white-space:nowrap;text-align:right;font-variant-numeric:tabular-nums;font-size:13px}
+.hbar .v b{font-size:14px}
+.hm{display:grid;gap:3px;font-size:12.5px;font-variant-numeric:tabular-nums}
+.hm div{padding:6px 4px;text-align:center;border-radius:4px;background:#f4eee4}
+.hm .h{background:transparent;font-weight:700;color:var(--doc-ink2);font-size:12px}
+.hm .rl{text-align:left;background:transparent;font-weight:600;padding-left:2px}
+.note{font-size:12px;color:var(--doc-ink2);line-height:1.5}
+.callout{background:var(--doc-accent-soft);border-radius:10px;padding:10px 14px;font-size:13.5px;line-height:1.55}
+.callout.g{background:var(--doc-leaf-soft)}
+.callout b{color:var(--doc-accent)}
+.callout.g b{color:var(--doc-leaf)}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.card{border:1px solid var(--doc-line);border-radius:10px;background:#fff;padding:12px 14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.quote{border:1px solid var(--doc-line);border-radius:10px;background:#fff;padding:10px 14px;font-size:14px;line-height:1.55;display:flex;flex-direction:column;gap:4px}
+.quote .by{font-size:12px;color:var(--doc-ink2)}
+.kw{display:flex;gap:6px 8px;flex-wrap:wrap}
+.kw span{display:inline-flex;gap:6px;align-items:baseline;padding:3px 10px;border-radius:999px;background:#efe8dc;font-size:13px}
+.kw span b{font-size:11.5px;color:var(--doc-accent);font-variant-numeric:tabular-nums}
+.kw span.big{font-size:16px;font-weight:700;background:var(--doc-accent-soft)}
+.divider{height:1px;background:var(--doc-line);border:0;margin:0}
+.bignum{font-size:56px;font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums;color:var(--doc-accent)}
+.pair{display:grid;grid-template-columns:120px 1fr 64px;gap:10px;align-items:center;font-size:14px}
+.pair .tr{position:relative;height:22px;border-radius:5px;background:#efe8dc}
+.pair .tr i{position:absolute;left:0;top:3px;height:16px;border-radius:4px;background:var(--blue)}
+.pair .tr em{position:absolute;top:-2px;bottom:-2px;width:3px;border-radius:2px;background:var(--doc-ink);font-style:normal}
+.pair .tr u{position:absolute;top:0;bottom:0;width:0;border-left:2px dashed var(--doc-accent);text-decoration:none}
+.pair .v{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.pair .v small{display:block;font-size:11px;font-weight:400;color:var(--doc-ink2)}
+.podium{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.pod{border:1px solid var(--doc-line);border-radius:12px;background:#fff;padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+.pod .role{font-size:13px;font-weight:700;color:var(--doc-accent);letter-spacing:.08em}
+.pod .nm{font-size:30px;font-weight:700;line-height:1.2}
+.pod .sub{font-size:12.5px;color:var(--doc-ink2)}
+.stamp{display:inline-flex;gap:6px;align-items:center;font-size:12px;border:1px dashed var(--doc-ink2);border-radius:6px;padding:2px 8px;color:var(--doc-ink2)}
+.wordtag{font-size:11.5px;font-weight:600;color:var(--doc-ink2);border:1px solid var(--doc-line);border-radius:4px;padding:0 6px;margin-left:6px;background:#fff}
+.paper .cols2 .hbar{grid-template-columns:62px 1fr 88px;font-size:13px}
+.blk{background:var(--doc-paper);color:var(--doc-ink);border:1px solid var(--doc-line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;font:14px/1.5 var(--font);min-width:0}
+.blk *{box-sizing:border-box}
+.blk h3,.blk h4,.blk p{margin:0}
+.blk .bh{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.blk .bh b{font-size:15px}
+.blkgrid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr))}
+.dtable.tight td{padding:4px 8px}
+.dtable.tight th{padding:5px 8px}
+
+.cmp{display:flex;flex-direction:column;gap:6px}
+.cmp .h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:var(--fs-sm)}
+.cmp .v{font-variant-numeric:tabular-nums}
+.cmp .tr{position:relative;height:20px;border-radius:5px;background:var(--sunk)}
+.cmp .tr i{position:absolute;left:0;top:3px;height:14px;border-radius:4px;background:var(--accent)}
+.cmp .tr u{position:absolute;top:0;bottom:0;border-left:2px dashed var(--warn-bar);text-decoration:none}
+.cmp .tr em{position:absolute;top:-2px;bottom:-2px;width:3px;border-radius:2px;background:var(--ink);font-style:normal}
+
+.tgl{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:56px;padding:8px 14px;background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r-md);width:100%;font:inherit;color:var(--ink);cursor:pointer}
+.tgl .sw2{width:52px;height:32px;border-radius:16px;background:var(--ink3);position:relative;flex:none}
+.tgl .sw2::after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:var(--card);transition:left var(--dur)}
+.tgl[aria-checked="true"] .sw2{background:var(--accent)}
+.tgl[aria-checked="true"] .sw2::after{left:23px;background:var(--on-accent)}
+
+.pane{display:flex;flex-direction:column;gap:12px;overflow:hidden;flex:none;min-width:0}
+.qrow{display:flex;gap:10px;align-items:center;min-height:48px;padding:0 12px;border-radius:var(--r-sm);color:var(--ink);font-size:var(--fs-md)}
+.qrow[aria-current]{background:var(--accent-soft);color:var(--accent-ink);font-weight:700}
+.actbar.desk .btn{flex:none;min-width:140px}
+
+.pagehead{display:flex;flex-direction:column;gap:6px;max-width:72ch}.round{display:flex;flex-direction:column;gap:32px}
+.scale{position:static!important;width:auto!important;height:auto!important}
+.scale>.dev,.scale>.paper{position:relative!important;transform:none!important}
+.figs{overflow-x:auto}
+.docfig{overflow-x:auto}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+<symbol id="i-next" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
+<symbol id="i-down" viewBox="0 0 24 24"><path d="M5 9l7 7 7-7"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+<symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h8M18 7h2M4 17h2M12 17h8"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></symbol>
+<symbol id="i-file" viewBox="0 0 24 24"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></symbol>
+<symbol id="i-dice" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8.5 8.5h.01M15.5 8.5h.01M12 12h.01M8.5 15.5h.01M15.5 15.5h.01"/></symbol>
+<symbol id="i-down-arrow" viewBox="0 0 24 24"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></symbol>
+<symbol id="i-bars" viewBox="0 0 24 24"><path d="M5 19v-7M12 19V5M19 19v-10"/></symbol>
+<symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 114 2c-.8.6-1.5 1-1.5 2M12 17h.01"/></symbol>
+<symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 19c0-3 3-5 6-5s6 2 6 5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14c3 0 5 1.8 5 4.5"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4-4"/></symbol>
+<symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19z"/></symbol>
+<symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 6.2A9 9 0 0121 12a13 13 0 01-3 3.6M6.5 7.5A13 13 0 003 12s3.5 6 9 6a8.6 8.6 0 003.2-.6"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></symbol>
+<symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol>
+<symbol id="i-cast" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></symbol>
+<symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></symbol>
+<symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 18a4 4 0 01-.5-8A6 6 0 0118 9.5 4.3 4.3 0 0117 18z"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 10-2.3 5.7M20 5v5h-5"/></symbol>
+<symbol id="i-trend" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></symbol>
+<symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5M4 9h10a6 6 0 010 12h-3"/></symbol>
+<symbol id="i-redo" viewBox="0 0 24 24"><path d="M15 14l5-5-5-5M20 9H10a6 6 0 000 12h3"/></symbol>
+<symbol id="i-grip" viewBox="0 0 24 24"><path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01" stroke-width="3.2"/></symbol>
+<symbol id="i-up" viewBox="0 0 24 24"><path d="M5 15l7-7 7 7"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></symbol>
+<symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+<symbol id="i-type" viewBox="0 0 24 24"><path d="M5 6h14M12 6v13"/></symbol>
+<symbol id="i-table" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="M3 10h18M9 5v14"/></symbol>
+<symbol id="i-comment" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></symbol>
+<symbol id="i-pagebreak" viewBox="0 0 24 24"><path d="M3 12h4M10 12h4M17 12h4"/></symbol>
+<symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 18l5-5 4 3 3-3 4 4"/></symbol>
+</svg>
+<div class="wrap">
+<header class="pagehead"><p class="small muted">設計規範的模擬頁，使用虛構資料。規範見 docs/design/DESIGN.md。</p><h1>桌機補完：開啟、對應、檢查、審稿、範本庫、投影唱票</h1><p class="muted">桌機三欄版面的其餘畫面、投影唱票模式與鍵盤快速鍵。</p></header>
+<div class="figs">
+<figure class="fig" style="margin:0"><div class="scale" data-w="1280" data-h="800"><div class="dev" style="width:1280px;height:800px;border-radius:12px"><div class="appbar" style="padding:0 16px;gap:20px"><span class="brand"><svg class="ic"><use href="#i-bars"/></svg></span><b style="font-size:17px">問卷回饋小幫手</b><span class="small muted"></span><div class="stepper" style="border:0;padding:0;background:transparent;margin-left:auto;width:360px"><div class="segs"><span class="st on cur">開啟</span><span class="st">對應</span><span class="st">統計</span><span class="st">輸出</span></div></div><button class="icbtn" type="button" aria-label="設定"><svg class="ic"><use href="#i-sliders"/></svg></button></div><div style="flex:1;min-height:0;display:flex"><div class="pane" style="flex:1;padding:24px;align-items:stretch;justify-content:center"><div style="margin:auto;width:560px;display:flex;flex-direction:column;gap:16px"><div style="display:flex;flex-direction:column;gap:4px"><h2 style="margin:0;font-size:var(--fs-xl)">開啟問卷檔</h2><p class="small muted" style="margin:0">支援 Google 表單匯出的 xlsx 或 csv。</p></div><div style="border:2px dashed var(--ink3);border-radius:var(--r-lg);padding:48px 24px;display:flex;flex-direction:column;align-items:center;gap:14px;background:var(--card)"><span style="width:56px;height:56px;border-radius:50%;background:var(--accent-soft);color:var(--accent-ink);display:grid;place-items:center"><svg class="ic"><use href="#i-down-arrow"/></svg></span><b style="font-size:var(--fs-lg)">把 xlsx 或 csv 拖到這裡</b><span class="small muted">或</span><div style="display:flex;gap:8px"><button class="btn btn-primary" type="button">選擇檔案</button><button class="btn btn-secondary" type="button">從 Google 雲端硬碟</button></div></div><div class="notice"><svg class="ic"><use href="#i-lock"/></svg><div>資料只在這個瀏覽器處理，不會上傳，關閉頁面就清除。</div></div></div></div><div class="pane" style="width:340px;padding:24px;border-left:1px solid var(--line-soft);background:var(--card)"><div style="display:flex;flex-direction:column;gap:4px"><h2 style="margin:0;font-size:var(--fs-xl)">最近的專案</h2><p class="small muted" style="margin:0">只記住設定，不含學生資料</p></div><button class="rowbtn" type="button"><div><div class="nm">三年二班 幹部票選</div><div class="sm">10/28 · 票選幹部</div></div><span class="rt"><svg class="ic"><use href="#i-next"/></svg></span></button><button class="rowbtn" type="button"><div><div class="nm">小組報告 評分</div><div class="sm">10/12 · 報告回饋</div></div><span class="rt"><svg class="ic"><use href="#i-next"/></svg></span></button><button class="rowbtn" type="button"><div><div class="nm">開啟專案檔…</div><div class="sm">從檔案還原設定</div></div><span class="rt"><svg class="ic"><use href="#i-next"/></svg></span></button><div style="margin-top:auto"><button class="btn btn-secondary btn-block" type="button">用示範資料試試看</button></div></div></div></div></div><figcaption style="max-width:640px"><b>13a 桌機：開啟問卷</b>整個中間就是放檔案的地方，可以直接拖放；也有「選擇檔案」按鈕給不用拖放的人。右邊放最近的專案與示範資料。</figcaption></figure>
+<figure class="fig" style="margin:0"><div class="scale" data-w="1280" data-h="800"><div class="dev" style="width:1280px;height:800px;border-radius:12px"><div class="appbar" style="padding:0 16px;gap:20px"><span class="brand"><svg class="ic"><use href="#i-bars"/></svg></span><b style="font-size:17px">問卷回饋小幫手</b><span class="small muted">三年二班_幹部票選.xlsx</span><div class="stepper" style="border:0;padding:0;background:transparent;margin-left:auto;width:360px"><div class="segs"><span class="st on">開啟</span><span class="st on cur">對應</span><span class="st">統計</span><span class="st">輸出</span></div></div><button class="icbtn" type="button" aria-label="設定"><svg class="ic"><use href="#i-sliders"/></svg></button></div><div style="flex:1;min-height:0;display:flex"><div class="pane" style="width:480px;padding:20px;border-right:1px solid var(--line-soft);overflow:hidden"><div style="display:flex;flex-direction:column;gap:4px"><h2 style="margin:0;font-size:var(--fs-xl)">欄位對應</h2><p class="small muted" style="margin:0">系統已猜好，不對的才需要改。</p></div><div style="display:flex;align-items:center;gap:10px;min-height:48px;padding:0 12px;border-radius:var(--r-sm);"><span class="mono" style="width:6.5em">時間戳記</span><span style="color:var(--ink3)"><svg class="ic"><use href="#i-next"/></svg></span><div class="input" style="flex:1;min-height:40px;display:flex;align-items:center;padding:0 12px">時間戳記</div></div><div style="display:flex;align-items:center;gap:10px;min-height:48px;padding:0 12px;border-radius:var(--r-sm);"><span class="mono" style="width:6.5em">班級</span><span style="color:var(--ink3)"><svg class="ic"><use href="#i-next"/></svg></span><div class="input" style="flex:1;min-height:40px;display:flex;align-items:center;padding:0 12px">班級</div></div><div style="display:flex;align-items:center;gap:10px;min-height:48px;padding:0 12px;border-radius:var(--r-sm);"><span class="mono" style="width:6.5em">座號</span><span style="color:var(--ink3)"><svg class="ic"><use href="#i-next"/></svg></span><div class="input" style="flex:1;min-height:40px;display:flex;align-items:center;padding:0 12px">座號</div></div><div style="display:flex;align-items:center;gap:10px;min-height:48px;padding:0 12px;border-radius:var(--r-sm);"><span class="mono" style="width:6.5em">姓名</span><span style="color:var(--ink3)"><svg class="ic"><use href="#i-next"/></svg></span><div class="input" style="flex:1;min-height:40px;display:flex;align-items:center;padding:0 12px">姓名</div></div><div style="display:flex;align-items:center;gap:10px;min-height:48px;padding:0 12px;border-radius:var(--r-sm);background:var(--accent-soft)"><span class="mono" style="width:6.5em">班長</span><span style="color:var(--ink3)"><svg class="ic"><use href="#i-next"/></svg></span><div class="input" style="flex:1;min-height:40px;display:flex;align-items:center;padding:0 12px">班長（票選）</div></div><div style="display:flex;align-items:center;gap:10px;min-height:48px;padding:0 12px;border-radius:var(--r-sm);"><span class="mono" style="width:6.5em">副班長</span><span style="color:var(--ink3)"><svg class="ic"><use href="#i-next"/></svg></span><div class="input" style="flex:1;min-height:40px;display:flex;align-items:center;padding:0 12px">副班長（票選）</div></div><div style="display:flex;align-items:center;gap:10px;min-height:48px;padding:0 12px;border-radius:var(--r-sm);"><span class="mono" style="width:6.5em">風紀股長</span><span style="color:var(--ink3)"><svg class="ic"><use href="#i-next"/></svg></span><div class="input" style="flex:1;min-height:40px;display:flex;align-items:center;padding:0 12px">風紀股長（票選）</div></div><div style="display:flex;align-items:center;gap:10px;min-height:48px;padding:0 12px;border-radius:var(--r-sm);"><span class="mono" style="width:6.5em">衛生股長</span><span style="color:var(--ink3)"><svg class="ic"><use href="#i-next"/></svg></span><div class="input" style="flex:1;min-height:40px;display:flex;align-items:center;padding:0 12px">衛生股長（票選）</div></div><div class="notice ok"><svg class="ic"><use href="#i-check"/></svg><div>8 個欄位都已對應。</div></div></div><div class="pane" style="flex:1;padding:20px;overflow:hidden;gap:14px"><div style="display:flex;flex-direction:column;gap:4px"><h2 style="margin:0;font-size:var(--fs-xl)">資料預覽</h2><p class="small muted" style="margin:0">前 5 列，共 41 列</p></div><div style="border:1px solid var(--line-soft);border-radius:var(--r-md);overflow:hidden;background:var(--card)"><table style="border-collapse:collapse;width:100%;font-size:var(--fs-sm)"><thead><tr><th style="text-align:left;padding:8px 10px;font-weight:700;border-bottom:1px solid var(--line);background:var(--sunk);white-space:nowrap">時間戳記</th><th style="text-align:left;padding:8px 10px;font-weight:700;border-bottom:1px solid var(--line);background:var(--sunk);white-space:nowrap">班級</th><th style="text-align:left;padding:8px 10px;font-weight:700;border-bottom:1px solid var(--line);background:var(--sunk);white-space:nowrap">座號</th><th style="text-align:left;padding:8px 10px;font-weight:700;border-bottom:1px solid var(--line);background:var(--sunk);white-space:nowrap">姓名</th><th style="text-align:left;padding:8px 10px;font-weight:700;border-bottom:1px solid var(--line);background:var(--sunk);white-space:nowrap;background:var(--accent-soft);color:var(--accent-ink)">班長</th><th style="text-align:left;padding:8px 10px;font-weight:700;border-bottom:1px solid var(--line);background:var(--sunk);white-space:nowrap">副班長</th><th style="text-align:left;padding:8px 10px;font-weight:700;border-bottom:1px solid var(--line);background:var(--sunk);white-space:nowrap">風紀股長</th><th style="text-align:left;padding:8px 10px;font-weight:700;border-bottom:1px solid var(--line);background:var(--sunk);white-space:nowrap">衛生股長</th></tr></thead><tbody><tr><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">2026/10/12 10:12</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">2</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">6</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">林小宇</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap;background:var(--accent-soft)">陳怡安</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">王品妍</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">周冠宇</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">劉承恩</td></tr><tr><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">2026/10/12 10:13</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">2</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">17</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">趙子安</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap;background:var(--accent-soft)">林小宇</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">王品妍</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">蔡佳穎</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">劉承恩</td></tr><tr><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">2026/10/12 10:15</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">2</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">9</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">周宜靜</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap;background:var(--accent-soft)">林小宇</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">李冠廷</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">周冠宇</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">謝宛庭</td></tr><tr><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">2026/10/12 10:15</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">2</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">21</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">張語彤</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap;background:var(--accent-soft)">陳怡安</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">王品妍</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">周冠宇</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">劉承恩</td></tr><tr><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">2026/10/12 10:18</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">2</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">30</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">黃子謙</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap;background:var(--accent-soft)">林小宇</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">吳承翰</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">許志豪</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">劉承恩</td></tr></tbody></table></div><div class="qcard" style="gap:10px"><b>「班長」欄的內容</b><span class="small muted">4 種答案，1 列空白，共 41 列</span><div class="brow"><div class="h"><span class="nm">林小宇</span><span class="v"><b>18</b> · 44%</span></div><div class="track"><i style="width:44%"></i></div></div><div class="brow"><div class="h"><span class="nm">陳怡安</span><span class="v"><b>12</b> · 29%</span></div><div class="track"><i style="width:29%"></i></div></div><div class="brow"><div class="h"><span class="nm">張子豪</span><span class="v"><b>6</b> · 15%</span></div><div class="track"><i style="width:15%"></i></div></div><div class="brow"><div class="h"><span class="nm">黃思穎</span><span class="v"><b>4</b> · 10%</span></div><div class="track"><i style="width:10%"></i></div></div></div></div></div><div class="actbar desk" style="justify-content:flex-end"><button class="btn btn-secondary" type="button">上一步</button><button class="btn btn-primary" type="button">下一步：看統計</button></div></div></div><figcaption style="max-width:640px"><b>13b 桌機：對應欄位</b>左邊一列一個欄位、右邊選用途；右邊同步顯示資料前幾列，讓老師看實際內容對不對。點到的欄位在預覽中反白。</figcaption></figure>
+<figure class="fig" style="margin:0"><div class="scale" data-w="1280" data-h="800"><div class="dev" style="width:1280px;height:800px;border-radius:12px"><div class="appbar" style="padding:0 16px;gap:20px"><span class="brand"><svg class="ic"><use href="#i-bars"/></svg></span><b style="font-size:17px">問卷回饋小幫手</b><span class="small muted">三年二班_幹部票選.xlsx</span><div class="stepper" style="border:0;padding:0;background:transparent;margin-left:auto;width:360px"><div class="segs"><span class="st on">開啟</span><span class="st on cur">對應</span><span class="st">統計</span><span class="st">輸出</span></div></div><button class="icbtn" type="button" aria-label="設定"><svg class="ic"><use href="#i-sliders"/></svg></button></div><div style="flex:1;min-height:0;display:flex"><div class="pane" style="width:280px;padding:12px;border-right:1px solid var(--line-soft)"><div class="small muted" style="font-weight:700">檢查項目</div><div class="qrow" aria-current="true"><span style="flex:1">重複填答</span><span class="tag tag-warn">1</span></div><div class="qrow"><span style="flex:1">時間異常</span><span class="tag tag-warn">2</span></div><div class="qrow"><span style="flex:1">格式異常</span><span class="tag tag-ok">0</span></div><div class="qrow"><span style="flex:1">空白</span><span class="tag tag-warn">1</span></div><div class="qrow"><span style="flex:1">名單對照</span><span class="tag tag-warn">3</span></div></div><div class="pane" style="flex:1;padding:20px;overflow:hidden"><div style="display:flex;flex-direction:column;gap:4px"><h2 style="margin:0;font-size:var(--fs-xl)">重複填答：1 位同學</h2><p class="small muted" style="margin:0">同一個人交了 2 份，請決定怎麼算。</p></div><div style="border:1px solid var(--line-soft);border-radius:var(--r-md);overflow:hidden;background:var(--card)"><table style="border-collapse:collapse;width:100%;font-size:var(--fs-sm)"><thead><tr><th style="text-align:left;padding:8px 10px;font-weight:700;border-bottom:1px solid var(--line);background:var(--sunk);white-space:nowrap">項目</th><th style="text-align:left;padding:8px 10px;font-weight:700;border-bottom:1px solid var(--line);background:var(--sunk);white-space:nowrap">第一份 10:12</th><th style="text-align:left;padding:8px 10px;font-weight:700;border-bottom:1px solid var(--line);background:var(--sunk);white-space:nowrap">第二份 10:31</th></tr></thead><tbody><tr><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">姓名</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">趙子安（17 號）</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">趙子安（17 號）</td></tr><tr><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">班長</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">陳怡安</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap"><b>林小宇</b></td></tr><tr><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">副班長</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">王品妍</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">王品妍</td></tr><tr><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">風紀股長</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">蔡佳穎</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">蔡佳穎</td></tr><tr><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">衛生股長</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">劉承恩</td><td style="padding:8px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap">劉承恩</td></tr></tbody></table></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"><button class="rcard" role="radio" aria-checked="true" type="button"><span class="dot"></span><span><b>只算最後一份</b><small>預設</small></span></button><button class="rcard" role="radio" aria-checked="false" type="button"><span class="dot"></span><span><b>只算第一份</b></span></button><button class="rcard" role="radio" aria-checked="false" type="button"><span class="dot"></span><span><b>兩份都不算</b></span></button></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"><div class="tile"><div class="l">收到</div><div class="n">42</div></div><div class="tile"><div class="l">納入</div><div class="n">41</div></div><div class="tile warn"><div class="l">排除</div><div class="n">1</div></div></div></div><div class="pane" style="width:320px;padding:20px;border-left:1px solid var(--line-soft);background:var(--card)"><div style="display:flex;flex-direction:column;gap:4px"><h2 style="margin:0;font-size:var(--fs-xl)">為什麼預設最後一份</h2></div><p class="small" style="margin:0;line-height:1.7">同學重送通常是改變心意，所以以最後一份為準。你選的處理會寫進「統計方法說明」，之後可以重現同樣的結果。</p><div class="notice"><svg class="ic"><use href="#i-info"/></svg><div>兩份投的班長不同，這是需要你判斷的地方。</div></div></div></div><div class="actbar desk" style="justify-content:flex-end"><button class="btn btn-secondary" type="button">上一步</button><button class="btn btn-primary" type="button">下一步：看統計</button></div></div></div><figcaption style="max-width:640px"><b>13c 桌機：資料檢查</b>三欄：左邊檢查類別與數量、中間目前這類的明細、右邊規則說明與預設處理。重複填答把兩份並排，一眼看出差在哪。</figcaption></figure>
+<figure class="fig" style="margin:0"><div class="scale" data-w="1280" data-h="800"><div class="dev" style="width:1280px;height:800px;border-radius:12px"><div class="appbar" style="padding:0 16px;gap:20px"><span class="brand"><svg class="ic"><use href="#i-bars"/></svg></span><b style="font-size:17px">問卷回饋小幫手</b><span class="small muted">三年二班_幹部票選.xlsx</span><div class="stepper" style="border:0;padding:0;background:transparent;margin-left:auto;width:360px"><div class="segs"><span class="st on">開啟</span><span class="st on">對應</span><span class="st on">統計</span><span class="st on cur">輸出</span></div></div><button class="icbtn" type="button" aria-label="設定"><svg class="ic"><use href="#i-sliders"/></svg></button></div><div style="flex:1;min-height:0;display:flex"><div class="pane" style="width:260px;padding:12px;border-right:1px solid var(--line-soft)"><div class="small muted" style="font-weight:700">學生（待審 5／41）</div><div class="qrow"><span style="width:1.6em;color:var(--ink3);font-variant-numeric:tabular-nums">5</span><span style="flex:1">周宜靜</span><span class="tag tag-ok">完成</span></div><div class="qrow" aria-current="true"><span style="width:1.6em;color:inherit;font-variant-numeric:tabular-nums">6</span><span style="flex:1">林小宇</span><span class="tag tag-warn">待審</span></div><div class="qrow"><span style="width:1.6em;color:var(--ink3);font-variant-numeric:tabular-nums">7</span><span style="flex:1">陳怡安</span><span class="tag tag-warn">待審</span></div><div class="qrow"><span style="width:1.6em;color:var(--ink3);font-variant-numeric:tabular-nums">8</span><span style="flex:1">張子豪</span><span class="tag tag-ok">完成</span></div><div class="qrow"><span style="width:1.6em;color:var(--ink3);font-variant-numeric:tabular-nums">9</span><span style="flex:1">黃思穎</span><span class="tag tag-ok">完成</span></div><div class="qrow"><span style="width:1.6em;color:var(--ink3);font-variant-numeric:tabular-nums">10</span><span style="flex:1">王品妍</span><span class="tag tag-warn">待審</span></div></div><div class="pane" style="flex:1;padding:20px;overflow:hidden"><div style="display:flex;flex-direction:column;gap:4px"><h2 style="margin:0;font-size:var(--fs-xl)">林小宇（6 號）</h2><p class="small muted" style="margin:0">2 則待審</p></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"><div class="tile warn"><div class="l">待審</div><div class="n">2</div></div><div class="tile"><div class="l">採用</div><div class="n">2</div></div><div class="tile"><div class="l">隱藏</div><div class="n">1</div></div></div><div class="qcard" style="gap:8px;padding:12px 14px"><div style="display:flex;gap:6px;flex-wrap:wrap"><span class="tag tag-ok">優點</span><span class="tag tag-ok">採用</span></div><div style="line-height:1.6">報告條理清楚，圖表很好懂。</div><div style="display:flex;gap:6px"><button class="btn btn-primary btn-sm" type="button">採用</button><button class="btn btn-secondary btn-sm" type="button">隱藏</button><button class="btn btn-secondary btn-sm" type="button">改寫</button></div></div><div class="qcard" style="gap:8px;padding:12px 14px"><div style="display:flex;gap:6px;flex-wrap:wrap"><span class="tag tag-accent">建議</span><span class="tag tag-bad">提醒：含「笨」</span></div><div style="line-height:1.6">他講話有點笨拙，但是很認真。</div><div style="display:flex;gap:6px"><button class="btn btn-secondary btn-sm" type="button">採用</button><button class="btn btn-secondary btn-sm" type="button">隱藏</button><button class="btn btn-secondary btn-sm" type="button">改寫</button></div></div></div><div class="pane" style="width:430px;padding:12px;background:var(--sunk)"><div class="small muted" style="font-weight:700;text-align:center">學生版預覽</div><div style="display:grid;place-items:start center"><div style="position:relative;width:397px;height:562px;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:#fff;box-shadow:0 4px 14px var(--shadow-sm);flex:none"><div style="width:794px;transform:scale(0.5);transform-origin:0 0;pointer-events:none"><div class="paper doc-warm"><div class="ph"><span>三年二班 · 小組報告回饋</span><span>學生版 · 林小宇</span></div>
+<div class="dt"><div class="eyebrow">個人回饋單</div><h1 style="font-size:36px">林小宇 同學的回饋單</h1>
+<div class="meta"><span>三年二班 6 號</span><span>小組報告：水資源（第 1 組）</span><span>共 36 位同學給你回饋</span></div></div>
+<div style="display:grid;grid-template-columns:1.1fr 1fr;gap:14px;align-items:stretch">
+<div class="kpi hi" style="padding:14px 18px;justify-content:center"><div class="l" style="font-size:14px">同學給你的總分</div><div class="bignum">85.2<small style="font-size:20px;color:var(--doc-ink2);font-weight:600"> 分</small></div><div class="s" style="font-size:14px">比全班平均（79.8 分）高 <b style="color:var(--doc-accent)">5.4 分</b></div></div>
+<div style="display:grid;gap:10px"><div class="kpi"><div class="n">87.2<small>分</small></div><div class="l">你給自己</div><div class="s">比同學給的高 2.0 分</div></div><div class="kpi"><div class="n">79.8<small>分</small></div><div class="l">全班平均</div><div class="s">滿分 100 分</div></div></div></div>
+<div class="callout g"><b>你的強項：團隊合作</b>。同學給你 4.6 分，比全班平均高 0.4 分。繼續保持！</div>
+<div class="sh"><h2>每個項目的表現</h2><p>把同學給你的分數、全班平均、你自己的看法放在同一條線上。</p></div>
+<div class="legend"><span><i style="background:var(--blue)"></i>同學給你的分數</span><span><i style="background:transparent;border-left:2px dashed var(--doc-accent);border-radius:0;width:0;height:12px"></i>班級平均</span><span><i style="background:var(--doc-ink);width:3px;height:12px"></i>你給自己的分數</span><span>滿分 5 分</span></div>
+<div style="display:flex;flex-direction:column;gap:12px"><div class="pair"><div>內容完整 <span class="note">占 30%</span></div><div class="tr"><i style="width:86%"></i><u style="left:80.80000000000001%"></u><em style="left:calc(90% - 1px)"></em></div><div class="v">4.3<small>班均 4.0</small></div></div><div class="pair"><div>創意 <span class="note">占 25%</span></div><div class="tr"><i style="width:80%"></i><u style="left:76.8%"></u><em style="left:calc(84.00000000000001% - 1px)"></em></div><div class="v">4.0<small>班均 3.8</small></div></div><div class="pair"><div>表達 <span class="note">占 25%</span></div><div class="tr"><i style="width:84.00000000000001%"></i><u style="left:78.8%"></u><em style="left:calc(80% - 1px)"></em></div><div class="v">4.2<small>班均 3.9</small></div></div><div class="pair"><div>團隊合作 <span class="note">占 20%</span></div><div class="tr"><i style="width:92%"></i><u style="left:83.39999999999999%"></u><em style="left:calc(96% - 1px)"></em></div><div class="v">4.6<small>班均 4.2</small></div></div></div>
+<div class="sh"><h2>你怎麼看自己、同學怎麼看你</h2></div>
+<table class="dtable"><thead><tr><th>項目</th><th class="r">你給自己</th><th class="r">同學給你</th><th>差別</th></tr></thead><tbody>
+<tr><td>內容完整</td><td class="r">4.5</td><td class="r"><b>4.3</b></td><td><span class="pill">你給得比同學高 0.2</span></td></tr><tr><td>創意</td><td class="r">4.2</td><td class="r"><b>4.0</b></td><td><span class="pill">你給得比同學高 0.2</span></td></tr><tr><td>表達</td><td class="r">4.0</td><td class="r"><b>4.2</b></td><td><span class="pill">同學給得比你高 0.2</span></td></tr><tr><td>團隊合作</td><td class="r">4.8</td><td class="r"><b>4.6</b></td><td><span class="pill">你給得比同學高 0.2</span></td></tr>
+</tbody></table>
+<div class="pf"><span>問卷回饋小幫手 · 給學生本人</span><span>第 1／2 頁</span></div></div>
+</div></div></div></div></div><div class="actbar desk" style="justify-content:flex-end"><span class="small muted" style="margin-right:auto;white-space:nowrap"><span class="mono" style="border:1px solid var(--line);border-radius:4px;padding:1px 6px;background:var(--card)">Ctrl</span> + <span class="mono" style="border:1px solid var(--line);border-radius:4px;padding:1px 6px;background:var(--card)">Enter</span> 下一位</span><button class="btn btn-secondary" type="button">上一位</button><button class="btn btn-primary" type="button">下一位</button></div></div></div><figcaption style="max-width:640px"><b>13d 桌機：老師審稿</b>三欄：左邊學生清單（看得到誰審完了）、中間留言逐則處理、右邊即時預覽學生版。審完一位按 Ctrl+Enter 到下一位。</figcaption></figure>
+<figure class="fig" style="margin:0"><div class="scale" data-w="1280" data-h="800"><div class="dev" style="width:1280px;height:800px;border-radius:12px"><div class="appbar" style="padding:0 16px;gap:20px"><span class="brand"><svg class="ic"><use href="#i-bars"/></svg></span><b style="font-size:17px">問卷回饋小幫手</b><span class="small muted">三年二班_幹部票選.xlsx</span><div class="stepper" style="border:0;padding:0;background:transparent;margin-left:auto;width:360px"><div class="segs"><span class="st on">開啟</span><span class="st on">對應</span><span class="st on">統計</span><span class="st on cur">輸出</span></div></div><button class="icbtn" type="button" aria-label="設定"><svg class="ic"><use href="#i-sliders"/></svg></button></div><div style="flex:1;min-height:0;display:flex"><div class="pane" style="width:240px;padding:12px;border-right:1px solid var(--line-soft)"><div class="qrow">全域預設</div><div class="qrow" aria-current="true">版面範本</div><div class="qrow">檔名規則</div><div class="qrow">關鍵字提醒</div><div class="qrow">備份與還原</div><div class="qrow">外觀</div><div class="qrow">隱私與關於</div></div><div class="pane" style="flex:1;padding:24px;overflow:hidden"><div style="display:flex;align-items:center;gap:12px"><div style="display:flex;flex-direction:column;gap:4px"><h2 style="margin:0;font-size:var(--fs-xl)">版面範本</h2><p class="small muted" style="margin:0">範本只有版面與文字，不含學生資料。</p></div><div style="margin-left:auto;display:flex;gap:8px"><button class="btn btn-secondary" type="button"><svg class="ic"><use href="#i-down-arrow"/></svg>匯入範本檔</button><button class="btn btn-primary" type="button"><svg class="ic"><use href="#i-plus"/></svg>新增範本</button></div></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px"><div class="qcard" style="gap:10px;padding:12px"><div style="display:grid;place-items:center;background:var(--sunk);border-radius:var(--r-sm);padding:10px;height:176px;overflow:hidden"><div style="position:relative;width:159px;height:225px;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:#fff;box-shadow:0 4px 14px var(--shadow-sm);flex:none"><div style="width:794px;transform:scale(0.2);transform-origin:0 0;pointer-events:none"><div class="paper doc-warm"><div class="ph"><span>三年二班 · 小組報告回饋</span><span>學生版 · 林小宇</span></div>
+<div class="dt"><div class="eyebrow">個人回饋單</div><h1 style="font-size:36px">林小宇 同學的回饋單</h1>
+<div class="meta"><span>三年二班 6 號</span><span>小組報告：水資源（第 1 組）</span><span>共 36 位同學給你回饋</span></div></div>
+<div style="display:grid;grid-template-columns:1.1fr 1fr;gap:14px;align-items:stretch">
+<div class="kpi hi" style="padding:14px 18px;justify-content:center"><div class="l" style="font-size:14px">同學給你的總分</div><div class="bignum">85.2<small style="font-size:20px;color:var(--doc-ink2);font-weight:600"> 分</small></div><div class="s" style="font-size:14px">比全班平均（79.8 分）高 <b style="color:var(--doc-accent)">5.4 分</b></div></div>
+<div style="display:grid;gap:10px"><div class="kpi"><div class="n">87.2<small>分</small></div><div class="l">你給自己</div><div class="s">比同學給的高 2.0 分</div></div><div class="kpi"><div class="n">79.8<small>分</small></div><div class="l">全班平均</div><div class="s">滿分 100 分</div></div></div></div>
+<div class="callout g"><b>你的強項：團隊合作</b>。同學給你 4.6 分，比全班平均高 0.4 分。繼續保持！</div>
+<div class="sh"><h2>每個項目的表現</h2><p>把同學給你的分數、全班平均、你自己的看法放在同一條線上。</p></div>
+<div class="legend"><span><i style="background:var(--blue)"></i>同學給你的分數</span><span><i style="background:transparent;border-left:2px dashed var(--doc-accent);border-radius:0;width:0;height:12px"></i>班級平均</span><span><i style="background:var(--doc-ink);width:3px;height:12px"></i>你給自己的分數</span><span>滿分 5 分</span></div>
+<div style="display:flex;flex-direction:column;gap:12px"><div class="pair"><div>內容完整 <span class="note">占 30%</span></div><div class="tr"><i style="width:86%"></i><u style="left:80.80000000000001%"></u><em style="left:calc(90% - 1px)"></em></div><div class="v">4.3<small>班均 4.0</small></div></div><div class="pair"><div>創意 <span class="note">占 25%</span></div><div class="tr"><i style="width:80%"></i><u style="left:76.8%"></u><em style="left:calc(84.00000000000001% - 1px)"></em></div><div class="v">4.0<small>班均 3.8</small></div></div><div class="pair"><div>表達 <span class="note">占 25%</span></div><div class="tr"><i style="width:84.00000000000001%"></i><u style="left:78.8%"></u><em style="left:calc(80% - 1px)"></em></div><div class="v">4.2<small>班均 3.9</small></div></div><div class="pair"><div>團隊合作 <span class="note">占 20%</span></div><div class="tr"><i style="width:92%"></i><u style="left:83.39999999999999%"></u><em style="left:calc(96% - 1px)"></em></div><div class="v">4.6<small>班均 4.2</small></div></div></div>
+<div class="sh"><h2>你怎麼看自己、同學怎麼看你</h2></div>
+<table class="dtable"><thead><tr><th>項目</th><th class="r">你給自己</th><th class="r">同學給你</th><th>差別</th></tr></thead><tbody>
+<tr><td>內容完整</td><td class="r">4.5</td><td class="r"><b>4.3</b></td><td><span class="pill">你給得比同學高 0.2</span></td></tr><tr><td>創意</td><td class="r">4.2</td><td class="r"><b>4.0</b></td><td><span class="pill">你給得比同學高 0.2</span></td></tr><tr><td>表達</td><td class="r">4.0</td><td class="r"><b>4.2</b></td><td><span class="pill">同學給得比你高 0.2</span></td></tr><tr><td>團隊合作</td><td class="r">4.8</td><td class="r"><b>4.6</b></td><td><span class="pill">你給得比同學高 0.2</span></td></tr>
+</tbody></table>
+<div class="pf"><span>問卷回饋小幫手 · 給學生本人</span><span>第 1／2 頁</span></div></div>
+</div></div></div><div style="display:flex;gap:6px;align-items:center"><b style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">三年二班 學生版</b><span class="tag tag-accent">我的</span></div><div class="small muted">改自個人回饋單 · 2 頁</div><div style="display:flex;gap:6px"><button class="btn btn-primary btn-sm" type="button">套用</button><button class="btn btn-secondary btn-sm" type="button">編輯</button></div></div><div class="qcard" style="gap:10px;padding:12px"><div style="display:grid;place-items:center;background:var(--sunk);border-radius:var(--r-sm);padding:10px;height:176px;overflow:hidden"><div style="position:relative;width:159px;height:225px;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:#fff;box-shadow:0 4px 14px var(--shadow-sm);flex:none"><div style="width:794px;transform:scale(0.2);transform-origin:0 0;pointer-events:none"><div class="paper doc-warm"><div class="ph"><span>三年二班 · 小組報告回饋</span><span>學生版 · 林小宇</span></div>
+<div class="dt"><div class="eyebrow">個人回饋單</div><h1 style="font-size:36px">林小宇 同學的回饋單</h1>
+<div class="meta"><span>三年二班 6 號</span><span>小組報告：水資源（第 1 組）</span><span>共 36 位同學給你回饋</span></div></div>
+<div style="display:grid;grid-template-columns:1.1fr 1fr;gap:14px;align-items:stretch">
+<div class="kpi hi" style="padding:14px 18px;justify-content:center"><div class="l" style="font-size:14px">同學給你的總分</div><div class="bignum">85.2<small style="font-size:20px;color:var(--doc-ink2);font-weight:600"> 分</small></div><div class="s" style="font-size:14px">比全班平均（79.8 分）高 <b style="color:var(--doc-accent)">5.4 分</b></div></div>
+<div style="display:grid;gap:10px"><div class="kpi"><div class="n">87.2<small>分</small></div><div class="l">你給自己</div><div class="s">比同學給的高 2.0 分</div></div><div class="kpi"><div class="n">79.8<small>分</small></div><div class="l">全班平均</div><div class="s">滿分 100 分</div></div></div></div>
+<div class="callout g"><b>你的強項：團隊合作</b>。同學給你 4.6 分，比全班平均高 0.4 分。繼續保持！</div>
+<div class="sh"><h2>每個項目的表現</h2><p>把同學給你的分數、全班平均、你自己的看法放在同一條線上。</p></div>
+<div class="legend"><span><i style="background:var(--blue)"></i>同學給你的分數</span><span><i style="background:transparent;border-left:2px dashed var(--doc-accent);border-radius:0;width:0;height:12px"></i>班級平均</span><span><i style="background:var(--doc-ink);width:3px;height:12px"></i>你給自己的分數</span><span>滿分 5 分</span></div>
+<div style="display:flex;flex-direction:column;gap:12px"><div class="pair"><div>內容完整 <span class="note">占 30%</span></div><div class="tr"><i style="width:86%"></i><u style="left:80.80000000000001%"></u><em style="left:calc(90% - 1px)"></em></div><div class="v">4.3<small>班均 4.0</small></div></div><div class="pair"><div>創意 <span class="note">占 25%</span></div><div class="tr"><i style="width:80%"></i><u style="left:76.8%"></u><em style="left:calc(84.00000000000001% - 1px)"></em></div><div class="v">4.0<small>班均 3.8</small></div></div><div class="pair"><div>表達 <span class="note">占 25%</span></div><div class="tr"><i style="width:84.00000000000001%"></i><u style="left:78.8%"></u><em style="left:calc(80% - 1px)"></em></div><div class="v">4.2<small>班均 3.9</small></div></div><div class="pair"><div>團隊合作 <span class="note">占 20%</span></div><div class="tr"><i style="width:92%"></i><u style="left:83.39999999999999%"></u><em style="left:calc(96% - 1px)"></em></div><div class="v">4.6<small>班均 4.2</small></div></div></div>
+<div class="sh"><h2>你怎麼看自己、同學怎麼看你</h2></div>
+<table class="dtable"><thead><tr><th>項目</th><th class="r">你給自己</th><th class="r">同學給你</th><th>差別</th></tr></thead><tbody>
+<tr><td>內容完整</td><td class="r">4.5</td><td class="r"><b>4.3</b></td><td><span class="pill">你給得比同學高 0.2</span></td></tr><tr><td>創意</td><td class="r">4.2</td><td class="r"><b>4.0</b></td><td><span class="pill">你給得比同學高 0.2</span></td></tr><tr><td>表達</td><td class="r">4.0</td><td class="r"><b>4.2</b></td><td><span class="pill">同學給得比你高 0.2</span></td></tr><tr><td>團隊合作</td><td class="r">4.8</td><td class="r"><b>4.6</b></td><td><span class="pill">你給得比同學高 0.2</span></td></tr>
+</tbody></table>
+<div class="pf"><span>問卷回饋小幫手 · 給學生本人</span><span>第 1／2 頁</span></div></div>
+</div></div></div><div style="display:flex;gap:6px;align-items:center"><b style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">小組報告 評分表</b><span class="tag tag-accent">我的</span></div><div class="small muted">改自班級總表 · 1 頁</div><div style="display:flex;gap:6px"><button class="btn btn-primary btn-sm" type="button">套用</button><button class="btn btn-secondary btn-sm" type="button">編輯</button></div></div><div class="qcard" style="gap:10px;padding:12px"><div style="display:grid;place-items:center;background:var(--sunk);border-radius:var(--r-sm);padding:10px;height:176px;overflow:hidden"><div style="position:relative;width:159px;height:225px;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:#fff;box-shadow:0 4px 14px var(--shadow-sm);flex:none"><div style="width:794px;transform:scale(0.2);transform-origin:0 0;pointer-events:none"><div class="paper doc-warm"><div class="ph"><span>三年二班 · 小組報告回饋</span><span>學生版 · 林小宇</span></div>
+<div class="dt"><div class="eyebrow">個人回饋單</div><h1 style="font-size:36px">林小宇 同學的回饋單</h1>
+<div class="meta"><span>三年二班 6 號</span><span>小組報告：水資源（第 1 組）</span><span>共 36 位同學給你回饋</span></div></div>
+<div style="display:grid;grid-template-columns:1.1fr 1fr;gap:14px;align-items:stretch">
+<div class="kpi hi" style="padding:14px 18px;justify-content:center"><div class="l" style="font-size:14px">同學給你的總分</div><div class="bignum">85.2<small style="font-size:20px;color:var(--doc-ink2);font-weight:600"> 分</small></div><div class="s" style="font-size:14px">比全班平均（79.8 分）高 <b style="color:var(--doc-accent)">5.4 分</b></div></div>
+<div style="display:grid;gap:10px"><div class="kpi"><div class="n">87.2<small>分</small></div><div class="l">你給自己</div><div class="s">比同學給的高 2.0 分</div></div><div class="kpi"><div class="n">79.8<small>分</small></div><div class="l">全班平均</div><div class="s">滿分 100 分</div></div></div></div>
+<div class="callout g"><b>你的強項：團隊合作</b>。同學給你 4.6 分，比全班平均高 0.4 分。繼續保持！</div>
+<div class="sh"><h2>每個項目的表現</h2><p>把同學給你的分數、全班平均、你自己的看法放在同一條線上。</p></div>
+<div class="legend"><span><i style="background:var(--blue)"></i>同學給你的分數</span><span><i style="background:transparent;border-left:2px dashed var(--doc-accent);border-radius:0;width:0;height:12px"></i>班級平均</span><span><i style="background:var(--doc-ink);width:3px;height:12px"></i>你給自己的分數</span><span>滿分 5 分</span></div>
+<div style="display:flex;flex-direction:column;gap:12px"><div class="pair"><div>內容完整 <span class="note">占 30%</span></div><div class="tr"><i style="width:86%"></i><u style="left:80.80000000000001%"></u><em style="left:calc(90% - 1px)"></em></div><div class="v">4.3<small>班均 4.0</small></div></div><div class="pair"><div>創意 <span class="note">占 25%</span></div><div class="tr"><i style="width:80%"></i><u style="left:76.8%"></u><em style="left:calc(84.00000000000001% - 1px)"></em></div><div class="v">4.0<small>班均 3.8</small></div></div><div class="pair"><div>表達 <span class="note">占 25%</span></div><div class="tr"><i style="width:84.00000000000001%"></i><u style="left:78.8%"></u><em style="left:calc(80% - 1px)"></em></div><div class="v">4.2<small>班均 3.9</small></div></div><div class="pair"><div>團隊合作 <span class="note">占 20%</span></div><div class="tr"><i style="width:92%"></i><u style="left:83.39999999999999%"></u><em style="left:calc(96% - 1px)"></em></div><div class="v">4.6<small>班均 4.2</small></div></div></div>
+<div class="sh"><h2>你怎麼看自己、同學怎麼看你</h2></div>
+<table class="dtable"><thead><tr><th>項目</th><th class="r">你給自己</th><th class="r">同學給你</th><th>差別</th></tr></thead><tbody>
+<tr><td>內容完整</td><td class="r">4.5</td><td class="r"><b>4.3</b></td><td><span class="pill">你給得比同學高 0.2</span></td></tr><tr><td>創意</td><td class="r">4.2</td><td class="r"><b>4.0</b></td><td><span class="pill">你給得比同學高 0.2</span></td></tr><tr><td>表達</td><td class="r">4.0</td><td class="r"><b>4.2</b></td><td><span class="pill">同學給得比你高 0.2</span></td></tr><tr><td>團隊合作</td><td class="r">4.8</td><td class="r"><b>4.6</b></td><td><span class="pill">你給得比同學高 0.2</span></td></tr>
+</tbody></table>
+<div class="pf"><span>問卷回饋小幫手 · 給學生本人</span><span>第 1／2 頁</span></div></div>
+</div></div></div><div style="display:flex;gap:6px;align-items:center"><b style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">個人回饋單：學生版</b><span class="tag">內建</span></div><div class="small muted">內建 · 2 頁</div><div style="display:flex;gap:6px"><button class="btn btn-primary btn-sm" type="button">套用</button><button class="btn btn-secondary btn-sm" type="button">複製後編輯</button></div></div><div class="qcard" style="gap:10px;padding:12px"><div style="display:grid;place-items:center;background:var(--sunk);border-radius:var(--r-sm);padding:10px;height:176px;overflow:hidden"><div style="position:relative;width:159px;height:225px;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:#fff;box-shadow:0 4px 14px var(--shadow-sm);flex:none"><div style="width:794px;transform:scale(0.2);transform-origin:0 0;pointer-events:none"><div class="paper doc-warm"><div class="ph"><span>三年二班 · 小組報告回饋</span><span>學生版 · 林小宇</span></div>
+<div class="dt"><div class="eyebrow">個人回饋單</div><h1 style="font-size:36px">林小宇 同學的回饋單</h1>
+<div class="meta"><span>三年二班 6 號</span><span>小組報告：水資源（第 1 組）</span><span>共 36 位同學給你回饋</span></div></div>
+<div style="display:grid;grid-template-columns:1.1fr 1fr;gap:14px;align-items:stretch">
+<div class="kpi hi" style="padding:14px 18px;justify-content:center"><div class="l" style="font-size:14px">同學給你的總分</div><div class="bignum">85.2<small style="font-size:20px;color:var(--doc-ink2);font-weight:600"> 分</small></div><div class="s" style="font-size:14px">比全班平均（79.8 分）高 <b style="color:var(--doc-accent)">5.4 分</b></div></div>
+<div style="display:grid;gap:10px"><div class="kpi"><div class="n">87.2<small>分</small></div><div class="l">你給自己</div><div class="s">比同學給的高 2.0 分</div></div><div class="kpi"><div class="n">79.8<small>分</small></div><div class="l">全班平均</div><div class="s">滿分 100 分</div></div></div></div>
+<div class="callout g"><b>你的強項：團隊合作</b>。同學給你 4.6 分，比全班平均高 0.4 分。繼續保持！</div>
+<div class="sh"><h2>每個項目的表現</h2><p>把同學給你的分數、全班平均、你自己的看法放在同一條線上。</p></div>
+<div class="legend"><span><i style="background:var(--blue)"></i>同學給你的分數</span><span><i style="background:transparent;border-left:2px dashed var(--doc-accent);border-radius:0;width:0;height:12px"></i>班級平均</span><span><i style="background:var(--doc-ink);width:3px;height:12px"></i>你給自己的分數</span><span>滿分 5 分</span></div>
+<div style="display:flex;flex-direction:column;gap:12px"><div class="pair"><div>內容完整 <span class="note">占 30%</span></div><div class="tr"><i style="width:86%"></i><u style="left:80.80000000000001%"></u><em style="left:calc(90% - 1px)"></em></div><div class="v">4.3<small>班均 4.0</small></div></div><div class="pair"><div>創意 <span class="note">占 25%</span></div><div class="tr"><i style="width:80%"></i><u style="left:76.8%"></u><em style="left:calc(84.00000000000001% - 1px)"></em></div><div class="v">4.0<small>班均 3.8</small></div></div><div class="pair"><div>表達 <span class="note">占 25%</span></div><div class="tr"><i style="width:84.00000000000001%"></i><u style="left:78.8%"></u><em style="left:calc(80% - 1px)"></em></div><div class="v">4.2<small>班均 3.9</small></div></div><div class="pair"><div>團隊合作 <span class="note">占 20%</span></div><div class="tr"><i style="width:92%"></i><u style="left:83.39999999999999%"></u><em style="left:calc(96% - 1px)"></em></div><div class="v">4.6<small>班均 4.2</small></div></div></div>
+<div class="sh"><h2>你怎麼看自己、同學怎麼看你</h2></div>
+<table class="dtable"><thead><tr><th>項目</th><th class="r">你給自己</th><th class="r">同學給你</th><th>差別</th></tr></thead><tbody>
+<tr><td>內容完整</td><td class="r">4.5</td><td class="r"><b>4.3</b></td><td><span class="pill">你給得比同學高 0.2</span></td></tr><tr><td>創意</td><td class="r">4.2</td><td class="r"><b>4.0</b></td><td><span class="pill">你給得比同學高 0.2</span></td></tr><tr><td>表達</td><td class="r">4.0</td><td class="r"><b>4.2</b></td><td><span class="pill">同學給得比你高 0.2</span></td></tr><tr><td>團隊合作</td><td class="r">4.8</td><td class="r"><b>4.6</b></td><td><span class="pill">你給得比同學高 0.2</span></td></tr>
+</tbody></table>
+<div class="pf"><span>問卷回饋小幫手 · 給學生本人</span><span>第 1／2 頁</span></div></div>
+</div></div></div><div style="display:flex;gap:6px;align-items:center"><b style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">個人回饋單：家長版</b><span class="tag">內建</span></div><div class="small muted">內建 · 1 頁</div><div style="display:flex;gap:6px"><button class="btn btn-primary btn-sm" type="button">套用</button><button class="btn btn-secondary btn-sm" type="button">複製後編輯</button></div></div></div></div></div></div></div><figcaption style="max-width:640px"><b>13e 桌機：設定與範本庫</b>設定左邊分組、右邊內容。範本庫用縮圖卡片，一眼看出版面長什麼樣；套用、編輯、複製都在卡片上。</figcaption></figure>
+<figure class="fig" style="margin:0"><div class="scale" data-w="1280" data-h="720"><div class="dev" style="width:1280px;height:720px;border-radius:12px"><div style="flex:1;min-height:0;display:flex;flex-direction:column;padding:28px 48px;gap:8px;background:var(--paper)"><div style="display:flex;align-items:center;gap:12px"><span class="small muted" style="font-size:var(--fs-lg)">班長 · 第 1 位候選人／共 4 位</span><span style="margin-left:auto" class="small muted"><button class="icbtn" type="button" aria-label="離開唱票模式"><svg class="ic"><use href="#i-x"/></svg></button></span></div><div style="flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0"><div style="font-size:104px;font-weight:800;line-height:1.2;letter-spacing:.04em">林小宇</div><div class="mono" style="font-size:260px;font-weight:800;line-height:1;color:var(--accent);font-variant-numeric:tabular-nums">11</div><div style="font-size:44px;font-weight:700;color:var(--ink2);margin-top:4px">票</div></div><div style="display:flex;align-items:center;gap:16px"><div class="prog" style="flex:1" role="progressbar" aria-valuenow="27" aria-valuemin="0" aria-valuemax="100"><i style="width:27%"></i></div><span class="small muted">已唱 11／40 張有效票</span></div><div style="display:flex;gap:12px;justify-content:center;padding-top:8px"><button class="btn btn-secondary" type="button" style="min-width:200px;height:72px;font-size:var(--fs-lg)">上一位候選人</button><button class="btn btn-primary" type="button" style="min-width:360px;height:72px;font-size:var(--fs-xl)">下一票　＋1</button><button class="btn btn-secondary" type="button" style="min-width:200px;height:72px;font-size:var(--fs-lg)">這位唱完了</button></div><div class="small muted" style="text-align:center"><span class="mono" style="border:1px solid var(--line);border-radius:4px;padding:1px 6px;background:var(--card)">空白鍵</span> 下一票　<span class="mono" style="border:1px solid var(--line);border-radius:4px;padding:1px 6px;background:var(--card)">←</span> 回上一位　<span class="mono" style="border:1px solid var(--line);border-radius:4px;padding:1px 6px;background:var(--card)">Esc</span> 離開</div></div></div></div><figcaption style="max-width:640px"><b>13f 投影唱票</b>接投影機給全班看：一次只顯示一位候選人，每按一下「下一票」加一，避免提前看到結果。字體大到後排看得到；按空白鍵也能加一票。</figcaption></figure>
+<figure class="fig" style="margin:0"><div class="scale" data-w="1280" data-h="640"><div class="dev" style="width:1280px;height:640px;border-radius:12px"><div class="appbar" style="padding:0 16px;gap:20px"><span class="brand"><svg class="ic"><use href="#i-bars"/></svg></span><b style="font-size:17px">問卷回饋小幫手</b><span class="small muted">三年二班_幹部票選.xlsx</span><div class="stepper" style="border:0;padding:0;background:transparent;margin-left:auto;width:360px"><div class="segs"><span class="st on">開啟</span><span class="st on">對應</span><span class="st on cur">統計</span><span class="st">輸出</span></div></div><button class="icbtn" type="button" aria-label="設定"><svg class="ic"><use href="#i-sliders"/></svg></button></div><div style="flex:1;min-height:0;display:flex"><div class="pane" style="width:290px;border-right:1px solid var(--line-soft)"></div><div class="pane" style="flex:1;"></div></div><div class="scrim"></div><div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:760px;background:var(--card);border-radius:var(--r-lg);padding:28px;display:flex;flex-direction:column;gap:16px;box-shadow:0 12px 40px var(--shadow-sm)"><div style="display:flex;align-items:center"><h2 style="margin:0;font-size:var(--fs-xl)">鍵盤快速鍵</h2><span style="margin-left:auto"><button class="icbtn" type="button" aria-label="關閉"><svg class="ic"><use href="#i-x"/></svg></button></span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 40px"><div><b>全部畫面</b><div style="display:flex;align-items:center;gap:12px;min-height:40px"><span style="min-width:150px"><span class="mono" style="border:1px solid var(--line);border-radius:4px;padding:1px 6px;background:var(--card)">Ctrl</span> + <span class="mono" style="border:1px solid var(--line);border-radius:4px;padding:1px 6px;background:var(--card)">Enter</span></span><span class="muted">下一步</span></div><div style="display:flex;align-items:center;gap:12px;min-height:40px"><span style="min-width:150px"><span class="mono" style="border:1px solid var(--line);border-radius:4px;padding:1px 6px;background:var(--card)">Ctrl</span> + <span class="mono" style="border:1px solid var(--line);border-radius:4px;padding:1px 6px;background:var(--card)">Z</span></span><span class="muted">復原</span></div><div style="display:flex;align-items:center;gap:12px;min-height:40px"><span style="min-width:150px"><span class="mono" style="border:1px solid var(--line);border-radius:4px;padding:1px 6px;background:var(--card)">Ctrl</span> + <span class="mono" style="border:1px solid var(--line);border-radius:4px;padding:1px 6px;background:var(--card)">Shift</span> + <span class="mono" style="border:1px solid var(--line);border-radius:4px;padding:1px 6px;background:var(--card)">Z</span></span><span class="muted">重做</span></div><div style="display:flex;align-items:center;gap:12px;min-height:40px"><span style="min-width:150px"><span class="mono" style="border:1px solid var(--line);border-radius:4px;padding:1px 6px;background:var(--card)">?</span></span><span class="muted">顯示這張說明</span></div></div><div><b>統計</b><div style="display:flex;align-items:center;gap:12px;min-height:40px"><span style="min-width:150px"><span class="mono" style="border:1px solid var(--line);border-radius:4px;padding:1px 6px;background:var(--card)">←</span> <span class="mono" style="border:1px solid var(--line);border-radius:4px;padding:1px 6px;background:var(--card)">→</span></span><span class="muted">切換題目</span></div><div style="display:flex;align-items:center;gap:12px;min-height:40px"><span style="min-width:150px"><span class="mono" style="border:1px solid var(--line);border-radius:4px;padding:1px 6px;background:var(--card)">/</span></span><span class="muted">搜尋留言</span></div><b style="display:block;margin-top:8px">編輯器</b><div style="display:flex;align-items:center;gap:12px;min-height:40px"><span style="min-width:150px"><span class="mono" style="border:1px solid var(--line);border-radius:4px;padding:1px 6px;background:var(--card)">↑</span> <span class="mono" style="border:1px solid var(--line);border-radius:4px;padding:1px 6px;background:var(--card)">↓</span></span><span class="muted">移動選取的區塊</span></div><div style="display:flex;align-items:center;gap:12px;min-height:40px"><span style="min-width:150px"><span class="mono" style="border:1px solid var(--line);border-radius:4px;padding:1px 6px;background:var(--card)">Delete</span></span><span class="muted">刪除區塊</span></div></div></div></div></div></div><figcaption style="max-width:640px"><b>13g 鍵盤快速鍵</b>桌機按 ? 開啟說明。只列最常用的，分組寫成動作；所有功能也都能用滑鼠完成，快速鍵只是更快。</figcaption></figure>
+
+</div>
+</div>
+</body>
+</html>
