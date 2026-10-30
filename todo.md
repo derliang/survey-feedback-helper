@@ -21,6 +21,7 @@
 - [ ] 啟用 `main` 分支保護（程式類只能經 PR 合併、必須全部通過）；須放行純文件類直接 push，且純文件變更不觸發重新部署（見 CLAUDE.md〈工作流程〉）
 - [ ] 啟用 GitHub 的私人漏洞回報（Report a vulnerability），[SECURITY.md](SECURITY.md) 已引用此功能
 - [ ] GitHub Pages 部署流程（GitHub Actions）；合併前確認授權，因 main 即上線
+- [ ] **Teacher Hub 卡片轉正**：第一版上線、有 GitHub Pages 網址後，通知 `derliang/teacher-hub` 把「問卷回饋小幫手」候選卡改為可點的即開即用或 Beta 卡，並在它的 `tools.json` 加一筆。工具要有 `version.json`（版號與發布日），否則 teacher-hub 的自動同步會失敗。流程見該 repo 的 `docs/PUBLISHING.md` 3.1。背景見 [決定記錄](docs/decisions/2026-10-30-發佈到Teacher-Hub先佔位.md)
 - [ ] 引入第一個套件時，核對授權與費用並登錄 [docs/third-party.md](docs/third-party.md)
 
 ## v0.1 本機版核心
