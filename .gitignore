@@ -7,6 +7,13 @@
 sample-data/private/
 output/
 
+# 原型的打包產物與字型檔（字型由本機提供，不進版控；正式版字型另行登錄並明確放行）
+prototypes/**/dist/
+*.ttf
+*.otf
+*.woff
+*.woff2
+
 # 系統與編輯器
 .DS_Store
 Thumbs.db
