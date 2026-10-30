@@ -4,6 +4,8 @@ import { createCanvas, loadImage } from '@napi-rs/canvas';
 import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
 
 const root = new URL('./output/', import.meta.url).pathname.replace(/^\/([A-Z]:)/, '$1');
+// PROTO_WORDPDF_DIR 可改讀其他資料夾（例如系統字型版的 wordpdf-sys）
+const WORD_DIR = process.env.PROTO_WORDPDF_DIR ?? 'wordpdf';
 const ids = process.argv.slice(2).length ? process.argv.slice(2) : ['01', '02', '09', '18', '27'];
 mkdirSync(`${root}png`, { recursive: true });
 
@@ -41,7 +43,7 @@ async function render(page, scale = 1.4) {
 let totalLines = 0, sameText = 0, samePages = 0;
 const dys = [], dxs = [];
 for (const id of ids) {
-  const a = `${root}pdf/${id}.pdf`, b = `${root}wordpdf/${id}.pdf`;
+  const a = `${root}pdf/${id}.pdf`, b = `${root}${WORD_DIR}/${id}.pdf`;
   if (!existsSync(b)) { console.log(`${id}: 缺少 Word 輸出，略過`); continue; }
   const [pa, pb] = [await open(a), await open(b)];
   const same = pa.numPages === pb.numPages;
@@ -67,7 +69,7 @@ for (const id of ids) {
     g.fillStyle = '#888'; g.fillRect(0, 0, out.width, out.height);
     g.drawImage(await loadImage(ca.toBuffer('image/png')), 0, 0);
     g.drawImage(await loadImage(cb.toBuffer('image/png')), ca.width + 20, 0);
-    writeFileSync(`${root}png/${id}-p${p}.png`, out.toBuffer('image/png'));
+    writeFileSync(`${root}png/${WORD_DIR === 'wordpdf' ? '' : WORD_DIR + '-'}${id}-p${p}.png`, out.toBuffer('image/png'));
   }
   console.log(note);
   mism.forEach((m) => console.log(m));
