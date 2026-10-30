@@ -5,38 +5,40 @@
  */
 :root {
   /* 色彩：表面 */
-  --paper: #f3f6f7;       /* 頁面底 */
-  --card: #fcfdfd;        /* 卡片、導覽列、輸入框底 */
-  --sunk: #e8eef0;        /* 凹陷底：分段控制軌道、進度軌道、停用 */
+  --paper: #f4f5f7;       /* 頁面底 */
+  --card: #ffffff;        /* 卡片、導覽列、輸入框底 */
+  --sunk: #eceef2;        /* 凹陷底：分段控制軌道、進度軌道、停用 */
   /* 色彩：文字 */
-  --ink: #17232a;
-  --ink2: #41515a;
-  --ink3: #566770;
+  --ink: #14171f;
+  --ink2: #444b5a;
+  --ink3: #5b6373;
   /* 色彩：線 */
-  --line: #cdd7dc;
-  --line-soft: #e0e7ea;
-  /* 色彩：強調（青綠，唯一的強調色） */
-  --accent: #0a6a6e;
+  --line: #cfd3dc;
+  --line-soft: #e3e6ec;
+  /* 色彩：強調（鈷藍，唯一的強調色；深色版用較深的藍搭白字，不用粉彩色） */
+  --accent: #2554d8;
   --on-accent: #ffffff;
-  --accent-soft: #d9eeee;
-  --accent-ink: #075156;
+  --accent-soft: #e7edff;
+  --accent-ink: #1b3fa6;
   /* 色彩：語意（不算強調色） */
-  --ok: #1b7048;
-  --ok-soft: #dbf0e4;
-  --warn: #7d5200;
-  --warn-soft: #fbecc9;
-  --bad: #a02a2a;
-  --bad-soft: #f8dfdc;
+  --ok: #17713f;
+  --ok-soft: #dcf1e3;
+  --warn: #7a4f00;
+  --warn-soft: #fdf0d0;
+  --bad: #a8262b;
+  --bad-soft: #fbe2e0;
   /* 色彩：圖表資料色（色盲友善；一定要搭配文字標籤，不單靠顏色） */
-  --d1: #0a6a6e;
-  --d2: #c4691d;
-  --d3: #4a5eb0;
-  --d4: #a83f76;
-  --d5: #6f7f22;
-  --d0: #7f8e96;          /* 其他、未分類 */
-  --bar-muted: #b8c6cc;   /* 未當選、未突顯的長條 */
-  --scrim: rgba(10, 20, 25, 0.5);
-  --shadow: rgba(23, 35, 42, 0.18);
+  --d1: #2554d8;
+  --d2: #cf5f12;
+  --d3: #b3367a;
+  --d4: #0c7a88;
+  --d5: #8a6a0a;
+  --d0: #7b8494;          /* 其他、未分類 */
+  --warn-bar: #e3a012;       /* 同票、需處理的長條 */
+  --bar-muted: #c3c9d6;   /* 未當選、未突顯的長條 */
+  --scrim: rgba(12, 14, 20, 0.5);
+  --shadow: rgba(20, 24, 40, 0.16);
+  --shadow-sm: rgba(20, 24, 40, 0.08);   /* 卡片的細微層次 */
 
   /* 字型：介面一律系統字型，不載入網路字型 */
   --font: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Heiti TC", system-ui, sans-serif;
@@ -68,65 +70,69 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --paper: #0f1518;
-    --card: #172025;
-    --sunk: #0a0f12;
-    --ink: #e7eef1;
-    --ink2: #b4c3ca;
-    --ink3: #8fa1a9;
-    --line: #2c3a41;
-    --line-soft: #212d33;
-    --accent: #5ec4c6;
-    --on-accent: #06201f;
-    --accent-soft: #143436;
-    --accent-ink: #a2e3e4;
-    --ok: #7fd1a6;
-    --ok-soft: #12301f;
-    --warn: #f0c36b;
-    --warn-soft: #32280e;
-    --bad: #f2a7a0;
-    --bad-soft: #3a1a1a;
-    --d1: #5ec4c6;
-    --d2: #ef9b55;
-    --d3: #8c9ee6;
-    --d4: #e283b2;
-    --d5: #b3c45a;
-    --d0: #8fa1a9;
-    --bar-muted: #3b4d55;
-    --scrim: rgba(0, 0, 0, 0.62);
+    --paper: #0e1014;
+    --card: #171a20;
+    --sunk: #0b0c10;
+    --ink: #eceef3;
+    --ink2: #b9bfcc;
+    --ink3: #8f97a8;
+    --line: #2b303a;
+    --line-soft: #20242c;
+    --accent: #3d68f0;
+    --on-accent: #ffffff;
+    --accent-soft: #1a2850;
+    --accent-ink: #9db8ff;
+    --ok: #6fd39a;
+    --ok-soft: #12291c;
+    --warn: #f2c35c;
+    --warn-soft: #2e2410;
+    --bad: #ff9d96;
+    --bad-soft: #3a1b1d;
+    --d1: #6f93ff;
+    --d2: #f08a47;
+    --d3: #e579b3;
+    --d4: #3fc0d0;
+    --d5: #d6b43a;
+    --d0: #8f97a8;
+    --warn-bar: #f0b429;
+    --bar-muted: #3a404d;
+    --scrim: rgba(0, 0, 0, 0.65);
     --shadow: rgba(0, 0, 0, 0.6);
+    --shadow-sm: rgba(0, 0, 0, 0.4);
     color-scheme: dark;
   }
 }
 
 :root[data-theme="dark"] {
-  --paper: #0f1518;
-  --card: #172025;
-  --sunk: #0a0f12;
-  --ink: #e7eef1;
-  --ink2: #b4c3ca;
-  --ink3: #8fa1a9;
-  --line: #2c3a41;
-  --line-soft: #212d33;
-  --accent: #5ec4c6;
-  --on-accent: #06201f;
-  --accent-soft: #143436;
-  --accent-ink: #a2e3e4;
-  --ok: #7fd1a6;
-  --ok-soft: #12301f;
-  --warn: #f0c36b;
-  --warn-soft: #32280e;
-  --bad: #f2a7a0;
-  --bad-soft: #3a1a1a;
-  --d1: #5ec4c6;
-  --d2: #ef9b55;
-  --d3: #8c9ee6;
-  --d4: #e283b2;
-  --d5: #b3c45a;
-  --d0: #8fa1a9;
-  --bar-muted: #3b4d55;
-  --scrim: rgba(0, 0, 0, 0.62);
+  --paper: #0e1014;
+  --card: #171a20;
+  --sunk: #0b0c10;
+  --ink: #eceef3;
+  --ink2: #b9bfcc;
+  --ink3: #8f97a8;
+  --line: #2b303a;
+  --line-soft: #20242c;
+  --accent: #3d68f0;
+  --on-accent: #ffffff;
+  --accent-soft: #1a2850;
+  --accent-ink: #9db8ff;
+  --ok: #6fd39a;
+  --ok-soft: #12291c;
+  --warn: #f2c35c;
+  --warn-soft: #2e2410;
+  --bad: #ff9d96;
+  --bad-soft: #3a1b1d;
+  --d1: #6f93ff;
+  --d2: #f08a47;
+  --d3: #e579b3;
+  --d4: #3fc0d0;
+  --d5: #d6b43a;
+  --d0: #8f97a8;
+  --warn-bar: #f0b429;
+  --bar-muted: #3a404d;
+  --scrim: rgba(0, 0, 0, 0.65);
   --shadow: rgba(0, 0, 0, 0.6);
+  --shadow-sm: rgba(0, 0, 0, 0.4);
   color-scheme: dark;
 }
 
