@@ -11,7 +11,7 @@
 - [ ] **設計員建立設計系統**（原型驗證後、v0.1 畫面實作前）：mobile-first，先手機再平板、桌機，含輸出文件的區塊元件庫與主題；字型與圖示優先選 OFL／MIT 授權；正式品牌名稱與 Logo 在此階段決定
 - [ ] 專案骨架：TypeScript + Vite + Preact + Vitest + Playwright，並補專案 `CLAUDE.md` 的測試與建置指令
 - [ ] **CI 關卡**（GitHub Actions，公開 repo 免費）：型別與 lint、單元測試、Playwright 端對端（多解析度、觸控）、輸出視覺比對、隱私掃描、授權與費用檢查、Google 權限檢查（只允許 `drive.file`）、建置
-- [ ] 啟用 `main` 分支保護（只能經 PR 合併、必須全部通過）
+- [ ] 啟用 `main` 分支保護（程式類只能經 PR 合併、必須全部通過）；須放行純文件類直接 push，且純文件變更不觸發重新部署（見 CLAUDE.md〈工作流程〉）
 - [ ] 啟用 GitHub 的私人漏洞回報（Report a vulnerability），[SECURITY.md](SECURITY.md) 已引用此功能
 - [ ] GitHub Pages 部署流程（GitHub Actions）；合併前確認授權，因 main 即上線
 - [ ] 引入第一個套件時，核對授權與費用並登錄 [docs/third-party.md](docs/third-party.md)
