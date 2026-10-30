@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 安全性問題
+    url: https://github.com/derliang/survey-feedback-helper/security/policy
+    about: 涉及學生資料外洩的問題請依安全性政策私下回報，不要公開開 Issue。
