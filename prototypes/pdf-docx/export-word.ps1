@@ -1,5 +1,6 @@
 # 用本機 Microsoft Word 把 docx 排版後輸出成 PDF（驗證用，只在原型階段使用）
 #
+# 【2026-10-30 更新】Start-Job + SaveAs2 在這台已會卡死；改用前景直接執行、Visible=$true、Open + ExportAsFixedFormat(路徑,17)，約 7.6 秒/份穩定（見原型驗證結果）。以下為舊做法紀錄。
 # 這台 Word 的自動化很容易卡住（原因未明）。實測有效的做法，缺一不可：
 #   1. 用 Start-Job 執行下面的區塊，並用 Wait-Job -Timeout 設逾時（不要直接在前景跑）
 #   2. Word 設為可見（Visible = $true）
