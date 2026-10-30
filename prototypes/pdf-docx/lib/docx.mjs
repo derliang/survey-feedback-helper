@@ -1,13 +1,11 @@
 import {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, ImageRun, Footer,
   AlignmentType, WidthType, LineRuleType, HeightRule, VerticalAlign, ShadingType,
-  TableLayoutType, BorderStyle, PageNumber, LevelFormat,
+  TableLayoutType, BorderStyle, PageNumber, LevelFormat, CharacterSet,
 } from 'docx';
 import { PAGE } from './model.mjs';
 
 const tw = (pt) => Math.round(pt * 20); // pt → twips
-const FONT = 'Noto Sans TC';
-const font = { name: FONT, eastAsia: FONT, ascii: FONT, hAnsi: FONT };
 const col = (h) => h.slice(1).toUpperCase();
 
 const base = {
@@ -16,6 +14,8 @@ const base = {
 };
 
 export async function renderDocx(doc, opts = {}) {
+  const FONT = opts.fontName ?? 'Noto Sans TC';
+  const font = { name: FONT, eastAsia: FONT, ascii: FONT, hAnsi: FONT };
   const lineH = doc.lineH;
   const children = [];
   const spacer = (pt) =>
@@ -92,7 +92,7 @@ export async function renderDocx(doc, opts = {}) {
   });
 
   const d = new Document({
-    ...(opts.embedFont ? { fonts: [{ name: FONT, data: opts.embedFont, characterSet: 'ChineseBig5' }] } : {}),
+    ...(opts.embedFont ? { fonts: [{ name: FONT, data: opts.embedFont, characterSet: CharacterSet.CHINESEBIG5 }] } : {}),
     styles: { default: { document: { run: { font, size: 22 }, paragraph: { spacing: { before: 0, after: 0 } } } } },
     numbering: {
       config: [{

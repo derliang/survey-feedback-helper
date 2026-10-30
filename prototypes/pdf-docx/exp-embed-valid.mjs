@@ -1,0 +1,10 @@
+import { readFileSync } from 'node:fs';
+import fontkit from '@pdf-lib/fontkit';
+import subsetFont from 'subset-font';
+import { loadFonts } from './lib/fonts.mjs';
+import { renameFont } from './lib/rename-font.mjs';
+const sub = await subsetFont(loadFonts().regular, '中文字型測試報告', { targetFormat: 'truetype', noHinting: true });
+const r = renameFont(sub, 'SFH Embed Test');
+const f = fontkit.create(r);
+console.log('改名後字型：', f.familyName, '|', f.fullName, '|', f.postscriptName, '｜字形數', f.numGlyphs, '｜含「中」', f.hasGlyphForCodePoint('中'.codePointAt(0)), '｜fsType', f['OS/2']?.fsType);
+console.log('原字型 fsType（可否內嵌）：', fontkit.create(loadFonts().regular)['OS/2']?.fsType);
