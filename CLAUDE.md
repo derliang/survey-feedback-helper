@@ -28,7 +28,7 @@ TypeScript + Vite + Preact + Vitest + Playwright；ExcelJS、docx、fflate；PDF
 - PR 全綠 → 回報測試證據 → 使用者說「發布」→ 合併。
 - **純文件類可直接 push 到 `main`**（使用者 2026-10-30 決定）：文件不是正式程式，直接進 `main` 是為了讓後續對話一 pull 就拿到最新資訊。範圍僅限 `*.md`、`docs/`、`.github/` 的範本與 `LICENSE`；只要同一次變更碰到程式、`.github/workflows/`、設定或建置檔，就走 PR。部署流程建好後，須設定成純文件變更不觸發重新部署，並讓分支保護對純文件變更放行。
 - 版本記錄：每次發布更新 `CHANGELOG.md` 並建立 GitHub Release；完成待辦要同步更新 `todo.md`。
-- 介面與輸出文件的設計走設計員流程，設計系統完成後記錄於 `docs/design-system/`。
+- 介面與輸出文件的設計走設計員流程，設計系統記錄於 `docs/design/`。
 - Commit 署名依全域規範（`Claude-<裝置簡稱>`）。
 
 ## 設計規範（改頁面前必讀）
