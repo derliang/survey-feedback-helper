@@ -1,7 +1,9 @@
 // 建置：成品頁（分組）與 repo 內的各頁模擬頁
 import fs from 'node:fs';
-const sp = 'C:/Users/derli/AppData/Local/Temp/claude/C--Users-derli-Documents-claude-projects-survey-feedback-helper/7debb979-1afb-49a7-80fb-e06703a95e45/scratchpad';
-const repo = 'C:/Users/derli/Documents/claude_projects/survey-feedback-helper-design';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+const sp = process.env.SFH_SP || dirname(fileURLToPath(import.meta.url));
+const repo = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 const rd = (f) => fs.readFileSync(f, 'utf8');
 const tokens = rd(repo + '/docs/design/tokens.css').replace(/\/\*[\s\S]*?\*\/\s*/, '');
 const css = [rd(sp + '/chrome.css'), rd(sp + '/app.css'), rd(sp + '/doc.css')].join('\n');
@@ -53,18 +55,18 @@ function deviceArtifact() {
   const wide = figsOf(inner(by('flow-wide')));
   const DESK = {};
   const used = new Set();
-  [...wide.filter((f) => capOf(f).includes('桌機')), ...['flow-desk', 'flow-desk2', 'desk-a', 'desk-b', 'desk-c', 'desk-d'].flatMap((id) => figsOf(inner(by(id))))].forEach((f) => { DESK[capOf(f).split(' ')[0]] = f; });
+  [...wide.filter((f) => capOf(f).includes('桌機')), ...['flow-desk', 'flow-desk2', 'desk-a', 'desk-b', 'desk-c', 'desk-d', 'desk-e'].flatMap((id) => figsOf(inner(by(id))))].forEach((f) => { DESK[capOf(f).split(' ')[0]] = f; });
   const DESK_N = Object.keys(DESK).length;
   const DESK_SECS = [
-    { id: 'd-open', title: '開啟問卷', intro: '第 1 步。拖放或選檔、選檔來源、讀取中、讀不到檔案、瀏覽器過舊。', keys: ['13a', 'D12', 'D13', 'D14', 'D15'] },
-    { id: 'd-prep', title: '準備資料', intro: '第 2 步。總覽、問卷類型、欄位對應、學生名單與對照、資料檢查。', keys: ['D16', 'D17', '13b', 'D18', 'D19', 'D20', 'D21', 'D22', '13c'] },
-    { id: 'd-survey', title: '意見調查統計', intro: '第 3 步。量表、複選、開放題、交叉分析、圖表另存、量表標籤與反向計分。', keys: ['12c', 'D24', 'D5', 'D4', 'D50', 'D10'] },
+    { id: 'd-open', title: '開啟試算表', intro: '第 1 步。首頁、選檔來源、讀取中、讀不到檔案、匯出教學、瀏覽器過舊。', keys: ['13a', 'D12', 'D13', 'D14', 'D57', 'D15'] },
+    { id: 'd-prep', title: '準備資料', intro: '第 2 步。總覽、問卷類型、欄位對應、學生名單與對照、資料檢查。', keys: ['D16', 'D17', '13b', 'D18', 'D19', 'D64', 'D20', 'D58', 'D21', 'D22', '13c'] },
+    { id: 'd-survey', title: '意見調查統計', intro: '第 3 步。量表、複選、開放題、交叉分析、圖表另存、量表標籤與反向計分。', keys: ['12c', 'D59', 'D60', 'D61', 'D24', 'D5', 'D4', 'D50', 'D10'] },
     { id: 'd-vote', title: '票選統計與防弊', intro: '第 3 步。各職位結果、同票抽籤、投影唱票、防弊檢查、同人多票、計票規則。', keys: ['D1', 'D23', '13f', 'D47', 'D48', 'D49'] },
     { id: 'd-fb', title: '報告回饋與歷次趨勢', intro: '第 3 步。以被評對象為單位的統計，與同一班多次問卷的變化。', keys: ['D2', 'D3'] },
-    { id: 'd-out', title: '審稿與輸出', intro: '第 4 步。老師審稿、改寫留言、評語與關鍵字、輸出設定、檔名與去識別化、進度、完成與失敗。', keys: ['13d', 'D25', 'D26', '12e', 'D28', 'D27', 'D6', 'D31'] },
-    { id: 'd-edit', title: '版面編輯器', intro: '三欄：區塊清單、頁面、屬性。文字與圖表屬性、加入區塊、頁面設定、個別學生版本、拖曳排序。', keys: ['12d', 'D33', 'D34', 'D35', 'D36', 'D37'] },
+    { id: 'd-out', title: '審稿與輸出', intro: '第 4 步。老師審稿、改寫留言、評語與關鍵字、輸出設定、檔名與去識別化、進度、完成與失敗。', keys: ['13d', 'D62', 'D25', 'D26', 'D66', '12e', 'D65', 'D28', 'D27', 'D6', 'D31'] },
+    { id: 'd-edit', title: '版面編輯器', intro: '三欄：區塊清單、頁面、屬性。文字與圖表屬性、加入區塊、頁面設定、個別學生版本、拖曳排序。', keys: ['12d', 'D33', 'D63', 'D34', 'D35', 'D36', 'D37', 'D67', 'D68', 'D69'] },
     { id: 'd-tpl', title: '範本庫與專案檔', intro: '範本縮圖、選單、匯出與匯入；儲存專案檔，與開啟專案檔後的接續。', keys: ['D38', 'D39', 'D40', 'D41', 'D42', 'D43'] },
-    { id: 'd-drive', title: 'Google 雲端硬碟', intro: '雙軌（資料夾與登入）、選檔視窗、配額用完、已連線設定。', keys: ['D7', 'D44', 'D45', 'D46'] },
+    { id: 'd-drive', title: 'Google 雲端硬碟', intro: '設定頁的連線入口、選檔視窗、無法連線、已連線設定。', keys: ['D7', 'D44', 'D45', 'D46'] },
     { id: 'd-set', title: '設定、教學與隱私', intro: '設定與範本、三層預設、備份與還原、隱私與關於、清除本機設定、Google 表單教學。', keys: ['13e', 'D11', 'D29', 'D54', 'D56', 'D8'] },
     { id: 'd-sys', title: '狀態、提示與系統', intro: '空白、離開確認、快速鍵說明、安裝為應用程式、離線與新版本、第一次載入。', keys: ['D30', 'D32', '13g', 'D51', 'D52', 'D53', 'D55'] },
   ];

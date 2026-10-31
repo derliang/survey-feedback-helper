@@ -34,8 +34,8 @@
   --d4: #0c7a88;
   --d5: #8a6a0a;
   --d0: #7b8494;          /* 其他、未分類 */
-  --warn-bar: #e3a012;       /* 同票、需處理的長條 */
-  --bar-muted: #c3c9d6;   /* 未當選、未突顯的長條 */
+  --warn-bar: #b67a00;       /* 同票、需處理的長條 */
+  --bar-muted: #8c94a4;   /* 未當選、未突顯的長條 */
   --scrim: rgba(12, 14, 20, 0.5);
   --shadow: rgba(20, 24, 40, 0.16);
   --shadow-sm: rgba(20, 24, 40, 0.08);   /* 卡片的細微層次 */
@@ -49,6 +49,7 @@
   --fs-lg: 18px;
   --fs-xl: 22px;
   --fs-2xl: 28px;
+  --fs-3xl: 32px;  /* 首頁標題，只用在「開啟試算表」 */
   --lh-body: 1.65;
   --lh-tight: 1.3;
 
@@ -95,7 +96,7 @@
     --d5: #d6b43a;
     --d0: #8f97a8;
     --warn-bar: #f0b429;
-    --bar-muted: #3a404d;
+    --bar-muted: #6b7384;
     --scrim: rgba(0, 0, 0, 0.65);
     --shadow: rgba(0, 0, 0, 0.6);
     --shadow-sm: rgba(0, 0, 0, 0.4);
@@ -129,7 +130,7 @@
   --d5: #d6b43a;
   --d0: #8f97a8;
   --warn-bar: #f0b429;
-  --bar-muted: #3a404d;
+  --bar-muted: #6b7384;
   --scrim: rgba(0, 0, 0, 0.65);
   --shadow: rgba(0, 0, 0, 0.6);
   --shadow-sm: rgba(0, 0, 0, 0.4);
@@ -149,4 +150,14 @@
   --doc-accent-soft: #ffecd2;
   --doc-leaf: #2f6f55;
   --doc-leaf-soft: #e1f1e8;
+  --doc-card: #ffffff;      /* 文件內的白卡片 */
+  --doc-fill: #efe8dc;      /* 標籤、軌道的暖灰底 */
+  --doc-fill2: #f4eee4;     /* 熱圖空格 */
+  --doc-blue-soft: #e3eaff;
+  --doc-blue-ink: #1b3fa6;
+  --doc-lk1: #cf5f12;       /* 五級量表：橘、淺橘、暖灰、淺藍、藍 */
+  --doc-lk2: #eaa06a;
+  --doc-lk3: #ddd5c8;
+  --doc-lk4: #7f9be3;
+  --doc-lk5: #2554d8;
 }

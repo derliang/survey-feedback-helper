@@ -3,6 +3,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { stepRow, topbar } from './wide.mjs';
+import { home, guide, prow, psub, guardList, progDone } from './deskkit.mjs';
+import { CHARTS, thumb, chartLabel, chartUse } from './charts.mjs';
 import { ic, tag, icbtn, btn, notice, tile, seg, chips, rcard, opt, rowbtn, brow, field, grp, steps, sheet } from './lib.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -27,12 +30,12 @@ const USAGE = {
   'accent-soft': '選取底、一般提示底。', 'accent-ink': '強調色文字與連結，用在 card、accent-soft 上。',
   ok: '成功文字，用在 ok-soft、card 上。', 'ok-soft': '成功底。', warn: '警示、同票、請確認的文字，用在 warn-soft、card 上。', 'warn-soft': '警示底。', bad: '錯誤與危險文字及外框，用在 bad-soft、card 上。', 'bad-soft': '錯誤底。',
   d1: '圖表資料色 1（藍）；一定搭配文字標籤。', d2: '圖表資料色 2（橙）。', d3: '圖表資料色 3（洋紅）。', d4: '圖表資料色 4（青）。', d5: '圖表資料色 5（琥珀）。', d0: '圖表的「其他」、未分類。',
-  'warn-bar': '同票、需處理的長條。淺色版對 card 僅 2.26:1，旁邊一定要有數字與文字。', 'bar-muted': '未突顯的長條。對 card 僅約 1.7:1，旁邊一定要有數字與名稱。',
+  'warn-bar': '同票、需處理的長條。對 card 至少 3:1，旁邊一定要有數字與文字。', 'bar-muted': '未突顯的長條。對 card 至少 3:1，旁邊一定要有數字與文字。',
   scrim: '彈出面板與對話框的遮罩。', shadow: '底部彈出面板、分段控制選取項的陰影色。', 'shadow-sm': '卡片、數字磚、列、次按鈕的細微陰影色。',
 };
 const colorNames = Object.keys(USAGE);
 const colors = colorNames.map((n) => ({ name: n, value: { light: L[n], dark: D[n] }, usage: USAGE[n] }));
-const DOCU = { 'doc-paper': '輸出文件紙張底，永遠是淺色。', 'doc-ink': '輸出文件主要文字，用在 doc-paper 上。', 'doc-ink2': '輸出文件次要文字，用在 doc-paper 上。', 'doc-line': '輸出文件分隔線。', 'doc-accent': '琥珀：重點數字與標題，用在 doc-paper、doc-accent-soft 上。', 'doc-accent-soft': '輸出文件重點底。', 'doc-leaf': '綠：稱讚與優點，用在 doc-paper、doc-leaf-soft 上。', 'doc-leaf-soft': '稱讚底與老師評語底。' };
+const DOCU = { 'doc-card': '文件內的白卡片。', 'doc-fill': '標籤與軌道的暖灰底。', 'doc-fill2': '熱圖空格底。', 'doc-blue-soft': '藍色標籤底。', 'doc-blue-ink': '藍色標籤字。', 'doc-lk1': '五級量表 1（橘）。', 'doc-lk2': '五級量表 2（淺橘）。', 'doc-lk3': '五級量表 3（暖灰）。', 'doc-lk4': '五級量表 4（淺藍）。', 'doc-lk5': '五級量表 5（藍）。', 'doc-paper': '輸出文件紙張底，永遠是淺色。', 'doc-ink': '輸出文件主要文字，用在 doc-paper 上。', 'doc-ink2': '輸出文件次要文字，用在 doc-paper 上。', 'doc-line': '輸出文件分隔線。', 'doc-accent': '琥珀：重點數字與標題，用在 doc-paper、doc-accent-soft 上。', 'doc-accent-soft': '輸出文件重點底。', 'doc-leaf': '綠：稱讚與優點，用在 doc-paper、doc-leaf-soft 上。', 'doc-leaf-soft': '稱讚底與老師評語底。' };
 for (const n of Object.keys(DOCU)) colors.push({ name: n, value: { light: W[n], dark: W[n] }, usage: DOCU[n] });
 // 五級量表固定色，值來自 DESIGN.md 5.6 與 doc.css 的 .paper
 for (const [n, v, u] of [['likert-1', '#cf5f12', '量表 1 分（橘，不同意）。'], ['likert-2', '#eaa06a', '量表 2 分（淺橘）。'], ['likert-3', '#ddd5c8', '量表 3 分（暖灰）。'], ['likert-4', '#7f9be3', '量表 4 分（淺藍）。'], ['likert-5', '#2554d8', '量表 5 分（藍，同意）。']]) colors.push({ name: n, value: { light: v, dark: v }, usage: u + '只用在輸出文件，紙張永遠淺色。' });
@@ -145,6 +148,12 @@ const C = [
   ['DocBarChart', '輸出文件', 160, '輸出文件的長條圖。', '單選以 100% 計，複選以回收人數為基準並寫明。', blk('最喜歡的單元', `${hbar('電路實作', 45, 15, 'k')}${hbar('力學', 30, 10)}${hbar('光學', 25, 9)}`)],
   ['DocTable', '輸出文件', 190, '統計表：表頭粗線、列細線、數字靠右。', '可跨頁並重複表頭；最高最低列用底色加文字標籤。', blk('各規準分數', `<table class="dtable"><thead><tr><th>規準</th><th class="r">平均</th><th class="r">標準差</th><th></th></tr></thead><tbody><tr class="hl"><td>內容掌握</td><td class="r">4.4</td><td class="r">0.6</td><td><span class="pill g">最高</span></td></tr><tr><td>口語表達</td><td class="r">3.6</td><td class="r">0.9</td><td></td></tr></tbody></table>`)],
   ['DocComment', '輸出文件', 200, '留言與老師評語。', '留言預設匿名，經老師審稿；老師評語用綠色底。', blk('留言與評語', `<div class="quote">投影片的圖表很清楚，舉例也很好懂。<span class="by">優點 · 匿名</span></div><div class="callout g"><b>老師評語</b>　這次的資料整理很完整，下次可以多練習口頭結論。</div>`)],
+  ['DesktopBar', '導覽', 150, '桌機頂端列與步驟列：品牌、檔名、齒輪加「設定」，下方獨立一列四段步驟。', '每步有編號、圖示、文字與完成度；完成用勾、目前用強調色、未到用外框，不只靠顏色。手機只用齒輪圖示並保留 aria-label。', topbar(2)],
+  ['RecentHome', '版面', 720, '首頁方案 1b：左邊放新檔，右邊六張最近的專案。', '卡片只記檔案位置與設定，不存統計結果。', `<div style="display:flex;height:680px;width:1232px">${home()}</div>`],
+  ['ExportGuide', '資訊', 240, '匯出教學示意圖，自畫 SVG，文字可翻譯。', '首頁對話框、讀不到檔案、教學頁共用同一組。', guide()],
+  ['ChartThumbs', '資料', 460, '11 種圖表的縮圖與一句用途說明。', '每種統計預設一張：票選長條、量表堆疊橫條、報告回饋對照條、趨勢折線、交叉熱圖；其餘由老師勾選。', `<div class="allch">${Object.keys(CHARTS).map((k) => `<div class="qcard" style="gap:6px;padding:10px 12px">${thumb(k)}<b>${chartLabel(k)}</b><span class="small muted">${chartUse(k)}</span></div>`).join('')}</div>`],
+  ['GuardList', '資料', 260, '逐人勾選名單：每列一位同學，多票可展開。', '整類決定是預設，逐人勾選是例外，標「手動調整」。投影時隱藏投給誰。', `<div style="display:flex;flex-direction:column;gap:8px">${guardList('', [prow(true, '三年二班', 6, '林小宇', '班長投 林小宇'), prow(false, '三年二班', 17, '趙子安', '2 份', tag('請處理', 'warn')), psub(true, '10:31 · 第二份', '班長 林小宇', tag('預設'))], 1)}</div>`],
+  ['TwinCards', '版面', 200, '並排卡片：等高、內距字級一致，按鈕貼底同一水平線。', '兩顆按鈕保留主次樣式；唯讀灰底、可編輯白底。', '<div class="twin"><div class="ro"><span class="lab">原文</span>他很認真。</div><div class="rw"><span class="lab">改寫後的內容</span>看得出來很認真。</div></div>'],
 ];
 const hasIcons = (h) => h.includes('<use ');
 const inlineSprite = sprite.replace(/^[\s\S]*?(<svg)/, '$1');
