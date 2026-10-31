@@ -1,0 +1,309 @@
+{
+  "v": 3,
+  "layout": "files",
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-31T07:05:13.368Z"
+  },
+  "title": "問卷回饋小幫手 設計系統",
+  "namespace": "SurveyFeedbackHelper",
+  "libraries": [],
+  "sections": {},
+  "groups": [
+    "Icons"
+  ],
+  "assetGroups": {
+    "Icons": {
+      "name": "Icons",
+      "tile": "s",
+      "order": [
+        "back.svg",
+        "next.svg",
+        "down.svg",
+        "check.svg",
+        "sliders.svg",
+        "file.svg",
+        "info.svg",
+        "lock.svg",
+        "dice.svg",
+        "down-arrow.svg",
+        "bars.svg",
+        "help.svg",
+        "warn.svg",
+        "x.svg",
+        "users.svg",
+        "copy.svg",
+        "plus.svg",
+        "search.svg",
+        "pencil.svg",
+        "eye-off.svg",
+        "clock.svg",
+        "list.svg",
+        "flag.svg",
+        "cast.svg",
+        "folder.svg",
+        "cloud.svg",
+        "refresh.svg",
+        "trend.svg",
+        "undo.svg",
+        "redo.svg",
+        "grip.svg",
+        "up.svg",
+        "trash.svg",
+        "minus.svg",
+        "type.svg",
+        "table.svg",
+        "comment.svg",
+        "pagebreak.svg",
+        "image.svg"
+      ],
+      "files": {
+        "back.svg": {
+          "name": "back.svg",
+          "blob": "fc9a1d4e7b0c207bca3caafab4895d0a",
+          "size": 209,
+          "type": "image/svg+xml"
+        },
+        "next.svg": {
+          "name": "next.svg",
+          "blob": "1e0f0e1e180f1c0bfeb34e86204eae6a",
+          "size": 207,
+          "type": "image/svg+xml"
+        },
+        "down.svg": {
+          "name": "down.svg",
+          "blob": "9e9d5558158c3ae42dbc4ca1c0579b19",
+          "size": 207,
+          "type": "image/svg+xml"
+        },
+        "check.svg": {
+          "name": "check.svg",
+          "blob": "bd348dc3e1a7540a87ab9ca958abc694",
+          "size": 217,
+          "type": "image/svg+xml"
+        },
+        "sliders.svg": {
+          "name": "sliders.svg",
+          "blob": "57832b9d4f724d990bab91b586b08f76",
+          "size": 287,
+          "type": "image/svg+xml"
+        },
+        "file.svg": {
+          "name": "file.svg",
+          "blob": "f59833201f2dbcd6aeb0fd7d999efb11",
+          "size": 232,
+          "type": "image/svg+xml"
+        },
+        "info.svg": {
+          "name": "info.svg",
+          "blob": "b223d41e0172aaf619676c79aa91f2fa",
+          "size": 243,
+          "type": "image/svg+xml"
+        },
+        "lock.svg": {
+          "name": "lock.svg",
+          "blob": "840f8b719351c3eea9f331d1f250b95a",
+          "size": 265,
+          "type": "image/svg+xml"
+        },
+        "dice.svg": {
+          "name": "dice.svg",
+          "blob": "b13e979e8f7e5a93ec088bdeb9779ad4",
+          "size": 306,
+          "type": "image/svg+xml"
+        },
+        "down-arrow.svg": {
+          "name": "down-arrow.svg",
+          "blob": "4a4d1a2b61f48344a5e40763643886d3",
+          "size": 224,
+          "type": "image/svg+xml"
+        },
+        "bars.svg": {
+          "name": "bars.svg",
+          "blob": "e268e3470b3147c37a015a9362f593c5",
+          "size": 221,
+          "type": "image/svg+xml"
+        },
+        "help.svg": {
+          "name": "help.svg",
+          "blob": "84497a3a018919b2861bf8ce976c6054",
+          "size": 278,
+          "type": "image/svg+xml"
+        },
+        "warn.svg": {
+          "name": "warn.svg",
+          "blob": "4592fc6aa0d4d848ecb53a4ccedbdd2a",
+          "size": 239,
+          "type": "image/svg+xml"
+        },
+        "x.svg": {
+          "name": "x.svg",
+          "blob": "d6eec10997236be2d4946ba66f33ca45",
+          "size": 215,
+          "type": "image/svg+xml"
+        },
+        "users.svg": {
+          "name": "users.svg",
+          "blob": "6ba3c9da3d246aa329470412172fd29b",
+          "size": 315,
+          "type": "image/svg+xml"
+        },
+        "copy.svg": {
+          "name": "copy.svg",
+          "blob": "b2bba10a15b18a3663803fb40cd45e9d",
+          "size": 295,
+          "type": "image/svg+xml"
+        },
+        "plus.svg": {
+          "name": "plus.svg",
+          "blob": "7c735f6ea9713ed2e00a4314c036c61b",
+          "size": 211,
+          "type": "image/svg+xml"
+        },
+        "search.svg": {
+          "name": "search.svg",
+          "blob": "e5324086c89164862dbe6b2f21c6a01d",
+          "size": 237,
+          "type": "image/svg+xml"
+        },
+        "pencil.svg": {
+          "name": "pencil.svg",
+          "blob": "8d528a90d80b2ce3736665a824ca35fa",
+          "size": 219,
+          "type": "image/svg+xml"
+        },
+        "eye-off.svg": {
+          "name": "eye-off.svg",
+          "blob": "8af3bcf7bc09716ec344e9b3f4c6441e",
+          "size": 297,
+          "type": "image/svg+xml"
+        },
+        "clock.svg": {
+          "name": "clock.svg",
+          "blob": "90619342fcc9184ea4a760efc466d48d",
+          "size": 237,
+          "type": "image/svg+xml"
+        },
+        "list.svg": {
+          "name": "list.svg",
+          "blob": "d60d665813bd2197073677f290da92c2",
+          "size": 244,
+          "type": "image/svg+xml"
+        },
+        "flag.svg": {
+          "name": "flag.svg",
+          "blob": "0551cbbe7e53e5447c4e1705ce90118f",
+          "size": 220,
+          "type": "image/svg+xml"
+        },
+        "cast.svg": {
+          "name": "cast.svg",
+          "blob": "5ffbb1adc3277e567ed6122636cbe52d",
+          "size": 259,
+          "type": "image/svg+xml"
+        },
+        "folder.svg": {
+          "name": "folder.svg",
+          "blob": "585042bd091d0237b21e7325ef2480be",
+          "size": 262,
+          "type": "image/svg+xml"
+        },
+        "cloud.svg": {
+          "name": "cloud.svg",
+          "blob": "0a9749dab914549ea314f1025bf4cc26",
+          "size": 248,
+          "type": "image/svg+xml"
+        },
+        "refresh.svg": {
+          "name": "refresh.svg",
+          "blob": "f9815c26aeddd74f2023cea9a6331792",
+          "size": 228,
+          "type": "image/svg+xml"
+        },
+        "trend.svg": {
+          "name": "trend.svg",
+          "blob": "4cd5e9dbfd3f05d7f6867aa9c14979aa",
+          "size": 221,
+          "type": "image/svg+xml"
+        },
+        "undo.svg": {
+          "name": "undo.svg",
+          "blob": "38ab6c3aa16d97d5f7ff251c7191fb38",
+          "size": 231,
+          "type": "image/svg+xml"
+        },
+        "redo.svg": {
+          "name": "redo.svg",
+          "blob": "8880833b0160204d2a1383e09cdb9723",
+          "size": 232,
+          "type": "image/svg+xml"
+        },
+        "grip.svg": {
+          "name": "grip.svg",
+          "blob": "0fd7bbfa7731096a3c7f7313e73fc975",
+          "size": 269,
+          "type": "image/svg+xml"
+        },
+        "up.svg": {
+          "name": "up.svg",
+          "blob": "78dd821f8d1e2106c7710b57d3039aaf",
+          "size": 208,
+          "type": "image/svg+xml"
+        },
+        "trash.svg": {
+          "name": "trash.svg",
+          "blob": "237c0ad143a1f0a9c25e5ecea4341d2c",
+          "size": 229,
+          "type": "image/svg+xml"
+        },
+        "minus.svg": {
+          "name": "minus.svg",
+          "blob": "29b87e8491a44bba868115a2ba76c527",
+          "size": 203,
+          "type": "image/svg+xml"
+        },
+        "type.svg": {
+          "name": "type.svg",
+          "blob": "e3b9339e400e8de6791c8f2f3be3ef37",
+          "size": 210,
+          "type": "image/svg+xml"
+        },
+        "table.svg": {
+          "name": "table.svg",
+          "blob": "8fe936fee07fb30fbf81a819835a3eca",
+          "size": 259,
+          "type": "image/svg+xml"
+        },
+        "comment.svg": {
+          "name": "comment.svg",
+          "blob": "306371bffedf6d3f6d53ea566aa77e88",
+          "size": 213,
+          "type": "image/svg+xml"
+        },
+        "pagebreak.svg": {
+          "name": "pagebreak.svg",
+          "blob": "2cbce038ac2c74b80988ae7c87ad5412",
+          "size": 218,
+          "type": "image/svg+xml"
+        },
+        "image.svg": {
+          "name": "image.svg",
+          "blob": "735f773031bae60549c98f3c637de2ac",
+          "size": 297,
+          "type": "image/svg+xml"
+        }
+      }
+    }
+  },
+  "blobs": {},
+  "docs": {
+    "readme": "project/README.md",
+    "sections": []
+  },
+  "lastChange": {
+    "by": "derliang",
+    "at": "2026-10-31T07:06:25.725Z",
+    "via": "GitHub · derliang/survey-feedback-helper@31635ff",
+    "note": "由 docs/design 的 tokens、元件 CSS 與圖示建立"
+  }
+}
