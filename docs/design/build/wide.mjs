@@ -10,7 +10,12 @@ export const frameWH = (cap, W, H, inner, rad) => {
   return `<figure class="fig" style="margin:0"><div class="scale" data-w="${W}" data-h="${H}"><div class="dev" style="width:${W}px;height:${H}px;border-radius:${rad ?? (W > 1000 ? 12 : 28)}px">${inner}</div></div><figcaption style="max-width:${Math.min(W, 640)}px"><b>${t[0]}</b>${t[1] || ''}</figcaption></figure>`;
 };
 const stp = (step) => `<div class="stepper" style="border:0;padding:0;background:transparent;margin-left:auto;width:${'%W%'}"><div class="segs">${['開啟', '對應', '統計', '輸出'].map((t, i) => `<span class="st${i === step - 1 ? ' on cur' : i < step - 1 ? ' on' : ''}">${t}</span>`).join('')}</div></div>`;
-export const topbar = (step, file = '三年二班_幹部票選.xlsx') => `<div class="appbar" style="padding:0 16px;gap:20px"><span class="brand">${ic('bars')}</span><b style="font-size:17px">問卷回饋小幫手</b><span class="small muted">${file}</span>${stp(step).replace('%W%', '360px')}${icbtn('sliders', '設定')}</div>`;
+const STEPS = [['開啟', 'file'], ['準備資料', 'table'], ['統計', 'bars'], ['輸出', 'down-arrow']];
+const STEP_STATE = { 1: [['cur', '', 0], ['todo', '', 0], ['todo', '', 0], ['todo', '', 0]], 2: [['done', '已完成', 100], ['cur', '2／4', 50], ['todo', '尚未開始', 0], ['todo', '尚未開始', 0]], 3: [['done', '已完成', 100], ['done', '4／4', 100], ['cur', '已看 3／8 題', 38], ['todo', '尚未開始', 0]], 4: [['done', '已完成', 100], ['done', '4／4', 100], ['done', '已看 8／8 題', 100], ['cur', '審稿 12／35 人', 34]] };
+export const stepRow = (step) => `<div class="wbar"><ol class="ws">${STEPS.map(([t, g], i) => { const [st, p, pct] = STEP_STATE[step][i]; return `<li class="${st}"${st === 'cur' ? ' aria-current="step"' : ''}><div class="wh"><span class="num ${st}">${st === 'done' ? ic('check') : i + 1}</span>${ic(g)}<b>${t}</b>${p ? `<em>${p}</em>` : ''}</div><div class="wt"><i style="width:${pct}%"></i></div></li>`; }).join('')}</ol></div>`;
+export const gearBtn = `<button class="btn btn-secondary btn-sm gearbtn" type="button">${ic('gear')}設定</button>`;
+export const BAR_H = 68;
+export const topbar = (step, file = '三年二班_幹部票選.xlsx') => `<div class="tb"><div class="bd"><span class="brand">${ic('bars')}</span><b>問卷回饋小幫手</b></div>${file ? `<span class="fn">${file}</span>` : ''}${gearBtn}</div>${stepRow(step)}`;
 export const tbar = (step, title) => `<div class="appbar" style="padding:0 16px;gap:12px"><span class="brand">${ic('bars')}</span><b style="font-size:var(--fs-lg)">${title}</b>${stp(step).replace('%W%', '300px')}${icbtn('sliders', '設定')}</div>`;
 export const pane = (w, inner, o = '') => `<div class="pane" style="width:${w}px;${o}">${inner}</div>`;
 export const flex1 = (inner, o = '') => `<div class="pane" style="flex:1;${o}">${inner}</div>`;

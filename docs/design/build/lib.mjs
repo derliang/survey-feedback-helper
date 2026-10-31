@@ -1,6 +1,8 @@
 // 畫面片段產生器：共用小工具，輸出與設計系統一致的 HTML
 import fs from 'node:fs';
-export const sp = 'C:/Users/derli/AppData/Local/Temp/claude/C--Users-derli-Documents-claude-projects-survey-feedback-helper/7debb979-1afb-49a7-80fb-e06703a95e45/scratchpad';
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+export const sp = process.env.SFH_SP || dirname(fileURLToPath(import.meta.url));
 
 export const ic = (n) => `<svg class="ic"><use href="#i-${n}"/></svg>`;
 export const tag = (t, c = '') => `<span class="tag${c ? ' tag-' + c : ''}">${t}</span>`;

@@ -27,7 +27,7 @@
 .chips{display:flex;gap:8px;flex-wrap:wrap}
 .chip{min-height:var(--tap-min);padding:0 16px;border-radius:999px;border:1px solid var(--ink3);background:var(--card);color:var(--ink);font:600 15px/1.2 var(--font);cursor:pointer}
 .chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink)}
-.rcard{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;min-height:64px;padding:12px 14px;border:1.5px solid var(--line);border-radius:var(--r-md);background:var(--card);text-align:left;cursor:pointer;color:var(--ink);width:100%;font:inherit}
+.rcard{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;min-height:64px;padding:12px 14px;border:1.5px solid var(--ink3);border-radius:var(--r-md);background:var(--card);text-align:left;cursor:pointer;color:var(--ink);width:100%;font:inherit}
 .rcard b{display:block;font-size:var(--fs-md);line-height:1.35}
 .rcard small{display:block;font-size:var(--fs-sm);color:var(--ink2);line-height:1.45}
 .rcard[aria-checked="true"]{border-color:var(--accent);background:var(--accent-soft)}
@@ -56,7 +56,7 @@
 .track>i{display:block;height:100%;border-radius:6px;background:var(--bar-muted)}
 .track>i.lead{background:var(--accent)}
 .track>i.tie{background:var(--warn-bar)}
-.rowbtn{box-shadow:0 1px 2px var(--shadow-sm);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;min-height:64px;padding:10px 14px;background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r-md);text-align:left;color:var(--ink);cursor:pointer;width:100%;font:inherit}
+.rowbtn{box-shadow:0 1px 2px var(--shadow-sm);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;min-height:64px;padding:10px 14px;background:var(--card);border:1px solid var(--ink3);border-radius:var(--r-md);text-align:left;color:var(--ink);cursor:pointer;width:100%;font:inherit}
 .rowbtn .nm{font-weight:600;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rowbtn .sm{font-size:var(--fs-xs);color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rowbtn .rt{display:flex;align-items:center;gap:4px;color:var(--ink2)}
@@ -112,3 +112,115 @@
 .opt[aria-checked="true"]{font-weight:700}
 .sheet .btn{margin-top:12px}
 
+
+/* ===== 桌機頂端列與步驟列（R-004、R-028）===== */
+.tb{display:flex;align-items:center;gap:16px;min-height:60px;padding:0 20px;background:var(--card);flex:none}
+.tb .bd{display:flex;align-items:center;gap:10px;flex:none}
+.tb .bd b{font-size:var(--fs-lg)}
+.fn{font:var(--fs-xs)/1.4 var(--font-mono);color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gearbtn{flex:none;gap:6px;padding:0 14px;margin-left:auto}
+.gearbtn svg.ic{width:20px;height:20px}
+.wbar{background:var(--card);border-bottom:1px solid var(--line-soft);padding:0 20px 12px;flex:none}
+.ws{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.ws li{display:flex;flex-direction:column;gap:8px;min-width:0;color:var(--ink2)}
+.wh{display:flex;align-items:center;gap:8px}
+.wh>svg.ic{width:18px;height:18px}
+.wh em{margin-left:auto;font-style:normal;font-size:var(--fs-xs);color:var(--ink2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ws b{font-size:var(--fs-md);font-weight:600}
+.ws li.cur .wh{color:var(--accent-ink)}
+.ws li.cur b{font-weight:700}
+.wt{height:6px;border-radius:3px;background:var(--sunk);overflow:hidden}
+.wt i{display:block;height:100%;background:var(--accent);border-radius:3px}
+.num{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font:700 var(--fs-sm)/1 var(--font);font-variant-numeric:tabular-nums;flex:none}
+.num.cur{background:var(--accent);color:var(--on-accent)}
+.num.done{background:var(--ok-soft);color:var(--ok)}
+.num.done svg.ic{width:16px;height:16px;stroke-width:3}
+.num.todo{background:var(--card);color:var(--ink2);box-shadow:inset 0 0 0 1.5px var(--ink3)}
+.num.lock{background:var(--sunk);color:var(--ink3)}
+.num.lock svg.ic{width:14px;height:14px}
+/* ===== 首頁（方案 1b）===== */
+.home{flex:1;min-height:0;display:grid;grid-template-columns:420px minmax(0,1fr);gap:24px;padding:24px}
+.hdrop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;background:var(--accent-soft);color:var(--ink);border:2px dashed var(--accent);border-radius:var(--r-lg);padding:24px;min-width:0}
+.hdrop h1{font-size:var(--fs-3xl);color:var(--accent-ink);line-height:var(--lh-tight)}
+.hdrop>b{font-size:var(--fs-xl)}
+.hart{width:150px;height:112px}
+.hart .a0{fill:var(--card);stroke:var(--accent)}
+.hart .a1{fill:var(--accent)}
+.hart .a2{fill:none;stroke:var(--accent)}
+.hart .a3{fill:var(--d2)}
+.hright{display:flex;flex-direction:column;gap:12px;min-width:0;min-height:0}
+.shead{display:flex;align-items:center;gap:12px;min-height:44px}
+.shead h3{white-space:nowrap}
+.shead .end{margin-left:auto;display:flex;gap:4px}
+.chips.mini{flex-wrap:nowrap;gap:6px}
+.chips.mini .chip{padding:0 12px;font-size:var(--fs-sm)}
+.rgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:1fr;gap:12px;flex:1;min-height:0}
+.rc{display:flex;gap:12px;align-items:center;padding:14px;background:var(--card);border:1px solid var(--ink3);border-radius:var(--r-md);text-align:left;cursor:pointer;color:var(--ink);font:inherit;min-width:0;box-shadow:0 1px 2px var(--shadow-sm)}
+.rk{width:44px;height:44px;border-radius:var(--r-sm);display:grid;place-items:center;background:var(--k);color:var(--card);flex:none}
+.rb{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.rb>b{line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rm{display:flex;align-items:center;gap:6px;margin-top:5px;min-width:0}
+.rm .dt{margin-left:auto;font-size:var(--fs-xs);color:var(--ink2);white-space:nowrap}
+.lnk{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 8px;border:0;background:transparent;color:var(--accent-ink);font:600 var(--fs-sm)/1.2 var(--font);cursor:pointer;border-radius:var(--r-sm)}
+.lnk svg.ic{width:18px;height:18px}
+.pv{display:flex;align-items:center;gap:8px;font-size:var(--fs-sm);color:var(--ink2)}
+.pv svg.ic{width:18px;height:18px}
+/* ===== 匯出教學示意圖（R-007）===== */
+.guide{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.gstep{display:flex;flex-direction:column;gap:8px;min-width:0}
+.gart{width:100%;height:auto;background:var(--card);border:1px solid var(--line);border-radius:var(--r-sm)}
+.gart .l{fill:none;stroke:var(--ink3);stroke-width:1.5}
+.gart .f{fill:var(--sunk)}
+.gart .m{fill:var(--accent)}
+.gart .o{fill:none;stroke:var(--accent);stroke-width:2.5}
+.gart text{font:600 11px var(--font);fill:var(--ink2)}
+.gart text.on{fill:var(--on-accent)}
+.gstep .gh{display:flex;gap:8px;align-items:flex-start;font-size:var(--fs-sm);line-height:1.5}
+/* ===== 準備資料：四件事的垂直步驟（R-006）===== */
+.vs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;position:relative}
+.vs li{position:relative;display:grid;grid-template-columns:28px minmax(0,1fr);gap:14px}
+.vs li+li::before{content:"";position:absolute;left:13px;top:-10px;height:10px;width:2px;background:var(--line)}
+.vs li.opt1+li::before{background:repeating-linear-gradient(var(--ink3) 0 3px,transparent 3px 6px)}
+.vcard{display:flex;align-items:center;gap:12px;min-height:64px;padding:12px 16px;background:var(--card);border:1px solid var(--ink3);border-radius:var(--r-md);min-width:0}
+.vcard.now{border:2px solid var(--accent);background:var(--accent-soft)}
+.vcard.lock{background:var(--sunk);border-color:var(--line)}
+.vcard>div{min-width:0;flex:1}
+.vcard b{display:block;font-size:var(--fs-lg);line-height:1.35}
+/* ===== 表格內的欄位列（R-011、R-013）===== */
+.colrow{display:grid;grid-template-columns:6.5em 22px minmax(0,1fr) auto;align-items:center;gap:8px;min-height:44px;padding:0 8px;border-radius:var(--r-sm)}
+.colrow.cur{background:var(--accent-soft)}
+.colrow .input{min-height:36px;display:flex;align-items:center;padding:0 12px;font-size:var(--fs-sm)}
+.colrow.off{color:var(--ink2)}
+.seat{color:var(--ink2);font-variant-numeric:tabular-nums}
+
+/* ===== 圖表選擇（R-017、R-024、R-029）===== */
+.cth{width:120px;height:72px;flex:none;display:block}
+.chkgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.chkrow{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--ink3);border-radius:var(--r-md);min-width:0}
+.chkrow>div{min-width:0}
+.chkrow b{margin-right:6px}
+.ck{width:22px;height:22px;border-radius:6px;box-shadow:inset 0 0 0 2px var(--ink3);display:grid;place-items:center;flex:none;color:var(--on-accent)}
+.ck.on{background:var(--accent);box-shadow:none}
+.ck svg.ic{width:15px;height:15px;stroke-width:3}
+.pickrow{display:flex;align-items:center;gap:10px;padding:6px 8px;border:1px solid var(--line-soft);border-radius:var(--r-sm);background:var(--card);color:var(--ink);font:inherit;text-align:left;cursor:pointer;width:100%}
+.pickrow .cth{width:80px;height:48px}
+.pickrow>span{display:flex;flex-direction:column;min-width:0}
+.pickrow.on{border:2px solid var(--accent);background:var(--accent-soft)}
+.popov{position:absolute;display:flex;flex-direction:column;gap:6px;padding:8px;background:var(--card);border:1px solid var(--ink3);border-radius:var(--r-md);box-shadow:0 8px 24px var(--shadow);z-index:2}
+.allch{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.sbar{display:flex;flex-direction:column;gap:4px}
+.sbar .h{display:flex;justify-content:space-between;gap:12px;font-size:var(--fs-sm)}
+.sbar .tr{display:flex;height:16px;border-radius:4px;overflow:hidden}
+.sbar .tn{display:flex;font-size:var(--fs-xs);color:var(--ink2);font-variant-numeric:tabular-nums}
+.sbar .tn span{text-align:center}
+/* ===== 並排卡片（R-026）：等高、按鈕貼底同一水平線 ===== */
+.twin{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:stretch}
+.twin>div{display:flex;flex-direction:column;gap:6px;min-height:148px;padding:12px;border-radius:var(--r-sm);line-height:1.7;font-size:var(--fs-md)}
+.twin>.ro{background:var(--sunk);border:1px solid var(--line)}
+.twin>.rw{background:var(--card);border:1px solid var(--ink3)}
+.twin .lab{display:flex;align-items:center;gap:6px;font-size:var(--fs-sm);color:var(--ink2)}
+/* ===== 逐人勾選名單（R-015）===== */
+.plist{display:flex;flex-direction:column;border:1px solid var(--line-soft);border-radius:var(--r-md);background:var(--card);overflow:hidden}
+.prow{display:grid;grid-template-columns:22px 7em 3em 6em minmax(0,1fr) auto;gap:10px;align-items:center;min-height:48px;padding:0 14px;border-top:1px solid var(--line-soft);font-size:var(--fs-sm)}
+.prow:first-child{border-top:0}
+.prow.sub{background:var(--sunk);grid-template-columns:22px minmax(0,1fr) auto;padding-left:46px}

@@ -3,7 +3,7 @@
   "layout": "files",
   "createdOnFiles": {
     "v": 1,
-    "at": "2026-10-31T07:05:13.368Z"
+    "at": "2026-10-31T11:10:52.147Z"
   },
   "title": "問卷回饋小幫手 設計系統",
   "namespace": "SurveyFeedbackHelper",
@@ -55,7 +55,8 @@
         "table.svg",
         "comment.svg",
         "pagebreak.svg",
-        "image.svg"
+        "image.svg",
+        "gear.svg"
       ],
       "files": {
         "back.svg": {
@@ -291,6 +292,12 @@
           "blob": "735f773031bae60549c98f3c637de2ac",
           "size": 297,
           "type": "image/svg+xml"
+        },
+        "gear.svg": {
+          "name": "gear.svg",
+          "blob": "98d27c995e7b5bd6803ffe5d89342214",
+          "size": 583,
+          "type": "image/svg+xml"
         }
       }
     }
@@ -302,8 +309,8 @@
   },
   "lastChange": {
     "by": "derliang",
-    "at": "2026-10-31T07:06:25.725Z",
-    "via": "GitHub · derliang/survey-feedback-helper@31635ff",
+    "at": "2026-10-31T11:10:52.147Z",
+    "via": "GitHub · derliang/survey-feedback-helper@main",
     "note": "由 docs/design 的 tokens、元件 CSS 與圖示建立"
   }
 }

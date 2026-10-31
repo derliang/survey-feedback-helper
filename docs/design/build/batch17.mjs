@@ -1,6 +1,6 @@
 // 桌機補完 B：統計、審稿、輸出、設定與狀態（D23–D32）
 import * as K from './deskkit.mjs';
-const { L, D, side, main, rside, nav, modal, mhead, mfoot, prog, round, centered, rail, fbox, h, th, td, qrow, nvr, tgl, body, pane, flex1, foot, fchip, table, cmt, tag, btn, notice, tile, tiles, seg, chips, rcard, rowbtn, ic, icbtn, brow, addPages, write, voteBars } = K;
+const { progDone, chartHead, L, D, side, main, rside, nav, modal, mhead, mfoot, prog, round, centered, rail, fbox, h, th, td, qrow, nvr, tgl, body, pane, flex1, foot, fchip, table, cmt, tag, btn, notice, tile, tiles, seg, chips, rcard, rowbtn, ic, icbtn, brow, addPages, write, voteBars } = K;
 const F = [];
 const posList = (cur) => `${rail('職位')}${['班長', '副班長', '風紀股長', '衛生股長'].map((t, i) => nvr(t, i === cur, i === 1 ? tag('同票', 'warn') : '')).join('')}`;
 const qList = (cur) => `${rail('題目')}${['1 活動內容有趣', '2 老師說明清楚', '3 活動場地舒適', '4 時間安排', '5 整體滿意度', '6 推薦給別人', '7 希望增加的活動', '8 分組方式', '9 其他建議'].map((t, i) => nvr(t, i === cur)).join('')}`;
@@ -16,12 +16,12 @@ F.push(D('D24 桌機：意見調查（複選題）｜左邊題目清單可一直
 
 // D25 改寫留言
 const reviewBase = () => body(side(260, `${rail('學生（審完 12／41）')}${['王大明', '林雅婷', '陳家豪', '黃思穎'].map((t, i) => nvr(t, i === 2, i < 2 ? tag('已審', 'ok') : '')).join('')}`), main(`${h('陳家豪 收到的留言', '3 則 · 待審 2')}${cmt('他講話有點笨拙，但是很認真。', '建議', '', true)}${cmt('報告條理清楚，圖表很好懂。', '優點', '採用')}`));
-F.push(D('D25 桌機：改寫留言｜點「改寫」開置中對話框：左邊原文、右邊可編輯版本。改寫過的留言在教師版標示「老師改寫」，學生版看不到差別。', 4,
-  `${reviewBase()}${modal(720, `${mhead('改寫留言')}<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div class="qcard" style="gap:6px"><span class="small muted">原文</span><div style="line-height:1.7">他講話有點笨拙，但是很認真。</div></div><div style="display:flex;flex-direction:column;gap:6px"><span class="small muted">改寫後的內容</span><div class="input" style="min-height:96px;padding:12px;line-height:1.7">講話可以再慢一點、再有條理，但是看得出來很認真。</div></div></div><span class="small muted">學生版看到的是改寫後的內容。</span>${mfoot(btn('取消', 'secondary'), btn('儲存並採用', 'primary'))}`)}`));
+F.push(D('D25 桌機：改寫留言｜點「改寫」開置中對話框。兩框等高、內距與字級一致：左邊原文灰底標唯讀，右邊改寫白底，高度隨較長者。改寫過的留言在教師版標示「老師改寫」，學生版看不到差別。', 4,
+  `${reviewBase()}${modal(720, `${mhead('改寫留言')}<div class="twin"><div class="ro"><span class="lab">原文 ${tag('唯讀')}</span>他講話有點笨拙，但是很認真。</div><div class="rw"><span class="lab">改寫後的內容</span>講話可以再慢一點、再有條理，但是看得出來很認真。</div></div><span class="small muted">學生版看到的是改寫後的內容。</span>${mfoot(btn('取消', 'secondary'), btn('儲存並採用', 'primary'))}`)}`));
 
 // D26 老師評語與關鍵字
-F.push(D('D26 桌機：老師評語與關鍵字｜左邊切換學生，中間寫評語並套用常用評語，右邊維護「留言提醒」的關鍵字清單。評語出現在學生版與家長版。', 4,
-  `${body(side(260, `${rail('學生')}${['林小宇', '陳怡安', '張子豪', '黃思穎'].map((t, i) => nvr(t, i === 0, i < 1 ? tag('已寫', 'ok') : '')).join('')}`), main(`${h('林小宇（6 號）', '評語會出現在學生版與家長版')}<div class="input" style="min-height:180px;padding:14px;line-height:1.8">小宇，這次報告看得出你很用心，也很願意照顧組員。下次試著把一個生活例子放進去。</div><span class="small muted">86 字 · 可使用 {姓名}、{總分}</span>${rail('常用評語')}${chips(['很用心', '再多舉例', '勇於發表', '合作愉快'], -1)}`), rside(340, `${h('關鍵字提醒', '留言含這些詞時，審稿畫面會加紅色提醒。系統只提醒，不會自動隱藏。')}<div style="display:flex;flex-wrap:wrap;gap:6px">${['笨', '白痴', '討厭', '很爛', '最差'].map((t) => tag(t, 'bad')).join('')}</div><div>${btn('編輯關鍵字', 'secondary', { sm: true, icon: 'pencil' })}</div>`))}${nav('儲存', '上一步')}`));
+F.push(D('D26 桌機：老師評語與關鍵字｜左邊切換學生並看完成人數，有寫評語或標「跳過」就算完成。中間寫評語，常用評語用分類頁籤加搜尋，籌碼顯示短標題，點一下插在游標處。六類預設是草稿，等使用者修改後定稿。', 4,
+  `${body(side(260, `${progDone(3, 35)}${['林小宇', '陳怡安', '張子豪', '黃思穎'].map((t, i) => nvr(t, i === 0, i < 2 ? tag('已寫', 'ok') : i === 2 ? tag('跳過') : '')).join('')}`), main(`${h('林小宇（6 號）', '評語會出現在學生版與家長版')}<div style="position:relative"><div class="input" style="min-height:150px;padding:14px 14px 56px;line-height:1.8">小宇，這次報告看得出你很用心，也很願意照顧組員。下次試著把一個生活例子放進去。</div><span style="position:absolute;right:8px;bottom:8px">${btn('存成常用評語', 'secondary', { sm: true, icon: 'plus' })}</span></div><span class="small muted">38 字 · 可使用 {姓名}、{總分}</span><div style="display:flex;align-items:center;gap:12px">${rail('常用評語')}<input class="input" style="flex:1;min-height:44px" placeholder="搜尋評語" aria-label="搜尋評語"></div>${seg(['學習態度', '課堂參與', '合作', '表達', '進步', '鼓勵', '我的'], 0, '評語分類')}${chips(['很用心', '主動學習', '按部就班', '願意修正', '再專注一點'], -1)}<span class="small muted">游標停在籌碼上可預覽整句。可以新增、改寫、刪除與排序。</span>`), rside(320, `${h('關鍵字提醒', '留言含這些詞時，審稿畫面會加紅色提醒。系統只提醒，不會自動隱藏。')}<div style="display:flex;flex-wrap:wrap;gap:6px">${['笨', '白痴', '討厭', '很爛', '最差'].map((t) => tag(t, 'bad')).join('')}</div><div>${btn('編輯關鍵字', 'secondary', { sm: true, icon: 'pencil' })}</div>`))}${nav('儲存', '上一步')}`));
 
 // D27 輸出進度
 const stepRow = (t, st) => `<div style="display:flex;align-items:center;gap:10px;min-height:36px"><span style="width:22px;height:22px;border-radius:50%;display:grid;place-items:center;${st === 'done' ? 'background:var(--ok);color:#fff' : st === 'now' ? 'border:2px solid var(--accent)' : 'border:2px solid var(--line)'}">${st === 'done' ? ic('check') : ''}</span><span style="${st === 'wait' ? 'color:var(--ink3)' : ''}">${t}</span></div>`;
