@@ -50,7 +50,9 @@ function columnValues(table: Table, index: number): Cell[] {
 function guessByContent(values: Cell[]): { role: Role; confirm: boolean } | null {
   if (values.length === 0) return null;
   const nums = values.map((v) => parseNumber(v));
-  if (nums.every((n) => n !== null && n >= 0 && n <= 10 && Number.isInteger(n))) {
+  // 九成以上是 0～10 的整數就當評分：偶有打錯的 11 不該讓整欄被略過（資料檢查會再標出超出範圍的那一列）
+  const inRange = nums.filter((n) => n !== null && n >= 0 && n <= 10 && Number.isInteger(n)).length;
+  if (nums.every((n) => n !== null) && inRange / nums.length >= 0.9) {
     return { role: 'score', confirm: true };
   }
   const texts = values.map((v) => cellText(v));

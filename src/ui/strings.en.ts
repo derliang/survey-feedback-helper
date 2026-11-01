@@ -1,8 +1,9 @@
 // English interface (skeleton, v1.0). Loaded on demand when the user picks English; any key not listed here falls back to Traditional Chinese.
 // Google Forms / Sheets / Excel menu names are NOT translated here: they must be checked against the real English interface first (hard rule 10).
-import type { DeepPartial, Strings } from './locale';
+import { mergeStrings, type DeepPartial, type Strings } from './locale';
+import { enMore } from './strings.en.more';
 
-export const en: DeepPartial<Strings> = {
+const enCore: DeepPartial<Strings> = {
   appName: 'Survey Feedback Helper',
   steps: ['Open survey', 'Prepare data', 'Statistics', 'Output'],
   restart: 'Start over',
@@ -63,3 +64,6 @@ export const en: DeepPartial<Strings> = {
     shortcutsBody: 'Tab / Shift+Tab move between buttons, Enter or Space presses, Esc closes a panel. The first Tab on a page is "Skip to main content".',
   },
 };
+
+/** 英文介面 = 主要畫面骨架（本檔）＋其餘畫面（strings.en.more.ts）。 */
+export const en: DeepPartial<Strings> = mergeStrings(enCore, enMore);
