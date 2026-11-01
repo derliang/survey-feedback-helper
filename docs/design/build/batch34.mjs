@@ -1,8 +1,9 @@
 // 平板第二輪：與手機一一對應。每個手機畫面自動換成平板版（頂端列＋左欄清單＋右側內容＋底部操作列；底部彈出面板改成靠右側彈出），
-// 另有 6 張維持手工設計的畫面（見 KEEP）：投影唱票（橫向，B）、票選統計、資料檢查、歷次趨勢、設定與範本、編輯器橫向。
+// 另有 9 張維持手工設計的畫面（第三輪加審稿 6a、輸出 4、範本庫 9a，見 tablet-hand.mjs）（見 KEEP）：投影唱票（橫向，B）、票選統計、資料檢查、歷次趨勢、設定與範本、編輯器橫向。
 import fs from 'node:fs';
 import * as K from './m2kit.mjs';
 import { phoneSecs, checkUnused } from './phones.mjs';
+import * as TH from './tablet-hand.mjs';
 const { ic, tag, btn, write, mframeWH, tabletize, figsOf, keyOf, patchOld } = K;
 checkUnused();
 
@@ -34,7 +35,7 @@ const oldT = {};
 for (const f of figsOf(rd('frag-b14.html'))) oldT[keyOf(f)] = patchOld(f);
 for (const f of figsOf(rd('frag-b8.html'))) oldT['w' + keyOf(f)] = patchOld(f);
 // 手機畫面 → 保留的平板舊稿
-const KEEP = { 'flow-data:4a': oldT.T3, 'flow-stats:5a': oldT.T4, 'flow-stats:5j': oldT.T6, 'flow-out:8a': oldT.T9, 'flow-edit:11a': oldT.w12b, 'new:唱票': vote };
+const KEEP = { 'flow-data:4a': oldT.T3, 'flow-stats:5a': oldT.T4, 'flow-stats:5j': oldT.T6, 'flow-out:8a': oldT.T9, 'flow-edit:11a': oldT.w12b, 'new:唱票': vote, 'new:6a': TH.review, 'new:4': TH.output, 'new:9a': TH.tpl };
 for (const [k, v] of Object.entries(KEEP)) if (!v) throw new Error('找不到保留的平板稿：' + k);
 
 const out = [];
