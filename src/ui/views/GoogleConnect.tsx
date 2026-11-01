@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import { openSurveyTable } from "../../app/store";
+import { setCloudToken } from "../../app/cloud";
+import { backupToDrive, openSurveyTable } from "../../app/store";
 import { readGoogleConfig } from "../../google/config";
 import type { ConnectResult } from "../../google/session";
 import type { GoogleServices } from "../../google/types";
@@ -83,7 +84,10 @@ export function GoogleConnectDialog(props: {
       return setPhase("empty");
     }
     setMessage(r.message);
-    if (r.failure === "auth") token = null;
+    if (r.failure === "auth") {
+      token = null;
+      setCloudToken(null);
+    }
     setPhase("failed");
   };
 
@@ -100,6 +104,8 @@ export function GoogleConnectDialog(props: {
         return setPhase("failed");
       }
       token = r.token;
+      setCloudToken(r.token);
+      void backupToDrive();
       await read(svc, r.token);
     });
   };

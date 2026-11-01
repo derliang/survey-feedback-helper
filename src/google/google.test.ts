@@ -1,5 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
-import { createSheetsApi, quoteSheetTitle } from "./api";
+import {
+  createDriveApi,
+  createSheetsApi,
+  quoteDriveName,
+  quoteSheetTitle,
+} from "./api";
 import {
   createGoogleAuth,
   SignInCancelled,
@@ -41,6 +46,7 @@ function fakeServices(over: Over = {}) {
       info: async () => ({ title: "問卷", sheets: ["A", "B"] }),
       values,
     },
+    drive: { saveText: async () => "fid" },
     picker: { pickSpreadsheet: async () => ({ id: "sid", name: "我的問卷" }) },
   };
   return { svc, revoke, values };
@@ -176,6 +182,62 @@ describe("REST 封裝", () => {
       status: 403,
       reason: "rateLimitExceeded",
     });
+  });
+});
+
+describe("雲端硬碟存檔", () => {
+  const okJson = (body: unknown) => ({
+    ok: true,
+    status: 200,
+    json: async () => body,
+  });
+
+  it("找不到同名檔案就新建（multipart），帶權杖與內容", async () => {
+    const calls: { url: string; init?: Parameters<FetchLike>[1] }[] = [];
+    const f: FetchLike = async (url, init) => {
+      calls.push({ url, init });
+      return okJson(init?.method === "POST" ? { id: "new1" } : { files: [] });
+    };
+    const id = await createDriveApi(f).saveText("tok", "設定.sfh", '{"a":1}');
+    expect(id).toBe("new1");
+    expect(calls[0]?.url).toContain("trashed%20%3D%20false");
+    const post = calls[1];
+    if (!post) throw new Error("沒有送出建立請求");
+    expect(post.init?.method).toBe("POST");
+    expect(post.url).toContain("uploadType=multipart");
+    expect(post.init?.headers?.Authorization).toBe("Bearer tok");
+    expect(post.init?.body).toContain('"name":"設定.sfh"');
+    expect(post.init?.body).toContain('{"a":1}');
+  });
+
+  it("已有同名檔案就覆蓋內容（PATCH），不新建", async () => {
+    const calls: { url: string; init?: Parameters<FetchLike>[1] }[] = [];
+    const f: FetchLike = async (url, init) => {
+      calls.push({ url, init });
+      return okJson(init?.method ? { id: "old" } : { files: [{ id: "old" }] });
+    };
+    const id = await createDriveApi(f).saveText("tok", "設定.sfh", "新內容");
+    expect(id).toBe("old");
+    expect(calls).toHaveLength(2);
+    expect(calls[1]?.init?.method).toBe("PATCH");
+    expect(calls[1]?.url).toContain("/old?uploadType=media");
+    expect(calls[1]?.init?.body).toBe("新內容");
+  });
+
+  it("配額用完（429）丟 GoogleApiError，可分類為 quota", async () => {
+    const f: FetchLike = async () => ({
+      ok: false,
+      status: 429,
+      json: async () => ({ error: { status: "RESOURCE_EXHAUSTED" } }),
+    });
+    const err = await createDriveApi(f)
+      .saveText("tok", "x", "y")
+      .catch((e) => e);
+    expect(classifyGoogleError(err)).toBe("quota");
+  });
+
+  it("檔名裡的單引號與反斜線會跳脫", () => {
+    expect(quoteDriveName(String.raw`a'b\c`)).toBe(String.raw`'a\'b\\c'`);
   });
 });
 

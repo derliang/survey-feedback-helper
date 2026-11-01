@@ -24,6 +24,7 @@ import {
 } from "../storage";
 import type { PhraseCategory, SurveyKind } from "../storage";
 import { applyLang } from "../ui/locale";
+import { saveToDrive } from "./cloud";
 import {
   QUICK_TEMPLATES,
   TEMPLATE_ID_PREFIX,
@@ -233,6 +234,7 @@ export function dismiss(key: string): void {
 /** 存設定：有資料夾就直接寫；沒有就記下「還沒下載」。 */
 export async function persist(data: FolderData): Promise<void> {
   set({ data });
+  void backupToDrive(data);
   const f = getState().folder;
   if (f.state === "ready") {
     try {
@@ -243,6 +245,19 @@ export async function persist(data: FolderData): Promise<void> {
     }
   } else {
     set({ dirty: true });
+  }
+}
+
+let announced = false;
+
+/** 已登入 Google 時，把設定檔也存一份到使用者的雲端硬碟（沒登入什麼都不做）。 */
+export async function backupToDrive(data: FolderData = getState().data) {
+  const r = await saveToDrive(serializeFolderData(data), (toast) =>
+    set({ toast }),
+  );
+  if (r === "saved" && !announced) {
+    announced = true;
+    set({ toast: `已把「${SETTINGS_FILE}」存到你的 Google 雲端硬碟。` });
   }
 }
 
