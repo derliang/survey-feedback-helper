@@ -15,6 +15,34 @@ export interface DirHandleLike {
 
 const HANDLE_KEY = 'folder';
 
+// 寫入資料夾是非同步的；寫入進行中關分頁會丟這次更新，所以此時讓瀏覽器跳出離開確認。
+let pendingWrites = 0;
+let guardInstalled = false;
+
+function onBeforeUnload(e: BeforeUnloadEvent): void {
+  if (pendingWrites > 0) {
+    e.preventDefault();
+    e.returnValue = '';
+  }
+}
+
+export function pendingFolderWrites(): number {
+  return pendingWrites;
+}
+
+async function guarded<T>(job: () => Promise<T>): Promise<T> {
+  if (!guardInstalled && typeof window !== 'undefined') {
+    window.addEventListener('beforeunload', onBeforeUnload);
+    guardInstalled = true;
+  }
+  pendingWrites++;
+  try {
+    return await job();
+  } finally {
+    pendingWrites--;
+  }
+}
+
 export function fsaSupported(): boolean {
   return typeof window !== 'undefined' && 'showDirectoryPicker' in window;
 }
@@ -33,11 +61,13 @@ export function storeFromHandle(dir: DirHandleLike): FolderStore {
         throw e;
       }
     },
-    async write(file, text) {
-      const fh = await dir.getFileHandle(file, { create: true });
-      const w = await fh.createWritable();
-      await w.write(text);
-      await w.close();
+    write(file, text) {
+      return guarded(async () => {
+        const fh = await dir.getFileHandle(file, { create: true });
+        const w = await fh.createWritable();
+        await w.write(text);
+        await w.close();
+      });
     },
   };
 }
