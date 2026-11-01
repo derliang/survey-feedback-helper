@@ -1,9 +1,9 @@
 // 輸出接線：把「輸出用」範本（src/editor）套上真實統計資料，編譯成 src/export 讀的 DocModel。純函式。
 import { builtinTemplates, SLOTS } from '../editor/builtin';
-import { compile, pageSetup } from '../editor/compile';
+import { compile, pageSetup, type SlotBlock } from '../editor/compile';
 import type { StudentOverride } from '../editor/overrides';
 import { walk } from '../editor/ops';
-import type { BulletsEB, DataEB, EditorTemplate, ReportVersion } from '../editor/types';
+import type { EditorTemplate, ReportVersion } from '../editor/types';
 import { contentWidth, type Block, type DocModel } from '../export/model';
 import type { ClassSummaryInput, PersonalFeedbackInput } from '../export';
 
@@ -116,7 +116,7 @@ export function personalDocFromTemplate(t: EditorTemplate, inp: PersonalFeedback
     有優點: inp.praise.length ? '1' : '',
     有建議: inp.advice.length ? '1' : '',
   };
-  const slot = (name: string, b: DataEB | BulletsEB): Block[] => {
+  const slot = (name: string, b: SlotBlock): Block[] => {
     const size = 'size' in b && typeof b.size === 'number' ? b.size : 11;
     switch (name) {
       case SLOTS.scoreTable:
