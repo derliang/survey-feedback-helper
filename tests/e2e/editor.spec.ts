@@ -210,3 +210,19 @@ test('設計落地：面板進場有動畫，減少動態時為 0', async ({ pag
   await page.getByRole('button', { name: '「班級總表」的選單' }).click();
   expect(['0s', '']).toContain(await anim());
 });
+
+test('桌機拖曳（5.26）：滑鼠按住移動不到 4px 不開始，超過才開始', async ({ page }, info) => {
+  test.skip(info.project.name !== 'desktop', '滑鼠拖曳門檻只在桌機');
+  await openLibrary(page);
+  await page.getByRole('button', { name: '編輯「個人回饋單」' }).click();
+  const box = (await page.locator('.grip').first().boundingBox())!;
+  const x = box.x + box.width / 2;
+  const y = box.y + box.height / 2;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x, y + 3);
+  await expect(page.locator('.blk.lift')).toHaveCount(0);
+  await page.mouse.move(x, y + 12);
+  await expect(page.locator('.blk.lift')).toHaveCount(1);
+  await page.mouse.up();
+});

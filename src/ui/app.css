@@ -1422,3 +1422,49 @@ details[open] > :not(summary) {
 .g-tag { margin-left: auto; font-size: 0.75rem; color: var(--ink3); border: 1px dashed var(--line); border-radius: 6px; padding: 0 6px; }
 .g-steps { list-style: none; padding: 0; margin: 12px 0; display: grid; gap: 12px; }
 .g-steps li { display: grid; gap: 2px; }
+
+/* ───────── 桌機滑鼠懸停（設計稿 5.26）：只在有滑鼠的裝置；色取既有 token，不位移不縮放；停用與已選取不受影響 ───────── */
+@media (hover: hover) and (pointer: fine) {
+  .btn.primary:hover:not(:disabled) {
+    filter: brightness(0.94);
+  }
+  .btn.secondary:hover:not(:disabled) {
+    background: var(--sunk);
+    border-color: var(--ink2);
+  }
+  .btn.ghost:hover:not(:disabled) {
+    background: var(--accent-soft);
+  }
+  .btn.danger:hover:not(:disabled) {
+    background: var(--bad-soft);
+  }
+  .icbtn:hover:not(:disabled) {
+    background: var(--sunk);
+  }
+  .rowbtn:hover:not(:disabled):not(.on) {
+    background: var(--sunk);
+  }
+  .card-btn:hover,
+  .tpl-card:hover:not([aria-checked='true']) {
+    border-color: var(--ink2);
+    box-shadow: 0 2px 6px var(--shadow-sm);
+  }
+}
+.btn.primary:active:not(:disabled) {
+  filter: brightness(0.88);
+}
+.icbtn:disabled {
+  cursor: not-allowed;
+}
+.grip:active {
+  cursor: grabbing;
+}
+.icbtn,
+.rowbtn,
+.card-btn,
+.tpl-card {
+  transition:
+    background-color var(--dur) ease,
+    border-color var(--dur) ease,
+    box-shadow var(--dur) ease;
+}

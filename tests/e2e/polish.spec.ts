@@ -227,3 +227,25 @@ test('英文介面：切換後主要畫面變英文，沒翻到的字退回中�
   await expect(page.getByRole('heading', { name: '設定', level: 1 })).toBeVisible();
   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-Hant');
 });
+
+test('桌機懸停（5.26）：次按鈕懸停換 --sunk，停用不變；減少動態時 transition 為 0', async ({ page }, info) => {
+  test.skip(info.project.name !== 'desktop', '懸停只在有滑鼠的桌機');
+  await page.goto('./');
+  const btn = page.locator('.btn.secondary:not(:disabled)').first();
+  await expect(btn).toBeVisible();
+  const bg = () => btn.evaluate((el) => getComputedStyle(el).backgroundColor);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const before = await bg();
+  await btn.hover();
+  const sunk = await page.evaluate(() => {
+    const t = document.createElement('i');
+    t.style.background = 'var(--sunk)';
+    document.body.append(t);
+    const c = getComputedStyle(t).backgroundColor;
+    t.remove();
+    return c;
+  });
+  expect(await bg()).toBe(sunk);
+  expect(await bg()).not.toBe(before);
+  expect(await btn.evaluate((el) => getComputedStyle(el).transitionDuration)).toMatch(/^0(\.0+)?s(, 0(\.0+)?s)*$/);
+});
