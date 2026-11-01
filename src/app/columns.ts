@@ -1,0 +1,203 @@
+import {
+  type Cell,
+  type CheckRecord,
+  type FieldRole,
+  type PersonRef,
+  type SavedMapping,
+  type Table,
+  buildMapping,
+  cellText,
+  isBlankCell,
+  parseNumber,
+  resolveMapping,
+  suggestRoles,
+} from '../core';
+import type { SurveyKind } from '../storage';
+
+export type Role = FieldRole;
+
+export interface ColumnInfo {
+  index: number;
+  header: string;
+  /** 老師看到的名稱（可改）；沒改就等於原標題。 */
+  label: string;
+  role: Role | null;
+  /** 系統沒把握或老師還沒看過，需要確認。 */
+  confirm: boolean;
+  samples: string[];
+}
+
+export interface Scale {
+  min: number;
+  max: number;
+}
+
+function samplesOf(table: Table, index: number, n = 5): string[] {
+  const out: string[] = [];
+  for (const r of table.rows) {
+    const c = r[index];
+    if (!isBlankCell(c)) out.push(cellText(c));
+    if (out.length >= n) break;
+  }
+  return out;
+}
+
+function columnValues(table: Table, index: number): Cell[] {
+  return table.rows.map((r) => r[index] ?? null).filter((c) => !isBlankCell(c));
+}
+
+/** 只靠內容猜：整欄都是 0～10 的數字 → 評分；選項很少 → 選擇題；文字很長 → 開放意見。 */
+function guessByContent(values: Cell[]): { role: Role; confirm: boolean } | null {
+  if (values.length === 0) return null;
+  const nums = values.map((v) => parseNumber(v));
+  if (nums.every((n) => n !== null && n >= 0 && n <= 10 && Number.isInteger(n))) {
+    return { role: 'score', confirm: true };
+  }
+  const texts = values.map((v) => cellText(v));
+  const distinct = new Set(texts);
+  const avgLen = texts.reduce((a, t) => a + t.length, 0) / texts.length;
+  if (avgLen >= 12) return { role: 'comment', confirm: true };
+  if (distinct.size <= Math.max(6, texts.length / 4) && avgLen <= 12) return { role: 'choice', confirm: true };
+  return null;
+}
+
+/** 欄位智慧判斷：標題優先，再看內容；沒把握的標「請確認」。 */
+export function analyzeColumns(table: Table): ColumnInfo[] {
+  const sug = suggestRoles(table.headers);
+  return table.headers.map((header, index) => {
+    const s = sug[index];
+    let role: Role | null = s?.role ?? null;
+    let confirm = s?.confidence === 'low' && role !== null;
+    if (role === null) {
+      const g = guessByContent(columnValues(table, index));
+      if (g) {
+        role = g.role;
+        confirm = g.confirm;
+      } else {
+        role = 'ignore';
+        confirm = false;
+      }
+    }
+    return { index, header, label: header, role, confirm, samples: samplesOf(table, index) };
+  });
+}
+
+/** 套用已存的對應（認得讀過）：標題比對成功的欄位直接帶入且免確認，新增的欄位仍需確認。 */
+export function applySavedMapping(table: Table, saved: SavedMapping, labels: Record<string, string> = {}): ColumnInfo[] {
+  const base = analyzeColumns(table);
+  const { columns } = resolveMapping(table.headers, saved);
+  for (const [role, idxs] of Object.entries(columns)) {
+    for (const i of idxs) {
+      const col = base[i];
+      if (col) {
+        col.role = role as Role;
+        col.confirm = false;
+      }
+    }
+  }
+  return base.map((c) => ({ ...c, label: labels[c.header] ?? c.header }));
+}
+
+/** 由目前的欄位選擇建立可存的對應（角色 → 欄位原標題）。 */
+export function toSavedMapping(cols: readonly ColumnInfo[]): SavedMapping {
+  const byRole: Record<string, number[]> = {};
+  for (const c of cols) {
+    if (c.role === null) continue;
+    (byRole[c.role] ??= []).push(c.index);
+  }
+  return buildMapping(
+    cols.map((c) => c.header),
+    byRole,
+  );
+}
+
+export function toSavedLabels(cols: readonly ColumnInfo[]): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const c of cols) if (c.label.trim() !== '' && c.label !== c.header) out[c.header] = c.label.trim();
+  return out;
+}
+
+const has = (cols: readonly ColumnInfo[], role: Role) => cols.some((c) => c.role === role);
+
+/** 問卷類型建議與判斷依據。 */
+export function inferKind(cols: readonly ColumnInfo[]): { kind: SurveyKind; reason: string } {
+  const names = cols.filter((c) => c.role === 'respondentName' || c.role === 'targetName').length;
+  const scores = cols.filter((c) => c.role === 'score').length;
+  if (has(cols, 'targetName') && names >= 2 && scores >= 1) {
+    return { kind: 'feedback', reason: `有「填寫者」與「被評對象」兩種姓名欄，並有 ${scores} 題評分，所以判斷是報告回饋。` };
+  }
+  const titles = cols.map((c) => c.header).join(' ');
+  if (/班長|幹部|票選|投票|推薦|當選/.test(titles)) {
+    return { kind: 'vote', reason: '欄位標題有「班長、幹部、票選」等字樣，所以判斷是票選幹部。' };
+  }
+  return { kind: 'opinion', reason: '沒有被評對象欄，也不像票選，所以判斷是意見調查。' };
+}
+
+/** 欄位對應還缺什麼；空陣列代表可以往下。 */
+export function mappingProblems(kind: SurveyKind, cols: readonly ColumnInfo[]): string[] {
+  const out: string[] = [];
+  const content = cols.filter((c) => c.role === 'score' || c.role === 'choice' || c.role === 'comment').length;
+  if (kind === 'vote') {
+    if (!has(cols, 'choice')) out.push('票選幹部需要至少一欄「選擇題」（例如班長、副班長）。');
+  } else if (kind === 'feedback') {
+    if (!has(cols, 'respondentName')) out.push('報告回饋需要一欄「填寫者姓名」。');
+    if (!has(cols, 'targetName')) out.push('報告回饋需要一欄「被評對象姓名」。');
+    if (!has(cols, 'score')) out.push('報告回饋需要至少一欄「評分」。');
+  } else if (content === 0) {
+    out.push('意見調查需要至少一欄「評分」「選擇題」或「開放意見」。');
+  }
+  return out;
+}
+
+export function countToConfirm(cols: readonly ColumnInfo[]): number {
+  return cols.filter((c) => c.confirm).length;
+}
+
+/** 量表範圍：評分欄的最大值 ≤5 當 1～5，否則 0～10（樣本是 0～10）；含 0 一律 0～10。 */
+export function detectScale(table: Table, cols: readonly ColumnInfo[]): Scale {
+  let max = 0;
+  let min = Infinity;
+  for (const c of cols) {
+    if (c.role !== 'score') continue;
+    for (const v of columnValues(table, c.index)) {
+      const n = parseNumber(v);
+      if (n === null) continue;
+      max = Math.max(max, n);
+      min = Math.min(min, n);
+    }
+  }
+  if (max === 0 && min === Infinity) return { min: 1, max: 5 };
+  return max <= 5 && min >= 1 ? { min: 1, max: 5 } : { min: 0, max: 10 };
+}
+
+function pick(row: readonly Cell[], cols: readonly ColumnInfo[], role: Role): Cell {
+  const c = cols.find((x) => x.role === role);
+  return c ? (row[c.index] ?? null) : null;
+}
+
+/** 某一組人（填寫者或被評對象）每列的班級、座號、姓名。 */
+export function personRefs(table: Table, cols: readonly ColumnInfo[], who: 'respondent' | 'target'): PersonRef[] {
+  return table.rows.map((r) => ({
+    class: pick(r, cols, `${who}Class` as Role),
+    seat: pick(r, cols, `${who}Seat` as Role),
+    name: pick(r, cols, `${who}Name` as Role),
+  }));
+}
+
+/** 資料檢查的輸入：只含檢查需要的欄位。 */
+export function buildCheckRecords(table: Table, cols: readonly ColumnInfo[]): CheckRecord[] {
+  const resp = personRefs(table, cols, 'respondent');
+  const target = personRefs(table, cols, 'target');
+  const scoreCols = cols.filter((c) => c.role === 'score');
+  return table.rows.map((r, i) => ({
+    id: i,
+    timestamp: pick(r, cols, 'timestamp'),
+    respondent: resp[i],
+    target: target[i],
+    bookTitle: pick(r, cols, 'bookTitle'),
+    scores: Object.fromEntries(scoreCols.map((c) => [String(c.index), r[c.index] ?? null])),
+    required: Object.fromEntries(
+      cols.filter((c) => c.role === 'score' || c.role === 'choice').map((c) => [String(c.index), r[c.index] ?? null]),
+    ),
+  }));
+}
