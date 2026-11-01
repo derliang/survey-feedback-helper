@@ -94,6 +94,8 @@ export interface EditorTemplate {
   name: string;
   /** 內建範本不可改；第一次修改時複製成「我的範本」。 */
   builtin: boolean;
+  /** 複製自哪一份內建範本（恢復預設用）。 */
+  basedOn?: string;
   /** 套用的問卷類型（範本庫分類用）。 */
   forKind: 'feedback' | 'opinion' | 'vote';
   page: PageSpec;

@@ -14,9 +14,11 @@ export interface EditorData {
   settings: Pick<SettingsLayers, 'global' | 'byKind'>;
   /** 問卷 id → 學生覆寫。 */
   overrides: Record<string, OverrideMap>;
+  /** 圖片參照 → data URL（Logo 等小圖，存在設定檔裡；不含學生資料）。 */
+  images: Record<string, string>;
 }
 
-export const emptyEditorData = (): EditorData => ({ version: EDITOR_VERSION, templates: [], settings: persistable(emptyLayers()), overrides: {} });
+export const emptyEditorData = (): EditorData => ({ version: EDITOR_VERSION, templates: [], settings: persistable(emptyLayers()), overrides: {}, images: {} });
 
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 
@@ -52,7 +54,7 @@ export function parseEditorData(text: string): { data: EditorData; skipped: numb
       // 直接走匯入的清理流程，但保留原 id（覆寫與設定靠 id 對應）
       const keepId = isObj(t) && typeof t.id === 'string' ? t.id : null;
       const imp = importTemplate(JSON.stringify({ format: 'sfh-template', version: 1, template: t }), templates);
-      templates.push(keepId ? { ...imp, id: keepId, name: isObj(t) && typeof t.name === 'string' ? t.name : imp.name } : imp);
+      templates.push(keepId ? { ...imp, ...(isObj(t) && typeof t.basedOn === 'string' ? { basedOn: t.basedOn } : {}), id: keepId, name: isObj(t) && typeof t.name === 'string' ? t.name : imp.name } : imp);
     } catch {
       skipped++;
     }
@@ -63,7 +65,9 @@ export function parseEditorData(text: string): { data: EditorData; skipped: numb
     byKind: isObj(s.byKind) ? (s.byKind as SettingsLayers['byKind']) : {},
   };
   const overrides = isObj(cur.overrides) ? (cur.overrides as EditorData['overrides']) : {};
-  return { data: { version: EDITOR_VERSION, templates, settings, overrides }, skipped, ...(from < EDITOR_VERSION ? { migratedFrom: from } : {}) };
+  const images: Record<string, string> = {};
+  if (isObj(cur.images)) for (const [k, v] of Object.entries(cur.images)) if (typeof v === 'string' && v.startsWith('data:image/')) images[k] = v;
+  return { data: { version: EDITOR_VERSION, templates, settings, overrides, images }, skipped, ...(from < EDITOR_VERSION ? { migratedFrom: from } : {}) };
 }
 
 export const serializeEditorData = (d: EditorData): string => JSON.stringify(d, null, 2);

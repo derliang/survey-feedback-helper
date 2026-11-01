@@ -313,3 +313,16 @@ describe('設定檔序列化與版本轉換', () => {
     expect(() => unbundleBackup('{"format":"x"}')).toThrow(EditorDataError);
   });
 });
+
+describe('我的範本來源與圖片', () => {
+  it('複製自內建範本會記下來源，存檔後仍在；只收圖片 data URL', () => {
+    const d = emptyEditorData();
+    const mine = ensureEditable(personal(), []);
+    expect(mine.basedOn).toBe('builtin-personal');
+    d.templates.push(mine);
+    d.images = { a: 'data:image/png;base64,AAAA', b: 'javascript:alert(1)' };
+    const back = parseEditorData(serializeEditorData(d)).data;
+    expect(back.templates[0]!.basedOn).toBe('builtin-personal');
+    expect(Object.keys(back.images)).toEqual(['a']);
+  });
+});
