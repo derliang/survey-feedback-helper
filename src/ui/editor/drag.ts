@@ -1,4 +1,4 @@
-// 把手拖曳排序：滑鼠按下即拖；觸控要長按 350ms 才開始（避免和捲動打架）。每列另有上下移按鈕，不依賴手勢。
+// 把手拖曳排序：滑鼠按住移動超過 4px 才開始（5.26）；觸控要長按 350ms 才開始（避免和捲動打架）。每列另有上下移按鈕，不依賴手勢。
 import { useRef, useState } from 'preact/hooks';
 
 export interface DragInfo {
@@ -33,8 +33,19 @@ export function useDragSort(onDrop: (id: string, target: string, before: boolean
         el.setPointerCapture(pid);
         update({ id, target: null, before: true });
       };
-      if (e.pointerType === 'mouse') start();
-      else {
+      if (e.pointerType === 'mouse') {
+        const arm = (m: PointerEvent) => {
+          if (Math.hypot(m.clientX - sx, m.clientY - sy) <= 4) return;
+          el.removeEventListener('pointermove', arm);
+          start();
+          update({ id, ...locate(m.clientX, m.clientY, id) });
+        };
+        el.setPointerCapture(pid);
+        el.addEventListener('pointermove', arm);
+        const off = () => el.removeEventListener('pointermove', arm);
+        el.addEventListener('pointerup', off, { once: true });
+        el.addEventListener('pointercancel', off, { once: true });
+      } else {
         timer.current = setTimeout(() => {
           start();
           navigator.vibrate?.(15);

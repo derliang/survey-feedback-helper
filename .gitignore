@@ -15,6 +15,11 @@ prototypes/**/dist/
 *.woff2
 !public/fonts/NotoSansTC-VF.woff2
 
+# 本機建置設定（Google 用戶端 ID／API 金鑰；雖是前端公開值，仍不進版控）
+.env
+.env.*
+!.env.example
+
 # 系統與編輯器
 .DS_Store
 Thumbs.db

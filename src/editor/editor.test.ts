@@ -5,7 +5,7 @@ import { describeCondition, evalCondition } from './condition';
 import { canRedo, canUndo, commit, createHistory, redo, undo } from './history';
 import { ensureEditable, exportTemplate, importTemplate, referencedImages, resetToBuiltin, TemplateImportError } from './library';
 import { blankBlock, dropBlock, duplicateBlock, findBlock, insertBlock, moveBlock, removeBlock, setColumnCount, setPage, updateBlock, walk } from './ops';
-import { applyOverrides, countOverrides, listOverrides, setBlockOverride, setVarOverride } from './overrides';
+import { applyOverrides, countOverrides, listOverrides, setBlockOverride, setVarOverride, withoutBlockPart } from './overrides';
 import { bundleBackup, EditorDataError, emptyEditorData, parseEditorData, serializeEditorData, unbundleBackup } from './project';
 import { emptyLayers, resolveSettings, settingSources } from './settings';
 import type { Condition, EBlock, EditorTemplate } from './types';
@@ -158,6 +158,16 @@ describe('單一學生覆寫', () => {
     m = setBlockOverride(m, '301-5', 'p-h1', {});
     m = setVarOverride(m, '301-5', '姓名', undefined);
     expect(m).toEqual({});
+  });
+  it('同一區塊的隱藏與改字可分別還原，另一項保留', () => {
+    let m = setBlockOverride({}, 's', 'p-intro', { hidden: true, patch: { text: '改過' } });
+    const items = listOverrides(personal(), m.s);
+    expect(items.map((x) => x.part)).toEqual(['hidden', 'patch']);
+    m = setBlockOverride(m, 's', 'p-intro', withoutBlockPart(m.s!.blocks['p-intro'], 'hidden'));
+    expect(m.s!.blocks['p-intro']).toEqual({ patch: { text: '改過' } });
+    m = setBlockOverride(m, 's', 'p-intro', withoutBlockPart(m.s!.blocks['p-intro'], 'patch'));
+    expect(m).toEqual({});
+    expect(withoutBlockPart(undefined, 'hidden')).toEqual({});
   });
   it('只收允許的欄位（不能改 id／kind／條件）', () => {
     const m = setBlockOverride({}, 's', 'p-intro', { patch: { text: 'x', kind: 'heading', id: 'zz', when: undefined } });

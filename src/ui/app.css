@@ -1396,6 +1396,10 @@ mark.pn-low {
 .scrim {
   animation: sfh-fade-in 220ms ease-out;
 }
+/* 展開收合（details）：內容淡入 200ms，只動展開 */
+details[open] > :not(summary) {
+  animation: sfh-fade-in 200ms ease-out;
+}
 .sheet {
   animation: sfh-slide-up 220ms ease-out;
 }
@@ -1418,3 +1422,103 @@ mark.pn-low {
 .g-tag { margin-left: auto; font-size: 0.75rem; color: var(--ink3); border: 1px dashed var(--line); border-radius: 6px; padding: 0 6px; }
 .g-steps { list-style: none; padding: 0; margin: 12px 0; display: grid; gap: 12px; }
 .g-steps li { display: grid; gap: 2px; }
+
+/* ───────── 桌機滑鼠懸停（設計稿 5.26）：只在有滑鼠的裝置；色取既有 token，不位移不縮放；停用與已選取不受影響 ───────── */
+@media (hover: hover) and (pointer: fine) {
+  .btn.primary:hover:not(:disabled) {
+    filter: brightness(0.94);
+  }
+  .btn.secondary:hover:not(:disabled) {
+    background: var(--sunk);
+    border-color: var(--ink2);
+  }
+  .btn.ghost:hover:not(:disabled) {
+    background: var(--accent-soft);
+  }
+  .btn.danger:hover:not(:disabled) {
+    background: var(--bad-soft);
+  }
+  .icbtn:hover:not(:disabled) {
+    background: var(--sunk);
+  }
+  .rowbtn:hover:not(:disabled):not(.on) {
+    background: var(--sunk);
+  }
+  .card-btn:hover,
+  .tpl-card:hover:not([aria-checked='true']) {
+    border-color: var(--ink2);
+    box-shadow: 0 2px 6px var(--shadow-sm);
+  }
+}
+.btn.primary:active:not(:disabled) {
+  filter: brightness(0.88);
+}
+.icbtn:disabled {
+  cursor: not-allowed;
+}
+.grip:active {
+  cursor: grabbing;
+}
+.icbtn,
+.rowbtn,
+.card-btn,
+.tpl-card {
+  transition:
+    background-color var(--dur) ease,
+    border-color var(--dur) ease,
+    box-shadow var(--dur) ease;
+}
+
+/* ───────── 工具提示、圖表長條提示、讀取中延遲（設計稿 5.26） ───────── */
+@media (hover: hover) and (pointer: fine) {
+  .icbtn[aria-label] {
+    position: relative;
+  }
+  .icbtn[aria-label]::after {
+    content: attr(aria-label);
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 30;
+    padding: var(--sp-1) var(--sp-2);
+    border-radius: 6px;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: var(--fs-xs);
+    font-weight: 400;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+  }
+  /* 懸停 500ms 後 100ms 淡入；離開立即消失；鍵盤焦點立即出現 */
+  .icbtn[aria-label]:hover::after {
+    opacity: 1;
+    transition: opacity 100ms ease-out 500ms;
+  }
+  .icbtn[aria-label]:focus-visible::after {
+    opacity: 1;
+    transition: opacity 100ms ease-out;
+  }
+}
+/* 圖表長條：懸停或鍵盤聚焦加 2px --ink 外框，提示用原生 title（無動畫） */
+.chart .bar:focus {
+  outline: none;
+}
+.chart .bar:hover rect,
+.chart .bar:focus rect {
+  stroke: var(--ink);
+  stroke-width: 2px;
+}
+/* 讀取中：300ms 內完成就不顯示（減少動態時照樣延遲，因為這是閃爍而非動畫） */
+@keyframes sfh-delayed-show {
+  from {
+    visibility: hidden;
+  }
+  to {
+    visibility: visible;
+  }
+}
+.out .notice[role='status'] {
+  animation: sfh-delayed-show 0s 300ms backwards;
+}

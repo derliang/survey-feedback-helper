@@ -172,3 +172,84 @@ test('沒有資料夾時提示下載備份；有資料夾時重開後範本還�
   await page.getByRole('button', { name: '我的', exact: true }).click();
   await expect(page.getByTestId('template-card')).toHaveCount(1);
 });
+
+test('設計落地：桌機範本卡露出「編輯」「用這份輸出」，其他寬度只有選單', async ({ page }, info) => {
+  await openLibrary(page);
+  const card = page.getByTestId('template-card').first();
+  if (info.project.name === 'desktop') {
+    await expect(card.getByRole('button', { name: /^編輯版面/ })).toBeVisible();
+    await expect(card.getByRole('button', { name: /輸出$/ })).toBeVisible();
+  } else {
+    await expect(card.getByRole('button', { name: /^編輯版面/ })).toHaveCount(0);
+  }
+  await expect(card.getByRole('button', { name: /的選單$/ })).toBeVisible();
+  expect(await smallButtons(page)).toEqual([]);
+});
+
+test('設計落地：紙張用 --doc-* token、縮放旁顯示頁數、把手 ≥44', async ({ page }, info) => {
+  const wide = info.project.name === 'desktop';
+  await openLibrary(page);
+  await page.getByRole('button', { name: '編輯「個人回饋單」' }).click();
+  await expect(page.getByTestId('page-count')).toHaveText(/共 \d+ 頁/);
+  const paper = await page.locator('.pv-page').first().evaluate((el) => ({ cls: el.className, bg: getComputedStyle(el).backgroundColor }));
+  expect(paper.cls).toContain('doc-warm');
+  expect(paper.bg).toBe('rgb(255, 255, 255)');
+  if (!wide) await page.getByRole('button', { name: '區塊清單' }).click();
+  const grip = await page.locator('.grip').first().boundingBox();
+  expect(grip!.width).toBeGreaterThanOrEqual(44);
+  expect(grip!.height).toBeGreaterThanOrEqual(44);
+});
+
+test('設計落地：面板進場有動畫，減少動態時為 0', async ({ page }) => {
+  await openLibrary(page);
+  await page.getByRole('button', { name: '「班級總表」的選單' }).click();
+  const anim = () => page.locator('.sheet').first().evaluate((el) => getComputedStyle(el).animationDuration);
+  expect(await anim()).toBe('0.22s');
+  await page.keyboard.press('Escape');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.getByRole('button', { name: '「班級總表」的選單' }).click();
+  expect(['0s', '']).toContain(await anim());
+});
+
+test('桌機拖曳（5.26）：滑鼠按住移動不到 4px 不開始，超過才開始', async ({ page }, info) => {
+  test.skip(info.project.name !== 'desktop', '滑鼠拖曳門檻只在桌機');
+  await openLibrary(page);
+  await page.getByRole('button', { name: '編輯「個人回饋單」' }).click();
+  const box = (await page.locator('.grip').first().boundingBox())!;
+  const x = box.x + box.width / 2;
+  const y = box.y + box.height / 2;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x, y + 3);
+  await expect(page.locator('.blk.lift')).toHaveCount(0);
+  await page.mouse.move(x, y + 12);
+  await expect(page.locator('.blk.lift')).toHaveCount(1);
+  await page.mouse.up();
+});
+
+test('桌機（5.26）：圖示鈕工具提示懸停 500ms、鍵盤焦點立即；鍵盤拖曳 Space 拿起、↑↓ 移動、Esc 取消', async ({ page }, info) => {
+  test.skip(info.project.name !== 'desktop', '工具提示與鍵盤拖曳驗桌機');
+  await openLibrary(page);
+  await page.getByRole('button', { name: '編輯「個人回饋單」' }).click();
+  const mv = page.locator('.blk-mv .icbtn').nth(1);
+  const tip = () => mv.evaluate((el) => ({ o: getComputedStyle(el, '::after').opacity, c: getComputedStyle(el, '::after').content }));
+  expect((await tip()).o).toBe('0');
+  await mv.hover();
+  expect((await mv.evaluate((el) => getComputedStyle(el, '::after').transitionDelay))).toBe('0.5s');
+  await expect.poll(async () => (await tip()).o).toBe('1');
+  expect((await tip()).c).toContain('下移');
+  await page.mouse.move(0, 0);
+  await expect.poll(async () => (await tip()).o).toBe('0');
+
+  const names = () => page.locator('.blk-list .blk .blk-name').allTextContents();
+  const before = await names();
+  const grip = page.locator('.blk-list .grip[tabindex="0"]').first();
+  await grip.focus();
+  await page.keyboard.press('Space');
+  await expect(page.locator('.blk-list [role="status"]')).toContainText(/第 1 個，共 \d+ 個/);
+  await page.keyboard.press('ArrowDown');
+  await expect(page.locator('.blk-list [role="status"]')).toContainText('第 2 個');
+  expect((await names())[1]).toBe(before[0]);
+  await page.keyboard.press('Escape');
+  await expect.poll(names).toEqual(before);
+});

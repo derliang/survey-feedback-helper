@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'preact/hooks';
 import { getState, go, useApp } from '../../app/store';
 import { applyOverrides, countOverrides } from '../../editor/overrides';
-import { blockName, findBlock } from '../../editor/ops';
-import type { EBlock } from '../../editor/types';
+import { blockName, findBlock, walk } from '../../editor/ops';
+import type { EBlock, EditorTemplate } from '../../editor/types';
 import { wordNotes } from '../../editor/word';
 import { Icon, Notice, Sheet, useWide } from '../parts/parts';
 import './editor.css';
@@ -40,8 +40,31 @@ export default function EditorView() {
 
 // ---- 範本庫 ----
 
+/** 桌機寬度（≥1024）：範本卡直接露出常用動作；較窄只留「選單」。 */
+function useDesk(): boolean {
+  const q = '(min-width: 1024px)';
+  const [desk, setDesk] = useState(() => window.matchMedia(q).matches);
+  useEffect(() => {
+    const m = window.matchMedia(q);
+    const on = () => setDesk(m.matches);
+    m.addEventListener('change', on);
+    return () => m.removeEventListener('change', on);
+  }, []);
+  return desk;
+}
+
+/** 頁數：以分頁線計（內容超出一頁的自動換頁要到輸出才知道）。 */
+function pageCount(t: EditorTemplate): number {
+  let n = 1;
+  walk(t.blocks, (b) => {
+    if (b.kind === 'pageBreak') n += 1;
+  });
+  return n;
+}
+
 function Library({ e }: { e: ES }) {
   const st = useApp();
+  const desk = useDesk();
   const [filter, setFilter] = useState<'all' | 'builtin' | 'mine'>('all');
   const list = allTemplates(e.data).filter((t) => filter === 'all' || (filter === 'builtin') === t.builtin);
   const menu = e.menuFor ? allTemplates(e.data).find((t) => t.id === e.menuFor) : undefined;
@@ -84,9 +107,21 @@ function Library({ e }: { e: ES }) {
                 {e.useId === t.id && <span class="tag ok">輸出用</span>}
               </span>
             </div>
-            <button type="button" class="btn secondary small" onClick={() => setMenuFor(t.id)} aria-label={`「${t.name}」的選單`}>
-              選單
-            </button>
+            <div class="lib-acts">
+              {desk && (
+                <>
+                  <button type="button" class="btn secondary small" onClick={() => openEditor(t.id)} aria-label={`編輯版面「${t.name}」`}>
+                    編輯
+                  </button>
+                  <button type="button" class="btn secondary small" onClick={() => useTemplate(t.id)} aria-label={`用「${t.name}」輸出`}>
+                    用這份輸出
+                  </button>
+                </>
+              )}
+              <button type="button" class="btn secondary small" onClick={() => setMenuFor(t.id)} aria-label={`「${t.name}」的選單`}>
+                選單
+              </button>
+            </div>
           </div>
         ))}
       </div>
@@ -199,6 +234,42 @@ function Edit({ e }: { e: ES }) {
   const canEdit = wide || e.editMode;
   const images = e.data.images;
   const { drag, handleProps } = useDragSort(dropSel);
+  // 鍵盤拖曳（5.26）：Space 拿起、↑↓ 移動、Space 放下、Esc 取消（復原已移動的步數）
+  const [kb, setKb] = useState<{ id: string; moves: number } | null>(null);
+  const [kbMsg, setKbMsg] = useState('');
+  const kbKey = (id: string, ev: KeyboardEvent) => {
+    const total = t0.blocks.length;
+    const pos = (bid: string) => t0.blocks.findIndex((x) => x.id === bid);
+    const say = (i: number) => setKbMsg(`第 ${i + 1} 個，共 ${total} 個`);
+    const refocus = () => requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-bid="${id}"] .grip`)?.focus());
+    if (ev.key === ' ') {
+      ev.preventDefault();
+      if (kb) {
+        setKb(null);
+        setKbMsg(`已放下，第 ${pos(id) + 1} 個`);
+      } else {
+        setKb({ id, moves: 0 });
+        say(pos(id));
+      }
+    } else if (kb && (ev.key === 'ArrowUp' || ev.key === 'ArrowDown')) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const d = ev.key === 'ArrowUp' ? -1 : 1;
+      const i = pos(id);
+      if (i + d < 0 || i + d >= total) return;
+      moveSel(id, d);
+      setKb({ id, moves: kb.moves + 1 });
+      say(i + d);
+      refocus();
+    } else if (kb && ev.key === 'Escape') {
+      ev.preventDefault();
+      ev.stopPropagation();
+      for (let n = 0; n < kb.moves; n++) doUndo();
+      setKb(null);
+      setKbMsg('已取消');
+      refocus();
+    }
+  };
 
   // 鍵盤：Ctrl+Z 復原、Ctrl+Y／Ctrl+Shift+Z 重做、Delete 刪除、↑↓ 移動區塊（輸入文字時不攔截）
   useEffect(() => {
@@ -246,13 +317,25 @@ function Edit({ e }: { e: ES }) {
 
   const blockList = (
     <ul class="blk-list" aria-label="區塊清單">
+      <li class="sr" role="status" aria-live="polite">
+        {kbMsg}
+      </li>
       {names.map(({ id, b, depth }) => {
         const top = t0.blocks.findIndex((x) => x.id === id);
         const dropMark = drag?.target === id ? (drag.before ? 'before' : 'after') : '';
         return (
-          <li key={id} data-bid={id} class={`blk${sel === id ? ' sel' : ''}${drag?.id === id ? ' lift' : ''}${dropMark ? ` drop-${dropMark}` : ''}`} style={{ paddingLeft: depth * 16 }}>
+          <li key={id} data-bid={id} class={`blk${sel === id ? ' sel' : ''}${drag?.id === id || kb?.id === id ? ' lift' : ''}${dropMark ? ` drop-${dropMark}` : ''}`} style={{ paddingLeft: depth * 16 }}>
             {!e.student && (
-              <span class="grip" role="img" aria-label="拖曳把手：長按後拖曳" {...(handleProps(id) as object)}>
+              <span
+                class="grip"
+                role="button"
+                tabIndex={depth === 0 ? 0 : -1}
+                aria-pressed={kb?.id === id}
+                aria-label="拖曳把手：滑鼠或長按拖曳；鍵盤按空白鍵拿起，上下鍵移動，空白鍵放下，Esc 取消"
+                onKeyDown={depth === 0 ? (ev) => kbKey(id, ev as unknown as KeyboardEvent) : undefined}
+                onBlur={() => kb?.id === id && setKb(null)}
+                {...(handleProps(id) as object)}
+              >
                 ⋮⋮
               </span>
             )}
@@ -352,7 +435,7 @@ function Edit({ e }: { e: ES }) {
           <button type="button" class="btn secondary small" onClick={() => setPanel('student')}>
             {e.student ? '個別學生版本（使用中）' : '個別學生版本'}
           </button>
-          <Zoom e={e} />
+          <Zoom e={e} pages={pageCount(t0)} />
           <span class="kbd-hint">Ctrl+Z 復原 · Delete 刪除 · ↑↓ 移動 · 雙擊文字直接改</span>
         </div>
         <div class="ed-grid">
@@ -400,7 +483,7 @@ function Edit({ e }: { e: ES }) {
       </div>
       {e.view === 'preview' ? (
         <>
-          <Zoom e={e} />
+          <Zoom e={e} pages={pageCount(t0)} />
           <p class="hint">{e.editMode ? '點一下區塊選取，再按下方「編輯屬性」。' : '捲動模式：單指捲動、雙指縮放，不會誤改。要修改請打開「編輯」。'}</p>
           {pages}
         </>
@@ -432,7 +515,7 @@ function Edit({ e }: { e: ES }) {
   );
 }
 
-function Zoom({ e }: { e: ES }) {
+function Zoom({ e, pages }: { e: ES; pages: number }) {
   const f = e.zoom ?? 1;
   return (
     <div class="zoom" role="group" aria-label="預覽縮放">
@@ -445,6 +528,9 @@ function Zoom({ e }: { e: ES }) {
       <button type="button" class="icbtn" aria-label="放大" disabled={f >= 3} onClick={() => setZoom(Math.min(3, f + 0.25))}>
         ＋
       </button>
+      <span class="zoom-pages" data-testid="page-count">
+        共 {pages} 頁
+      </span>
     </div>
   );
 }
