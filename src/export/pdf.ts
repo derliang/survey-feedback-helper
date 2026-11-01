@@ -12,6 +12,8 @@ const hexParts = (h: string): [number, number, number] => {
 export interface PdfResult {
   bytes: Uint8Array;
   pageCount: number;
+  /** 字型沒有的字元（會顯示成空白方框）；介面可據此提醒使用者改用 Word 版或換字。 */
+  missingChars: string[];
 }
 
 /** baseK：基線位置係數，0.5 為對照 Word 實測校準值。 */
@@ -28,6 +30,8 @@ export async function renderPdf(doc: DocModel, fonts: Fonts, opts: { baseK?: num
   pdf.registerFontkit(fontkit);
   const regular = await pdf.embedFont(fr, { subset: false });
   const bold = await pdf.embedFont(fb, { subset: false });
+  const has = new Set([...regular.getCharacterSet(), ...bold.getCharacterSet()]);
+  const missingChars = [...new Set([...need.regular, ...need.bold])].filter((c) => !/\s/.test(c) && !has.has(c.codePointAt(0)!));
   if (doc.title) pdf.setTitle(doc.title);
   pdf.setProducer('問卷回饋小幫手');
   pdf.setCreator('問卷回饋小幫手');
@@ -126,5 +130,5 @@ export async function renderPdf(doc: DocModel, fonts: Fonts, opts: { baseK?: num
   pages.forEach((p, i) => {
     p.drawText(`${doc.footerText}｜第 ${i + 1} 頁，共 ${pages.length} 頁`, { x: P.mx, y: P.footerFromBottom + 3, size: 9, font: regular, color: color('#8a97a5') });
   });
-  return { bytes: await pdf.save(), pageCount: pages.length };
+  return { bytes: await pdf.save(), pageCount: pages.length, missingChars };
 }

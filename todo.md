@@ -57,10 +57,10 @@
 
 ## 開工前置
 
-- [ ] **補驗證**：Safari／iOS 實機、Word for Mac／LibreOffice／Google 文件開 docx、罕用字（超出 BMP 的字、簡體、假名）與超長留言。（班級總表版面已於 2026-11-01 在 Windows Word／Excel 驗過可開啟）
-- [x] （2026-11-01，分支 export-fonts）Word 字型退讓清單與說明文字：`src/fonts/word-fonts.ts`（微軟正黑體／PingFang TC，`WORD_FONT_NOTE`）
-- [ ] Word for Mac（PingFang TC）重測：沒有 Mac，做不到；Windows Word 已確認 docx 能開、頁數與 PDF 相同（見 [輸出器與字型管線](docs/decisions/2026-11-01-輸出器與字型管線.md)）
-- [ ] 手機等級（CPU 降速）效能重測：桌機 Chromium 實測已有分段耗時（字型解壓＋wasm 初始化約 0.2～0.3 秒、單份 PDF 約 0.1 秒、12 份批次約 0.2 秒；見 `tests/e2e/export.spec.ts` 輸出）；**手機與 CPU 降速未量**，需實機或用 DevTools 降速補量
+- [~] **補驗證**（2026-11-01，分支 verify-export）：LibreOffice 開 docx／xlsx／PDF、罕用字與超長留言**已做**（結果與修正見 [docs/real-device-checklist.md](docs/real-device-checklist.md)；PDF 字型缺字會回報 `missingChars`、超長英數串逐字拆開、xlsx 列印縮一頁寬）。**仍需使用者實機**：Word for Mac、Google 文件（A1、A2），Safari／iOS／手機（B1～B3，要等輸出頁接線）。（班級總表版面已於 2026-11-01 在 Windows Word／Excel 驗過可開啟）
+- [x] （2026-11-01，分支 export-fonts；verify-export 已複查，清單夠用，說明文字加 Google 文件一句待 A2 實測）Word 字型退讓清單與說明文字：`src/fonts/word-fonts.ts`（微軟正黑體／PingFang TC，`WORD_FONT_NOTE`）
+- [ ] Word for Mac（PingFang TC）重測（步驟見 docs/real-device-checklist.md A1）：沒有 Mac，做不到；Windows Word 已確認 docx 能開、頁數與 PDF 相同（見 [輸出器與字型管線](docs/decisions/2026-11-01-輸出器與字型管線.md)）
+- [x] （2026-11-01，分支 verify-export）手機等級（CPU 降速）效能重測：`node scripts/perf-throttle.mjs`；數字與優化（解壓後 TTF 存 Cache Storage，6x 降速下載入字型由 1～4 秒降到約 0.1 秒）見 docs/real-device-checklist.md；Web Worker 待實機（B3）量到卡頓再做。原記錄：桌機 Chromium 實測已有分段耗時（字型解壓＋wasm 初始化約 0.2～0.3 秒、單份 PDF 約 0.1 秒、12 份批次約 0.2 秒；見 `tests/e2e/export.spec.ts` 輸出）；**手機與 CPU 降速未量**，需實機或用 DevTools 降速補量
 - [x] （2026-11-01，分支 export-fonts）自包瀏覽器可用的 HarfBuzz 子集化模組：`src/fonts/subset.ts`（直接用 harfbuzzjs wasm，不再相依 subset-font／fontverter）
 - [x] （2026-11-01，分支 export-fonts）字型發布為 WOFF2（可變字型單一檔 5.43 MB，涵蓋一般與粗體）、解壓一次後重複使用（`loadFonts`）、Service Worker 快取（`public/sw.js`，實測第二次載入不再連網）
 - [x] （2026-11-01，PR design-mobile-tablet 待合併）平板補齊到與手機一一對應（84 個）；**待使用者確認方向後**，再挑審稿、輸出、範本庫手工重排並排預覽

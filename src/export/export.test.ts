@@ -10,7 +10,7 @@ import { wrap } from './layout';
 import { collectChars, fillVars, parseDoc, serializeDoc } from './model';
 import { renderPdf } from './pdf';
 import { classSummaryDoc, personalFeedbackDoc } from './templates';
-import { fakeClassSummary, fakeFeedback, nodeFontSource } from './test-support';
+import { fakeClassSummary, fakeFeedback, nodeFontSource, RARE_BMP, RARE_OUTSIDE_FONT, stressFeedback } from './test-support';
 import { buildXlsx, classSummaryXlsx, colName, safeSheetName } from './xlsx';
 
 describe('文件模型', () => {
@@ -85,6 +85,7 @@ describe('xlsx 輸出', () => {
     const sheet = strFromU8(files['xl/worksheets/sheet1.xml']!);
     expect(sheet).toContain('state="frozen"');
     expect(sheet).toContain('<cols>');
+    expect(sheet).toContain('fitToWidth="1"'); // 列印時所有欄縮到一頁寬（LibreOffice 實測原本欄會被切到第二頁）
   });
   it('欄號與工作表名稱', () => {
     expect([colName(0), colName(25), colName(26), colName(701), colName(702)]).toEqual(['A', 'Z', 'AA', 'ZZ', 'AAA']);
@@ -115,6 +116,24 @@ describe('字型管線（真實字型）', () => {
     expect(Buffer.from(reg).equals(Buffer.from(bold))).toBe(false); // 固定了不同字重
     // 輸出是靜態字型：沒有 fvar 變化軸表
     expect(Buffer.from(reg).includes(Buffer.from('fvar'))).toBe(false);
+  }, 60_000);
+});
+
+describe('解壓後字型快取', () => {
+  it('第二次（記憶體清空後）從快取取得，不再解壓；版本不同則重新解壓', async () => {
+    const store = new Map<number, Uint8Array>();
+    const src = { ...nodeFontSource, ttfCache: { get: async (v: number) => store.get(v), put: async (v: number, t: Uint8Array) => void store.set(v, t) } };
+    resetFontCache();
+    const a = await loadFonts(src);
+    expect(store.size).toBe(1);
+    resetFontCache();
+    const b = await loadFonts(src);
+    expect(b.ttf).toBe([...store.values()][0]); // 直接用快取的那份
+    expect(Buffer.from(b.ttf).equals(Buffer.from(a.ttf))).toBe(true);
+    store.clear();
+    resetFontCache();
+    await loadFonts(src);
+    expect(store.size).toBe(1);
   }, 60_000);
 });
 
@@ -166,6 +185,37 @@ describe('PDF／Word／批次輸出', () => {
   }, 60_000);
 });
 
+describe('罕用字與超長留言', () => {
+  it('超長英數串逐字拆開，不超出行寬', () => {
+    const m = (t: string) => [...t].length * 10;
+    const lines = wrap('https://example.com/' + 'x'.repeat(100), m, 200);
+    expect(lines.length).toBeGreaterThan(5);
+    expect(lines.every((l) => m(l) <= 200)).toBe(true);
+    expect(lines.join('')).toBe('https://example.com/' + 'x'.repeat(100));
+  });
+  it('PDF：BMP 罕用字、假名、符號都有字形；字型沒有的字（超出 BMP、簡體、韓文、表情）如實回報', async () => {
+    const fonts = await loadFonts(nodeFontSource);
+    const r = await renderPdf(personalFeedbackDoc(stressFeedback()), fonts);
+    expect(strFromU8(r.bytes.subarray(0, 5))).toBe('%PDF-');
+    for (const c of RARE_BMP) expect(r.missingChars).not.toContain(c);
+    for (const c of RARE_OUTSIDE_FONT) expect(r.missingChars).toContain(c);
+    expect(r.pageCount).toBeGreaterThan(1); // 超長留言會多頁，且不當掉
+    expect((await renderPdf(personalFeedbackDoc(fakeFeedback()), fonts)).missingChars).toEqual([]);
+  }, 60_000);
+  it('Word：罕用字與超長留言原樣寫入且 XML 合法（超出 BMP 的字不被拆成半個）', async () => {
+    const doc = strFromU8(unzipSync(await renderDocx(personalFeedbackDoc(stressFeedback())))['word/document.xml']!);
+    for (const c of RARE_BMP + RARE_OUTSIDE_FONT) expect(doc).toContain(c);
+    expect(doc).not.toMatch(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/); // 沒有孤立的高代理碼
+    expect(doc).toContain('a1b2c3d4e5');
+  });
+  it('xlsx：罕用字原樣保存', async () => {
+    const bytes = buildXlsx([{ name: '罕用字', rows: [[RARE_BMP + RARE_OUTSIDE_FONT, 'x'.repeat(5000)]] }]);
+    const row = (await xlsxSource(bytes).sheets())[0]!.rows[0]!;
+    expect(row[0]).toBe(RARE_BMP + RARE_OUTSIDE_FONT);
+    expect(String(row[1])).toHaveLength(5000);
+  });
+});
+
 // 手動檢查用：EXPORT_DUMP_DIR=某資料夾 npx vitest run src/export/export.test.ts，會把輸出檔寫出來，拿去 Word／Excel 開。
 describe.skipIf(!process.env.EXPORT_DUMP_DIR)('輸出檔傾印（手動）', () => {
   it('寫出 xlsx／docx／pdf', async () => {
@@ -176,5 +226,9 @@ describe.skipIf(!process.env.EXPORT_DUMP_DIR)('輸出檔傾印（手動）', () 
     writeFileSync(`${dir}/班級總表.docx`, await renderDocx(classSummaryDoc(fakeClassSummary(35))));
     writeFileSync(`${dir}/個人回饋單.docx`, await renderDocx(personalFeedbackDoc(fakeFeedback(3, 8))));
     writeFileSync(`${dir}/個人回饋單.pdf`, (await renderPdf(personalFeedbackDoc(fakeFeedback(3, 8)), fonts)).bytes);
+    writeFileSync(`${dir}/班級總表.pdf`, (await renderPdf(classSummaryDoc(fakeClassSummary(35)), fonts)).bytes);
+    writeFileSync(`${dir}/罕用字超長留言.docx`, await renderDocx(personalFeedbackDoc(stressFeedback())));
+    writeFileSync(`${dir}/罕用字超長留言.pdf`, (await renderPdf(personalFeedbackDoc(stressFeedback()), fonts)).bytes);
+    writeFileSync(`${dir}/批次.zip`, await renderBatchZip([1, 2, 3].map((n) => ({ name: `0${n} 示範`, doc: personalFeedbackDoc(fakeFeedback(n)) })), fonts));
   }, 60_000);
 });

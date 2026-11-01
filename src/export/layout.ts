@@ -29,7 +29,8 @@ export type Measure = (text: string) => number;
 export function wrap(text: string, measure: Measure, maxW: number): string[] {
   const lines: string[] = [];
   for (const para of text.split('\n')) {
-    const tokens = tokenize(para);
+    // 單一單位比整行還寬（例如超長網址、連續英數）時逐字拆開，避免溢出頁面
+    const tokens = tokenize(para).flatMap((t) => (measure(t) > maxW ? [...t] : [t]));
     let cur = '';
     for (const t of tokens) {
       if (measure(cur + t) <= maxW || cur === '') {
