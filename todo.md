@@ -229,7 +229,7 @@
 
 ## 帳號限制取消與 Drive 連結預防（2026-11-01）
 
-- [ ] 依[取消帳號限制](docs/decisions/2026-11-01-取消帳號限制.md)：移除學校帳號偵測與擋下畫面（google-ui 施工）
-- [ ] Google 登入視窗打不開的預防：預載登入腳本、載好前停用按鈕、`popup_failed_to_open` 中文說明（根因與做法見取消帳號限制決定記錄；google-ui 施工）
+- [x] 依[取消帳號限制](docs/decisions/2026-11-01-取消帳號限制.md)：移除帳號判斷與 `about.get` 取信箱（`src/google`，測試同步）；使用說明「連接 Google 帳號」文案改為任何帳號皆可（google-ui，分支 google-ui）。畫面接線待金鑰
+- [x] （程式層已做，畫面接線待金鑰）Google 登入視窗打不開的預防：`auth.preload()`／`isReady()`、`signIn` 同步開彈窗、`SignInPopupBlocked` 與 `popup_closed` 分流、單元測試模擬慢載；畫面端按鈕停用與「準備 Google 登入…」尚未接。原：預載登入腳本、載好前停用按鈕、`popup_failed_to_open` 中文說明（根因與做法見取消帳號限制決定記錄；google-ui 施工）
 - [ ] 設計員重審 D57／S1／S2／D58／S0 並補「Drive 連不上」畫面；使用說明去掉「僅限私人 Gmail」
 - [ ] 通知 google-setup：OAuth 同意畫面使用者類型不再限私人 Gmail
