@@ -426,3 +426,36 @@
     flex: 1;
   }
 }
+
+/* 進階區塊（預覽）：紙張永遠淺色，色塊文字固定 */
+.eb-hero {
+  color: #fff;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.eb-stats {
+  display: grid;
+  gap: 6px;
+}
+.eb-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #222;
+  border-radius: 4px;
+}
+.eb-callout {
+  border-left: 4px solid #2f8f4e;
+  background: #e3f3e6;
+  color: #1d5c33;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.eb-callout.hint {
+  border-left-color: #c98512;
+  background: #fff1d6;
+  color: #7a4f00;
+}

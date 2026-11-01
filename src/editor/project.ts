@@ -81,3 +81,42 @@ export function unbundleBackup(text: string): { folder: string; editor: string }
   if (!isObj(raw) || raw.format !== 'sfh-backup' || typeof raw.folder !== 'string' || typeof raw.editor !== 'string') throw new EditorDataError('這不是備份檔');
   return { folder: raw.folder, editor: raw.editor };
 }
+
+/** 合併進目前的資料：已有的不動，只補沒有的（範本看 id、設定看欄位、覆寫與圖片看鍵）。 */
+export function mergeEditorData(base: EditorData, incoming: EditorData): EditorData {
+  const ids = new Set(base.templates.map((t) => t.id));
+  const templates = [...base.templates, ...incoming.templates.filter((t) => !ids.has(t.id))];
+  const byKind: SettingsLayers['byKind'] = { ...incoming.settings.byKind };
+  for (const [k, v] of Object.entries(base.settings.byKind)) byKind[k] = { ...(incoming.settings.byKind[k] ?? {}), ...v };
+  const overrides: EditorData['overrides'] = { ...incoming.overrides };
+  for (const [k, v] of Object.entries(base.overrides)) overrides[k] = { ...(incoming.overrides[k] ?? {}), ...v };
+  return {
+    version: EDITOR_VERSION,
+    templates,
+    settings: { global: { ...incoming.settings.global, ...base.settings.global }, byKind },
+    overrides,
+    images: { ...incoming.images, ...base.images },
+  };
+}
+
+export interface BackupSummary {
+  surveys: number;
+  rosters: number;
+  templates: number;
+  overrides: number;
+  /** 備份內的個別學生版本（區塊與變數覆寫）總數。 */
+  settingLayers: number;
+  images: number;
+}
+
+/** 還原前給老師看的內容摘要。 */
+export function summarizeBackup(folder: { surveys: unknown[]; rosters: unknown[] }, editor: EditorData): BackupSummary {
+  return {
+    surveys: folder.surveys.length,
+    rosters: folder.rosters.length,
+    templates: editor.templates.length,
+    overrides: Object.values(editor.overrides).reduce((n, o) => n + Object.keys(o).length, 0),
+    settingLayers: Object.keys(editor.settings.global).length + Object.values(editor.settings.byKind).reduce((n, o) => n + Object.keys(o).length, 0),
+    images: Object.keys(editor.images).length,
+  };
+}

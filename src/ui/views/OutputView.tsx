@@ -15,11 +15,12 @@ import {
 import { canGoStats } from '../../app/progress';
 import { emptyReview, reviewCounts } from '../../app/review';
 import { go, loadReview, useApp } from '../../app/store';
-import { WORD_FONT_NOTE, loadDocx, loadPdf, loadXlsx, registerAssetCache } from '../../export';
+import { WORD_FONT_NOTE, loadDocx, loadPdf, loadPrint, loadXlsx, registerAssetCache } from '../../export';
 import type { ClassSummaryInput, DocModel, PersonalFeedbackInput } from '../../export';
-import { downloadBytes } from '../../storage';
+import { downloadBytes, isTouchDevice } from '../../storage';
 import { feedbackKey } from '../../app/output';
 import { resolveSettings } from '../../editor/settings';
+import { findPossibleNames, type PossibleName } from '../../core/possible-names';
 import { PRINT, pairedBarsSvg } from '../chart-svg';
 import { svgToPng } from '../chart-png';
 import { strings as S } from '../strings';
@@ -58,6 +59,30 @@ const MIME: Record<Fmt | 'zip', string> = {
   pdf: 'application/pdf',
   zip: 'application/zip',
 };
+
+/** 逐則預覽的留言：可能含名單外人名的用警示底標出（只是提醒，沒標出不代表沒有）。 */
+function FlaggedComment({ text }: { text: string }) {
+  const hits: PossibleName[] = useMemo(() => findPossibleNames(text, { includeLow: true }), [text]);
+  if (hits.length === 0) return <li>{text}</li>;
+  const parts: preact.ComponentChildren[] = [];
+  let at = 0;
+  hits.forEach((h, i) => {
+    if (h.start > at) parts.push(text.slice(at, h.start));
+    parts.push(
+      <mark key={i} class={'pn pn-' + h.level} title={h.level === 'high' ? S.output.possibleNameHigh : S.output.possibleNameLow}>
+        {h.text}
+      </mark>,
+    );
+    at = h.end;
+  });
+  if (at < text.length) parts.push(text.slice(at));
+  const high = hits.some((h) => h.level === 'high');
+  return (
+    <li class={'flagged-comment ' + (high ? 'high' : 'low')} data-testid="flagged-comment">
+      {parts} <span class="tag warn">{S.output.possibleNameTag}</span>
+    </li>
+  );
+}
 
 export function OutputView() {
   const st = useApp();
@@ -98,6 +123,7 @@ export function OutputView() {
     );
   }
 
+  const nameFlags = audience !== 'teacher' ? personal.reduce((n, p) => n + p.comments.filter((c) => findPossibleNames(c, { includeLow: false }).length > 0).length, 0) : 0;
   const needPreview = audience !== 'teacher' && summary !== null;
   const sig = JSON.stringify([audience, personal.map((p) => [p.key, p.comments])]);
   const previewed = !needPreview || seenSig === sig;
@@ -170,6 +196,21 @@ export function OutputView() {
       }
     });
 
+  /** 桌機備用：用瀏覽器列印（不產生檔案，在列印視窗選「另存為 PDF」或直接印）。 */
+  const printOne = async () => {
+    setBusy('print');
+    try {
+      const list = await withCharts();
+      const pick = list.find((p) => p.key === (sel?.key ?? '')) ?? list[0]!;
+      const doc = (await docTools()).personal(pick.input, audience);
+      await (await loadPrint()).printDoc(doc);
+    } catch {
+      setMsg({ kind: 'bad', text: S.output.printFail });
+    } finally {
+      setBusy(null);
+    }
+  };
+
   const batch = () =>
     run('batch', async () => {
       const list = await withCharts();
@@ -240,6 +281,7 @@ export function OutputView() {
                 }
               >
                 {S.output.warnBody}
+                {nameFlags > 0 && ` ${S.output.possibleNameCount(nameFlags)}`}
               </Notice>
             )}
           </section>
@@ -282,6 +324,11 @@ export function OutputView() {
               <button class="btn secondary" type="button" disabled={personalDis} onClick={() => void onePersonal('docx')}>
                 {S.output.docx}
               </button>
+              {!isTouchDevice() && (
+                <button class="btn secondary" type="button" disabled={personalDis} onClick={() => void printOne()}>
+                  {S.output.print}
+                </button>
+              )}
               <button class="btn primary" type="button" disabled={personalDis} onClick={() => void batch()}>
                 {S.output.allStudents(personal.length)}
               </button>
@@ -339,6 +386,7 @@ export function OutputView() {
           }
         >
           <Notice kind="warn">{S.output.warnBody}</Notice>
+          <p class="hint">{S.output.possibleNameNote}</p>
           <ul class="plain-ul preview-list" data-testid="preview">
             {personal.map((p) => (
               <li key={p.key}>
@@ -348,7 +396,7 @@ export function OutputView() {
                 ) : (
                   <ul class="plain-list">
                     {p.comments.map((c, i) => (
-                      <li key={i}>{c}</li>
+                      <FlaggedComment key={i} text={c} />
                     ))}
                   </ul>
                 )}

@@ -26,6 +26,7 @@ export function wordNotes(t: EditorTemplate): WordNote[] {
       const t2 = b.chartType ?? '';
       out.push({ target: b.id, label, note: IMAGE_ONLY_CHARTS.includes(t2) ? 'Word：轉為圖片' : 'Word：以圖片插入，無法在 Word 內編輯' });
     }
+    if (b.kind === 'hero' || b.kind === 'stats' || b.kind === 'callout') out.push({ target: b.id, label, note: 'Word：色塊以表格呈現，圓角改直角' });
     if (b.kind === 'image' && b.isLogo) out.push({ target: b.id, label, note: 'Word：Logo 放在頁首' });
   });
   return out;

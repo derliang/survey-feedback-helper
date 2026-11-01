@@ -70,7 +70,46 @@ export interface ColumnsEB extends Base {
   kind: 'columns';
   cols: EBlock[][];
 }
-export type EBlock = HeadingEB | TextEB | BulletsEB | DataEB | ImageEB | DividerEB | PageBreakEB | ColumnsEB;
+/** 進階區塊：標題區（色塊＋大標＋副標）。 */
+export interface HeroEB extends Base {
+  kind: 'hero';
+  title: string;
+  subtitle: string;
+  fill?: string;
+}
+/** 摘要數字列可選的數字；rank（全班名次）在學生版與家長版自動隱藏。 */
+export type StatKey = 'mine' | 'classMean' | 'rank' | 'count' | 'median' | 'sd';
+export const STAT_KEYS: Record<StatKey, { label: string; varName: string }> = {
+  mine: { label: '我的平均', varName: '平均分' },
+  classMean: { label: '班級平均', varName: '班級平均' },
+  rank: { label: '全班名次', varName: '全班名次' },
+  count: { label: '回收份數', varName: '回收份數' },
+  median: { label: '中位數', varName: '中位數' },
+  sd: { label: '標準差（母體）', varName: '標準差' },
+};
+/** 進階區塊：摘要數字列。數字由統計結果帶入，變數沒有值的格子略過。 */
+export interface StatsEB extends Base {
+  kind: 'stats';
+  items: StatKey[];
+  /** 每列幾格。 */
+  perRow: number;
+  fill?: string;
+}
+/** 進階區塊：稱讚或提示卡片（左側色條）；有 slot 時內容由統計帶入。 */
+export interface CalloutEB extends Base {
+  kind: 'callout';
+  tone: 'praise' | 'hint';
+  title: string;
+  text: string;
+  slot?: string;
+}
+/** 進階區塊：自評對照表（他評與自評的落差），由統計帶入；沒有自評資料就略過。 */
+export interface CompareEB extends Base {
+  kind: 'compare';
+}
+export type EBlock = HeadingEB | TextEB | BulletsEB | DataEB | ImageEB | DividerEB | PageBreakEB | ColumnsEB | HeroEB | StatsEB | CalloutEB | CompareEB;
+/** 進階區塊的種類（加入面板分「基本」「進階」兩組）。 */
+export const ADVANCED_KINDS: EBlockKind[] = ['hero', 'stats', 'callout', 'compare'];
 export type EBlockKind = EBlock['kind'];
 
 export interface PageSpec {
@@ -119,4 +158,8 @@ export const KIND_NAMES: Record<EBlockKind, string> = {
   divider: '分隔線',
   pageBreak: '分頁',
   columns: '多欄',
+  hero: '標題區',
+  stats: '摘要數字列',
+  callout: '稱讚提示',
+  compare: '自評對照表',
 };

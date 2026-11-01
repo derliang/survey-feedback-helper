@@ -11,6 +11,7 @@ import { type BlockOverride, type OverrideMap, setBlockOverride, setVarOverride 
 import { pickTemplates, type TemplatePick } from '../../app/render';
 import { EDITOR_FILE, type EditorData, emptyEditorData, parseEditorData, serializeEditorData } from '../../editor/project';
 import type { EBlock, EBlockKind, EditorTemplate, PageSpec } from '../../editor/types';
+import { type Layer, type ReportSettings, emptyLayers } from '../../editor/settings';
 
 export type Screen = 'library' | 'edit';
 export type Panel = 'props' | 'add' | 'page' | 'student' | 'menu' | null;
@@ -37,6 +38,8 @@ export interface ES {
   confirm: null | { kind: 'delete' | 'reset'; id: string };
   /** 目前正在輸出時要用的範本。 */
   useId: string | null;
+  /** 「這次輸出」層：只對這一次有效，不存檔。 */
+  run: Partial<ReportSettings>;
 }
 
 const init: ES = {
@@ -54,6 +57,7 @@ const init: ES = {
   menuFor: null,
   confirm: null,
   useId: null,
+  run: {},
 };
 
 let st: ES = init;
@@ -304,3 +308,29 @@ export function overrideVar(name: string, value: string | undefined): void {
 
 /** 輸出時實際用的範本（輸出用範本；沒選就用內建）。 */
 export const pickedTemplates = (): TemplatePick => pickTemplates(allTemplates(), st.useId);
+
+// ---- 三層設定 ----
+
+/** 目前的三層（含不存檔的「這次輸出」）。 */
+export const layers = () => ({ ...emptyLayers(), global: st.data.settings.global, byKind: st.data.settings.byKind, run: st.run });
+
+/** 設定某層的某個欄位；value 為 undefined 就是「還原到上一層的值」。 */
+export function setLayerValue<K extends keyof ReportSettings>(layer: Layer, kind: string, key: K, value: ReportSettings[K] | undefined): void {
+  const strip = (o: Partial<ReportSettings>): Partial<ReportSettings> => {
+    const n = { ...o };
+    if (value === undefined) delete n[key];
+    else n[key] = value;
+    return n;
+  };
+  if (layer === 'run') return put({ run: strip(st.run) });
+  if (layer === 'global') return save({ ...st.data, settings: { ...st.data.settings, global: strip(st.data.settings.global) } });
+  save({ ...st.data, settings: { ...st.data.settings, byKind: { ...st.data.settings.byKind, [kind]: strip(st.data.settings.byKind[kind] ?? {}) } } });
+}
+
+// ---- 備份與還原 ----
+
+/** 還原：換掉或合併編輯器資料（範本、設定、覆寫、圖片）。 */
+export function applyEditorData(data: EditorData): void {
+  save(data);
+  put({ useId: data.settings.global.templateId || st.useId });
+}
