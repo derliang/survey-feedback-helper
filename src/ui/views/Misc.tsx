@@ -1,0 +1,146 @@
+import { canGoStats } from '../../app/progress';
+import { choosePickFolder, downloadSettings, forgetThisFolder, go, restart, set, updatePrefs, useApp } from '../../app/store';
+import type { Theme } from '../../storage';
+import { strings as S } from '../strings';
+import { ActBar, Notice, Sheet } from '../parts/parts';
+
+/** 統計與輸出尚未提供（v0.2 之後）；欄位對應等準備工作都已存好。 */
+export function Stub({ which }: { which: 'stats' | 'output' }) {
+  const s = useApp().session;
+  const [title, body] = S.stub[which];
+  const ok = s !== null && canGoStats(s);
+  return (
+    <main class="page" id="main">
+      <h1>{title}</h1>
+      {ok ? <Notice kind="info">{body}</Notice> : <Notice kind="warn">{S.stub.locked}</Notice>}
+      <ActBar>
+        <button class="btn secondary grow" type="button" onClick={() => go(s ? 'prepare' : 'home')}>
+          {S.stub.goPrep}
+        </button>
+      </ActBar>
+    </main>
+  );
+}
+
+export function Settings() {
+  const st = useApp();
+  const f = st.folder;
+  return (
+    <main class="page" id="main">
+      <h1>{S.settingsPage.title}</h1>
+
+      <section class="card">
+        <h2>{S.settingsPage.privacyTitle}</h2>
+        <ul class="plain-list">
+          {S.privacy.map((p) => (
+            <li key={p}>{p}</li>
+          ))}
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>{S.settingsPage.folderTitle}</h2>
+        <p>
+          {S.folder.label}
+          <strong>{f.state === 'ready' ? f.store.name : f.state === 'needsPermission' ? f.name : S.folder.none}</strong>
+        </p>
+        <div class="btn-row">
+          {f.state !== 'unsupported' && (
+            <button class="btn secondary" type="button" onClick={() => set({ folderDialog: true })}>
+              {S.folder.choose}
+            </button>
+          )}
+          {f.state !== 'unsupported' && f.state !== 'none' && (
+            <button class="btn danger" type="button" onClick={() => void forgetThisFolder()}>
+              {S.settingsPage.forget}
+            </button>
+          )}
+          {f.state !== 'ready' && (
+            <button class="btn secondary" type="button" onClick={downloadSettings}>
+              {S.folder.download}
+            </button>
+          )}
+        </div>
+        {f.state !== 'unsupported' && f.state !== 'none' && <p class="hint">{S.settingsPage.forgetNote}</p>}
+        {f.state === 'unsupported' && <p class="hint">{S.folder.manualBody}</p>}
+      </section>
+
+      <section class="card">
+        <h2>{S.settingsPage.theme}</h2>
+        <div class="seg" role="radiogroup" aria-label={S.settingsPage.theme}>
+          {(['auto', 'light', 'dark'] as Theme[]).map((t) => (
+            <button key={t} type="button" role="radio" aria-checked={st.prefs.theme === t} class={st.prefs.theme === t ? 'on' : ''} onClick={() => updatePrefs({ theme: t })}>
+              {S.settingsPage.themes[t]}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>{S.settingsPage.browserTitle}</h2>
+        <p>{S.settingsPage.browserBody}</p>
+      </section>
+
+      <ActBar>
+        <button class="btn secondary grow" type="button" onClick={() => go(st.session ? 'prepare' : 'home')}>
+          {S.back}
+        </button>
+      </ActBar>
+    </main>
+  );
+}
+
+export function FolderDialog() {
+  const st = useApp();
+  if (!st.folderDialog) return null;
+  const supported = st.folder.state !== 'unsupported';
+  return (
+    <Sheet
+      title={S.folder.dialogTitle}
+      onClose={() => set({ folderDialog: false })}
+      footer={
+        <>
+          <button class="btn secondary" type="button" onClick={() => set({ folderDialog: false })}>
+            {supported ? S.folder.later : S.close}
+          </button>
+          {supported && (
+            <button class="btn primary grow" type="button" onClick={() => void choosePickFolder()}>
+              {S.folder.chooseFolder}
+            </button>
+          )}
+        </>
+      }
+    >
+      <p>{S.folder.dialogBody}</p>
+      <p>
+        <strong>{S.folder.dialogNote}</strong>
+      </p>
+      <h3>{S.folder.anywhereTitle}</h3>
+      <p>{S.folder.anywhereBody}</p>
+      <p class="hint">{S.folder.browserNote}</p>
+    </Sheet>
+  );
+}
+
+export function RestartDialog() {
+  const st = useApp();
+  if (!st.confirmRestart) return null;
+  return (
+    <Sheet
+      title={S.restart}
+      onClose={() => set({ confirmRestart: false })}
+      footer={
+        <>
+          <button class="btn secondary" type="button" onClick={() => set({ confirmRestart: false })}>
+            {S.cancel}
+          </button>
+          <button class="btn danger grow" type="button" onClick={restart}>
+            {S.settingsPage.restartYes}
+          </button>
+        </>
+      }
+    >
+      <p>{S.settingsPage.restartConfirm}</p>
+    </Sheet>
+  );
+}
