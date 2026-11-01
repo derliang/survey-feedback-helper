@@ -93,6 +93,15 @@ describe('輸出接線', () => {
     expect(teacher.comments).toContain('你很笨');
     expect(personalInputs(s, summary, r, 'parent', raters)[0]!.input.items).toEqual([]);
   });
+  it('摘要統計：名次、回收份數、班級中位數與標準差（母體）', () => {
+    const list = personalInputs(s, summary, emptyReview('s1'), 'teacher', raters);
+    for (const p of list) {
+      expect(p.input.stats?.count).toBeGreaterThan(0);
+      expect(p.input.stats?.median).not.toBeNull();
+      expect(p.input.stats?.sd).toBeGreaterThanOrEqual(0);
+    }
+    expect(list.map((p) => p.input.stats?.rank).sort()).toEqual([1, 2]);
+  });
   it('班級總表與標題', () => {
     const c = classSummaryInput(s, summary);
     expect(c.items).toEqual(['內容', '台風']);

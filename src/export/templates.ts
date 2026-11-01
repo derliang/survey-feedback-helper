@@ -25,6 +25,10 @@ export interface PersonalFeedbackInput {
   chartPng?: Uint8Array;
   /** 標題、副標的範本，可含變數 {姓名}{座號}{班級}{事項}。 */
   titleTemplate?: string;
+  /** 摘要數字列用的統計；沒有的欄位在輸出時略過。名次只在老師版顯示（compile 處理）。 */
+  stats?: { rank?: number | null; count?: number | null; median?: number | null; sd?: number | null };
+  /** 自評對照表用：同學給的與自己給的；空陣列或沒有 = 不輸出。 */
+  selfCompare?: { item: string; others: number; self: number }[];
 }
 
 /** 個人回饋單（含平均列）。 */

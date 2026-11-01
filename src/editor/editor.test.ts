@@ -403,3 +403,14 @@ describe('compile 進階區塊與版面', () => {
     expect(d[1]).toMatchObject({ tone: 'praise', text: '很用心；表達清楚' });
   });
 });
+
+describe('雙指縮放換算', () => {
+  it('依兩指距離比例縮放、貼齊 5%、限制 50%～300%', async () => {
+    const { pinchZoom } = await import('./pinch');
+    expect(pinchZoom(1, 100, 150)).toBe(1.5);
+    expect(pinchZoom(1, 100, 101)).toBe(1);
+    expect(pinchZoom(1, 100, 10)).toBe(0.5);
+    expect(pinchZoom(2, 100, 400)).toBe(3);
+    expect(pinchZoom(1.25, 0, 50)).toBe(1.25);
+  });
+});

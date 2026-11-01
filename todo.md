@@ -130,7 +130,7 @@
 ## v0.3 編輯器與設定
 
 - [x] （2026-11-01，editor-v02b）區塊編輯器：`src/editor` 邏輯＋`src/ui/editor` 畫面（桌機三欄、預覽雙擊改字、清單拖曳與上下鈕、增刪區塊、多欄、頁面大小與邊界、背景與頁框、圖片與 Logo、圖表顏色、條件顯示、個別學生版本）；e2e 三裝置。尚缺：範本只有基本區塊（設計稿的摘要數字列、稱讚提示等進階區塊未做）
-- [~] （2026-11-01，editor-v02b 已做：預覽／區塊清單分開、捲動與編輯模式、長按把手拖曳＋上下鈕、底部屬性面板、縮放按鈕、復原重做；**未做**：雙指縮放手勢，且**需實機驗證**長按拖曳、鍵盤彈出與捲動衝突）手機完整編輯器
+- [~] （2026-11-01，editor-v02b 已做：預覽／區塊清單分開、捲動與編輯模式、長按把手拖曳＋上下鈕、底部屬性面板、縮放按鈕、復原重做；2026-11-01 分支 impl-editor-adv 補雙指縮放手勢〔`pinchZoom` 單元測試＋e2e 模擬雙指〕；**仍待使用者實機**：雙指縮放手感、長按拖曳、鍵盤彈出與捲動衝突，步驟見 [real-device-checklist B4](docs/real-device-checklist.md)）手機完整編輯器
 - [x] （2026-11-01，editor-v02b）Word 不支援效果的標示：選取區塊與頁面設定面板顯示說明
 - [x] （2026-11-01，editor-v02b）編輯器資料存資料夾（`問卷小幫手範本與版面.sfh`；沒資料夾時提示下載備份）、範本庫（內建／我的、複製、恢復預設、刪除二次確認）、範本匯出入。**未做**：整包備份與還原的畫面（`bundleBackup` 已有）、設定頁保存提示與編輯器提示的整合（等 ui-r5）
 - [x] 設定檔（資料來源對應＋欄位對應＋設定）（2026-11-01 核對：`src/storage/folder-data.ts` 的 `SETTINGS_FILE` 存 sourceLabel／headers／mapping／labels／scale；`src/app/store.ts` 存取與套用；`src/app/app.test.ts` 有 parse／serialize／merge 往返測試）
@@ -145,7 +145,7 @@
 - [x] （2026-11-01，export-layout：`DocModel.deco` 與區塊 `bg`，PDF／Word 皆已繪製；**`compile` 要把 `PageSpec` 的 background／frame／headerText／logoSrc 與文字 `bg` 填進 `deco`／`bg`**）頁面背景色、頁框、頁首、Logo、區塊底色。
 - [x] （2026-11-01，分支 output-wiring）輸出頁接「輸出用」範本與真實統計槽：`src/app/render.ts`（compile → DocModel，槽：評分表、圖表、留言、老師評語、班級總表；學生覆寫、學校變數、Logo 圖片）；輸出頁有範本縮圖與選擇（`OutputPicker`，動態載入）；班級總表、單人 PDF／Word、批次 zip 都走範本；學生版／家長版警語預覽與 missingChars 提醒不變。**未做**：進階區塊（等 export-layout 引擎，現缺引擎的區塊略過）、檔名規則、去識別化代號輸出。內建「個人回饋單」留言標題改為「同學的留言」（留言不分優缺點）。
 - [x] （2026-11-01，分支 student-override-revert）個別學生版本：目前學生名單取自已讀入的名單，沒有名單時用範例同學；覆寫的「還原」已拆成隱藏、改字各自還原（`withoutBlockPart`）。沒有名單時用範例同學未處理
-- [~] 設計稿的進階區塊：輸出引擎已做（2026-11-01，export-layout：`hero`、`stats`、`callout` 區塊與 `compareTable`，建構函式 `src/export/advanced.ts`）；**編輯器的區塊種類、範本與 compile 對應未做**；頁面上拖曳區塊、預覽輸出（試印 PDF）未做
+- [x] 設計稿的進階區塊：輸出引擎已做（2026-11-01，export-layout：`hero`、`stats`、`callout` 區塊與 `compareTable`，建構函式 `src/export/advanced.ts`）；2026-11-01 分支 impl-editor-adv：編輯器加入面板與屬性面板（早已有）、新增內建範本「個人回饋單（進階版）」、統計變數（全班名次、回收份數、中位數、標準差〔母體〕）與 `compare` 槽接上輸出（`personalInputs` 帶入、`render.ts` 解析），頁面上直接拖曳區塊（選取後左上角 ⋮⋮ 把手），編輯器頂端「試印 PDF」（`src/app/trial.ts`，虛構示範資料）；單元＋e2e。試印按鈕與頁面把手是設計稿沒有的小元件，**待設計員補稿**
 - [x] 頁面設定的 Logo：輸出器已繪製（PDF 右上角、Word 放頁首），compile 接線同上
 
 ## v0.4 Google 登入軌（軌一）

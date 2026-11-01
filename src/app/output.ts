@@ -6,7 +6,9 @@ import {
   type TargetResult,
   buildView,
   cellText,
+  median,
   pseudonymize,
+  selfVsOthers,
   type ViewKind,
 } from '../core';
 import type { BatchItem, ClassSummaryInput, DocModel, PersonalFeedbackInput, XSheet } from '../export';
@@ -61,6 +63,11 @@ export function personalInputs(
   const map: PseudonymMap = pseudonymize(allPeople(s, summary, raters));
   const sorted = [...summary.targets].sort((a, b) => Number(seatText(a.person)) - Number(seatText(b.person)) || nameText(a.person).localeCompare(nameText(b.person), 'zh-Hant'));
   const itemLabels = summary.items.map((i) => i.label);
+  const totals = summary.targets.map((t) => t.total).filter((x): x is number => x !== null);
+  const classMedian = median(totals);
+  const mu = totals.length ? totals.reduce((a, b) => a + b, 0) / totals.length : null;
+  const classSd = mu === null ? null : Math.sqrt(totals.reduce((a, b) => a + (b - mu) ** 2, 0) / totals.length);
+  const gaps = new Map(selfVsOthers(summary).map((g) => [g.key, g]));
   return sorted.map((t) => {
     const view = buildView(reviewedTarget(t, review, audience), summary, audience, { map });
     const items = (view.items ?? []).map((it, i) => ({ label: itemLabels[i] ?? it.label, mine: it.mean, classMean: it.classMean }));
@@ -78,6 +85,10 @@ export function personalInputs(
       advice: [],
       teacherComment: review.teacher[t.key] || undefined,
       chartPng: chartFor?.(t),
+      stats: { rank: t.rank, count: t.raters, median: classMedian, sd: classSd },
+      selfCompare: (gaps.get(t.key)?.items ?? [])
+        .filter((g) => g.self !== null && g.others !== null)
+        .map((g) => ({ item: summary.items.find((i) => i.id === g.itemId)?.label ?? g.itemId, others: g.others as number, self: g.self as number })),
     };
     const prefix = seat === '' ? '' : `${seat.padStart(2, '0')} `;
     return { key: t.key, fileName: `${prefix}${nameText(t.person)}`, input, comments };

@@ -1,10 +1,11 @@
 // 編輯器畫面：範本庫、區塊編輯器（桌機三欄；手機與直向平板為「預覽／區塊清單」＋底部彈出屬性面板）。
 // 這個檔案連同它引入的模組只在進入編輯器時才下載（動態載入），不進首頁 bundle。
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { getState, go, useApp } from '../../app/store';
 import { applyOverrides, countOverrides } from '../../editor/overrides';
 import { blockName, findBlock, walk } from '../../editor/ops';
 import type { EBlock, EditorTemplate } from '../../editor/types';
+import { pinchZoom } from '../../editor/pinch';
 import { wordNotes } from '../../editor/word';
 import { Icon, Notice, Sheet, useWide } from '../parts/parts';
 import './editor.css';
@@ -234,6 +235,53 @@ function Edit({ e }: { e: ES }) {
   const canEdit = wide || e.editMode;
   const images = e.data.images;
   const { drag, handleProps } = useDragSort(dropSel);
+  // 雙指縮放：兩根觸控點的距離變化換算成縮放比；單指維持捲動
+  const touches = useRef(new Map<number, { x: number; y: number }>());
+  const pinchStart = useRef<{ d: number; z: number } | null>(null);
+  const dist = () => {
+    const [a, b] = [...touches.current.values()];
+    return a && b ? Math.hypot(a.x - b.x, a.y - b.y) : 0;
+  };
+  const pinch = {
+    onPointerDown: (ev: PointerEvent) => {
+      if (ev.pointerType !== 'touch') return;
+      touches.current.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+      if (touches.current.size === 2) pinchStart.current = { d: dist(), z: e.zoom ?? 1 };
+    },
+    onPointerMove: (ev: PointerEvent) => {
+      if (!touches.current.has(ev.pointerId)) return;
+      touches.current.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+      if (touches.current.size === 2 && pinchStart.current) setZoom(pinchZoom(pinchStart.current.z, pinchStart.current.d, dist()));
+    },
+    onPointerUp: (ev: PointerEvent) => {
+      touches.current.delete(ev.pointerId);
+      if (touches.current.size < 2) pinchStart.current = null;
+    },
+    onPointerCancel: (ev: PointerEvent) => {
+      touches.current.delete(ev.pointerId);
+      if (touches.current.size < 2) pinchStart.current = null;
+    },
+  };
+  // 試印 PDF：用虛構示範資料把目前範本實際輸出，開新分頁看；開不了就改下載
+  const [trial, setTrial] = useState<{ busy: boolean; msg: string }>({ busy: false, msg: '' });
+  const doTrial = async () => {
+    setTrial({ busy: true, msg: '正在產生試印 PDF…' });
+    try {
+      const { trialPdf } = await import('../../app/trial');
+      const r = await trialPdf(t0, { version: 'teacher', images: e.data.images, ...(ov ? { override: ov } : {}) });
+      const url = URL.createObjectURL(new Blob([r.bytes as BlobPart], { type: 'application/pdf' }));
+      if (!window.open(url, '_blank')) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `試印-${t0.name}.pdf`;
+        a.click();
+      }
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+      setTrial({ busy: false, msg: r.missingChars.length ? `試印完成。字型缺少：${r.missingChars.join('')}` : '試印完成（用虛構示範資料）。' });
+    } catch (err) {
+      setTrial({ busy: false, msg: `試印失敗：${err instanceof Error ? err.message : String(err)}` });
+    }
+  };
   // 鍵盤拖曳（5.26）：Space 拿起、↑↓ 移動、Space 放下、Esc 取消（復原已移動的步數）
   const [kb, setKb] = useState<{ id: string; moves: number } | null>(null);
   const [kbMsg, setKbMsg] = useState('');
@@ -361,8 +409,8 @@ function Edit({ e }: { e: ES }) {
   );
 
   const pages = (
-    <div class={`pv-wrap${canEdit ? ' editing' : ''}`}>
-      <Preview t={t} factor={e.zoom ?? 1} sel={canEdit ? sel : null} interactive={canEdit} onSelect={(id) => select(id)} onText={onText} images={images} {...(vars ? { vars } : {})} />
+    <div class={`pv-wrap${canEdit ? ' editing' : ''}`} data-testid="pv-wrap" {...pinch}>
+      <Preview t={t} factor={e.zoom ?? 1} sel={canEdit ? sel : null} interactive={canEdit} onSelect={(id) => select(id)} onText={onText} images={images} {...(vars ? { vars } : {})} {...(canEdit && !e.student ? { grip: handleProps, drag } : {})} />
     </div>
   );
 
@@ -380,6 +428,12 @@ function Edit({ e }: { e: ES }) {
       <button type="button" class="btn secondary small" disabled={!canRedo(e.hist!)} onClick={doRedo}>
         重做
       </button>
+      <button type="button" class="btn secondary small" disabled={trial.busy} onClick={doTrial}>
+        試印 PDF
+      </button>
+      <span class="sr" role="status" data-testid="trial-msg">
+        {trial.msg}
+      </span>
     </div>
   );
 
