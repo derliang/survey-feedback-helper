@@ -230,6 +230,6 @@
 ## 帳號限制取消與 Drive 連結預防（2026-11-01）
 
 - [x] 依[取消帳號限制](docs/decisions/2026-11-01-取消帳號限制.md)：移除帳號判斷與 `about.get` 取信箱（`src/google`，測試同步）；使用說明「連接 Google 帳號」文案改為任何帳號皆可（google-ui，分支 google-ui）。畫面接線待金鑰
-- [x] （程式層已做，畫面接線待金鑰）Google 登入視窗打不開的預防：`auth.preload()`／`isReady()`、`signIn` 同步開彈窗、`SignInPopupBlocked` 與 `popup_closed` 分流、單元測試模擬慢載；畫面端按鈕停用與「準備 Google 登入…」尚未接。原：預載登入腳本、載好前停用按鈕、`popup_failed_to_open` 中文說明（根因與做法見取消帳號限制決定記錄；google-ui 施工）
+- [x] （程式層已做，畫面接線待金鑰）Google 登入視窗打不開的預防：`auth.preload()`／`isReady()`、`signIn` 同步開彈窗、`SignInPopupBlocked` 與 `popup_closed` 分流、單元測試模擬慢載；畫面已接（`GoogleConnect.tsx`：登入前先看一下卡、停用態、popup_failed_to_open／popup_closed 說明、Picker 後進對應欄位），三項 VITE_GOOGLE_* 缺任一就維持「尚未開放」，**未用真金鑰實測**。原：預載登入腳本、載好前停用按鈕、`popup_failed_to_open` 中文說明（根因與做法見取消帳號限制決定記錄；google-ui 施工）
 - [x] 設計員重審 D57／S1／S2／D58／S0 並補「登入視窗被擋」畫面（2026-11-01 第七輪，分支 designer-google，見 DESIGN.md 5.25 與[取消帳號限制](docs/decisions/2026-11-01-取消帳號限制.md)〈設計員重審〉）；`docs/design` 內「僅限私人 Gmail」字樣已同步。**使用說明（`src/`）與停用態／被擋畫面的實作待施工，設計稿已定**
 - [ ] 通知 google-setup：OAuth 同意畫面使用者類型不再限私人 Gmail

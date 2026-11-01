@@ -1,5 +1,5 @@
-import { useEffect, useReducer } from 'preact/hooks';
-import { type Table, recognizeConfig } from '../core';
+import { useEffect, useReducer } from "preact/hooks";
+import { type Table, recognizeConfig } from "../core";
 import {
   type FolderData,
   type FolderStatus,
@@ -21,18 +21,51 @@ import {
   serializeFolderData,
   upsertRoster,
   upsertSurvey,
-} from '../storage';
-import type { PhraseCategory, SurveyKind } from '../storage';
-import { applyLang } from '../ui/locale';
-import { QUICK_TEMPLATES, TEMPLATE_ID_PREFIX, templateAsSurvey } from './quick-templates';
-import { type StatsOpts, defaultStatsOpts } from './analysis';
-import { type Review, emptyReview, parseReview, reviewFileName, serializeReview } from './review';
-import { type ColumnInfo, type Scale, analyzeColumns, applySavedMapping, detectScale, inferKind, toSavedLabels, toSavedMapping } from './columns';
-import { LoadError, type FileLike, surveyNameFromFile, tableFromFile } from './load';
-import { type RosterRow, isMixedClasses, rosterFromRows } from './roster-input';
+} from "../storage";
+import type { PhraseCategory, SurveyKind } from "../storage";
+import { applyLang } from "../ui/locale";
+import {
+  QUICK_TEMPLATES,
+  TEMPLATE_ID_PREFIX,
+  templateAsSurvey,
+} from "./quick-templates";
+import { type StatsOpts, defaultStatsOpts } from "./analysis";
+import {
+  type Review,
+  emptyReview,
+  parseReview,
+  reviewFileName,
+  serializeReview,
+} from "./review";
+import {
+  type ColumnInfo,
+  type Scale,
+  analyzeColumns,
+  applySavedMapping,
+  detectScale,
+  inferKind,
+  toSavedLabels,
+  toSavedMapping,
+} from "./columns";
+import {
+  LoadError,
+  type FileLike,
+  surveyNameFromFile,
+  tableFromFile,
+} from "./load";
+import { type RosterRow, isMixedClasses, rosterFromRows } from "./roster-input";
 
-export type Route = 'home' | 'prepare' | 'stats' | 'output' | 'settings' | 'method' | 'editor' | 'guide' | 'templates';
-export type Sub = 'type' | 'mapping' | 'roster' | 'compare' | 'check';
+export type Route =
+  | "home"
+  | "prepare"
+  | "stats"
+  | "output"
+  | "settings"
+  | "method"
+  | "editor"
+  | "guide"
+  | "templates";
+export type Sub = "type" | "mapping" | "roster" | "compare" | "check";
 
 /** 一份正在處理的問卷。作答資料只在記憶體，關掉分頁就沒有（硬規則 6）。 */
 export interface Session {
@@ -56,7 +89,7 @@ export interface Session {
   rosterSkipped: boolean;
   rosterName: string;
   /** 名單對照：老師對每一列的決定。 */
-  resolutions: Record<number, 'accept' | 'exclude'>;
+  resolutions: Record<number, "accept" | "exclude">;
   /** 資料檢查：被排除的列、書名合併、已處理或忽略的類別。 */
   excluded: number[];
   titleMerges: Record<string, string>;
@@ -78,7 +111,7 @@ export interface AppState {
   folderDialog: boolean;
   confirmRestart: boolean;
   toast: string | null;
-  error: LoadError['reason'] | 'settings' | null;
+  error: LoadError["reason"] | "settings" | null;
   /** 從「最近的問卷」卡片點進來，等選檔後優先比對這一份。 */
   pendingRecent: string | null;
   oldBrowser: boolean;
@@ -93,13 +126,13 @@ export interface AppState {
 
 const initial: AppState = {
   ready: false,
-  route: 'home',
+  route: "home",
   sub: null,
   session: null,
-  folder: { state: 'none' },
+  folder: { state: "none" },
   data: emptyFolderData(),
   dirty: false,
-  prefs: { theme: 'auto', lang: 'zh', dismissed: [] },
+  prefs: { theme: "auto", lang: "zh", dismissed: [] },
   folderDialog: false,
   confirmRestart: false,
   toast: null,
@@ -119,13 +152,26 @@ export function getState(): AppState {
   return state;
 }
 
-export function set(patch: Partial<AppState> | ((s: AppState) => Partial<AppState>)): void {
-  state = { ...state, ...(typeof patch === 'function' ? patch(state) : patch) };
+export function set(
+  patch: Partial<AppState> | ((s: AppState) => Partial<AppState>),
+): void {
+  state = { ...state, ...(typeof patch === "function" ? patch(state) : patch) };
   listeners.forEach((l) => l());
 }
 
-export function setSession(patch: Partial<Session> | ((s: Session) => Partial<Session>)): void {
-  set((s) => (s.session ? { session: { ...s.session, ...(typeof patch === 'function' ? patch(s.session) : patch) } } : {}));
+export function setSession(
+  patch: Partial<Session> | ((s: Session) => Partial<Session>),
+): void {
+  set((s) =>
+    s.session
+      ? {
+          session: {
+            ...s.session,
+            ...(typeof patch === "function" ? patch(s.session) : patch),
+          },
+        }
+      : {},
+  );
 }
 
 export function useApp(): AppState {
@@ -141,7 +187,11 @@ const today = () => new Date().toISOString().slice(0, 10);
 
 /** 瀏覽器太舊的判斷：缺少我們用到的基本功能就提示（仍可繼續使用）。 */
 export function isOldBrowser(): boolean {
-  return !(typeof structuredClone === 'function' && typeof Array.prototype.at === 'function' && typeof Object.hasOwn === 'function');
+  return !(
+    typeof structuredClone === "function" &&
+    typeof Array.prototype.at === "function" &&
+    typeof Object.hasOwn === "function"
+  );
 }
 
 /** 啟動：還原偏好與資料夾，並讀回資料夾裡的設定。 */
@@ -149,19 +199,21 @@ export async function boot(): Promise<void> {
   const prefs = loadPrefs();
   applyTheme(prefs.theme);
   await applyLang(prefs.lang).catch(() => false);
-  const folder = await restoreFolder().catch((): FolderStatus => ({ state: 'none' }));
+  const folder = await restoreFolder().catch((): FolderStatus => ({
+    state: "none",
+  }));
   set({ prefs, folder, oldBrowser: isOldBrowser(), ready: true });
-  if (folder.state === 'ready') await loadFromFolder();
+  if (folder.state === "ready") await loadFromFolder();
 }
 
 async function loadFromFolder(): Promise<void> {
   const f = getState().folder;
-  if (f.state !== 'ready') return;
+  if (f.state !== "ready") return;
   try {
     const text = await f.store.read(SETTINGS_FILE);
     if (text !== null) set({ data: parseFolderData(text) });
   } catch {
-    set({ error: 'settings' });
+    set({ error: "settings" });
   }
 }
 
@@ -182,12 +234,12 @@ export function dismiss(key: string): void {
 export async function persist(data: FolderData): Promise<void> {
   set({ data });
   const f = getState().folder;
-  if (f.state === 'ready') {
+  if (f.state === "ready") {
     try {
       await f.store.write(SETTINGS_FILE, serializeFolderData(data));
       set({ dirty: false });
     } catch {
-      set({ dirty: true, toast: '寫入資料夾失敗，請改按「下載設定檔」保存。' });
+      set({ dirty: true, toast: "寫入資料夾失敗，請改按「下載設定檔」保存。" });
     }
   } else {
     set({ dirty: true });
@@ -197,8 +249,10 @@ export async function persist(data: FolderData): Promise<void> {
 /** 保存設定檔：手機走分享選單的「儲存到檔案」，桌機與不支援分享的瀏覽器下載。 */
 export async function downloadSettings(): Promise<void> {
   const text = serializeFolderData(getState().data);
-  const r = await saveFile(SETTINGS_FILE, text, 'application/json', () => downloadText(SETTINGS_FILE, text));
-  if (r !== 'cancelled') set({ dirty: false });
+  const r = await saveFile(SETTINGS_FILE, text, "application/json", () =>
+    downloadText(SETTINGS_FILE, text),
+  );
+  if (r !== "cancelled") set({ dirty: false });
 }
 
 export async function choosePickFolder(): Promise<void> {
@@ -206,7 +260,7 @@ export async function choosePickFolder(): Promise<void> {
   try {
     const store = await pickFolder();
     if (!store) return;
-    set({ folder: { state: 'ready', store } });
+    set({ folder: { state: "ready", store } });
     const text = await store.read(SETTINGS_FILE);
     if (text !== null) {
       // 資料夾裡已有設定：與目前記憶體中的合併，不覆蓋
@@ -214,30 +268,32 @@ export async function choosePickFolder(): Promise<void> {
     }
     await persist(getState().data);
   } catch {
-    set({ toast: '無法使用這個資料夾，請換一個資料夾試試。' });
+    set({ toast: "無法使用這個資料夾，請換一個資料夾試試。" });
   }
 }
 
 export async function reauthorize(): Promise<void> {
   const store = await reauthorizeFolder().catch(() => null);
   if (!store) return;
-  set({ folder: { state: 'ready', store } });
+  set({ folder: { state: "ready", store } });
   await loadFromFolder();
 }
 
 export async function forgetThisFolder(): Promise<void> {
   await forgetFolder();
-  set({ folder: { state: 'none' }, data: emptyFolderData() });
+  set({ folder: { state: "none" }, data: emptyFolderData() });
 }
 
 /** 開啟設定檔（.sfh）：還原之前存的欄位對應與名單。 */
-export async function importSettings(file: FileLike & { text(): Promise<string> }): Promise<void> {
+export async function importSettings(
+  file: FileLike & { text(): Promise<string> },
+): Promise<void> {
   try {
     const incoming = parseFolderData(await file.text());
     await persist(mergeFolderData(getState().data, incoming));
     set({ toast: `已載入設定檔，共 ${incoming.surveys.length} 份問卷設定。` });
   } catch {
-    set({ error: 'settings' });
+    set({ error: "settings" });
   }
 }
 
@@ -251,35 +307,70 @@ export async function openSurveyFile(file: FileLike): Promise<void> {
   try {
     table = await tableFromFile(file);
   } catch (e) {
-    set({ error: e instanceof LoadError ? e.reason : 'unreadable' });
+    set({ error: e instanceof LoadError ? e.reason : "unreadable" });
     return;
   }
   startSession(table, file.name, {});
 }
 
-/** 示範資料（教學頁 R-001）：不比對、不存進資料夾、不進「最近的問卷」，重新開始即清除。 */
-export function openDemoTable(table: Table, rosterRows: RosterRow[]): void {
-  startSession(table, '示範資料.xlsx', { demo: true, rosterRows });
+/** Google 試算表直讀來的表格：與開 Excel 檔同一條路（辨識已存設定、進對應欄位）。 */
+export function openSurveyTable(table: Table, name: string): void {
+  startSession(table, name, {});
 }
 
-function startSession(table: Table, fileName: string, opts: { demo?: boolean; rosterRows?: RosterRow[] }): void {
+/** 示範資料（教學頁 R-001）：不比對、不存進資料夾、不進「最近的問卷」，重新開始即清除。 */
+export function openDemoTable(table: Table, rosterRows: RosterRow[]): void {
+  startSession(table, "示範資料.xlsx", { demo: true, rosterRows });
+}
+
+function startSession(
+  table: Table,
+  fileName: string,
+  opts: { demo?: boolean; rosterRows?: RosterRow[] },
+): void {
   const file = { name: fileName };
-  const { data, pendingRecent } = opts.demo ? { data: emptyFolderData(), pendingRecent: null } : getState();
+  const { data, pendingRecent } = opts.demo
+    ? { data: emptyFolderData(), pendingRecent: null }
+    : getState();
   let hit = recognizeConfig(
     table.headers,
-    data.surveys.map((s) => ({ id: s.id, name: s.name, headers: s.headers, mapping: s.mapping })),
+    data.surveys.map((s) => ({
+      id: s.id,
+      name: s.name,
+      headers: s.headers,
+      mapping: s.mapping,
+    })),
   );
   if (!hit && pendingRecent) {
     const want = data.surveys.find((s) => s.id === pendingRecent);
-    if (want) hit = recognizeConfig(table.headers, [{ id: want.id, name: want.name, headers: want.headers, mapping: want.mapping }], 0.5);
+    if (want)
+      hit = recognizeConfig(
+        table.headers,
+        [
+          {
+            id: want.id,
+            name: want.name,
+            headers: want.headers,
+            mapping: want.mapping,
+          },
+        ],
+        0.5,
+      );
   }
-  let saved = hit ? data.surveys.find((s) => s.id === hit?.config.id) : undefined;
+  let saved = hit
+    ? data.surveys.find((s) => s.id === hit?.config.id)
+    : undefined;
   if (!hit) {
     // 沒有之前存過的：看看是不是用快速範本的題目建的表單（標題相符就自動帶入）
     const tpls = QUICK_TEMPLATES.map(templateAsSurvey);
     hit = recognizeConfig(
       table.headers,
-      tpls.map((t) => ({ id: t.id, name: t.name, headers: t.headers, mapping: t.mapping })),
+      tpls.map((t) => ({
+        id: t.id,
+        name: t.name,
+        headers: t.headers,
+        mapping: t.mapping,
+      })),
     );
     const tplHit = hit;
     saved = tplHit ? tpls.find((t) => t.id === tplHit.config.id) : undefined;
@@ -288,7 +379,7 @@ function startSession(table: Table, fileName: string, opts: { demo?: boolean; ro
   const { kind, reason } = inferKind(cols);
   const session: Session = {
     fileName: file.name,
-    sourceLabel: 'Excel 檔',
+    sourceLabel: "Excel 檔",
     name: surveyNameFromFile(file.name),
     table,
     cols,
@@ -297,20 +388,31 @@ function startSession(table: Table, fileName: string, opts: { demo?: boolean; ro
     kindConfirmed: false,
     scale: detectScale(table, cols),
     mappingConfirmed: false,
-    recognition: saved && hit ? { survey: saved, similarity: hit.similarity } : null,
+    recognition:
+      saved && hit ? { survey: saved, similarity: hit.similarity } : null,
     surveyId: newId(),
     previousRows: null,
     rosterRows: opts.rosterRows ?? null,
     rosterMixed: false,
     rosterSkipped: false,
-    rosterName: opts.demo ? '示範名單' : '',
+    rosterName: opts.demo ? "示範名單" : "",
     demo: opts.demo === true,
     resolutions: {},
     excluded: [],
     titleMerges: {},
     checkHandled: [],
   };
-  set({ session, route: 'prepare', sub: null, error: null, pendingRecent: null, stats: defaultStatsOpts(), review: null, reviewUnsaved: false, statSel: null });
+  set({
+    session,
+    route: "prepare",
+    sub: null,
+    error: null,
+    pendingRecent: null,
+    stats: defaultStatsOpts(),
+    review: null,
+    reviewUnsaved: false,
+    statSel: null,
+  });
 }
 
 /** 「是之前的問卷」：帶入已存的對應，跳過欄位對應精靈。 */
@@ -319,7 +421,9 @@ export function acceptRecognition(): void {
   if (!s?.recognition) return;
   const saved = s.recognition.survey;
   const cols = applySavedMapping(s.table, saved.mapping, saved.labels);
-  const roster = saved.rosterId ? getState().data.rosters.find((r) => r.id === saved.rosterId) : undefined;
+  const roster = saved.rosterId
+    ? getState().data.rosters.find((r) => r.id === saved.rosterId)
+    : undefined;
   setSession({
     recognition: null,
     // 快速範本不是老師存過的問卷：每份新問卷各用自己的編號，不互相覆蓋
@@ -327,14 +431,20 @@ export function acceptRecognition(): void {
     name: saved.name,
     kind: saved.kind,
     kindConfirmed: true,
-    kindReason: '沿用之前存的設定。',
+    kindReason: "沿用之前存的設定。",
     cols,
     scale: saved.scale,
     mappingConfirmed: true,
     previousRows: saved.rowCount,
-    rosterRows: roster ? roster.students.map((st) => ({ class: st.class, seat: String(st.seat), name: st.name })) : null,
+    rosterRows: roster
+      ? roster.students.map((st) => ({
+          class: st.class,
+          seat: String(st.seat),
+          name: st.name,
+        }))
+      : null,
     rosterMixed: roster ? isMixedClasses(roster.students) : false,
-    rosterName: roster?.name ?? '',
+    rosterName: roster?.name ?? "",
   });
   void saveSurvey();
 }
@@ -363,18 +473,31 @@ export async function saveSurvey(): Promise<void> {
   let next = upsertSurvey(data, survey);
   if (s.rosterRows) {
     const { students } = rosterFromRows(s.rosterRows);
-    next = upsertRoster(next, { id: `r-${s.surveyId}`, name: s.rosterName || `${s.name} 名單`, students });
+    next = upsertRoster(next, {
+      id: `r-${s.surveyId}`,
+      name: s.rosterName || `${s.name} 名單`,
+      students,
+    });
   }
   await persist(next);
 }
 
 export function requestRestart(): void {
   if (getState().session) set({ confirmRestart: true });
-  else go('home');
+  else go("home");
 }
 
 export function restart(): void {
-  set({ confirmRestart: false, session: null, route: 'home', sub: null, error: null, pendingRecent: null, review: null, statSel: null });
+  set({
+    confirmRestart: false,
+    session: null,
+    route: "home",
+    sub: null,
+    error: null,
+    pendingRecent: null,
+    review: null,
+    statSel: null,
+  });
 }
 
 /** 存常用評語庫（跟著設定檔：有資料夾就寫進去，沒有就等老師下載）。 */
@@ -398,15 +521,15 @@ export async function loadReview(): Promise<void> {
   const { session, folder, review } = getState();
   if (!session || review?.surveyId === session.surveyId) return;
   let loaded = emptyReview(session.surveyId);
-  if (folder.state === 'ready') {
+  if (folder.state === "ready") {
     try {
       const text = await folder.store.read(reviewFileName(session.surveyId));
       if (text !== null) loaded = parseReview(text, session.surveyId);
     } catch {
-      set({ toast: '審稿進度檔讀不了，已從空白開始。' });
+      set({ toast: "審稿進度檔讀不了，已從空白開始。" });
     }
   }
-  set({ review: loaded, reviewUnsaved: folder.state !== 'ready' });
+  set({ review: loaded, reviewUnsaved: folder.state !== "ready" });
 }
 
 let reviewTimer: ReturnType<typeof setTimeout> | undefined;
@@ -414,15 +537,18 @@ let reviewTimer: ReturnType<typeof setTimeout> | undefined;
 async function writeReview(): Promise<void> {
   const { review, folder } = getState();
   if (!review) return;
-  if (folder.state !== 'ready') {
+  if (folder.state !== "ready") {
     set({ reviewUnsaved: true });
     return;
   }
   try {
-    await folder.store.write(reviewFileName(review.surveyId), serializeReview(review));
+    await folder.store.write(
+      reviewFileName(review.surveyId),
+      serializeReview(review),
+    );
     set({ reviewUnsaved: false });
   } catch {
-    set({ reviewUnsaved: true, toast: '審稿進度寫入資料夾失敗。' });
+    set({ reviewUnsaved: true, toast: "審稿進度寫入資料夾失敗。" });
   }
 }
 
@@ -440,6 +566,8 @@ export async function downloadReview(): Promise<void> {
   if (!review) return;
   const name = reviewFileName(review.surveyId);
   const text = serializeReview(review);
-  const r = await saveFile(name, text, 'application/json', () => downloadText(name, text));
-  if (r !== 'cancelled') set({ reviewUnsaved: false });
+  const r = await saveFile(name, text, "application/json", () =>
+    downloadText(name, text),
+  );
+  if (r !== "cancelled") set({ reviewUnsaved: false });
 }
