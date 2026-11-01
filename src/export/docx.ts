@@ -80,6 +80,17 @@ export async function renderDocx(doc: DocModel, opts: { fontName?: string } = {}
         }),
       );
       spacer(b.after ?? 0);
+    } else if (b.type === 'pagebreak') {
+      children.push(new Paragraph({ ...base, pageBreakBefore: true, spacing: { line: tw(2), lineRule: LineRuleType.EXACT, before: 0, after: 0 }, children: [new TextRun({ text: '', font, size: 2 })] }));
+    } else if (b.type === 'rule') {
+      children.push(
+        new Paragraph({
+          ...base,
+          border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: col(b.color ?? '#c9d6e3'), space: 0 } },
+          spacing: { line: tw(2), lineRule: LineRuleType.EXACT, before: 0, after: tw(b.after ?? 0) },
+          children: [new TextRun({ text: '', font, size: 2 })],
+        }),
+      );
     } else {
       children.push(
         new Paragraph({

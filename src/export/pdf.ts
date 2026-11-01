@@ -108,6 +108,13 @@ export async function renderPdf(doc: DocModel, fonts: Fonts, opts: { baseK?: num
         y += b.rowH;
       });
       y += b.after ?? 0;
+    } else if (b.type === 'pagebreak') {
+      if (y > P.mt) newPage();
+      continue;
+    } else if (b.type === 'rule') {
+      ensure(1);
+      page.drawLine({ start: { x: P.mx, y: P.h - y }, end: { x: P.mx + CW, y: P.h - y }, thickness: 0.75, color: color(b.color ?? '#c9d6e3') });
+      y += 1 + (b.after ?? 0);
     } else {
       ensure(b.h);
       const img = await pdf.embedPng(b.png);

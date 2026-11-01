@@ -54,7 +54,16 @@ export interface ImageBlock extends BlockBase {
   w: number;
   h: number;
 }
-export type Block = HeadingBlock | TextBlock | BulletsBlock | TableBlock | ImageBlock;
+/** 強制換頁（編輯器的「分頁」區塊）。 */
+export interface PageBreakBlock extends BlockBase {
+  type: 'pagebreak';
+}
+/** 細分隔線（編輯器的「分隔線」區塊）。 */
+export interface RuleBlock extends BlockBase {
+  type: 'rule';
+  color?: string;
+}
+export type Block = HeadingBlock | TextBlock | BulletsBlock | TableBlock | ImageBlock | PageBreakBlock | RuleBlock;
 
 export interface DocModel {
   blocks: Block[];
@@ -99,7 +108,8 @@ function fromBase64(s: string): Uint8Array {
 /** 收集各字重實際用到的字元（粗體：標題、表頭、強調列；其餘一般字重），給字型子集化用。 */
 export function collectChars(doc: DocModel): { regular: string; bold: string } {
   const reg = new Set('•｜第頁，共 0123456789'),
-    bol = new Set<string>();
+    // 粗體字集不可為空（子集化空字集會失敗）：編輯器的文件可能完全沒有標題或表格
+    bol = new Set<string>('0123456789');
   const add = (set: Set<string>, t?: string) => {
     if (t) for (const c of t) set.add(c);
   };
