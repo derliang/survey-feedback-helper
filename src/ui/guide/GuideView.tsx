@@ -3,7 +3,7 @@ import { TEMPLATE_FORM_URL } from '../../app/guide-config';
 import { QUICK_TEMPLATES, questionHint, questionsAsText } from '../../app/quick-templates';
 import { go, openDemoTable, set, useApp } from '../../app/store';
 import { strings as S } from '../strings';
-import { Icon, Notice } from '../parts/parts';
+import { AccountChooser, Icon, Notice } from '../parts/parts';
 
 /** 教學頁（route=guide）與快速範本（route=templates）：同一個動態載入的 chunk。 */
 export default function GuideView() {
@@ -59,8 +59,19 @@ function Guide() {
 
       <section class="card" id="g2" aria-labelledby="g2h">
         <h2 id="g2h">{G.accountTitle}</h2>
-        <p>{G.accountBody}</p>
-        <p>{G.accountAlt}</p>
+        <p>{G.accountLead}</p>
+        <ol class="tips">
+          {G.accountItems.map(([h, b]) => (
+            <li key={h}>
+              <strong>{h}</strong>
+              <span>{b}</span>
+            </li>
+          ))}
+        </ol>
+        <AccountChooser />
+        <p class="hint">
+          <strong>{S.google.noLoginTitle}</strong> {G.accountAlt}
+        </p>
       </section>
 
       <section class="card" id="g3" aria-labelledby="g3h">

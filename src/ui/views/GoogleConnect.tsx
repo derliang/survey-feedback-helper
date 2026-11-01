@@ -4,7 +4,7 @@ import { readGoogleConfig } from "../../google/config";
 import type { ConnectResult } from "../../google/session";
 import type { GoogleServices } from "../../google/types";
 import { strings as S } from "../strings";
-import { Icon, Notice, Sheet } from "../parts/parts";
+import { AccountChooser, Icon, Notice, Sheet, useWide } from "../parts/parts";
 
 const env = () => import.meta.env as Record<string, string | undefined>;
 
@@ -104,17 +104,26 @@ export function GoogleConnectDialog(props: {
     });
   };
 
+  const isBlocked = phase === "blocked";
+  const isClosed = phase === "closed";
+  const wide = useWide();
   const goLabel = !ready
     ? S.google.preparing
-    : phase === "blocked"
-      ? S.google.goAgain
-      : S.google.go;
+    : isBlocked
+      ? wide
+        ? S.google.goAgain
+        : S.google.retry
+      : isClosed
+        ? S.google.retry
+        : S.google.go;
+  // 依 DESIGN.md 5.25：停用態與失敗畫面都留「改用 Excel 檔」；一般登入前提示卡只有「取消」「前往 Google」
+  const showExcel = phase !== "reading" && (!ready || phase !== "intro");
   const footer = (
     <>
       <button class="btn secondary" type="button" onClick={props.onClose}>
         {S.google.cancel}
       </button>
-      {phase !== "intro" && phase !== "reading" && (
+      {showExcel && (
         <button class="btn secondary" type="button" onClick={props.onExcel}>
           {S.google.useExcel}
         </button>
@@ -133,75 +142,70 @@ export function GoogleConnectDialog(props: {
       )}
     </>
   );
+  const title = isBlocked
+    ? S.google.blockedSheet
+    : isClosed
+      ? S.google.closedSheet
+      : S.google.title;
+  const steps = (list: readonly (readonly string[])[]) => (
+    <ol class="g-steps">
+      {list.map(([h, b], i) => (
+        <li key={h}>
+          <strong>
+            {i + 1}. {h}
+          </strong>
+          <span>{b}</span>
+        </li>
+      ))}
+    </ol>
+  );
+  const noLogin = (
+    <p class="hint">
+      <Icon name="info" />
+      <span>
+        <strong>{S.google.noLoginTitle}</strong> {S.google.noLogin}
+      </span>
+    </p>
+  );
 
   return (
-    <Sheet
-      title={S.google.title}
-      onClose={props.onClose}
-      footer={footer}
-      label={S.google.title}
-    >
+    <Sheet title={title} onClose={props.onClose} footer={footer} label={title}>
       {phase === "reading" ? (
         <p role="status">{S.google.reading}</p>
+      ) : isBlocked || isClosed ? (
+        <>
+          <Notice
+            kind="warn"
+            title={isBlocked ? S.google.blockedTitle : S.google.closedTitle}
+          >
+            <p>{isBlocked ? S.google.blockedLead : S.google.closedLead}</p>
+            <p>{isBlocked ? S.google.blockedCode : S.google.closedCode}</p>
+          </Notice>
+          {steps(isBlocked ? S.google.blockedSteps : S.google.closedSteps)}
+          {noLogin}
+        </>
       ) : (
         <>
-          <p>{S.google.lead}</p>
-          <Chooser />
+          <p>
+            {S.google.intro}
+            <strong>{S.google.lead}</strong>
+          </p>
+          <AccountChooser />
           {!ready && phase === "intro" && (
             <p class="hint" id="g-why" role="status">
               <Icon name="info" />
-              <span>{S.google.preparingWhy}</span>
+              <span>
+                <strong>{S.google.preparingTitle}</strong>{" "}
+                {S.google.preparingWhy}
+              </span>
             </p>
-          )}
-          {phase === "blocked" && (
-            <Notice kind="warn" title={S.google.blockedTitle}>
-              <p>{S.google.blockedLead}</p>
-              <ol>
-                {S.google.blockedSteps.map((t) => (
-                  <li key={t}>{t}</li>
-                ))}
-              </ol>
-            </Notice>
-          )}
-          {phase === "closed" && (
-            <Notice kind="warn" title={S.google.closedTitle}>
-              <p>{S.google.closedLead}</p>
-              <ol>
-                {S.google.closedSteps.map((t) => (
-                  <li key={t}>{t}</li>
-                ))}
-              </ol>
-            </Notice>
           )}
           {(phase === "failed" || phase === "empty") && (
             <Notice kind="warn">{message}</Notice>
           )}
-          {phase === "intro" && (
-            <p class="hint">
-              <Icon name="info" />
-              <span>{S.google.noLogin}</span>
-            </p>
-          )}
+          {noLogin}
         </>
       )}
     </Sheet>
-  );
-}
-
-/** 選帳號畫面的示意圖（虛構帳號）：放著試算表的那一列標「選這個」，不再有「不要選」。 */
-function Chooser() {
-  return (
-    <div class="g-chooser" role="group" aria-label={S.google.chooserLabel}>
-      <div class="g-row g-pick">
-        <strong>{S.google.accountA}</strong>
-        <span>{S.google.sheetName}</span>
-        <em>{S.google.pickThis}</em>
-      </div>
-      <div class="g-row">
-        <strong>{S.google.accountB}</strong>
-        <span>{S.google.notThis}</span>
-      </div>
-      <div class="g-row g-other">{S.google.other}</div>
-    </div>
   );
 }

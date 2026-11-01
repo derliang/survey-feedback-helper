@@ -1406,3 +1406,15 @@ mark.pn-low {
 .g-row.g-pick { border-color: var(--ok); }
 .g-row em { margin-left: auto; font-style: normal; font-weight: 600; color: var(--ok); }
 .g-row.g-other { color: var(--ink3); }
+
+/* Google 選帳號示意圖（自畫、虛構帳號；「選這個」用文字加底色，不只靠顏色） */
+.g-chooser { display: grid; gap: 8px; margin: 12px 0; }
+.g-chooser figcaption { color: var(--ink3); font-size: 0.875rem; }
+.g-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
+.g-row.g-pick { border-color: var(--ok); }
+.g-row em { margin-left: auto; font-style: normal; font-weight: 600; color: var(--ok); }
+.g-row .g-mail, .g-row .g-note { color: var(--ink3); font-size: 0.875rem; }
+.g-row .g-note { flex-basis: 100%; }
+.g-tag { margin-left: auto; font-size: 0.75rem; color: var(--ink3); border: 1px dashed var(--line); border-radius: 6px; padding: 0 6px; }
+.g-steps { list-style: none; padding: 0; margin: 12px 0; display: grid; gap: 12px; }
+.g-steps li { display: grid; gap: 2px; }
