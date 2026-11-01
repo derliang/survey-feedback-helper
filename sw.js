@@ -1,7 +1,7 @@
 // Service Worker：讓程式離線也能開（PWA），並快取輸出用的大型靜態檔。
 // 只快取「程式本身」：建置時產生的檔案清單（precache.json，JS、CSS、首頁、圖示）與字型、wasm。
 // 不快取、也不攔截任何問卷資料：問卷資料不經過網路（只在記憶體），也不蒐集任何資料。
-// 版本：建置時把下面的 b3534592ab8f 換成檔案清單的雜湊，sw.js 內容一變，瀏覽器就會更新。
+// 版本：建置時把下面的 7e1dd18ee09a 換成檔案清單的雜湊，sw.js 內容一變，瀏覽器就會更新。
 const BUILD = '__BUILD_ID__';
 const APP_CACHE = `sfh-app-${BUILD}`;
 const ASSET_CACHE = 'sfh-assets-v1';
