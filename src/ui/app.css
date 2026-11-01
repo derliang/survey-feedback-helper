@@ -1172,7 +1172,7 @@ button.tile {
   position: relative;
 }
 
-/* ───────── 動態與轉場（設計稿第六輪 M1：全部 ≤ 220ms，頁面切換不做動畫；減少動態時全部關閉） ───────── */
+/* ───────── 動態與轉場（設計稿第六輪 M1，面板進場動畫見檔尾 sfh-fade-in：全部 ≤ 220ms，頁面切換不做動畫；減少動態時全部關閉） ───────── */
 .btn,
 .chip,
 .seg button,
@@ -1184,46 +1184,6 @@ button.tile {
     border-color var(--dur) ease,
     color var(--dur) ease;
 }
-.scrim {
-  animation: scrim-in 220ms ease-out;
-}
-.sheet {
-  animation: sheet-up 220ms ease-out;
-}
-@keyframes scrim-in {
-  from {
-    opacity: 0;
-  }
-}
-@keyframes sheet-up {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-}
-@keyframes sheet-left {
-  from {
-    opacity: 0;
-    transform: translateX(24px);
-  }
-}
-@keyframes sheet-pop {
-  from {
-    opacity: 0;
-    transform: scale(0.97);
-  }
-}
-@media (min-width: 600px) {
-  .sheet {
-    animation-name: sheet-left;
-  }
-}
-@media (min-width: 1024px) {
-  .sheet {
-    animation-name: sheet-pop;
-  }
-}
-
 /* 圖表另存圖片 */
 .chart-fig {
   margin: 0;
@@ -1353,6 +1313,8 @@ button.tile {
 }
 .demo-tag {
   flex: none;
+}
+
 /* 設定頁：預設值與備份還原（第六輪 A1～A3） */
 .stack {
   display: flex;
