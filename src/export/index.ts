@@ -19,3 +19,8 @@ export const loadPdf = async () => {
   const [pdf, batch, fonts] = await Promise.all([import('./pdf'), import('./batch'), import('../fonts/loader')]);
   return { renderPdf: pdf.renderPdf, renderBatchZip: batch.renderBatchZip, loadFonts: fonts.loadFonts };
 };
+/** 進階區塊建構函式（標題區、摘要數字列、稱讚提示、自評對照表、多欄；純函式，輕量）。 */
+export * as advanced from './advanced';
+export type { ColumnsBlock, HeroBlock, StatsBlock, CalloutBlock, PageDeco } from './model';
+/** 桌機備用：瀏覽器列印（docToHtml 純函式、printDoc 開列印視窗）。 */
+export const loadPrint = () => import('./print');
