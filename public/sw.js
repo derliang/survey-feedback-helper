@@ -53,7 +53,7 @@ self.addEventListener('fetch', (event) => {
   // 程式本身：先找預先快取的，沒有就連網（連不上時開首頁）
   event.respondWith(
     caches.open(APP_CACHE).then(async (cache) => {
-      const hit = await cache.match(req.mode === 'navigate' ? `${BASE}index.html` : req, { ignoreSearch: true });
+      const hit = await cache.match(req.mode === 'navigate' && !url.pathname.endsWith('.html') ? `${BASE}index.html` : req, { ignoreSearch: true });
       if (hit) return hit;
       try {
         return await fetch(req);
