@@ -474,7 +474,7 @@ export const strings = {
   guide: {
     title: 'Google 表單設計教學',
     lead: '表單設計得好，匯出後就不必整理。這裡有五個技巧、匯出成 Excel 的步驟，和一份可以直接複製的範本表單。',
-    nav: ['怎麼匯出成 Excel 檔', '改用私人 Gmail 登入', 'Google 表單怎麼設計', '範本表單', '示範資料'],
+    nav: ['怎麼匯出成 Excel 檔', '連接 Google 帳號', 'Google 表單怎麼設計', '範本表單', '示範資料'],
     back: '回首頁',
     exportTitle: '怎麼匯出成 Excel 檔',
     exportSteps: [
@@ -487,9 +487,9 @@ export const strings = {
     exportAlt: '備案：在表單的「回覆」分頁按右側的「⋮」，選「下載回應 (.csv)」（要有回應才能按）。匯出的是 csv，本程式也讀得懂。',
     exportChecked: '介面名稱核對日期：2026-11-01（桌機 Chrome）。Safari、Firefox 與手機 App 的畫面可能不同；Google 改版時以實際畫面為準。',
     exportPublish: '表單要先發布才收得到回應（「發布」按鈕的字樣待核對）。',
-    accountTitle: '改用私人 Gmail 登入',
+    accountTitle: '連接 Google 帳號',
     accountBody:
-      '目前只有「選擇 Excel 檔」可用，不需要登入任何帳號。之後提供直接讀取 Google 試算表時，只支援私人 Gmail（@gmail.com）帳號；學校帳號與非 Gmail 的個人帳號會被擋下並說明。',
+      '目前只有「選擇 Excel 檔」可用，不需要登入任何帳號。之後提供直接讀取 Google 試算表時，任何 Google 帳號（私人 Gmail、學校帳號、用其他信箱註冊的帳號）都可以使用；若學校管理員限制了第三方應用，登入時 Google 會顯示說明，這時可改用別的帳號或 Excel 檔。',
     accountAlt: '如果表單是用學校帳號建的，照上面的步驟匯出成 Excel 檔，再用「選擇 Excel 檔」開啟就可以。',
     tipsTitle: 'Google 表單怎麼設計：五個技巧',
     tips: [
