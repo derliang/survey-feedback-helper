@@ -1,19 +1,6 @@
-import type { Cell } from '../core/text';
-import { type FetchLike, getJson } from './http';
-import type { DriveApi, SheetInfo, SheetsApi } from './types';
-
-export function createDriveApi(fetchFn: FetchLike): DriveApi {
-  return {
-    async userEmail(token) {
-      const body = (await getJson(
-        fetchFn,
-        'https://www.googleapis.com/drive/v3/about?fields=user(emailAddress)',
-        token,
-      )) as { user?: { emailAddress?: string } };
-      return body.user?.emailAddress ?? null;
-    },
-  };
-}
+import type { Cell } from "../core/text";
+import { type FetchLike, getJson } from "./http";
+import type { SheetInfo, SheetsApi } from "./types";
 
 /** A1 表示法的工作表名稱要用單引號包起來，名稱內的單引號重複一次。 */
 export function quoteSheetTitle(title: string): string {
@@ -21,17 +8,20 @@ export function quoteSheetTitle(title: string): string {
 }
 
 export function createSheetsApi(fetchFn: FetchLike): SheetsApi {
-  const base = 'https://sheets.googleapis.com/v4/spreadsheets';
+  const base = "https://sheets.googleapis.com/v4/spreadsheets";
   return {
     async info(token, spreadsheetId): Promise<SheetInfo> {
       const body = (await getJson(
         fetchFn,
         `${base}/${encodeURIComponent(spreadsheetId)}?fields=properties.title,sheets.properties.title`,
         token,
-      )) as { properties?: { title?: string }; sheets?: { properties?: { title?: string } }[] };
+      )) as {
+        properties?: { title?: string };
+        sheets?: { properties?: { title?: string } }[];
+      };
       return {
-        title: body.properties?.title ?? '',
-        sheets: (body.sheets ?? []).map((s) => s.properties?.title ?? ''),
+        title: body.properties?.title ?? "",
+        sheets: (body.sheets ?? []).map((s) => s.properties?.title ?? ""),
       };
     },
     async values(token, spreadsheetId, sheetTitle): Promise<Cell[][]> {
@@ -42,7 +32,9 @@ export function createSheetsApi(fetchFn: FetchLike): SheetsApi {
         `${base}/${encodeURIComponent(spreadsheetId)}/values/${range}?valueRenderOption=FORMATTED_VALUE`,
         token,
       )) as { values?: unknown[][] };
-      return (body.values ?? []).map((row) => row.map((c) => (c == null ? '' : String(c))));
+      return (body.values ?? []).map((row) =>
+        row.map((c) => (c == null ? "" : String(c))),
+      );
     },
   };
 }
