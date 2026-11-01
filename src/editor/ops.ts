@@ -69,6 +69,14 @@ export function blankBlock(kind: EBlockKind, id = newId()): EBlock {
       return { id, kind };
     case 'columns':
       return { id, kind, cols: [[], []], after: 8 };
+    case 'hero':
+      return { id, kind, title: '{班級} {事項}', subtitle: '{姓名} 的回饋單', after: 10 };
+    case 'stats':
+      return { id, kind, items: ['mine', 'classMean', 'rank'], perRow: 3, after: 10 };
+    case 'callout':
+      return { id, kind, tone: 'praise', title: '你的強項', text: '', slot: 'praise', after: 8 };
+    case 'compare':
+      return { id, kind, after: 8 };
   }
 }
 

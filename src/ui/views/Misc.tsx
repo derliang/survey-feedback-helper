@@ -2,6 +2,7 @@ import { choosePickFolder, downloadSettings, forgetThisFolder, go, restart, set,
 import { type Lang, type Theme, isTouchDevice } from '../../storage';
 import { strings as S } from '../strings';
 import { ActBar, Sheet } from '../parts/parts';
+import { BackupCard, DefaultsCard } from './SettingsExtra';
 
 export function Settings() {
   const st = useApp();
@@ -51,6 +52,9 @@ export function Settings() {
           </>
         )}
       </section>
+
+      <DefaultsCard />
+      <BackupCard />
 
       <section class="card">
         <h2>{S.settingsPage.theme}</h2>
