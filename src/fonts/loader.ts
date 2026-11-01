@@ -11,11 +11,38 @@ export interface FontSource {
   fetchFont(): Promise<Uint8Array>;
   /** 取得 HarfBuzz 子集化 wasm（位元組或 fetch 的 Response）。 */
   fetchWasm(): Promise<BufferSource | Response>;
+  /** 選用：解壓後 TTF 的快取（以 WOFF2 位元組數當版本）。手機 6 倍降速下解壓要數秒，快取後只剩讀取。 */
+  ttfCache?: {
+    get(version: number): Promise<Uint8Array | undefined>;
+    put(version: number, ttf: Uint8Array): Promise<void>;
+  };
 }
+
+const TTF_CACHE = 'sfh-ttf-v1';
+/** 瀏覽器的解壓後 TTF 快取（Cache Storage，約 11 MB）；不支援或失敗時視為沒有快取。 */
+export const browserTtfCache: NonNullable<FontSource['ttfCache']> = {
+  async get(version) {
+    try {
+      const hit = await (await caches.open(TTF_CACHE)).match(`ttf/${version}`);
+      return hit ? new Uint8Array(await hit.arrayBuffer()) : undefined;
+    } catch {
+      return undefined;
+    }
+  },
+  async put(version, ttf) {
+    try {
+      await caches.delete(TTF_CACHE); // 只留最新版
+      await (await caches.open(TTF_CACHE)).put(`ttf/${version}`, new Response(ttf as BlobPart));
+    } catch {
+      /* 配額不足等：下次再解壓即可 */
+    }
+  },
+};
 
 /** 瀏覽器預設來源。字型放在 public/fonts，wasm 由 Vite 打成獨立檔案（?url）。 */
 export function browserFontSource(): FontSource {
   return {
+    ttfCache: typeof caches === 'undefined' ? undefined : browserTtfCache,
     async fetchFont() {
       const res = await fetch(`${import.meta.env.BASE_URL}${FONT_FILE}`);
       if (!res.ok) throw new Error(`字型下載失敗（${res.status}）`);
@@ -42,7 +69,11 @@ export function loadFonts(source: FontSource = browserFontSource()): Promise<Fon
   if (cache?.source === source) return cache.fonts;
   const fonts = (async () => {
     const [woff2] = await Promise.all([source.fetchFont(), source.fetchWasm().then(initSubset)]);
-    return { ttf: await woff2ToTtf(woff2) };
+    const cached = await source.ttfCache?.get(woff2.length);
+    if (cached) return { ttf: cached };
+    const ttf = await woff2ToTtf(woff2);
+    void source.ttfCache?.put(woff2.length, ttf);
+    return { ttf };
   })();
   cache = { source, fonts };
   fonts.catch(() => {

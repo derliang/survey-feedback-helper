@@ -66,3 +66,18 @@ export function fakeFeedback(seat = 1, extraAdvice = 0): PersonalFeedbackInput {
     teacherComment: '整體表現穩定，期待你在下一次報告中展現更多個人風格。繼續保持認真的態度！',
   };
 }
+
+/** 罕用字與超長留言（全部虛構）：BMP 罕用字、超出 BMP 的字、簡體、假名、符號，以及超長無空白留言與超長英數串。 */
+export const RARE_BMP = '堃喆峯鑫①㈱ありがとうカタカナ';
+export const RARE_OUTSIDE_FONT = '𠮷𩸽这报한😀';
+export function stressFeedback(): PersonalFeedbackInput {
+  const base = fakeFeedback(2);
+  const longPara = '這是一段沒有任何空白與換行的超長留言，'.repeat(40);
+  return {
+    ...base,
+    student: { seat: 2, name: `陳${RARE_BMP.slice(0, 4)}` },
+    praise: [`${RARE_BMP} ${RARE_OUTSIDE_FONT} 同學的報告很用心。`, longPara],
+    advice: ['https://example.com/' + 'a1b2c3d4e5'.repeat(30), longPara + longPara],
+    teacherComment: longPara,
+  };
+}
