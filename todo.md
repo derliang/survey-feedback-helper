@@ -10,11 +10,11 @@
 
 ## 等使用者
 
-- [ ] **第五輪設計稿待你決定**（[決定記錄](docs/decisions/2026-11-01-設計稿第五輪.md)）：快速範本題目與入口、「班規議題票選」放進票選幹部類型是否可接受、沒有資料夾時保存提示是否擴到每個畫面（建議頂端「設定」鈕加警示小點）、範本表單需你用私人 Gmail 建立
-- [ ] **待你回覆**（見桌機設計稿第 2 輪）：預設常用評語草稿（[草稿全文](docs/design/預設常用評語草稿.md)）、隱私三句定稿。**已定案**：首頁＝雙欄、唱票＝全部候選人同列、Logo＝乙，見[定案記錄](docs/decisions/2026-11-01-桌機設計稿定案.md)
-- [ ] （可選）刪除 2026-11-01 核對 Google 介面時，在你的帳號建的測試表單「未命名表單」與回應試算表「未命名表單 (回覆)」；沒有動既有的「自評表」
-- [ ] v0.4 前：建立 Google Cloud 專案與 OAuth 用戶端 ID，**不要綁定帳單帳戶**，確認帳單頁顯示未綁定（任何 Google 帳號都能用，見[取消帳號限制](docs/decisions/2026-11-01-取消帳號限制.md)；不需向資訊組確認）
-- [ ] v1.0 前：iPhone／Android 手機與平板實機驗證（見 v1.0）
+- [ ] **第五輪設計稿待你決定**（[決定記錄](docs/decisions/2026-11-01-設計稿第五輪.md)）：快速範本題目與入口、「班規議題票選」放進票選幹部類型是否可接受、沒有資料夾時保存提示是否擴到每個畫面（建議頂端「設定」鈕加警示小點）、範本表單需你用私人 Gmail 建立 負責：使用者（調度員已發問題卡）
+- [ ] **待你回覆**（見桌機設計稿第 2 輪）：預設常用評語草稿（[草稿全文](docs/design/預設常用評語草稿.md)）、隱私三句定稿。**已定案**：首頁＝雙欄、唱票＝全部候選人同列、Logo＝乙，見[定案記錄](docs/decisions/2026-11-01-桌機設計稿定案.md) 負責：使用者
+- [ ] （可選）刪除 2026-11-01 核對 Google 介面時，在你的帳號建的測試表單「未命名表單」與回應試算表「未命名表單 (回覆)」；沒有動既有的「自評表」 負責：使用者
+- [ ] v0.4 前：建立 Google Cloud 專案與 OAuth 用戶端 ID，**不要綁定帳單帳戶**，確認帳單頁顯示未綁定（任何 Google 帳號都能用，見[取消帳號限制](docs/decisions/2026-11-01-取消帳號限制.md)；不需向資訊組確認） 負責：使用者（建立 OAuth 用戶端）／google-setup 對話
+- [ ] v1.0 前：iPhone／Android 手機與平板實機驗證（見 v1.0） 負責：使用者（需實機）
 
 ## 待套用的裁示
 
@@ -59,18 +59,19 @@
 
 - [~] **補驗證**（2026-11-01，分支 verify-export）：LibreOffice 開 docx／xlsx／PDF、罕用字與超長留言**已做**（結果與修正見 [docs/real-device-checklist.md](docs/real-device-checklist.md)；PDF 字型缺字會回報 `missingChars`、超長英數串逐字拆開、xlsx 列印縮一頁寬）。**仍需使用者實機**：Word for Mac、Google 文件（A1、A2），Safari／iOS／手機（B1～B3，要等輸出頁接線）。（班級總表版面已於 2026-11-01 在 Windows Word／Excel 驗過可開啟）
 - [x] （2026-11-01，分支 export-fonts；verify-export 已複查，清單夠用，說明文字加 Google 文件一句待 A2 實測）Word 字型退讓清單與說明文字：`src/fonts/word-fonts.ts`（微軟正黑體／PingFang TC，`WORD_FONT_NOTE`）
-- [ ] Word for Mac（PingFang TC）重測（步驟見 docs/real-device-checklist.md A1）：沒有 Mac，做不到；Windows Word 已確認 docx 能開、頁數與 PDF 相同（見 [輸出器與字型管線](docs/decisions/2026-11-01-輸出器與字型管線.md)）
+- [ ] Word for Mac（PingFang TC）重測（步驟見 docs/real-device-checklist.md A1）：沒有 Mac，做不到；Windows Word 已確認 docx 能開、頁數與 PDF 相同（見 [輸出器與字型管線](docs/decisions/2026-11-01-輸出器與字型管線.md)） 負責：無人（沒有 Mac；可擱置）
 - [x] （2026-11-01，分支 verify-export）手機等級（CPU 降速）效能重測：`node scripts/perf-throttle.mjs`；數字與優化（解壓後 TTF 存 Cache Storage，6x 降速下載入字型由 1～4 秒降到約 0.1 秒）見 docs/real-device-checklist.md；Web Worker 待實機（B3）量到卡頓再做。原記錄：桌機 Chromium 實測已有分段耗時（字型解壓＋wasm 初始化約 0.2～0.3 秒、單份 PDF 約 0.1 秒、12 份批次約 0.2 秒；見 `tests/e2e/export.spec.ts` 輸出）；**手機與 CPU 降速未量**，需實機或用 DevTools 降速補量
 - [x] （2026-11-01，分支 export-fonts）自包瀏覽器可用的 HarfBuzz 子集化模組：`src/fonts/subset.ts`（直接用 harfbuzzjs wasm，不再相依 subset-font／fontverter）
 - [x] （2026-11-01，分支 export-fonts）字型發布為 WOFF2（可變字型單一檔 5.43 MB，涵蓋一般與粗體）、解壓一次後重複使用（`loadFonts`）、Service Worker 快取（`public/sw.js`，實測第二次載入不再連網）
 - [x] （2026-11-01，PR design-mobile-tablet 待合併）平板補齊到與手機一一對應（84 個）；**待使用者確認方向後**，再挑審稿、輸出、範本庫手工重排並排預覽
-- [ ] 尚未設計：深色輸出文件預覽細節、動態與轉場
+- [ ] 尚未設計：深色輸出文件預覽細節、動態與轉場 負責：無人（待派設計員）
 - [x] （2026-11-01，PR scaffold-ci 待合併）專案骨架：TypeScript + Vite + Preact + Vitest + Playwright，並補專案 `CLAUDE.md` 的測試與建置指令
 - [x] （2026-11-01，PR scaffold-ci 待合併；輸出視覺比對已於分支 export-fonts 補上：`src/export/visual.test.ts`）**PR 關卡**（2026-11-01 改為本機 `npm run ci`，不用 GitHub Actions）：型別與 lint、單元測試、Playwright 端對端（多解析度、觸控）、輸出視覺比對、隱私掃描、授權與費用檢查、Google 權限檢查（只允許 `drive.file`）、**效能預算（硬規則 9）**、建置
-- [ ] 啟用 `main` 分支保護（程式類只能經 PR 合併；因為沒有 CI，不設必要狀態檢查，靠 PR 附本機 `npm run ci` 證據）；須放行純文件類直接 push（見 CLAUDE.md〈工作流程〉）。需使用者在 repo 設定操作
+- [ ] 啟用 `main` 分支保護（程式類只能經 PR 合併；因為沒有 CI，不設必要狀態檢查，靠 PR 附本機 `npm run ci` 證據）；須放行純文件類直接 push（見 CLAUDE.md〈工作流程〉）。需使用者在 repo 設定操作 負責：使用者（2026-11-01 查 API：main 尚未保護，需在 repo 設定操作）
 - [x] （2026-11-01，PR local-release 待合併）GitHub Pages 發布流程改為本機 `npm run release`（推 `gh-pages` 分支，Pages 已設為從 gh-pages 部署，站台已上線）；見[決定](docs/decisions/2026-11-01-Pages改本機發布.md)。用 `--yes` 發布前需使用者說「發布」
-- [ ] 第一次用 `npm run release -- --yes` 實際發布（本 PR 只做 dry-run 驗證）
-- [ ] **Teacher Hub 卡片轉正**：第一版上線、有 GitHub Pages 網址後，通知 `derliang/teacher-hub` 把「問卷回饋小幫手」候選卡改為可點的即開即用或 Beta 卡，並在它的 `tools.json` 加一筆。工具要有 `version.json`（版號與發布日），否則 teacher-hub 的自動同步會失敗。（發布腳本已會產生 `version.json`、tag、Release，見[發布版本資訊](docs/decisions/2026-11-01-發布版本資訊.md)；第一次發布前要先把 `package.json` 升到 0.1.0 並整理 CHANGELOG。）流程見該 repo 的 `docs/PUBLISHING.md` 3.1。背景見 [決定記錄](docs/decisions/2026-10-30-發佈到Teacher-Hub先佔位.md)
+- [x] 第一次用 `npm run release -- --yes` 實際發布（本 PR 只做 dry-run 驗證）（已完成：v0.1.0 已發布，tag v0.1.0；#32 產生 version.json／tag／Release、#34 升版；現已發布到 v0.2.1）
+- [x] **Teacher Hub 卡片轉正**：第一版上線、有 GitHub Pages 網址後，通知 `derliang/teacher-hub` 把「問卷回饋小幫手」候選卡改為可點的即開即用或 Beta 卡，並在它的 `tools.json` 加一筆。工具要有 `version.json`（版號與發布日），否則 teacher-hub 的自動同步會失敗。（發布腳本已會產生 `version.json`、tag、Release，見[發布版本資訊](docs/decisions/2026-11-01-發布版本資訊.md)；第一次發布前要先把 `package.json` 升到 0.1.0 並整理 CHANGELOG。）流程見該 repo 的 `docs/PUBLISHING.md` 3.1。背景見 [決定記錄](docs/decisions/2026-10-30-發佈到Teacher-Hub先佔位.md)（已完成：使用者確認 Hub 卡片已轉正；2026-11-01 核對）
+- [ ] Teacher Hub 改讀 version.json 顯示版本 負責：無人（待派工，在 `derliang/teacher-hub`）
 - [x] （2026-11-01）引入第一個套件時，核對授權與費用並登錄 [docs/third-party.md](docs/third-party.md)
 
 ## v0.1 本機版核心
@@ -99,7 +100,7 @@
 - [x] **輸出頁接線**（2026-11-01，分支 app-v01b）：進輸出頁呼叫 `registerAssetCache()`；統計結果→範本輸入在 `src/app/output.ts`；可下載班級總表（xlsx／docx／PDF）、個人回饋單（單人 PDF／docx、全班批次 zip）、意見調查與票選的報告（xlsx／docx／PDF）；學生版／家長版輸出前警語＋強制預覽＋勾選確認
 - [~] 統計計算自動化測試（核心在 core-stats／adv-stats；接線與審稿在 `src/app/stats.test.ts`，2026-11-01）；**效能壓力測試並記錄上限仍待做**
 - [~] 手機／平板／桌機版面與觸控操作（2026-11-01：統計與輸出已有三種寬度的版面與 e2e；實機驗證待 v1.0）
-- [ ] 載入效能預算達標（硬規則 9）
+- [x] 載入效能預算達標（硬規則 9）（已完成：`npm run check:budget` 在 `npm run ci` 內，2026-11-01 實測首頁 85.7 KB gzip，預算 150 KB）
 
 ### 統計與輸出畫面（分支 app-v01b，2026-11-01）實作與設計稿的差異與未做
 
@@ -123,7 +124,7 @@
 - [x] 老師審稿（採用／隱藏／改寫）與老師評語欄（2026-11-01，分支 app-v01b；進度存資料夾 `審稿進度-<問卷代號>.json`，沒資料夾時提示並可下載）
 - [x] 關鍵字提醒清單（可自訂；不做智慧判斷）（2026-11-01，分支 app-v01b；預設十個用詞待使用者確認）
 - [x] 統計方法說明頁（2026-11-01，分支 app-v01b：畫面頁 `MethodView`，隨目前問卷列出資料來源、排除、設定、種子；**輸出文件附錄頁（A4 一頁、可選擇附上）未做**）
-- [ ] 設計系統落地
+- [x] 設計系統落地（2026-11-01 核對：`src/main.tsx` 引用 `docs/design/tokens.css`，`src/ui/*.css` 無寫死色碼、`app.css` 用 `var(--)` 366 處；細部落差屬下方「施工對話校正」，由 ui-polish 處理）
 - [x] （2026-11-01，分支 export-fonts）輸出視覺檢查測試：`src/export/visual.test.ts`（子集化與完整字型逐像素比對，防漏字）
 
 ## v0.3 編輯器與設定
@@ -132,7 +133,7 @@
 - [~] （2026-11-01，editor-v02b 已做：預覽／區塊清單分開、捲動與編輯模式、長按把手拖曳＋上下鈕、底部屬性面板、縮放按鈕、復原重做；**未做**：雙指縮放手勢，且**需實機驗證**長按拖曳、鍵盤彈出與捲動衝突）手機完整編輯器
 - [x] （2026-11-01，editor-v02b）Word 不支援效果的標示：選取區塊與頁面設定面板顯示說明
 - [x] （2026-11-01，editor-v02b）編輯器資料存資料夾（`問卷小幫手範本與版面.sfh`；沒資料夾時提示下載備份）、範本庫（內建／我的、複製、恢復預設、刪除二次確認）、範本匯出入。**未做**：整包備份與還原的畫面（`bundleBackup` 已有）、設定頁保存提示與編輯器提示的整合（等 ui-r5）
-- [ ] 設定檔（資料來源對應＋欄位對應＋設定）
+- [x] 設定檔（資料來源對應＋欄位對應＋設定）（2026-11-01 核對：`src/storage/folder-data.ts` 的 `SETTINGS_FILE` 存 sourceLabel／headers／mapping／labels／scale；`src/app/store.ts` 存取與套用；`src/app/app.test.ts` 有 parse／serialize／merge 往返測試）
 - [x] （2026-11-01，分支 settings-backup）全域預設／問卷類型／這次輸出三層設定畫面（設定頁「預設值」卡，每列標來源與「還原到上一層的值」）；整包備份與還原畫面（預設合併、取代前自動下載備份、v1 舊版提示）；頁框顏色與粗細；去識別化預覽標出「可能含名單外人名」。編輯器 compile 已輸出 columns、deco（背景、頁框、頁首、Logo）、文字底色與四種進階區塊（標題區、摘要數字列〔名次只在老師版〕、稱讚提示、自評對照表），輸出頁加「用瀏覽器列印」。**未做**：摘要數字列的名次、回收份數、中位數、標準差目前統計沒有帶入變數（卡片自動略過）、自評對照表沒有自評資料來源（略過）、桌機範本卡露出「編輯」「用這份輸出」、縮放頁碼、個別學生逐項還原、G2 預覽色碼改 token
 - [x] （2026-11-01，PR adv-stats 待合併；核心純函式，UI 未做）進階統計：加權（原有）、去極端值、自評對他評、小組互評、反向題、量表標籤；決定見[進階統計定義](docs/decisions/2026-11-01-進階統計定義.md)
 - [~] 教師版／學生版／家長版；檔名規則；去識別化匯出（2026-11-01 資料轉換純函式已做於 adv-stats：`buildView`、`pseudonymize`、`deidentifySummary`；版面輸出與檔名規則未做）
@@ -143,7 +144,7 @@
 - [x] （2026-11-01，export-layout：輸出器已支援 `columns` 區塊，PDF 並排、Word 無框線表格；**`compile` 尚未改成輸出 columns，由 output-wiring／後續接線**）多欄並排：原說明：輸出器目前不支援並排，`compile` 先把各欄由左到右上下攤平；輸出器加欄位排版後改為真正並排（PDF 與 Word 表格排版）。
 - [x] （2026-11-01，export-layout：`DocModel.deco` 與區塊 `bg`，PDF／Word 皆已繪製；**`compile` 要把 `PageSpec` 的 background／frame／headerText／logoSrc 與文字 `bg` 填進 `deco`／`bg`**）頁面背景色、頁框、頁首、Logo、區塊底色。
 - [x] （2026-11-01，分支 output-wiring）輸出頁接「輸出用」範本與真實統計槽：`src/app/render.ts`（compile → DocModel，槽：評分表、圖表、留言、老師評語、班級總表；學生覆寫、學校變數、Logo 圖片）；輸出頁有範本縮圖與選擇（`OutputPicker`，動態載入）；班級總表、單人 PDF／Word、批次 zip 都走範本；學生版／家長版警語預覽與 missingChars 提醒不變。**未做**：進階區塊（等 export-layout 引擎，現缺引擎的區塊略過）、檔名規則、去識別化代號輸出。內建「個人回饋單」留言標題改為「同學的留言」（留言不分優缺點）。
-- [ ] 個別學生版本：目前學生名單取自已讀入的名單，沒有名單時用範例同學；覆寫的「還原」會一次清掉該區塊的隱藏與改字（要拆成逐項）
+- [x] （2026-11-01，分支 student-override-revert）個別學生版本：目前學生名單取自已讀入的名單，沒有名單時用範例同學；覆寫的「還原」已拆成隱藏、改字各自還原（`withoutBlockPart`）。沒有名單時用範例同學未處理
 - [~] 設計稿的進階區塊：輸出引擎已做（2026-11-01，export-layout：`hero`、`stats`、`callout` 區塊與 `compareTable`，建構函式 `src/export/advanced.ts`）；**編輯器的區塊種類、範本與 compile 對應未做**；頁面上拖曳區塊、預覽輸出（試印 PDF）未做
 - [x] 頁面設定的 Logo：輸出器已繪製（PDF 右上角、Word 放頁首），compile 接線同上
 
@@ -152,7 +153,7 @@
 - [x] （2026-11-01，PR google-v04）開工前重核 Google 官方文件的配額、費用與政策（2026-11-01 已查，見[審稿意見裁示](docs/decisions/2026-11-01-審稿意見裁示.md)〈查證結果〉），留下來源連結與日期
 - [~] （2026-11-01，PR google-v04：`src/google/` 封裝與假實作測試已做；真實登入待使用者建 OAuth 用戶端 ID、UI 接線待調度員通知）Google 登入＋Drive API＋Sheets API＋Picker，僅申請 `drive.file`；API 金鑰限 Pages 網址、只開 Drive、Picker 與 Sheets API；入口在設定頁（R-002）
 - [~] （2026-11-01，PR google-v04：`readSpreadsheet` 已做，未實測）直讀 Google 試算表（Sheets API，可重新讀取最新內容、用試算表 ID 認得讀過）；存成 xlsx 或原生 Google 試算表
-- [ ] （等 OAuth 用戶端 ID；清單見[文件重核](docs/decisions/2026-11-01-Google登入軌文件重核.md)）最小實測：`drive.file`＋Picker 能否讀到；超額行為與 Drive 匯出上限；讀不到就退回「轉 xlsx」並重新討論
+- [ ] （等 OAuth 用戶端 ID；清單見[文件重核](docs/decisions/2026-11-01-Google登入軌文件重核.md)）最小實測：`drive.file`＋Picker 能否讀到；超額行為與 Drive 匯出上限；讀不到就退回「轉 xlsx」並重新討論 負責：使用者（等 OAuth 用戶端 ID）／google-setup 對話
 - [~] （2026-11-01，PR google-v04：純邏輯與單元測試已做，UI 接線未做）配額用完的友善提示並建議改用本機檔案
 
 ## v1.0
@@ -164,13 +165,13 @@
 - [~] Google 表單設計教學頁、示範資料入口（R-001）已做；**範本表單**待使用者用私人 Gmail 建立並把連結填入 `src/app/guide-config.ts`；**題型名稱與「發布」字樣待實際核對**（目前全標「待核對」）
 - [~] 英文介面：骨架已做（主要畫面）；其餘字串、教學頁與 Google 英文介面名稱待翻譯與核對
 - [~] 文件完整、完整測試：新功能都有單元與 e2e；總整理待做
-- [ ] 實機驗證：iPhone／Android 手機與平板（特別是 iOS Safari 的拖曳、鍵盤彈出、捲動、PWA 加入主畫面與離線）
-- [ ] 編輯器目錄的深色模式樣式（A8、A9）：等 settings-backup 併入後另做
+- [ ] 實機驗證：iPhone／Android 手機與平板（特別是 iOS Safari 的拖曳、鍵盤彈出、捲動、PWA 加入主畫面與離線） 負責：使用者（需實機）
+- [ ] 編輯器目錄的深色模式樣式（A8、A9）：等 settings-backup 併入後另做 負責：無人（待派設計員／施工）
 
 ## 版本待排
 
 - [x] 快速範本（R-009）：六個範本已做於 `polish-v10`（入口＝首頁左欄文字連結＋教學頁；班規議題票選歸票選幹部）；題目文字與題型名稱待使用者實際用 Google 表單走一遍後定稿
-- [ ] 選課分組志願獨立類型（v0.1 之後；需要排序題與名額限制）
+- [ ] 選課分組志願獨立類型（v0.1 之後；需要排序題與名額限制） 負責：無人（v0.1 之後）
 
 ## 已知風險（詳見決定記錄）
 
@@ -196,7 +197,7 @@
 - [x] 2026-10-30 建立公開 repo 與規劃文件
 
 - [x] ~~設計員：補「選帳號前先看一下」示意卡；擋下畫面附說明圖解~~ 已作廢：取消帳號限制後改為「登入前先看一下」與「登入視窗被擋」，見 DESIGN.md 5.25。
-- [ ] （等 OAuth 用戶端 ID；偵測與擋下純邏輯已做於 `src/google/account.ts`、`session.ts`）實測 `about.get` 在 `drive.file` 權杖下能否取得信箱（判斷學校帳號用）；不行再問是否加 `openid email`。
+- [x] ~~（等 OAuth 用戶端 ID；偵測與擋下純邏輯已做於 `src/google/account.ts`、`session.ts`）實測 `about.get` 在 `drive.file` 權杖下能否取得信箱（判斷學校帳號用）；不行再問是否加 `openid email`。~~ 作廢：取消帳號限制後不需偵測學校帳號，見[取消帳號限制](docs/decisions/2026-11-01-取消帳號限制.md)
 
 - [x] （2026-11-01，第五輪）舊設計系統成品頁三頁標題已加「已取代」（不刪）。擋下畫面按鈕主次維持：主「改用私人 Gmail 登入」、次「改用 Excel 檔」（使用者 2026-11-01 裁示）。
 
@@ -210,9 +211,9 @@
 
 - [x] 手機保存：觸控裝置的「設定有更新，還沒保存」改以「儲存到檔案」為主按鈕（Web Share API，先 `canShare({files})`，不支援或失敗才退回下載；使用者關掉選單視為取消）；審稿進度同理；桌機行為不變（`src/storage/share.ts`，單元測試＋e2e）。首頁大提示縮成一行可關閉小提示（關閉後不再出現，設定頁「資料夾」卡保留完整說明）。設定檔 `accept` 在觸控裝置不設副檔名限制（iOS「檔案」遇不認得的 `.sfh` 會灰掉），試算表 `accept` 補 MIME。
 - [x] 第五輪校正：「開啟試算表」停用態說明緊貼按鈕並加資訊圖示；頂端「設定」鈕在「設定有更新還沒保存」時加警示小點與 aria-label（待使用者確認範圍，見上）；輸出頁顯示 PDF 字型缺字提醒（`missingChars`，單份與批次）；統計頁標準差標「母體」；去識別化提醒、必須預覽文案依稿（按鈕「先預覽學生版」、鎖頭提示、確認句）。
-- [ ] 實機：iPhone Chrome／Safari 確認 (1) 首頁「開啟設定檔」能從「檔案」選到 iCloud／Google 雲端硬碟的 `.sfh`；(2) 按「儲存到檔案」出現分享選單且有「儲存到檔案」；(3) 存好後下次選回，最近的問卷回來。Android Chrome 同。分享選單的實際名稱**待核對**（程式文案寫「儲存到檔案」，iOS 為此名；Android 因機型而異）。
-- [ ] 設計稿與實作的差異待問：①去識別化 P2 的「可能含名單外人名」標示需核心新功能（姓氏表＋稱謂），未做；②快速範本（Q1／Q2）入口與題目待使用者定稿，未做；③H3 的「欄位類型面板」「資料夾選擇說明」等彈出面板、H2 列內按鈕、桌機準備資料兩欄，現有實作已與稿一致，未再改動。
-- [ ] v0.4：Google 登入後可自動存到使用者私人 Gmail 的雲端硬碟（取代手機手動「儲存到檔案」）；這次不做。
+- [ ] 實機：iPhone Chrome／Safari 確認 (1) 首頁「開啟設定檔」能從「檔案」選到 iCloud／Google 雲端硬碟的 `.sfh`；(2) 按「儲存到檔案」出現分享選單且有「儲存到檔案」；(3) 存好後下次選回，最近的問卷回來。Android Chrome 同。分享選單的實際名稱**待核對**（程式文案寫「儲存到檔案」，iOS 為此名；Android 因機型而異）。 負責：使用者（需實機）
+- [ ] 設計稿與實作的差異待問：①去識別化 P2 的「可能含名單外人名」標示需核心新功能（姓氏表＋稱謂），未做；②快速範本（Q1／Q2）入口與題目待使用者定稿，未做；③H3 的「欄位類型面板」「資料夾選擇說明」等彈出面板、H2 列內按鈕、桌機準備資料兩欄，現有實作已與稿一致，未再改動。 負責：使用者（②快速範本定稿，同第 13 行）；①去識別化「名單外人名」標示已做（見 settings-backup 條目）
+- [ ] v0.4：Google 登入後可自動存到使用者私人 Gmail 的雲端硬碟（取代手機手動「儲存到檔案」）；這次不做。 負責：無人（v0.4 之後）
 
 ## 設計稿第六輪（2026-11-01，分支 design-round6，PR 待審）
 
@@ -222,8 +223,8 @@
 - [x] 編輯器已實作畫面與設計稿差異補稿（15 項差異表）；三層設定（A1、A2）、備份與還原（A3）、輸出頁範本縮圖（A4）、進階區塊加入與屬性（A5、A6）、頁面設定與頁框（A7）三裝置已畫
 - [x] 深色模式輸出預覽與編輯器（A8、A9，紙張維持淺色）；動態與轉場總規則（M1）
 - [x] 設計系統落地落差清單 G1～G10（見決定記錄〈三〉）
-- [ ] **待使用者決定**（調度員發問題卡，見決定記錄〈五〉）：預設常用評語與隱私三句（D54）、快速範本題目／入口／班規議題歸類、保存提示範圍、頁框顏色粗細、備份「取代」、摘要數字列內容、動態目標值
-- [ ] 施工對話校正（設計稿已定，程式未改）：G1 危險鈕改外框（刪 `editor.css` `.btn.danger`）、G2 紙張色碼改 `--doc-*`、G3 預覽檯面、G4 把手寬 44、G6 面板與展開動畫（減少動態為 0）、範本庫桌機卡片露出「編輯」「用這份輸出」、縮放顯示頁碼、三層設定畫面、備份與還原畫面、輸出頁縮圖（output-wiring）、進階區塊入口與屬性
+- [ ] **待使用者決定**（調度員發問題卡，見決定記錄〈五〉）：預設常用評語與隱私三句（D54）、快速範本題目／入口／班規議題歸類、保存提示範圍、頁框顏色粗細、備份「取代」、摘要數字列內容、動態目標值 負責：使用者（同第 13、14 行）
+- [ ] 施工對話校正（設計稿已定，程式未改）：G1 危險鈕改外框（刪 `editor.css` `.btn.danger`）、G2 紙張色碼改 `--doc-*`、G3 預覽檯面、G4 把手寬 44、G6 面板與展開動畫（減少動態為 0）、範本庫桌機卡片露出「編輯」「用這份輸出」、縮放顯示頁碼、三層設定畫面、備份與還原畫面、輸出頁縮圖（output-wiring）、進階區塊入口與屬性 負責：無人（待派施工對話）
 
 - [~] 依[設計稿第六輪〈使用者裁示〉](docs/decisions/2026-11-01-設計稿第六輪.md)落實：預設常用評語照草稿定稿、快速範本入口（首頁左欄文字連結＋教學頁）、班規議題票選歸「票選幹部」、保存提示維持現況；設計系統落差 G1–G10 修正。（`polish-v10` 已做：預設常用評語、快速範本入口與歸類；G1–G10 與保存提示未動）
 
@@ -232,7 +233,7 @@
 - [x] 依[取消帳號限制](docs/decisions/2026-11-01-取消帳號限制.md)：移除帳號判斷與 `about.get` 取信箱（`src/google`，測試同步）；使用說明「連接 Google 帳號」文案改為任何帳號皆可（google-ui，分支 google-ui）。畫面接線待金鑰
 - [x] （程式層已做，畫面接線待金鑰）Google 登入視窗打不開的預防：`auth.preload()`／`isReady()`、`signIn` 同步開彈窗、`SignInPopupBlocked` 與 `popup_closed` 分流、單元測試模擬慢載；畫面已接（`GoogleConnect.tsx`：登入前先看一下卡、停用態、popup_failed_to_open／popup_closed 說明、Picker 後進對應欄位），三項 VITE_GOOGLE_* 缺任一就維持「尚未開放」，**未用真金鑰實測**。原：預載登入腳本、載好前停用按鈕、`popup_failed_to_open` 中文說明（根因與做法見取消帳號限制決定記錄；google-ui 施工）
 - [x] 設計員重審 D57／S1／S2／D58／S0 並補「登入視窗被擋」畫面（2026-11-01 第七輪，分支 designer-google，見 DESIGN.md 5.25 與[取消帳號限制](docs/decisions/2026-11-01-取消帳號限制.md)〈設計員重審〉）；`docs/design` 內「僅限私人 Gmail」字樣已同步。**使用說明（`src/`）與停用態／被擋畫面的實作待施工，設計稿已定**
-- [ ] 通知 google-setup：OAuth 同意畫面使用者類型不再限私人 Gmail
+- [ ] 通知 google-setup：OAuth 同意畫面使用者類型不再限私人 Gmail 負責：調度員
 - [x] （2026-11-01，google-ui 第二批）登入前提示卡與被擋/被關掉說明對照模擬頁修正（D58/D58b/D57/D57b、S0/S0b/S1/S1b）；教學頁 S2「Google 登入遇到問題」三種情況＋選帳號示意圖＋Excel 出口；「改用 Excel 檔」在停用態與失敗畫面顯示、一般登入前提示卡只有「取消」「前往 Google」（依 5.25）。未用真金鑰實測。
 - [x] e2e「資料夾：選擇、重開後仍記得」偶發失敗（2026-11-01，分支 fix-e2e-folder-flaky）：根因是測試在設定「非同步寫進資料夾」完成前就 `page.reload()`，機器吃重時寫入慢於重載，重開後讀到舊檔、最近問卷清單是空的。以 OPFS 寫入加 1.5 秒延遲可 100% 重現；修法是重載前輪詢資料夾檔案內容，並在測試內固定加延遲當回歸。程式行為不變（產品面重載當下寫入中斷的風險另見下行）。
 - [ ] （產品面，低優先）使用者在設定寫入資料夾的瞬間關閉分頁，可能丟失這次更新；可評估 `beforeunload` 提示或寫入中顯示狀態。
