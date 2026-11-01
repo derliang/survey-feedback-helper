@@ -20,6 +20,7 @@ import type { ClassSummaryInput, DocModel, PersonalFeedbackInput } from '../../e
 import { downloadBytes, isTouchDevice } from '../../storage';
 import { feedbackKey } from '../../app/output';
 import { resolveSettings } from '../../editor/settings';
+import { PreviewActions } from './ReviewParts';
 import { findPossibleNames, type PossibleName } from '../../core/possible-names';
 import { PRINT, pairedBarsSvg } from '../chart-svg';
 import { svgToPng } from '../chart-png';
@@ -61,9 +62,17 @@ const MIME: Record<Fmt | 'zip', string> = {
 };
 
 /** 逐則預覽的留言：可能含名單外人名的用警示底標出（只是提醒，沒標出不代表沒有）。 */
-function FlaggedComment({ text }: { text: string }) {
+function FlaggedComment({ text, itemKey, hiddenHere, onHide }: { text: string; itemKey: string; hiddenHere: boolean; onHide: () => void }) {
   const hits: PossibleName[] = useMemo(() => findPossibleNames(text, { includeLow: true }), [text]);
-  if (hits.length === 0) return <li>{text}</li>;
+  if (hits.length === 0) {
+    return (
+      <li class={hiddenHere ? 'cm-text hidden' : undefined} data-testid="preview-comment">
+        <PreviewActions itemKey={itemKey} text={text} hidden={hiddenHere} onHide={onHide}>
+          <span>{text}</span>
+        </PreviewActions>
+      </li>
+    );
+  }
   const parts: preact.ComponentChildren[] = [];
   let at = 0;
   hits.forEach((h, i) => {
@@ -79,7 +88,11 @@ function FlaggedComment({ text }: { text: string }) {
   const high = hits.some((h) => h.level === 'high');
   return (
     <li class={'flagged-comment ' + (high ? 'high' : 'low')} data-testid="flagged-comment">
-      {parts} <span class="tag warn">{S.output.possibleNameTag}</span>
+      <PreviewActions itemKey={itemKey} text={text} hidden={hiddenHere} onHide={onHide}>
+        <span>
+          {parts} <span class="tag warn">{S.output.possibleNameTag}</span>
+        </span>
+      </PreviewActions>
     </li>
   );
 }
@@ -95,6 +108,8 @@ export function OutputView() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const [seenSig, setSeenSig] = useState<string | null>(null);
+  /** 這次預覽中按了「隱藏這則」的留言（留在清單上以便還原）：審稿鍵 → 被評對象鍵與顯示文字 */
+  const [hiddenHere, setHiddenHere] = useState<Record<string, { who: string; text: string }>>({});
 
   useEffect(() => {
     if (!ok) return;
@@ -391,15 +406,26 @@ export function OutputView() {
             {personal.map((p) => (
               <li key={p.key}>
                 <strong>{p.fileName}</strong>
-                {p.comments.length === 0 ? (
-                  <p class="hint">{S.output.previewEmpty}</p>
-                ) : (
-                  <ul class="plain-list">
-                    {p.comments.map((c, i) => (
-                      <FlaggedComment key={i} text={c} />
-                    ))}
-                  </ul>
-                )}
+                {(() => {
+                  const gone = Object.entries(hiddenHere).filter(([k, v]) => v.who === p.key && !p.commentKeys.includes(k));
+                  if (p.comments.length === 0 && gone.length === 0) return <p class="hint">{S.output.previewEmpty}</p>;
+                  return (
+                    <ul class="plain-list">
+                      {p.comments.map((c, i) => (
+                        <FlaggedComment
+                          key={p.commentKeys[i] ?? i}
+                          text={c}
+                          itemKey={p.commentKeys[i] ?? ''}
+                          hiddenHere={false}
+                          onHide={() => setHiddenHere((h) => ({ ...h, [p.commentKeys[i] ?? '']: { who: p.key, text: c } }))}
+                        />
+                      ))}
+                      {gone.map(([k, v]) => (
+                        <FlaggedComment key={k} text={v.text} itemKey={k} hiddenHere onHide={() => undefined} />
+                      ))}
+                    </ul>
+                  );
+                })()}
               </li>
             ))}
           </ul>

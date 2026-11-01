@@ -8,6 +8,8 @@ import {
   courseList,
   courseNames,
   emptyCourseState,
+  includedCount,
+  outsideIds,
   mergeSuggestions,
   moveTo,
   parseCourse,
@@ -190,5 +192,29 @@ describe('選課分組輸出', () => {
     const nums = hit!.rows.slice(1, -1).map((r) => r[1] as number);
     expect(nums.reduce((a, b) => a + b, 0)).toBe(6);
     expect(JSON.stringify(per!.rows[0])).toContain('最少開班');
+  });
+});
+
+describe('名單外填答者（納入）', () => {
+  // 名單只有座號 1～5，己（6 號）不在名單上
+  const rosterRows = [1, 2, 3, 4, 5].map((n, i) => ({ class: '', seat: String(n), name: '甲乙丙丁戊'[i]! }));
+
+  it('有名單時，名單外的人預設不進分配；按納入後才算', () => {
+    const s = session({ rosterRows });
+    const c = emptyCourseState();
+    expect(courseApplicants(s, c).list).toHaveLength(5);
+    expect(outsideIds(s, c).size).toBe(1);
+    const c2 = { ...c, included: [...outsideIds(s, c)] };
+    expect(courseApplicants(s, c2).list).toHaveLength(6);
+    expect(includedCount(s, c2)).toBe(1);
+    expect(outsideIds(s, c2).size).toBe(0);
+  });
+
+  it('沒有名單時不影響原有行為；included 會存檔與讀回', () => {
+    const s = session();
+    expect(courseApplicants(s, emptyCourseState()).list).toHaveLength(6);
+    const back = parseCourse(serializeCourse({ ...emptyCourseState(), included: ['5'] }));
+    expect(back.included).toEqual(['5']);
+    expect(parseCourse('{}').included).toEqual([]);
   });
 });
