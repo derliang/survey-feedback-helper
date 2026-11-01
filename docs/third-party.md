@@ -32,6 +32,7 @@
 | @eslint/js | 10.0.1 | 建置：ESLint 推薦規則 | MIT | 是 | 免費 | 2026-11-01 |
 | typescript-eslint | 8.72.1 | 建置：ESLint 的 TypeScript 支援 | MIT | 是 | 免費 | 2026-11-01 |
 | @types/node | 26.6.6 | 建置：Node 型別（設定檔與腳本用） | MIT | 是 | 免費 | 2026-11-01 |
+| Google Identity Services／Google API 腳本（`accounts.google.com/gsi/client`、`apis.google.com/js/api.js`） | 執行期載入 | 正式（v0.4）：Google 登入與 Picker；只在老師按「連接 Google」後動態載入，不進首頁 bundle，不是 npm 套件 | Google 服務條款（非隨附程式碼） | 不隨附、不散布 | 免費（標準使用；超額計費預計 2026 稍晚，我們不綁帳單，見[文件重核](decisions/2026-11-01-Google登入軌文件重核.md)） | 2026-11-01 |
 
 ## 預計引入（尚未核對，引入時填入上表）
 
