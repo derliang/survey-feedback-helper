@@ -20,15 +20,22 @@
     "ci": "npm run typecheck && npm run lint && npm test && npm run check:privacy && npm run check:licenses && npm run check:google-scopes && npm run build && npm run check:budget && npm run test:e2e"
   },
   "dependencies": {
+    "@pdf-lib/fontkit": "^1.1.1",
+    "docx": "^9.15.0",
     "fflate": "^0.8.3",
-    "preact": "^11.1.1"
+    "harfbuzzjs": "^1.6.4",
+    "pdf-lib": "^1.17.1",
+    "preact": "^11.1.1",
+    "woff2-encoder": "^2.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@napi-rs/canvas": "^1.1.0",
     "@playwright/test": "^1.64.1",
     "@preact/preset-vite": "^2.10.6",
     "@types/node": "^26.6.6",
     "eslint": "^10.14.0",
+    "pdfjs-dist": "^6.4.299",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.72.1",
     "vite": "^8.3.5",
