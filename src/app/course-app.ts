@@ -13,6 +13,7 @@ import {
 } from '../core';
 import { prefColumns } from './columns';
 import { newSeed } from './analysis';
+import { rosterComparison } from './progress';
 import type { Session } from './store';
 
 /** 名額頁與結果的狀態；只屬於目前這份問卷，存在使用者選的資料夾（不進 repo）。 */
@@ -32,10 +33,12 @@ export interface CourseState {
   ranAt: string | null;
   /** 按了「固定結果」：不能再重新抽籤 */
   fixed: boolean;
+  /** 老師按了「納入」的名單外填答者（資料列索引）；沒按的不進分配 */
+  included: string[];
 }
 
 export function emptyCourseState(): CourseState {
-  return { capacity: {}, minSize: {}, merges: {}, declined: [], priority: [], seed: newSeed(), result: null, ranAt: null, fixed: false };
+  return { capacity: {}, minSize: {}, merges: {}, declined: [], priority: [], seed: newSeed(), result: null, ranAt: null, fixed: false, included: [] };
 }
 
 export const courseFileName = (surveyId: string): string => `選課分組-${surveyId}.json`;
@@ -63,6 +66,7 @@ export function parseCourse(text: string): CourseState {
     result,
     ranAt: typeof o.ranAt === 'string' ? o.ranAt : null,
     fixed: o.fixed === true,
+    included: strs(o.included),
   };
 }
 
@@ -142,6 +146,18 @@ export function courseList(s: Session, c: CourseState): Course[] {
   });
 }
 
+/** 不在名單上、而且老師還沒按「納入」的填答者（資料列索引）；沒有名單時是空集合。 */
+export function outsideIds(s: Session, c: CourseState): Set<string> {
+  const inc = new Set(c.included);
+  return new Set((rosterComparison(s)?.unknown ?? []).map((u) => String(u.id)).filter((id) => !inc.has(id)));
+}
+
+/** 不在名單上、但老師已按「納入」的人數。 */
+export function includedCount(s: Session, c: CourseState): number {
+  const inc = new Set(c.included);
+  return (rosterComparison(s)?.unknown ?? []).filter((u) => inc.has(String(u.id))).length;
+}
+
 export interface Applicants {
   list: Applicant[];
   people: Map<string, Person>;
@@ -154,10 +170,11 @@ export function courseApplicants(s: Session, c: CourseState): Applicants {
   const nameCol = colOf(s, 'respondentName');
   const gone = new Set(s.excluded);
   const pri = new Set(c.priority);
+  const outside = outsideIds(s, c);
   const list: Applicant[] = [];
   const people = new Map<string, Person>();
   s.table.rows.forEach((r, i) => {
-    if (gone.has(i)) return;
+    if (gone.has(i) || outside.has(String(i))) return;
     const id = String(i);
     const prefs = readPrefs(r, cols).map((v) => mergedName(c, v));
     list.push({ id, prefs, ...(pri.has(id) ? { priority: true } : {}) });

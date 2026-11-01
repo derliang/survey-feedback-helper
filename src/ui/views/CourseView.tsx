@@ -9,6 +9,8 @@ import {
   courseIssues,
   courseList,
   courseSummary,
+  includedCount,
+  outsideIds,
   mergeSuggestions,
   moveTo,
   parseCount,
@@ -17,7 +19,6 @@ import {
   runAllocation,
   stampTaipei,
 } from '../../app/course-app';
-import { rosterComparison } from '../../app/progress';
 import { go, loadCourse, updateCourse, useApp } from '../../app/store';
 import { downloadBytes } from '../../storage';
 import { loadXlsx } from '../../export';
@@ -87,7 +88,9 @@ function Rules(props: { onRun: () => void; onBack: () => void; hasResult: boolea
   const { list } = useMemo(() => courseApplicants(s, c), [s, c]);
   const firstOf = (name: string) => list.filter((a) => a.prefs[0] === name).length;
   const merges = mergeSuggestions(s, c);
-  const unknown = rosterComparison(s)?.unknown.length ?? 0;
+  const outside = outsideIds(s, c);
+  const unknown = outside.size;
+  const inclN = includedCount(s, c);
   const set = (patch: Partial<CourseState>) => updateCourse((cur) => ({ ...cur, ...patch }));
   const setCap = (name: string, v: string) => set({ capacity: { ...c.capacity, [name]: v } });
   const setMin = (name: string, v: string) => set({ minSize: { ...c.minSize, [name]: v } });
@@ -119,12 +122,34 @@ function Rules(props: { onRun: () => void; onBack: () => void; hasResult: boolea
         <Notice
           kind="info"
           actions={
-            <button class="btn secondary small" type="button" onClick={() => go('prepare', 'compare')}>
-              {C.seeWho}
-            </button>
+            <>
+              <button class="btn secondary small" type="button" onClick={() => go('prepare', 'compare')}>
+                {C.seeWho}
+              </button>
+              <button
+                class="btn ghost small"
+                type="button"
+                data-testid="include-outside"
+                onClick={() => set({ included: [...new Set([...c.included, ...outside])], result: null })}
+              >
+                {C.include}
+              </button>
+            </>
           }
         >
           {C.outsideRoster(unknown)}
+        </Notice>
+      )}
+      {inclN > 0 && (
+        <Notice
+          kind="info"
+          actions={
+            <button class="btn ghost small" type="button" data-testid="undo-include" onClick={() => set({ included: [], result: null })}>
+              {C.undoInclude}
+            </button>
+          }
+        >
+          {C.included(inclN)}
         </Notice>
       )}
       {merges.length > 0 && (

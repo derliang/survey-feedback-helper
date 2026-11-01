@@ -1,3 +1,4 @@
+import type { ComponentChildren } from 'preact';
 import { useState } from 'preact/hooks';
 import { commentState, flaggedWords, setComment, setKeywords, setRewrite, type Review } from '../../app/review';
 import { isTouchDevice } from '../../storage';
@@ -148,5 +149,79 @@ export function SaveNote() {
     </Notice>
   ) : (
     <p class="hint">{S.review.savedFolder}</p>
+  );
+}
+
+/**
+ * 去識別化預覽內每則留言的「留著／隱藏這則／改寫」：與審稿頁同一組邏輯（setComment／setRewrite）。
+ * `children` 是留言本文（可含名單外人名標示）；`text` 是預覽上顯示的文字，改寫從它開始。
+ */
+export function PreviewActions(props: { itemKey: string; text: string; hidden: boolean; onHide: () => void; children: ComponentChildren }) {
+  const review = useApp().review;
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(props.text);
+  const R = S.review;
+  if (!review) return <>{props.children}</>;
+  const st = commentState(review, props.itemKey);
+  return (
+    <>
+      {props.children}
+      {editing ? (
+        <div class="pv-edit">
+          <textarea class="input area" rows={3} value={draft} aria-label={R.rewrite} data-testid="pv-draft" onInput={(e) => setDraft((e.target as HTMLTextAreaElement).value)} />
+          <div class="btn-row">
+            <button
+              class="btn primary small"
+              type="button"
+              data-testid="pv-save"
+              onClick={() => {
+                updateReview((r) => setRewrite(r, props.itemKey, draft));
+                setEditing(false);
+              }}
+            >
+              {R.save}
+            </button>
+            <button class="btn secondary small" type="button" onClick={() => setEditing(false)}>
+              {R.cancel}
+            </button>
+          </div>
+        </div>
+      ) : props.hidden ? (
+        <div class="btn-row">
+          <span class="tag">{R.state.hide}</span>
+          <button class="btn ghost small" type="button" data-testid="pv-restore" onClick={() => updateReview((r) => setComment(r, props.itemKey, 'adopt'))}>
+            {R.restore}
+          </button>
+        </div>
+      ) : (
+        <div class="btn-row">
+          <button class="btn secondary small" type="button" data-testid="pv-keep" disabled={st === 'adopt' || st === 'rewrite'} aria-pressed={st === 'adopt' || st === 'rewrite'}>
+            {R.keep}
+          </button>
+          <button
+            class="btn secondary small"
+            type="button"
+            data-testid="pv-hide"
+            onClick={() => {
+              updateReview((r) => setComment(r, props.itemKey, 'hide'));
+              props.onHide();
+            }}
+          >
+            {R.hideThis}
+          </button>
+          <button
+            class="btn secondary small"
+            type="button"
+            data-testid="pv-rewrite"
+            onClick={() => {
+              setDraft(props.text);
+              setEditing(true);
+            }}
+          >
+            {R.rewrite}
+          </button>
+        </div>
+      )}
+    </>
   );
 }

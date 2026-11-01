@@ -219,3 +219,19 @@ test('桌機：拖曳與鍵盤移人', async ({ page }, info) => {
   await page.mouse.up();
   await expect.poll(() => assigned(page)).toBe(a0);
 });
+
+test('名單外填答者：預設不進分配，按「納入」後算進去，可復原', async ({ page }) => {
+  await mapped(page);
+  // 名單只放 1～11 號，林十二（12 號）不在名單上
+  const roster = ['王一', '王二', '王三', '王四', '王五', '王六', '王七', '王八', '王九', '王十', '林十一'].map((n, i) => `${i + 1} ${n}`).join('\n');
+  await page.getByRole('textbox', { name: '貼上名單' }).fill(roster);
+  await page.getByRole('button', { name: '加入名單' }).click();
+  await step(page, '名額與分配').click();
+  await expect(page.getByText(/1 位填答者不在名單上/)).toBeVisible();
+  await expect(page.getByTestId('include-outside')).toBeVisible();
+  await page.getByTestId('include-outside').click();
+  await expect(page.getByTestId('undo-include')).toBeVisible();
+  await expect(page.getByText(/已把 1 位名單外的填答者納入分配/)).toBeVisible();
+  await page.getByTestId('undo-include').click();
+  await expect(page.getByTestId('include-outside')).toBeVisible();
+});
