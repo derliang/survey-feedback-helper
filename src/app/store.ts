@@ -54,6 +54,13 @@ import {
   tableFromFile,
 } from "./load";
 import { type RosterRow, isMixedClasses, rosterFromRows } from "./roster-input";
+import {
+  type CourseState,
+  courseFileName,
+  emptyCourseState,
+  parseCourse,
+  serializeCourse,
+} from "./course-app";
 
 export type Route =
   | "home"
@@ -94,6 +101,8 @@ export interface Session {
   excluded: number[];
   titleMerges: Record<string, string>;
   checkHandled: string[];
+  /** 選課分組志願：名額、規則、種子與分配結果。 */
+  course: CourseState;
   /** 教學頁的示範資料：不寫進資料夾，也不進最近的問卷。 */
   demo: boolean;
 }
@@ -122,6 +131,8 @@ export interface AppState {
   reviewUnsaved: boolean;
   /** 統計畫面目前選的題目／職位／被評者。 */
   statSel: string | null;
+  /** 選課分組結果存不進資料夾（沒有資料夾或寫入失敗）。 */
+  courseUnsaved: boolean;
 }
 
 const initial: AppState = {
@@ -143,6 +154,7 @@ const initial: AppState = {
   review: null,
   reviewUnsaved: false,
   statSel: null,
+  courseUnsaved: false,
 };
 
 let state: AppState = initial;
@@ -401,7 +413,9 @@ function startSession(
     excluded: [],
     titleMerges: {},
     checkHandled: [],
+    course: emptyCourseState(),
   };
+  courseLoadedFor = null;
   set({
     session,
     route: "prepare",
@@ -412,6 +426,7 @@ function startSession(
     review: null,
     reviewUnsaved: false,
     statSel: null,
+    courseUnsaved: false,
   });
 }
 
@@ -488,6 +503,7 @@ export function requestRestart(): void {
 }
 
 export function restart(): void {
+  courseLoadedFor = null;
   set({
     confirmRestart: false,
     session: null,
@@ -570,4 +586,51 @@ export async function downloadReview(): Promise<void> {
     downloadText(name, text),
   );
   if (r !== "cancelled") set({ reviewUnsaved: false });
+}
+
+/* ───────── 選課分組志願 ───────── */
+
+let courseLoadedFor: string | null = null;
+
+/** 進名額與分配畫面時讀回這份問卷的名額與結果（資料夾沒有就從空白開始）。 */
+export async function loadCourse(): Promise<void> {
+  const { session, folder } = getState();
+  if (!session || courseLoadedFor === session.surveyId) return;
+  courseLoadedFor = session.surveyId;
+  if (folder.state === "ready") {
+    try {
+      const text = await folder.store.read(courseFileName(session.surveyId));
+      if (text !== null) setSession({ course: parseCourse(text) });
+    } catch {
+      set({ toast: "選課分組的存檔讀不了，已從空白開始。" });
+    }
+  }
+  set({ courseUnsaved: getState().folder.state !== "ready" });
+}
+
+let courseTimer: ReturnType<typeof setTimeout> | undefined;
+
+async function writeCourse(): Promise<void> {
+  const { session, folder } = getState();
+  if (!session) return;
+  if (folder.state !== "ready") {
+    set({ courseUnsaved: true });
+    return;
+  }
+  try {
+    await folder.store.write(courseFileName(session.surveyId), serializeCourse(session.course));
+    set({ courseUnsaved: false });
+  } catch {
+    set({ courseUnsaved: true, toast: "選課分組結果寫入資料夾失敗。" });
+  }
+}
+
+/** 改名額、規則或結果，稍後存回資料夾（連續輸入時合併成一次寫入）。示範資料不寫入。 */
+export function updateCourse(fn: (c: CourseState) => CourseState): void {
+  const s = getState().session;
+  if (!s) return;
+  setSession({ course: fn(s.course) });
+  if (s.demo) return;
+  clearTimeout(courseTimer);
+  courseTimer = setTimeout(() => void writeCourse(), 500);
 }

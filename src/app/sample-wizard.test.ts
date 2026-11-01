@@ -5,6 +5,7 @@ import { analyzeColumns, buildCheckRecords, detectScale, inferKind, mappingProbl
 import { classSummaryInput, personalInputs } from './output';
 import { emptyReview } from './review';
 import type { Session } from './store';
+import { emptyCourseState } from './course-app';
 
 // 樣本對照：以虛構資料集（記憶體產生，不寫檔）走過「欄位對應精靈 → 統計 → 個人回饋單平均列」。
 const ds = buildSampleDataset({ students: 12, seed: 'wizard' });
@@ -15,7 +16,7 @@ function sessionOf(): Session {
   return {
     fileName: 's.xlsx', sourceLabel: 'Excel 檔', name: '樣本問卷', table, cols, kind: 'feedback', kindReason: '', kindConfirmed: true,
     scale: detectScale(table, cols), mappingConfirmed: true, recognition: null, surveyId: 's1', previousRows: null,
-    rosterRows: null, rosterMixed: false, rosterSkipped: false, rosterName: '', resolutions: {}, excluded: [], titleMerges: {}, checkHandled: [],
+    rosterRows: null, rosterMixed: false, rosterSkipped: false, rosterName: '', resolutions: {}, excluded: [], titleMerges: {}, checkHandled: [], course: emptyCourseState(),
     demo: false,
   };
 }

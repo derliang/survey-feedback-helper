@@ -1,5 +1,5 @@
 import { useState } from 'preact/hooks';
-import { type ColumnInfo, type Role, countToConfirm, detectScale, mappingProblems } from '../../app/columns';
+import { type ColumnInfo, type Role, countToConfirm, detectScale, gridGroup, mappingProblems, movePref, prefColumns, withRank, withRole } from '../../app/columns';
 import { go, saveSurvey, setSession, useApp } from '../../app/store';
 import { strings as S } from '../strings';
 import { ActBar, Icon, Notice, Sheet } from '../parts/parts';
@@ -7,7 +7,7 @@ import { ActBar, Icon, Notice, Sheet } from '../parts/parts';
 function rolesFor(kind: string): Role[] {
   const base: Role[] = ['timestamp', 'respondentClass', 'respondentSeat', 'respondentName'];
   const target: Role[] = ['targetClass', 'targetSeat', 'targetName'];
-  const rest: Role[] = ['bookTitle', 'score', 'choice', 'comment', 'ignore'];
+  const rest: Role[] = kind === 'course' ? ['preference', 'comment', 'ignore'] : ['bookTitle', 'score', 'choice', 'comment', 'ignore'];
   return [...base, ...(kind === 'feedback' ? target : []), ...rest];
 }
 
@@ -15,10 +15,16 @@ export function MappingView() {
   const s = useApp().session;
   const [editing, setEditing] = useState<ColumnInfo | null>(null);
   const [renaming, setRenaming] = useState<number | null>(null);
+  const [adding, setAdding] = useState(false);
+  const [showGrid, setShowGrid] = useState(false);
   if (!s) return null;
 
   const update = (index: number, patch: Partial<ColumnInfo>) =>
     setSession((cur) => ({ cols: cur.cols.map((c) => (c.index === index ? { ...c, ...patch } : c)) }));
+  const setCols = (f: (cols: ColumnInfo[]) => ColumnInfo[]) => setSession((cur) => ({ cols: f(cur.cols) }));
+  const isCourse = s.kind === 'course';
+  const prefs = prefColumns(s.cols);
+  const grid = isCourse ? gridGroup(s.cols) : null;
   const used = s.cols.filter((c) => c.role !== 'ignore');
   const unused = s.cols.filter((c) => c.role === 'ignore');
   const ordered = [...used.filter((c) => c.confirm), ...used.filter((c) => !c.confirm)];
@@ -35,7 +41,7 @@ export function MappingView() {
         </span>
         <span class="rb-tags">
           {c.confirm && <span class="tag warn">{S.mapping.confirmTag}</span>}
-          <span class="tag">{S.mapping.roles[c.role ?? 'ignore']}</span>
+          <span class="tag">{c.role === 'preference' ? S.mapping.rankTag(c.rank ?? 1) : S.mapping.roles[c.role ?? 'ignore']}</span>
         </span>
       </button>
       {renaming === c.index ? (
@@ -75,6 +81,73 @@ export function MappingView() {
       <p class="hint">{S.mapping.lead}</p>
       {toConfirm > 0 ? <Notice kind="warn">{S.mapping.toConfirm(toConfirm)}</Notice> : <Notice kind="ok">{S.mapping.allGood}</Notice>}
       <ul class="map-list">{ordered.map(row)}</ul>
+      {isCourse && (
+        <button type="button" class="btn secondary" onClick={() => setAdding(true)} data-testid="add-pref">
+          {S.mapping.addPref}
+        </button>
+      )}
+      {isCourse && prefs.length > 1 && (
+        <section class="card pref-order" aria-label={S.mapping.prefOrder}>
+          <h3>{S.mapping.prefOrder}</h3>
+          <ol class="plain-ul">
+            {prefs.map((c, i) => (
+              <li key={c.index} class="pref-row">
+                <span class="tag accent">{S.mapping.rankTag(i + 1)}</span>
+                <span class="pr-name">{c.label}</span>
+                <button type="button" class="icbtn" disabled={i === 0} aria-label={`${S.mapping.moveUp}：${c.label}`} onClick={() => setCols((cols) => movePref(cols, c.index, -1))}>
+                  ↑
+                </button>
+                <button type="button" class="icbtn" disabled={i === prefs.length - 1} aria-label={`${S.mapping.moveDown}：${c.label}`} onClick={() => setCols((cols) => movePref(cols, c.index, 1))}>
+                  ↓
+                </button>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+      {grid && (
+        <Notice kind="info" title={S.mapping.gridTitle(grid.members.length)}>
+          {grid.question}：{grid.members.map((m) => m.label).join(' → ')}{' '}
+          <button class="btn ghost small" type="button" aria-expanded={showGrid} onClick={() => setShowGrid(!showGrid)}>
+            {showGrid ? S.mapping.collapse : S.mapping.expand}
+          </button>{' '}
+          <span class="tag warn">{S.mapping.toVerify}</span>
+        </Notice>
+      )}
+      {grid && showGrid && (
+        <ul class="plain-ul grid-members">
+          {grid.members.map((m) => (
+            <li key={m.index}>
+              {m.header} <span class="tag">{S.mapping.rankTag(m.rank ?? 1)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {grid && grid.unmatched.length > 0 && (
+        <Notice kind="warn" title={S.mapping.gridUnmatched(grid.unmatched.length)}>
+          <span class="merge-list">
+            {grid.unmatched.map((u) => (
+              <span key={u.index} class="merge-row">
+                <span>
+                  {u.label} <span class="hint">{u.samples.slice(0, 2).join('、')}</span>
+                </span>
+                <span class="merge-btns">
+                  {u.role === 'ignore' ? (
+                    <span class="tag">{S.mapping.skipped}</span>
+                  ) : (
+                    <button class="btn secondary small" type="button" onClick={() => setCols((cols) => withRole(cols, u.index, 'ignore'))}>
+                      {S.mapping.skip}
+                    </button>
+                  )}
+                  <button class="btn ghost small" type="button" onClick={() => setCols((cols) => withRole(cols, u.index, 'preference'))}>
+                    {S.mapping.putPref}
+                  </button>
+                </span>
+              </span>
+            ))}
+          </span>
+        </Notice>
+      )}
       {hasScore && (
         <div class="field">
           <span class="label" id="scale-l">
@@ -134,14 +207,76 @@ export function MappingView() {
                   role="radio"
                   aria-checked={cur}
                   class={`opt${cur ? ' on' : ''}`}
-                  onClick={() => update(editing.index, { role: r, confirm: false })}
+                  onClick={() => setCols((cols) => withRole(cols, editing.index, r))}
                 >
                   <span class="radio" aria-hidden="true" />
-                  {S.mapping.roles[r]}
+                  <span class="mo-main">
+                    {S.mapping.roles[r]}
+                    {S.mapping.roleNotes[r] && <span class="rb-note">{S.mapping.roleNotes[r]}</span>}
+                  </span>
                 </button>
               );
             })}
           </div>
+          {s.cols.find((c) => c.index === editing.index)?.role === 'preference' && (
+            <div class="field">
+              <span class="label" id="rank-l">
+                {S.mapping.rankPick}
+              </span>
+              <div class="chips" role="radiogroup" aria-labelledby="rank-l">
+                {Array.from({ length: Math.max(3, prefs.length) }, (_, i) => i + 1).map((n) => {
+                  const mine = s.cols.find((c) => c.index === editing.index)?.rank === n;
+                  const other = prefs.some((p) => p.rank === n && p.index !== editing.index);
+                  return (
+                    <button
+                      key={n}
+                      type="button"
+                      role="radio"
+                      aria-checked={mine}
+                      disabled={other}
+                      class={`chip${mine ? ' on' : ''}`}
+                      onClick={() => setCols((cols) => withRank(cols, editing.index, n))}
+                    >
+                      {other ? `${n}${S.mapping.rankUsed}` : n}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </Sheet>
+      )}
+      {adding && (
+        <Sheet
+          title={S.mapping.addPrefTitle}
+          onClose={() => setAdding(false)}
+          footer={
+            <button class="btn secondary grow" type="button" onClick={() => setAdding(false)}>
+              {S.cancel}
+            </button>
+          }
+        >
+          <ul class="plain-ul">
+            {s.cols
+              .filter((c) => c.role !== 'preference')
+              .map((c) => (
+                <li key={c.index}>
+                  <button
+                    type="button"
+                    class="rowbtn"
+                    onClick={() => {
+                      setCols((cols) => withRole(cols, c.index, 'preference'));
+                      setAdding(false);
+                    }}
+                  >
+                    <span class="rb-main">
+                      <strong>{c.label}</strong>
+                      <span class="rb-note">{c.samples.slice(0, 3).join('、') || '（沒有資料）'}</span>
+                    </span>
+                  </button>
+                </li>
+              ))}
+          </ul>
         </Sheet>
       )}
     </div>
