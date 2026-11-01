@@ -139,11 +139,11 @@
 
 ## v0.4 Google 登入軌（軌一）
 
-- [ ] 開工前重核 Google 官方文件的配額、費用與政策（2026-11-01 已查，見[審稿意見裁示](docs/decisions/2026-11-01-審稿意見裁示.md)〈查證結果〉），留下來源連結與日期
-- [ ] Google 登入＋Drive API＋Sheets API＋Picker，僅申請 `drive.file`；API 金鑰限 Pages 網址、只開 Drive、Picker 與 Sheets API；入口在設定頁（R-002）
-- [ ] 直讀 Google 試算表（Sheets API，可重新讀取最新內容、用試算表 ID 認得讀過）；存成 xlsx 或原生 Google 試算表
-- [ ] 最小實測：`drive.file`＋Picker 能否讀到；超額行為與 Drive 匯出上限；讀不到就退回「轉 xlsx」並重新討論
-- [ ] 配額用完的友善提示並建議改用本機檔案
+- [x] （2026-11-01，PR google-v04）開工前重核 Google 官方文件的配額、費用與政策（2026-11-01 已查，見[審稿意見裁示](docs/decisions/2026-11-01-審稿意見裁示.md)〈查證結果〉），留下來源連結與日期
+- [~] （2026-11-01，PR google-v04：`src/google/` 封裝與假實作測試已做；真實登入待使用者建 OAuth 用戶端 ID、UI 接線待調度員通知）Google 登入＋Drive API＋Sheets API＋Picker，僅申請 `drive.file`；API 金鑰限 Pages 網址、只開 Drive、Picker 與 Sheets API；入口在設定頁（R-002）
+- [~] （2026-11-01，PR google-v04：`readSpreadsheet` 已做，未實測）直讀 Google 試算表（Sheets API，可重新讀取最新內容、用試算表 ID 認得讀過）；存成 xlsx 或原生 Google 試算表
+- [ ] （等 OAuth 用戶端 ID；清單見[文件重核](docs/decisions/2026-11-01-Google登入軌文件重核.md)）最小實測：`drive.file`＋Picker 能否讀到；超額行為與 Drive 匯出上限；讀不到就退回「轉 xlsx」並重新討論
+- [~] （2026-11-01，PR google-v04：純邏輯與單元測試已做，UI 接線未做）配額用完的友善提示並建議改用本機檔案
 
 ## v1.0
 
@@ -183,7 +183,7 @@
 - [x] 2026-10-30 建立公開 repo 與規劃文件
 
 - [ ] 設計員：補「選帳號前先看一下」示意卡；擋下畫面（含非 Gmail 個人帳號）附說明圖解，依 [擋下學校帳號](docs/decisions/2026-11-01-擋下學校帳號.md) 使用者裁示。
-- [ ] 實測 `about.get` 在 `drive.file` 權杖下能否取得信箱（判斷學校帳號用）；不行再問是否加 `openid email`。
+- [ ] （等 OAuth 用戶端 ID；偵測與擋下純邏輯已做於 `src/google/account.ts`、`session.ts`）實測 `about.get` 在 `drive.file` 權杖下能否取得信箱（判斷學校帳號用）；不行再問是否加 `openid email`。
 
 - [ ] 舊設計系統成品頁三頁標題加「已取代」（不刪；新連結見 [第四輪決定記錄](docs/decisions/)）。擋下畫面按鈕主次維持：主「改用私人 Gmail 登入」、次「改用 Excel 檔」（使用者 2026-11-01 裁示）。
 
