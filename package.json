@@ -20,6 +20,7 @@
     "ci": "npm run typecheck && npm run lint && npm test && npm run check:privacy && npm run check:licenses && npm run check:google-scopes && npm run build && npm run check:budget && npm run test:e2e"
   },
   "dependencies": {
+    "fflate": "^0.8.3",
     "preact": "^11.1.1"
   },
   "devDependencies": {
