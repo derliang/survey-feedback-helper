@@ -35,14 +35,16 @@ export interface BatchItem {
 }
 
 /** 每位學生一個 PDF 的 zip。每份之間讓出執行緒，介面不會卡死；`onProgress(done, total)`。 */
-export async function renderBatchZip(items: BatchItem[], fonts: Fonts, onProgress?: (done: number, total: number) => void): Promise<Uint8Array> {
+export async function renderBatchZip(items: BatchItem[], fonts: Fonts, onProgress?: (done: number, total: number) => void, onMissing?: (chars: string[]) => void): Promise<Uint8Array> {
   const names = uniqueNames(
     items.map((i) => i.name),
     '.pdf',
   );
   const files: Record<string, Uint8Array> = {};
   for (let i = 0; i < items.length; i++) {
-    files[names[i]!] = (await renderPdf(items[i]!.doc, fonts)).bytes;
+    const r = await renderPdf(items[i]!.doc, fonts);
+    files[names[i]!] = r.bytes;
+    if (r.missingChars.length > 0) onMissing?.(r.missingChars);
     onProgress?.(i + 1, items.length);
     await new Promise((r) => setTimeout(r, 0));
   }

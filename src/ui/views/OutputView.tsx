@@ -20,7 +20,7 @@ import { feedbackKey } from '../../app/output';
 import { PRINT, pairedBarsSvg } from '../chart-svg';
 import { svgToPng } from '../chart-png';
 import { strings as S } from '../strings';
-import { ActBar, Notice, Sheet } from '../parts/parts';
+import { ActBar, Icon, Notice, Sheet } from '../parts/parts';
 
 type Fmt = 'xlsx' | 'docx' | 'pdf';
 const MIME: Record<Fmt | 'zip', string> = {
@@ -37,7 +37,7 @@ export function OutputView() {
   const [audience, setAudience] = useState<Audience>('teacher');
   const [who, setWho] = useState<string>('');
   const [busy, setBusy] = useState<string | null>(null);
-  const [msg, setMsg] = useState<{ kind: 'ok' | 'bad'; text: string } | null>(null);
+  const [msg, setMsg] = useState<{ kind: 'ok' | 'bad' | 'warn'; text: string } | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const [seenSig, setSeenSig] = useState<string | null>(null);
@@ -76,13 +76,14 @@ export function OutputView() {
   const allComments = summary ? summary.targets.flatMap((t) => t.comments.map((c) => ({ key: feedbackKey(c.recordId), text: c.text }))) : [];
   const counts = reviewCounts(review, allComments);
 
-  async function run(label: string, job: () => Promise<{ name: string; bytes: Uint8Array; mime: string }>) {
+  async function run(label: string, job: () => Promise<{ name: string; bytes: Uint8Array; mime: string; missing?: string[] }>) {
     setBusy(label);
     setMsg(null);
     try {
       const out = await job();
       downloadBytes(out.name, out.bytes, out.mime);
-      setMsg({ kind: 'ok', text: S.output.done(out.name) });
+      const missing = out.missing ?? [];
+      setMsg({ kind: missing.length > 0 ? 'warn' : 'ok', text: S.output.done(out.name) + (missing.length > 0 ? ` ${S.output.missingChars(missing.join(''))}` : '') });
     } catch {
       setMsg({ kind: 'bad', text: S.output.failed });
     } finally {
@@ -120,7 +121,10 @@ export function OutputView() {
       const doc = (await loadTemplates()).classSummaryDoc(input);
       if (fmt === 'docx') return { name, bytes: await (await loadDocx()).renderDocx(doc), mime: MIME.docx };
       const { renderPdf, loadFonts } = await loadPdf();
-      return { name, bytes: (await renderPdf(doc, await loadFonts())).bytes, mime: MIME.pdf };
+      {
+        const r = await renderPdf(doc, await loadFonts());
+        return { name, bytes: r.bytes, mime: MIME.pdf, missing: r.missingChars };
+      }
     });
 
   const onePersonal = (fmt: 'docx' | 'pdf') =>
@@ -131,7 +135,10 @@ export function OutputView() {
       const name = `${pick.fileName} ${AUDIENCE_NAMES[audience]}.${fmt}`;
       if (fmt === 'docx') return { name, bytes: await (await loadDocx()).renderDocx(doc), mime: MIME.docx };
       const { renderPdf, loadFonts } = await loadPdf();
-      return { name, bytes: (await renderPdf(doc, await loadFonts())).bytes, mime: MIME.pdf };
+      {
+        const r = await renderPdf(doc, await loadFonts());
+        return { name, bytes: r.bytes, mime: MIME.pdf, missing: r.missingChars };
+      }
     });
 
   const batch = () =>
@@ -140,8 +147,9 @@ export function OutputView() {
       const { personalFeedbackDoc } = await loadTemplates();
       const { renderBatchZip, loadFonts } = await loadPdf();
       const items = list.map((p) => ({ name: `${p.fileName} ${AUDIENCE_NAMES[audience]}`, doc: personalFeedbackDoc(p.input) }));
-      const bytes = await renderBatchZip(items, await loadFonts(), (d, t) => setBusy(S.output.progress(d, t)));
-      return { name: `${base} 個人回饋單 ${AUDIENCE_NAMES[audience]}.zip`, bytes, mime: MIME.zip };
+      const missing = new Set<string>();
+      const bytes = await renderBatchZip(items, await loadFonts(), (d, t) => setBusy(S.output.progress(d, t)), (cs) => cs.forEach((c) => missing.add(c)));
+      return { name: `${base} 個人回饋單 ${AUDIENCE_NAMES[audience]}.zip`, bytes, mime: MIME.zip, missing: [...missing] };
     });
 
   const report = (fmt: Fmt) =>
@@ -155,7 +163,10 @@ export function OutputView() {
       const doc = vote ? voteReport(s, vote) : opinionReport(s, qs!, review);
       if (fmt === 'docx') return { name, bytes: await (await loadDocx()).renderDocx(doc), mime: MIME.docx };
       const { renderPdf, loadFonts } = await loadPdf();
-      return { name, bytes: (await renderPdf(doc, await loadFonts())).bytes, mime: MIME.pdf };
+      {
+        const r = await renderPdf(doc, await loadFonts());
+        return { name, bytes: r.bytes, mime: MIME.pdf, missing: r.missingChars };
+      }
     });
 
   const dis = busy !== null;
@@ -195,7 +206,7 @@ export function OutputView() {
                 title={S.output.warnTitle}
                 actions={
                   <button class="btn secondary small" type="button" onClick={() => { setConfirmed(false); setPreviewOpen(true); }}>
-                    {previewed ? S.output.previewDone : S.output.previewBtn}
+                    {previewed ? S.output.previewDone : `先預覽${AUDIENCE_NAMES[audience]}`}
                   </button>
                 }
               >
@@ -240,7 +251,11 @@ export function OutputView() {
                 {S.output.allStudents(personal.length)}
               </button>
             </div>
-            {!previewed && <p class="hint">{S.output.needPreview}</p>}
+            {!previewed && (
+              <p class="hint lock-hint">
+                <Icon name="lock" /> {S.output.needPreview}
+              </p>
+            )}
             <p class="hint">{S.output.noteNoRank}</p>
           </section>
         </>

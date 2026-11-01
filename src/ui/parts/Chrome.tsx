@@ -21,6 +21,7 @@ function stepState(i: number, st: ReturnType<typeof getState>): { enabled: boole
 
 export function TopBar() {
   const st = useApp();
+  const unsaved = st.dirty && st.folder.state !== 'ready';
   const steps: StepDef[] = STEP_ROUTES.map((route, i) => ({ route, label: S.steps[i] as string }));
   return (
     <header class="topbar">
@@ -46,9 +47,10 @@ export function TopBar() {
             <Icon name="pencil" />
             <span class="lbl">範本</span>
           </button>
-          <button class="btn secondary small" type="button" onClick={() => go('settings')} aria-label={S.settings}>
+          <button class="btn secondary small" type="button" onClick={() => go('settings')} aria-label={unsaved ? S.settingsUnsaved : S.settings}>
             <Icon name="gear" />
             <span class="lbl">{S.settings}</span>
+            {unsaved && <span class="dot-warn" data-testid="unsaved-dot" aria-hidden="true" />}
           </button>
         </div>
       </div>
