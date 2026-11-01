@@ -9,3 +9,8 @@ export * from './survey';
 export * from './feedback';
 export * from './diff';
 export { mean, trimmedMean } from './mean';
+export { trimExtremes, median } from './mean';
+export * from './scale';
+export * from './advanced';
+export * from './trend';
+export * from './anonymize';
