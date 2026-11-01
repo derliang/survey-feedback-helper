@@ -44,7 +44,7 @@
 
 ## 技術
 
-TypeScript + Vite + Preact；ExcelJS、docx、fflate；PDF 由程式直接產生；GitHub Actions 部署到 GitHub Pages。選型原因與被否決的方案見 [docs/decisions/](docs/decisions/)。
+TypeScript + Vite + Preact；ExcelJS、docx、fflate；PDF 由程式直接產生；本機腳本發布到 GitHub Pages。選型原因與被否決的方案見 [docs/decisions/](docs/decisions/)。
 
 ## 發布規則
 
