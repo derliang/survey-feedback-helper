@@ -3,7 +3,7 @@ import * as W from './wide.mjs';
 export { W };
 export const { L, miniPaper, frameWH, topbar, pane, flex1, body, foot, kbd, fchip, h, th, td, qrow, nvr, tgl, card, table, cmt, cmpbar, addPages, voteBars, vote } = W;
 export const { ic, tag, icbtn, btn, notice, tile, tiles, seg, chips, rcard, rowbtn, grp, brow, write, field, opt } = L;
-export const D = (cap, step, inner, file, H = 800) => frameWH(cap, 1280, H, `${topbar(step, file)}${inner}`);
+export const D = (cap, step, inner, file, H = 800, o = {}) => frameWH(cap, 1280, H, `${topbar(step, file, o)}${inner}`);
 export const side = (w, inner) => pane(w, inner, 'padding:12px;border-right:1px solid var(--line-soft)');
 export const main = (inner, o = '') => flex1(inner, `padding:20px;overflow:hidden;${o}`);
 export const rside = (w, inner) => pane(w, inner, 'padding:20px;border-left:1px solid var(--line-soft);background:var(--card)');
@@ -17,4 +17,4 @@ export const round = (i, bg = 'var(--accent-soft)', fg = 'var(--accent-ink)') =>
 export const centered = (w, inner) => `<div style="margin:auto;width:${w}px;display:flex;flex-direction:column;gap:16px">${inner}</div>`;
 export const rail = (inner) => `<div class="small muted" style="font-weight:700">${inner}</div>`;
 export const fbox = (inner) => `<div style="border:1px solid var(--line-soft);border-radius:var(--r-md);overflow:hidden;background:var(--card)">${inner}</div>`;
-export const bgOpen = () => body(flex1(centered(560, `${h('開啟問卷檔', '支援 Google 表單匯出的 xlsx 或 csv。')}${dropzone(`${round('down-arrow')}<b style="font-size:var(--fs-lg)">把 xlsx 或 csv 拖到這裡</b><span class="small muted">或</span><div style="display:flex;gap:8px">${btn('選擇檔案', 'primary')}${btn('從 Google 雲端硬碟', 'secondary')}</div>`)}`), 'padding:24px;align-items:stretch;justify-content:center'));
+export const bgOpen = () => body(flex1(centered(560, `${h('開啟問卷')}${dropzone(`${round('down-arrow')}<b style="font-size:var(--fs-lg)">把 Excel 檔拖到這裡</b><span class="small muted">或</span><div style="display:flex;gap:8px">${btn('開啟試算表', 'primary')}${btn('選擇 Excel 檔', 'secondary')}</div>`)}`), 'padding:24px;align-items:stretch;justify-content:center'));

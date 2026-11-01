@@ -27,7 +27,7 @@
 .chips{display:flex;gap:8px;flex-wrap:wrap}
 .chip{min-height:var(--tap-min);padding:0 16px;border-radius:999px;border:1px solid var(--ink3);background:var(--card);color:var(--ink);font:600 15px/1.2 var(--font);cursor:pointer}
 .chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink)}
-.rcard{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;min-height:64px;padding:12px 14px;border:1.5px solid var(--line);border-radius:var(--r-md);background:var(--card);text-align:left;cursor:pointer;color:var(--ink);width:100%;font:inherit}
+.rcard{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;min-height:64px;padding:12px 14px;border:1.5px solid var(--ctl);border-radius:var(--r-md);background:var(--card);text-align:left;cursor:pointer;color:var(--ink);width:100%;font:inherit}
 .rcard b{display:block;font-size:var(--fs-md);line-height:1.35}
 .rcard small{display:block;font-size:var(--fs-sm);color:var(--ink2);line-height:1.45}
 .rcard[aria-checked="true"]{border-color:var(--accent);background:var(--accent-soft)}
@@ -56,7 +56,7 @@
 .track>i{display:block;height:100%;border-radius:6px;background:var(--bar-muted)}
 .track>i.lead{background:var(--accent)}
 .track>i.tie{background:var(--warn-bar)}
-.rowbtn{box-shadow:0 1px 2px var(--shadow-sm);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;min-height:64px;padding:10px 14px;background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r-md);text-align:left;color:var(--ink);cursor:pointer;width:100%;font:inherit}
+.rowbtn{box-shadow:0 1px 2px var(--shadow-sm);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;min-height:64px;padding:10px 14px;background:var(--card);border:1px solid var(--ctl);border-radius:var(--r-md);text-align:left;color:var(--ink);cursor:pointer;width:100%;font:inherit}
 .rowbtn .nm{font-weight:600;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rowbtn .sm{font-size:var(--fs-xs);color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rowbtn .rt{display:flex;align-items:center;gap:4px;color:var(--ink2)}
@@ -112,3 +112,25 @@
 .opt[aria-checked="true"]{font-weight:700}
 .sheet .btn{margin-top:12px}
 
+
+/* 2026-11-01 桌機頂端列：步驟（數字圖示＋完成度）、重新開始、設定 */
+.dsteps{display:flex;align-items:center;gap:2px;margin:0 auto}
+.ds{display:inline-flex;align-items:center;gap:8px;min-height:var(--tap-min);padding:0 12px;border:0;border-radius:var(--r-sm);background:transparent;color:var(--ink3);font:600 var(--fs-sm)/1.2 var(--font);cursor:pointer;white-space:nowrap}
+.ds .n{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;border:2px solid var(--ink3);font-size:var(--fs-xs);font-weight:700;flex:none}
+.ds .n svg.ic{width:14px;height:14px;stroke-width:3}
+.ds small{font-size:var(--fs-xs);font-weight:600}
+.ds.done{color:var(--ink2)}
+.ds.done .n{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.ds.cur{background:var(--accent-soft);color:var(--accent-ink)}
+.ds.cur .n{border-color:var(--accent-ink);color:var(--accent-ink)}
+.ds:disabled{cursor:not-allowed}
+.dsep{width:14px;height:2px;background:var(--line);flex:none}
+.btn-ghost{background:transparent;color:var(--ink2);border:1.5px solid transparent}
+.btn .ic{width:20px;height:20px}
+.xl{display:inline-block;width:1em;height:1em;vertical-align:-.15em}
+.chk{display:inline-grid;place-items:center;width:22px;height:22px;border:2px solid var(--ink3);border-radius:6px;background:var(--card);color:var(--on-accent);flex:none}
+.chk[data-on="true"]{background:var(--accent);border-color:var(--accent)}
+.chk svg.ic{width:14px;height:14px;stroke-width:3}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:stretch}
+.pair>*{display:flex;flex-direction:column;gap:10px;height:100%}
+.pair .foot{margin-top:auto;display:flex;gap:8px}
