@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ic, tag, icbtn, btn, notice, tile, seg, chips, rcard, opt, rowbtn, brow, field, grp, steps, sheet } from './lib.mjs';
+import { stepper, extra } from './ds-extra.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const design = path.resolve(here, '..');
@@ -134,7 +135,7 @@ const C = [
   ['FilePicker', '列表', 216, '選檔大按鈕，虛線外框，最小高 176。', 'class 是 `picker`。第 1 步的主要入口。', stack(`<button class="picker" type="button"><span class="big">${ic('file')}</span><b>選擇問卷檔</b><small>Google 表單匯出的 xlsx 或 csv</small></button>`)],
   ['FileChip', '列表', 100, '檔案資訊列。', '檔名過長時省略，檔案大小寫在次行。', stack(`<div class="filechip">${ic('file')}<div><b>三年二班_幹部票選.xlsx</b><span>41 筆回覆 · 18 KB</span></div></div>`)],
   ['AppBar', '導覽', 88, '頂端列，高 56。', '左返回或品牌、中標題、右動作。畫面標題只寫一次。', appbar('問卷回饋小幫手', brandbar, icbtn('sliders', '設定'))],
-  ['Stepper', '導覽', 88, '四段步驟進度：開啟、對應、統計、輸出。', '目前步驟用強調色文字。', steps(3)],
+  stepper,
   ['ActionBar', '導覽', 96, '底部操作列，主按鈕佔滿剩餘寬度。', '要加 `env(safe-area-inset-bottom)`。桌機用 `actbar desk`，按鈕固定寬度靠右。', `<div class="actbar">${btn('上一步', 'secondary')}${btn('下一步：輸出')}</div>`],
   ['BottomSheet', '面板', 420, '手機的底部彈出面板，上緣圓角 r-lg，有把手。', '點遮罩關閉；選項 52 高。桌機改成對話框或下拉選單。', `<div style="position:relative;height:420px;overflow:hidden">${sheet('題目類型', '這一欄是什麼題目？', `<div role="radiogroup" aria-label="題目類型">${opt('單選', true)}${opt('複選')}${opt('量表')}${opt('開放題')}</div>`, btn('套用', 'primary', { block: 1 }))}</div>`],
   ['Dialog', '面板', 300, '桌機與平板的置中對話框，寬 480～720。', '主動作在最右，次要動作在左；危險動作用外框紅，排最後。背景用 `scrim`。', `<div style="padding:24px;background:var(--scrim)"><div class="dialog" role="dialog" aria-label="離開前確認" style="max-width:480px;margin:auto"><h2 style="font-size:var(--fs-xl)">離開這個頁面？</h2><p class="muted">資料不保存，離開後要重新選檔。</p><div style="display:flex;gap:8px;justify-content:flex-end">${btn('離開', 'secondary')}${btn('先輸出')}</div></div></div>`],
@@ -145,6 +146,7 @@ const C = [
   ['DocBarChart', '輸出文件', 160, '輸出文件的長條圖。', '單選以 100% 計，複選以回收人數為基準並寫明。', blk('最喜歡的單元', `${hbar('電路實作', 45, 15, 'k')}${hbar('力學', 30, 10)}${hbar('光學', 25, 9)}`)],
   ['DocTable', '輸出文件', 190, '統計表：表頭粗線、列細線、數字靠右。', '可跨頁並重複表頭；最高最低列用底色加文字標籤。', blk('各規準分數', `<table class="dtable"><thead><tr><th>規準</th><th class="r">平均</th><th class="r">標準差</th><th></th></tr></thead><tbody><tr class="hl"><td>內容掌握</td><td class="r">4.4</td><td class="r">0.6</td><td><span class="pill g">最高</span></td></tr><tr><td>口語表達</td><td class="r">3.6</td><td class="r">0.9</td><td></td></tr></tbody></table>`)],
   ['DocComment', '輸出文件', 200, '留言與老師評語。', '留言預設匿名，經老師審稿；老師評語用綠色底。', blk('留言與評語', `<div class="quote">投影片的圖表很清楚，舉例也很好懂。<span class="by">優點 · 匿名</span></div><div class="callout g"><b>老師評語</b>　這次的資料整理很完整，下次可以多練習口頭結論。</div>`)],
+  ...extra,
 ];
 const hasIcons = (h) => h.includes('<use ');
 const inlineSprite = sprite.replace(/^[\s\S]*?(<svg)/, '$1');
@@ -188,7 +190,7 @@ wr('README.md', `問卷回饋小幫手是給老師用的網頁工具：統計 Go
 ## 設計原則
 
 - **手機單手優先。** 先設計 390 寬，平板與桌機從它延伸；主要動作放畫面底部。
-- **一次一個步驟。** 流程固定四步：開啟、對應、統計、輸出；每個手機畫面只有一個 \`primary\` 按鈕。
+- **一次一個步驟。** 流程固定四步：開啟問卷、準備資料、統計、輸出；每個手機畫面只有一個 \`primary\` 按鈕。
 - **數字要能對照。** 長條旁一定有名稱與數字，狀態一定有文字或圖示。
 - **誠實說明資料去向。** 第一屏就寫資料在哪裡處理。
 
@@ -237,6 +239,18 @@ A4 直式，邊界約 14 mm，頁尾區 20 mm。每份報告依序是摘要、�
 
 用 Icons 資產裡的線條圖示，線寬 2、圓端點，實作時用 \`stroke="currentColor"\` 繼承文字色。圖示按鈕一定要有 \`aria-label\`。
 
+## 第二至四輪的定案規則（2026-11-01）
+
+細節以 docs/design/DESIGN.md 5.20、5.21 與 docs/decisions/ 為準，這裡只留元件層面要記得的。
+
+- **用語**：「專案」叫「問卷」、「專案檔」叫「設定檔」、「猜」叫「智慧判斷」；開啟入口是「開啟試算表」「選擇 Excel 檔」「開啟設定檔」。Google 與 Excel 的選單名稱一律照實際介面抄（核對紀錄在 docs/design/Google介面核對紀錄.md），沒核對的標「待核對」。
+- **步驟列**（Stepper）：數字圖示加完成度，每一步點得進去；頂端列固定有「重新開始」與「設定」（手機是圖示加 aria-label）。
+- **資料存放**：設定檔、名單、審稿進度存使用者選的實體資料夾（桌機 Chrome／Edge），其餘瀏覽器退回手動下載與選檔；問卷作答資料與輸出檔不自動存。隱私文案只用三句白話，沒有「管理名單／一鍵刪除」。
+- **圖表**（ChartPicker）：十一種圖，每種附一句用途，用勾選清單選；每個統計畫面有預設圖，每張圖可換或隱藏；另存圖片有 PNG、JPG、SVG，寬度 1200／2400／4800px。
+- **審稿**（ReviewRow）：意見單行，三個動作同一列；手機用圖示鈕，桌機與平板可用文字鈕。
+- **並排卡片**：並排的卡片或框，高度相等、內距圓角字級一致，按鈕貼底同一水平線；兩顆按鈕保留主次樣式。
+- **帳號**（AccountChooser）：Google 只用私人 Gmail（@gmail.com 結尾）。開 Google 視窗前先出「選帳號前先看一下」；登入後若不是 Gmail，不論學校帳號或用其他信箱註冊的個人帳號，一律擋下，不設「仍要繼續」，並給「改用私人 Gmail 登入」與「改用 Excel 檔」兩條路。
+
 ## 不要做的事
 
 - 不載入網路字型、CDN 圖示或任何外部資源。
@@ -244,6 +258,7 @@ A4 直式，邊界約 14 mm，頁尾區 20 mm。每份報告依序是摘要、�
 - 不用漸層、大面積陰影、帶左側色邊的圓角卡片。
 - 手機版不用 hover 才出現的功能，不用雙擊或長按當唯一操作。
 - 不放使用者沒要求的統計或裝飾性數字。
+- 不替被擋下的帳號加「仍要繼續」；不教老師把學校帳號的表單共用給私人帳號。
 
 ## 未同步的項目
 
@@ -255,8 +270,8 @@ A4 直式，邊界約 14 mm，頁尾區 20 mm。每份報告依序是摘要、�
 const blobs = JSON.parse(rd('design-system/assets.json'));
 const iconNames = icons.map(([n]) => `${n}.svg`);
 const missing = iconNames.filter((n) => !blobs[n]);
-if (missing.length) throw new Error('assets.json 缺圖示 id：' + missing.join(','));
-const files = Object.fromEntries(iconNames.map((n) => [n, { name: n, blob: blobs[n], size: fs.statSync(path.join(out, 'assets/Icons', n)).size, type: 'image/svg+xml' }]));
+if (missing.length) console.warn('提醒：assets.json 缺圖示 id（發佈新成品頁前要先上傳這些圖示並補 id）：' + missing.join(','));
+const files = Object.fromEntries(iconNames.map((n) => [n, { name: n, ...(blobs[n] ? { blob: blobs[n] } : {}), size: fs.statSync(path.join(out, 'assets/Icons', n)).size, type: 'image/svg+xml' }]));
 wr('design-system.json', JSON.stringify({
   v: 3, layout: 'files', createdOnFiles: { v: 1, at: process.env.DS_CREATED || new Date().toISOString() },
   title: '問卷回饋小幫手 設計系統', namespace: 'SurveyFeedbackHelper', libraries: [], sections: {}, groups: ['Icons'],

@@ -16,7 +16,7 @@ for (const f of ['frag-b31.html', 'frag-b32.html', 'frag-b33.html']) for (const 
 // 分組（每個值是畫面代號清單，順序即使用順序）
 export const PHONE_SECS = [
   { id: 'p-open', title: '開啟問卷、資料夾與 Google', intro: '第 1 步。首頁（雙欄在手機改上下排）、選來源、讀取中、讀不到檔案、瀏覽器過舊、手機不能自動存資料夾、認得讀過、重新開始，與 Google 試算表直讀。', keys: ['new:H1', 'new:1b', 'new:1c', 'new:1d', 'flow-data:1e', 'new:E3', 'new:E4', 'new:E5', 'new:Gd1', 'new:Gd2', 'new:Gd3'] },
-  { id: 'p-help', title: '教學：匯出與私人 Gmail', intro: '匯出成 Excel 檔（用字照 Google 介面核對紀錄）、偵測到學校帳號時的擋下畫面與「怎麼改用私人 Gmail 登入」（Google 視窗字樣待核對）、Google 表單設計技巧。', keys: ['new:G1', 'new:G2', 'new:S1', 'new:S2', 'flow-out:9'] },
+  { id: 'p-help', title: '教學：匯出與私人 Gmail', intro: '匯出成 Excel 檔（用字照 Google 介面核對紀錄）、偵測到學校帳號時的擋下畫面與「怎麼改用私人 Gmail 登入」（Google 視窗字樣待核對）、Google 表單設計技巧。', keys: ['new:G1', 'new:G2', 'new:S0', 'new:S1', 'new:S2', 'flow-out:9'] },
   { id: 'p-prep', title: '準備資料', intro: '第 2 步。四件事固定順序並解鎖、問卷類型、欄位對應（可改名、沒用的欄收起來）、名單（同一班／混班）、名單對照、量表與權重、資料檢查。', keys: ['new:2', 'new:2a', 'new:2b', 'core:2b', 'new:3a', 'new:3b', 'flow-data:3c', 'new:W', 'flow-data:4a', 'flow-data:4b'] },
   { id: 'p-vote', title: '票選統計與防弊', intro: '第 3 步。各職位結果、逐人勾選的票選名單、同票抽籤、投影唱票（定案 B：全部候選人同列）、防弊檢查與計票規則。', keys: ['core:3', 'flow-stats:5a', 'new:V1', 'flow-stats:5b', 'new:唱票', 'flow-guard:11a', 'flow-guard:11b', 'flow-guard:11c'] },
   { id: 'p-survey', title: '意見調查統計與圖表', intro: '第 3 步。量表、複選、開放題、交叉分析、累積讀取、圖表圖庫與勾選換圖、圖表另存、量表標籤與反向計分。', keys: ['new:5d', 'new:5d2', 'flow-stats:5e', 'flow-stats:5f', 'flow-stats:5g', 'new:E6', 'new:Gal', 'new:Save', 'flow-guard:11d', 'flow-guard:11e'] },

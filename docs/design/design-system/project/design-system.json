@@ -3,7 +3,7 @@
   "layout": "files",
   "createdOnFiles": {
     "v": 1,
-    "at": "2026-10-31T07:05:13.368Z"
+    "at": "2026-11-01T03:26:56.961Z"
   },
   "title": "問卷回饋小幫手 設計系統",
   "namespace": "SurveyFeedbackHelper",
@@ -55,241 +55,325 @@
         "table.svg",
         "comment.svg",
         "pagebreak.svg",
-        "image.svg"
+        "image.svg",
+        "gear.svg",
+        "c-bar.svg",
+        "c-stack.svg",
+        "c-pie.svg",
+        "c-donut.svg",
+        "c-hist.svg",
+        "c-radar.svg",
+        "c-scatter.svg",
+        "c-box.svg",
+        "c-dots.svg",
+        "c-heat.svg",
+        "c-diff.svg"
       ],
       "files": {
         "back.svg": {
           "name": "back.svg",
-          "blob": "fc9a1d4e7b0c207bca3caafab4895d0a",
+          "blob": "fccde52bfea161c9effcb530f4eb2b38",
           "size": 209,
           "type": "image/svg+xml"
         },
         "next.svg": {
           "name": "next.svg",
-          "blob": "1e0f0e1e180f1c0bfeb34e86204eae6a",
+          "blob": "30297bf8fc617e551bf63fc8bf441f41",
           "size": 207,
           "type": "image/svg+xml"
         },
         "down.svg": {
           "name": "down.svg",
-          "blob": "9e9d5558158c3ae42dbc4ca1c0579b19",
+          "blob": "7b08e63a33fd2543da9f964879348968",
           "size": 207,
           "type": "image/svg+xml"
         },
         "check.svg": {
           "name": "check.svg",
-          "blob": "bd348dc3e1a7540a87ab9ca958abc694",
+          "blob": "92c10b9000465b26fddcfb11ef86c1c9",
           "size": 217,
           "type": "image/svg+xml"
         },
         "sliders.svg": {
           "name": "sliders.svg",
-          "blob": "57832b9d4f724d990bab91b586b08f76",
+          "blob": "075ed73772bbdac36f8873f10a473ff1",
           "size": 287,
           "type": "image/svg+xml"
         },
         "file.svg": {
           "name": "file.svg",
-          "blob": "f59833201f2dbcd6aeb0fd7d999efb11",
+          "blob": "d5e6e60d09f6910a3400e26bb4884176",
           "size": 232,
           "type": "image/svg+xml"
         },
         "info.svg": {
           "name": "info.svg",
-          "blob": "b223d41e0172aaf619676c79aa91f2fa",
+          "blob": "538ec926a953496d50b318cc01e10219",
           "size": 243,
           "type": "image/svg+xml"
         },
         "lock.svg": {
           "name": "lock.svg",
-          "blob": "840f8b719351c3eea9f331d1f250b95a",
+          "blob": "992447678f2161ec8dd77e6f626e311d",
           "size": 265,
           "type": "image/svg+xml"
         },
         "dice.svg": {
           "name": "dice.svg",
-          "blob": "b13e979e8f7e5a93ec088bdeb9779ad4",
+          "blob": "89ac637a4e3f8422d1d000f7a31334f7",
           "size": 306,
           "type": "image/svg+xml"
         },
         "down-arrow.svg": {
           "name": "down-arrow.svg",
-          "blob": "4a4d1a2b61f48344a5e40763643886d3",
+          "blob": "9202827a149f9ba63c35259802106952",
           "size": 224,
           "type": "image/svg+xml"
         },
         "bars.svg": {
           "name": "bars.svg",
-          "blob": "e268e3470b3147c37a015a9362f593c5",
+          "blob": "e8c89605faa6b0adf233a74a2d4a26bf",
           "size": 221,
           "type": "image/svg+xml"
         },
         "help.svg": {
           "name": "help.svg",
-          "blob": "84497a3a018919b2861bf8ce976c6054",
+          "blob": "ecfec16627deee7403218c7eed33be8e",
           "size": 278,
           "type": "image/svg+xml"
         },
         "warn.svg": {
           "name": "warn.svg",
-          "blob": "4592fc6aa0d4d848ecb53a4ccedbdd2a",
+          "blob": "aed26c947f95b6f4519f69c82bfe7059",
           "size": 239,
           "type": "image/svg+xml"
         },
         "x.svg": {
           "name": "x.svg",
-          "blob": "d6eec10997236be2d4946ba66f33ca45",
+          "blob": "142ea048ddeced536869030619c98d9f",
           "size": 215,
           "type": "image/svg+xml"
         },
         "users.svg": {
           "name": "users.svg",
-          "blob": "6ba3c9da3d246aa329470412172fd29b",
+          "blob": "d75c3c035b1f59674a8aa79688602b79",
           "size": 315,
           "type": "image/svg+xml"
         },
         "copy.svg": {
           "name": "copy.svg",
-          "blob": "b2bba10a15b18a3663803fb40cd45e9d",
+          "blob": "0bdf50c3a4e6cfc3c5462350f1b66974",
           "size": 295,
           "type": "image/svg+xml"
         },
         "plus.svg": {
           "name": "plus.svg",
-          "blob": "7c735f6ea9713ed2e00a4314c036c61b",
+          "blob": "1b914e3c269d164fa3f810335cc7fac4",
           "size": 211,
           "type": "image/svg+xml"
         },
         "search.svg": {
           "name": "search.svg",
-          "blob": "e5324086c89164862dbe6b2f21c6a01d",
+          "blob": "7c56bdc56e5660a68977531dd98969d7",
           "size": 237,
           "type": "image/svg+xml"
         },
         "pencil.svg": {
           "name": "pencil.svg",
-          "blob": "8d528a90d80b2ce3736665a824ca35fa",
+          "blob": "f60dbf006976a68ad2d62a15098931a5",
           "size": 219,
           "type": "image/svg+xml"
         },
         "eye-off.svg": {
           "name": "eye-off.svg",
-          "blob": "8af3bcf7bc09716ec344e9b3f4c6441e",
+          "blob": "3f49ef1abedbde0dc2c12fb3635c9bf2",
           "size": 297,
           "type": "image/svg+xml"
         },
         "clock.svg": {
           "name": "clock.svg",
-          "blob": "90619342fcc9184ea4a760efc466d48d",
+          "blob": "a5fdd343e5fa6c5a4af58dc510848230",
           "size": 237,
           "type": "image/svg+xml"
         },
         "list.svg": {
           "name": "list.svg",
-          "blob": "d60d665813bd2197073677f290da92c2",
+          "blob": "4f255f976fa7f17b9b510bc73c889190",
           "size": 244,
           "type": "image/svg+xml"
         },
         "flag.svg": {
           "name": "flag.svg",
-          "blob": "0551cbbe7e53e5447c4e1705ce90118f",
+          "blob": "8af69aa40124ca86cebc91b4e301cc85",
           "size": 220,
           "type": "image/svg+xml"
         },
         "cast.svg": {
           "name": "cast.svg",
-          "blob": "5ffbb1adc3277e567ed6122636cbe52d",
+          "blob": "171eed3f39cbe94f3dc456bf2fa6addf",
           "size": 259,
           "type": "image/svg+xml"
         },
         "folder.svg": {
           "name": "folder.svg",
-          "blob": "585042bd091d0237b21e7325ef2480be",
+          "blob": "4ebe63c5a751d4a3c098b177075a8ba4",
           "size": 262,
           "type": "image/svg+xml"
         },
         "cloud.svg": {
           "name": "cloud.svg",
-          "blob": "0a9749dab914549ea314f1025bf4cc26",
+          "blob": "4f40d6048560950e5d4d7cabbbddbce1",
           "size": 248,
           "type": "image/svg+xml"
         },
         "refresh.svg": {
           "name": "refresh.svg",
-          "blob": "f9815c26aeddd74f2023cea9a6331792",
+          "blob": "ca136f0ad0d771173aaca448a0a781a3",
           "size": 228,
           "type": "image/svg+xml"
         },
         "trend.svg": {
           "name": "trend.svg",
-          "blob": "4cd5e9dbfd3f05d7f6867aa9c14979aa",
+          "blob": "07e7faae27d2a797d79757aa74f9c20f",
           "size": 221,
           "type": "image/svg+xml"
         },
         "undo.svg": {
           "name": "undo.svg",
-          "blob": "38ab6c3aa16d97d5f7ff251c7191fb38",
+          "blob": "eae9dc27fea7c7c601495c49c92510b9",
           "size": 231,
           "type": "image/svg+xml"
         },
         "redo.svg": {
           "name": "redo.svg",
-          "blob": "8880833b0160204d2a1383e09cdb9723",
+          "blob": "c278ff7b54ed20dd305d938c015653c4",
           "size": 232,
           "type": "image/svg+xml"
         },
         "grip.svg": {
           "name": "grip.svg",
-          "blob": "0fd7bbfa7731096a3c7f7313e73fc975",
+          "blob": "03f16adf71b3cf2e9df3366bf1ea1b91",
           "size": 269,
           "type": "image/svg+xml"
         },
         "up.svg": {
           "name": "up.svg",
-          "blob": "78dd821f8d1e2106c7710b57d3039aaf",
+          "blob": "5b6b6de2b8d78b4ac93aaf1fa3b0dfe9",
           "size": 208,
           "type": "image/svg+xml"
         },
         "trash.svg": {
           "name": "trash.svg",
-          "blob": "237c0ad143a1f0a9c25e5ecea4341d2c",
+          "blob": "9d633828eed7fb9fe4ebb035abaf0f4a",
           "size": 229,
           "type": "image/svg+xml"
         },
         "minus.svg": {
           "name": "minus.svg",
-          "blob": "29b87e8491a44bba868115a2ba76c527",
+          "blob": "5b0ee1664ca2b83a9c7f9fea8e0cf9f1",
           "size": 203,
           "type": "image/svg+xml"
         },
         "type.svg": {
           "name": "type.svg",
-          "blob": "e3b9339e400e8de6791c8f2f3be3ef37",
+          "blob": "d3c345e6c8660148227d99451728d760",
           "size": 210,
           "type": "image/svg+xml"
         },
         "table.svg": {
           "name": "table.svg",
-          "blob": "8fe936fee07fb30fbf81a819835a3eca",
+          "blob": "a2a4cda340343bb4835eade8ffcc3127",
           "size": 259,
           "type": "image/svg+xml"
         },
         "comment.svg": {
           "name": "comment.svg",
-          "blob": "306371bffedf6d3f6d53ea566aa77e88",
+          "blob": "20731812413db1890aa03b5a23c06743",
           "size": 213,
           "type": "image/svg+xml"
         },
         "pagebreak.svg": {
           "name": "pagebreak.svg",
-          "blob": "2cbce038ac2c74b80988ae7c87ad5412",
+          "blob": "2edbbf79d9b452d12899068f0a43b72c",
           "size": 218,
           "type": "image/svg+xml"
         },
         "image.svg": {
           "name": "image.svg",
-          "blob": "735f773031bae60549c98f3c637de2ac",
+          "blob": "eb60a04e9c3f163866d3be621b3ceca7",
           "size": 297,
+          "type": "image/svg+xml"
+        },
+        "gear.svg": {
+          "name": "gear.svg",
+          "blob": "9153c3e754091ccb33b5e1fc28f09b18",
+          "size": 449,
+          "type": "image/svg+xml"
+        },
+        "c-bar.svg": {
+          "name": "c-bar.svg",
+          "blob": "123bd3cc05deb76e8a022704fc9ea613",
+          "size": 220,
+          "type": "image/svg+xml"
+        },
+        "c-stack.svg": {
+          "name": "c-stack.svg",
+          "blob": "4fff25bd6c933a4f5349840486e824c8",
+          "size": 326,
+          "type": "image/svg+xml"
+        },
+        "c-pie.svg": {
+          "name": "c-pie.svg",
+          "blob": "6bfc15733df2b2f35b9788f3104fd7f9",
+          "size": 235,
+          "type": "image/svg+xml"
+        },
+        "c-donut.svg": {
+          "name": "c-donut.svg",
+          "blob": "4b1fec51406be2b041690736210e97f9",
+          "size": 245,
+          "type": "image/svg+xml"
+        },
+        "c-hist.svg": {
+          "name": "c-hist.svg",
+          "blob": "ee01c0419527463e260d71eb5aae0413",
+          "size": 245,
+          "type": "image/svg+xml"
+        },
+        "c-radar.svg": {
+          "name": "c-radar.svg",
+          "blob": "bfff6cca9cf660c1f3bb21873489223b",
+          "size": 252,
+          "type": "image/svg+xml"
+        },
+        "c-scatter.svg": {
+          "name": "c-scatter.svg",
+          "blob": "a229a0086e6347cf5c0a39a5fb1da243",
+          "size": 335,
+          "type": "image/svg+xml"
+        },
+        "c-box.svg": {
+          "name": "c-box.svg",
+          "blob": "9e29d1bc0ea8997981d7613ff9c54e90",
+          "size": 231,
+          "type": "image/svg+xml"
+        },
+        "c-dots.svg": {
+          "name": "c-dots.svg",
+          "blob": "48e38938ac5bf9a28f0671d7612ba98a",
+          "size": 315,
+          "type": "image/svg+xml"
+        },
+        "c-heat.svg": {
+          "name": "c-heat.svg",
+          "blob": "94067c00a22f730e6562dd04a73cc2fd",
+          "size": 347,
+          "type": "image/svg+xml"
+        },
+        "c-diff.svg": {
+          "name": "c-diff.svg",
+          "blob": "0e794ad99f1edf2b9b272c2471a65c33",
+          "size": 252,
           "type": "image/svg+xml"
         }
       }
@@ -302,8 +386,8 @@
   },
   "lastChange": {
     "by": "derliang",
-    "at": "2026-10-31T07:06:25.725Z",
-    "via": "GitHub · derliang/survey-feedback-helper@31635ff",
+    "at": "2026-11-01T03:26:56.961Z",
+    "via": "GitHub · derliang/survey-feedback-helper@main",
     "note": "由 docs/design 的 tokens、元件 CSS 與圖示建立"
   }
 }
