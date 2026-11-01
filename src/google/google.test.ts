@@ -12,7 +12,11 @@ import {
 } from "./browser";
 import { readGoogleConfig } from "./config";
 import type { FetchLike } from "./http";
-import { classifyGoogleError, failureMessage } from "./quota";
+import {
+  classifyGoogleError,
+  classifySaveError,
+  failureMessage,
+} from "./quota";
 import {
   connectGoogle,
   pickAndRead,
@@ -238,6 +242,17 @@ describe("雲端硬碟存檔", () => {
 
   it("檔名裡的單引號與反斜線會跳脫", () => {
     expect(quoteDriveName(String.raw`a'b\c`)).toBe(String.raw`'a\'b\\c'`);
+  });
+});
+
+describe("存檔失敗分類", () => {
+  it("用 reason 分開限流與雲端空間滿", () => {
+    expect(classifySaveError(new GoogleApiError(403, "storageQuotaExceeded"))).toBe("storage");
+    expect(classifySaveError(new GoogleApiError(403, "userRateLimitExceeded"))).toBe("rate");
+    expect(classifySaveError(new GoogleApiError(429, ""))).toBe("rate");
+    expect(classifySaveError(new GoogleApiError(401, ""))).toBe("auth");
+    expect(classifySaveError(new GoogleApiError(500, ""))).toBe("other");
+    expect(classifySaveError(new TypeError("fetch failed"))).toBe("network");
   });
 });
 

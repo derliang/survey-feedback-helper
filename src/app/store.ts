@@ -24,7 +24,9 @@ import {
 } from "../storage";
 import type { PhraseCategory, SurveyKind } from "../storage";
 import { applyLang } from "../ui/locale";
-import { saveToDrive } from "./cloud";
+import type { SaveFailure } from "../google/quota";
+import { strings as S } from "../ui/strings";
+import { saveToDrive, setCloudToken } from "./cloud";
 import {
   QUICK_TEMPLATES,
   TEMPLATE_ID_PREFIX,
@@ -112,6 +114,10 @@ export interface AppState {
   folderDialog: boolean;
   confirmRestart: boolean;
   toast: string | null;
+  /** 雲端備份失敗提示（不自動消失，可有動作鈕）。 */
+  cloudAlert: SaveFailure | null;
+  /** 雲端備份狀態（設定頁用）；權杖與時間都只在記憶體。 */
+  cloud: { lastSaved: number | null; paused: SaveFailure | null };
   error: LoadError["reason"] | "settings" | null;
   /** 從「最近的問卷」卡片點進來，等選檔後優先比對這一份。 */
   pendingRecent: string | null;
@@ -133,10 +139,12 @@ const initial: AppState = {
   folder: { state: "none" },
   data: emptyFolderData(),
   dirty: false,
-  prefs: { theme: "auto", lang: "zh", dismissed: [] },
+  prefs: { theme: "auto", lang: "zh", dismissed: [], cloudBackup: false },
   folderDialog: false,
   confirmRestart: false,
   toast: null,
+  cloudAlert: null,
+  cloud: { lastSaved: null, paused: null },
   error: null,
   pendingRecent: null,
   oldBrowser: false,
@@ -249,15 +257,42 @@ export async function persist(data: FolderData): Promise<void> {
 }
 
 let announced = false;
+const alerted = new Set<SaveFailure>();
 
-/** 已登入 Google 時，把設定檔也存一份到使用者的雲端硬碟（沒登入什麼都不做）。 */
-export async function backupToDrive(data: FolderData = getState().data) {
-  const r = await saveToDrive(serializeFolderData(data), (toast) =>
-    set({ toast }),
-  );
-  if (r === "saved" && !announced) {
-    announced = true;
-    set({ toast: `已把「${SETTINGS_FILE}」存到你的 Google 雲端硬碟。` });
+/**
+ * 開關開著且這次已登入 Google 時，把設定檔也存一份到使用者的雲端硬碟（DESIGN.md 5.28）。
+ * 成功只在每次開啟的第一次跳提示；同種失敗每次開啟只跳一次，之後只更新設定頁狀態。
+ */
+export async function backupToDrive(
+  data: FolderData = getState().data,
+): Promise<void> {
+  if (!getState().prefs.cloudBackup) return;
+  const r = await saveToDrive(serializeFolderData(data));
+  if (r.status === "no-token") return;
+  if (r.status === "saved") {
+    set({ cloud: { lastSaved: r.at, paused: null }, cloudAlert: null });
+    if (!announced) {
+      announced = true;
+      set({ toast: S.cloud.savedFirst(SETTINGS_FILE) });
+    }
+    return;
+  }
+  set((st) => ({ cloud: { ...st.cloud, paused: r.kind } }));
+  if (!alerted.has(r.kind)) {
+    alerted.add(r.kind);
+    set({ cloudAlert: r.kind });
+  }
+}
+
+/** 設定頁的開關：關→開要先經確認卡才呼叫 true；開→關呼叫 false（雲端那份不刪）。 */
+export function setCloudBackup(on: boolean, disconnect = false): void {
+  updatePrefs({ cloudBackup: on });
+  if (on) {
+    alerted.clear();
+    void backupToDrive();
+  } else {
+    set({ cloud: { lastSaved: null, paused: null }, cloudAlert: null });
+    if (disconnect) setCloudToken(null);
   }
 }
 

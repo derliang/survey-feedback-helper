@@ -1,4 +1,5 @@
 import { useEffect } from 'preact/hooks';
+import { CloudAlert } from './views/CloudBackup';
 import { boot, set, useApp } from '../app/store';
 import { strings as S } from './strings';
 import { Notice } from './parts/parts';
@@ -60,6 +61,7 @@ export function App() {
       {(st.route === 'guide' || st.route === 'templates') && <GuideRoute />}
       {st.route === 'settings' && <Settings />}
       <FolderDialog />
+      <CloudAlert />
       <RestartDialog />
       {st.toast && (
         <div class="toast" role="status" data-testid="toast">

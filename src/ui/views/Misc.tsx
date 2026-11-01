@@ -2,6 +2,7 @@ import { choosePickFolder, downloadSettings, forgetThisFolder, go, restart, set,
 import { type Lang, type Theme, isTouchDevice } from '../../storage';
 import { strings as S } from '../strings';
 import { ActBar, Sheet } from '../parts/parts';
+import { CloudCard } from './CloudBackup';
 import { BackupCard, DefaultsCard } from './SettingsExtra';
 
 export function Settings() {
@@ -53,6 +54,7 @@ export function Settings() {
         )}
       </section>
 
+      <CloudCard />
       <DefaultsCard />
       <BackupCard />
 

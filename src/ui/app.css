@@ -1522,3 +1522,46 @@ details[open] > :not(summary) {
 .out .notice[role='status'] {
   animation: sfh-delayed-show 0s 300ms backwards;
 }
+
+/* 雲端自動備份（DESIGN.md 5.28） */
+.g-cloud-explain {
+  margin-top: var(--sp-4);
+}
+.g-cloud-explain h3 {
+  margin: 0 0 var(--sp-2);
+}
+.g-switch,
+.g-check {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  min-height: 44px;
+  margin-top: var(--sp-3);
+}
+.g-switch input,
+.g-check input {
+  width: 22px;
+  height: 22px;
+  margin-top: 2px;
+}
+.g-switch small {
+  display: block;
+  opacity: 0.8;
+}
+.toast-bad {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  border-left: 4px solid var(--warn-bar);
+}
+.toast-bad .btn,
+.toast-x {
+  min-height: 44px;
+  min-width: 44px;
+}
+.toast-x {
+  background: transparent;
+  color: inherit;
+  border: 0;
+  cursor: pointer;
+}
