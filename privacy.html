@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>隱私權政策｜問卷回饋小幫手</title>
+    <meta name="description" content="問卷回饋小幫手的隱私權政策：沒有伺服器、不蒐集使用數據，問卷與名單只在你的電腦處理。Privacy policy in English at the bottom." />
+    <link rel="icon" type="image/png" href="icons/icon-192.png" />
+    <style>
+/* tokens:start（內容必須與 docs/design/tokens.css 相同，npm test 會比對） */
+:root {
+  /* 色彩：表面 */
+  --paper: #f4f5f7;       /* 頁面底 */
+  --card: #ffffff;        /* 卡片、導覽列、輸入框底 */
+  --sunk: #eceef2;        /* 凹陷底：分段控制軌道、進度軌道、停用 */
+  /* 色彩：文字 */
+  --ink: #14171f;
+  --ink2: #444b5a;
+  --ink3: #5b6373;
+  /* 色彩：線 */
+  --line: #cfd3dc;
+  --line-soft: #e3e6ec;
+  /* 色彩：強調（鈷藍，唯一的強調色；深色版用較深的藍搭白字，不用粉彩色） */
+  --accent: #2554d8;
+  --on-accent: #ffffff;
+  --accent-soft: #e7edff;
+  --accent-ink: #1b3fa6;
+  /* 色彩：語意（不算強調色） */
+  --ok: #17713f;
+  --ok-soft: #dcf1e3;
+  --warn: #7a4f00;
+  --warn-soft: #fdf0d0;
+  --bad: #a8262b;
+  --bad-soft: #fbe2e0;
+  /* 色彩：圖表資料色（色盲友善；一定要搭配文字標籤，不單靠顏色） */
+  --d1: #2554d8;
+  --d2: #cf5f12;
+  --d3: #b3367a;
+  --d4: #0c7a88;
+  --d5: #8a6a0a;
+  --d0: #7b8494;          /* 其他、未分類 */
+  --warn-bar: #b97f00;       /* 同票、需處理的長條（對卡片 3.4:1） */
+  --bar-muted: #7f889b;   /* 未當選、未突顯的長條（對卡片 3.6:1） */
+  --ctl: #7f889b;         /* 控制項外框（選項卡、列按鈕）：對卡片與頁面底 3:1 以上 */
+  --ext-excel: #1d6f42;   /* 外部服務代表色：僅用於自畫的 Excel「X」圖示，不是品牌色 */
+  --scrim: rgba(12, 14, 20, 0.5);
+  --shadow: rgba(20, 24, 40, 0.16);
+  --shadow-sm: rgba(20, 24, 40, 0.08);   /* 卡片的細微層次 */
+
+  /* 字型：介面一律系統字型，不載入網路字型 */
+  --font: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Heiti TC", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Consolas, "Courier New", monospace;
+  --fs-xs: 13px;
+  --fs-sm: 14px;
+  --fs-md: 16px;   /* 手機輸入框不得小於 16，避免 iOS 自動放大 */
+  --fs-lg: 18px;
+  --fs-xl: 22px;
+  --fs-2xl: 28px;
+  --lh-body: 1.65;
+  --lh-tight: 1.3;
+
+  /* 間距（4 的倍數）、圓角、點擊區、動態 */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --r-sm: 8px;     /* 按鈕、輸入框、選項 */
+  --r-md: 12px;    /* 卡片、面板、提示 */
+  --r-lg: 20px;    /* 底部彈出面板上緣 */
+  --tap: 48px;     /* 手機預設點擊高度；任何可點元件不得低於 44px */
+  --tap-min: 44px;
+  --dur: 160ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0e1014;
+    --card: #171a20;
+    --sunk: #0b0c10;
+    --ink: #eceef3;
+    --ink2: #b9bfcc;
+    --ink3: #8f97a8;
+    --line: #2b303a;
+    --line-soft: #20242c;
+    --accent: #3d68f0;
+    --on-accent: #ffffff;
+    --accent-soft: #1a2850;
+    --accent-ink: #9db8ff;
+    --ok: #6fd39a;
+    --ok-soft: #12291c;
+    --warn: #f2c35c;
+    --warn-soft: #2e2410;
+    --bad: #ff9d96;
+    --bad-soft: #3a1b1d;
+    --d1: #6f93ff;
+    --d2: #f08a47;
+    --d3: #e579b3;
+    --d4: #3fc0d0;
+    --d5: #d6b43a;
+    --d0: #8f97a8;
+    --warn-bar: #f0b429;
+    --bar-muted: #6e7789;
+    --ctl: #6e7789;
+    --scrim: rgba(0, 0, 0, 0.65);
+    --shadow: rgba(0, 0, 0, 0.6);
+    --shadow-sm: rgba(0, 0, 0, 0.4);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper: #0e1014;
+  --card: #171a20;
+  --sunk: #0b0c10;
+  --ink: #eceef3;
+  --ink2: #b9bfcc;
+  --ink3: #8f97a8;
+  --line: #2b303a;
+  --line-soft: #20242c;
+  --accent: #3d68f0;
+  --on-accent: #ffffff;
+  --accent-soft: #1a2850;
+  --accent-ink: #9db8ff;
+  --ok: #6fd39a;
+  --ok-soft: #12291c;
+  --warn: #f2c35c;
+  --warn-soft: #2e2410;
+  --bad: #ff9d96;
+  --bad-soft: #3a1b1d;
+  --d1: #6f93ff;
+  --d2: #f08a47;
+  --d3: #e579b3;
+  --d4: #3fc0d0;
+  --d5: #d6b43a;
+  --d0: #8f97a8;
+  --warn-bar: #f0b429;
+  --bar-muted: #6e7789;
+  --ctl: #6e7789;
+  --scrim: rgba(0, 0, 0, 0.65);
+  --shadow: rgba(0, 0, 0, 0.6);
+  --shadow-sm: rgba(0, 0, 0, 0.4);
+  color-scheme: dark;
+}
+
+/*
+ * 輸出文件主題「溫暖」（個人回饋單預設）：紙張永遠是淺色，不隨深色模式改變。
+ * 用法：文件預覽與 PDF／Word 輸出的容器加 class="doc-warm"。
+ */
+.doc-warm {
+  --doc-paper: #fffdf9;
+  --doc-ink: #33291f;
+  --doc-ink2: #66554a;
+  --doc-line: #ead9c3;
+  --doc-accent: #a84f00;
+  --doc-accent-soft: #ffecd2;
+  --doc-leaf: #2f6f55;
+  --doc-leaf-soft: #e1f1e8;
+  --doc-card: #ffffff;
+  --doc-sunk: #efe8dc;
+  --doc-sunk2: #f4eee4;
+  --doc-blue-soft: #e3eaff;
+  --doc-blue-ink: #1b3fa6;
+  --doc-s1: #cf5f12;
+  --doc-s2: #eaa06a;
+  --doc-s3: #ddd5c8;
+  --doc-s4: #7f9be3;
+  --doc-s5: #2554d8;
+}
+/* tokens:end */
+      * { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: var(--font);
+        font-size: var(--fs-md);
+        line-height: 1.75;
+      }
+      .wrap { max-width: 720px; margin: 0 auto; padding: var(--sp-5) var(--sp-4) var(--sp-7); }
+      header { display: flex; flex-direction: column; gap: var(--sp-2); margin-bottom: var(--sp-5); }
+      .home { display: inline-flex; align-items: center; min-height: 44px; color: var(--accent-ink); font-weight: 600; }
+      h1 { margin: 0; font-size: var(--fs-2xl); line-height: 1.35; }
+      h2 { margin: var(--sp-6) 0 var(--sp-2); font-size: var(--fs-xl); line-height: 1.4; }
+      p, ul, ol { margin: var(--sp-2) 0; }
+      ul, ol { padding-left: 1.4em; }
+      li { margin: var(--sp-1) 0; }
+      a { color: var(--accent-ink); overflow-wrap: anywhere; }
+      .meta { margin: 0; color: var(--ink2); font-size: var(--fs-sm); }
+      .box {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: var(--r-md);
+        padding: var(--sp-4);
+        margin: var(--sp-4) 0;
+      }
+      .box h2 { margin-top: 0; font-size: var(--fs-lg); }
+      .tag {
+        display: inline-block;
+        padding: 0 var(--sp-2);
+        border: 1px solid var(--line);
+        border-radius: var(--r-sm);
+        background: var(--sunk);
+        color: var(--ink2);
+        font-size: var(--fs-xs);
+        line-height: 1.6;
+        white-space: nowrap;
+      }
+      code { font-family: var(--font-mono); font-size: 0.92em; overflow-wrap: anywhere; }
+      hr { border: 0; border-top: 1px solid var(--line-soft); margin: var(--sp-7) 0 0; }
+      :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <a class="home" href="./">← 回到問卷回饋小幫手</a>
+        <h1>隱私權政策</h1>
+        <p class="meta">最後更新：2026-11-01（台北時間）。適用於「問卷回饋小幫手」網頁程式（<a href="https://derliang.github.io/survey-feedback-helper/">https://derliang.github.io/survey-feedback-helper/</a>）。English version below.</p>
+      </header>
+
+      <main>
+        <section class="box" aria-label="重點">
+          <h2>重點</h2>
+          <ul>
+            <li>本程式<strong>沒有伺服器</strong>，也<strong>不蒐集任何使用數據</strong>（連匿名統計都沒有）。</li>
+            <li>你的問卷結果與學生名單，<strong>只在你自己的電腦或手機的瀏覽器裡處理</strong>，不會傳給我們。</li>
+            <li>Google 登入是<strong>選用</strong>的；不登入，改用 Excel 檔也能完整使用。</li>
+            <li>選用的「自動存到雲端硬碟」<strong>預設關閉</strong>，打開前會說明並請你確認。</li>
+          </ul>
+        </section>
+
+        <h2>1. 這是什麼</h2>
+        <p>問卷回饋小幫手是免費、開放原始碼（GPL-3.0）的純網頁工具，幫老師整理問卷結果、做統計與輸出回饋文件。原始碼公開在 <a href="https://github.com/derliang/survey-feedback-helper">github.com/derliang/survey-feedback-helper</a>，內容是否與本政策一致，任何人都可以檢查。</p>
+
+        <h2>2. 我們不蒐集什麼</h2>
+        <ul>
+          <li>沒有伺服器、沒有資料庫、沒有帳號系統，所以我們<strong>收不到</strong>你的任何資料。</li>
+          <li>沒有分析工具、沒有廣告、沒有追蹤用的 Cookie，也不會把你的使用情形回報給任何人。</li>
+          <li>介面字型使用你裝置內建的字型；輸出文件用的字型由本站自己提供，不向第三方載入。</li>
+        </ul>
+
+        <h2>3. 你的資料放在哪裡</h2>
+        <ul>
+          <li><strong>問卷結果</strong>（你開啟的 Excel 檔或 Google 試算表內容）：只在這個瀏覽器的記憶體裡計算，關掉分頁就沒了；不會寫進瀏覽器的儲存空間。</li>
+          <li><strong>設定檔、學生名單、審稿進度</strong>：存在你自己選的電腦資料夾（桌機 Chrome、Edge）。沒有資料夾的裝置（手機、平板、Safari、Firefox），由你手動下載或「儲存到檔案」。</li>
+          <li><strong>瀏覽器只記得</strong>：資料夾的存取代號，以及介面偏好（語言、外觀、是否開啟雲端自動備份）。不含問卷作答與名單內容；被清掉時，程式會請你重新選一次資料夾。</li>
+          <li><strong>輸出的檔案</strong>（個人回饋單、報告等）由你下載，之後怎麼保管、分享，由你決定。</li>
+          <li>為了離線可用，程式會把<strong>程式本身</strong>（網頁、字型）快取在瀏覽器，不快取任何問卷資料。</li>
+        </ul>
+
+        <h2>4. Google 登入（選用）</h2>
+        <p>只有在你要「開啟 Google 試算表」，或打開「自動存到雲端硬碟」時，才會請你登入 Google。</p>
+        <ul>
+          <li><strong>只申請一個權限：<code>drive.file</code></strong>。這個權限只讓本程式存取「你用 Google 的檔案選擇器選的檔案」與「本程式自己建立的設定檔」；看不到你雲端硬碟裡的其他檔案，也不會要求讀取你的信箱、聯絡人或行事曆。授權畫面上的實際字樣 <span class="tag">待核對</span></li>
+          <li><strong>讀取試算表</strong>：你選的那份試算表的內容，由你的瀏覽器直接向 Google 讀取，只在瀏覽器裡處理，<strong>不會經過我們</strong>（我們沒有伺服器）。</li>
+          <li><strong>登入憑證（權杖）只放在瀏覽器的記憶體</strong>，不寫進任何儲存空間；重新整理或關掉分頁就消失，下次要再登入一次。</li>
+          <li>登入時，瀏覽器會從 Google（<code>accounts.google.com</code>）載入 Google 提供的登入程式，Google 依它自己的政策處理你的登入。</li>
+          <li>本程式對從 Google API 取得的資訊的使用與轉移，會遵守 <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API 服務使用者資料政策</a>（Google API Services User Data Policy），包括其中的「限制使用」（Limited Use）規定：只用來提供你看得到的功能，不用於廣告、不出售、不供人閱讀，也不用來訓練任何模型。</li>
+        </ul>
+
+        <h2>5. 雲端自動備份（選用，預設關閉）</h2>
+        <ul>
+          <li>打開前，程式會先說明並請你明確確認；沒有打開，就不會把任何東西存到雲端。</li>
+          <li>打開後，每次設定有更新，程式會把<strong>「問卷小幫手設定.sfh」這一個檔</strong>多存一份到<strong>你自己的 Google 雲端硬碟</strong>（同名覆蓋）。檔案裡有設定、範本與你匯入的<strong>學生名單</strong>；<strong>不含問卷作答結果</strong>。</li>
+          <li>這個檔放在你的帳號底下，<strong>我們看不到</strong>。如果你登入的是學校帳號，學校管理員可能看得到；名單要保密時，請用個人帳號或不要開啟。</li>
+          <li>只往雲端寫，不會從雲端讀回來蓋掉你電腦上的檔案。</li>
+          <li>關閉後不再存新的更新；雲端裡已存的那份<strong>會留著</strong>，本程式不會刪，要刪請自己到 Google 雲端硬碟刪除。</li>
+        </ul>
+
+        <h2>6. 分享給第三方</h2>
+        <p>我們沒有你的資料，所以沒有東西可以出售、出租或分享，也不會揭露給任何第三方。資料會往來的對象只有你<strong>自己選擇使用</strong>的 Google（第 4、5 節）。另外，本網站放在 GitHub Pages；你開啟網頁時，GitHub 作為主機，可能依 <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">GitHub 的隱私聲明</a>記錄一般連線資訊（例如 IP 位址），本專案取不到這些紀錄。</p>
+
+        <h2>7. 怎麼撤銷與刪除</h2>
+        <ul>
+          <li><strong>停止雲端備份</strong>：在程式「設定」關閉「自動存到雲端硬碟」，並可選擇同時中斷 Google 連線。</li>
+          <li><strong>撤銷 Google 授權</strong>：到你的 Google 帳戶，在「安全性」裡找「第三方應用程式和服務的存取權」（實際名稱 <span class="tag">待核對</span>），選「問卷回饋小幫手」後移除存取權。</li>
+          <li><strong>刪除雲端那一份</strong>：到你的 Google 雲端硬碟，自己刪除「問卷小幫手設定.sfh」。</li>
+          <li><strong>刪除這台裝置上的記錄</strong>：在程式「設定」按「忘記這個資料夾」（只讓瀏覽器忘記位置，不動資料夾裡的檔案），或清除瀏覽器對本網站的資料。</li>
+        </ul>
+
+        <h2>8. 學生資料</h2>
+        <p>問卷與名單裡的學生資料屬於老師與學校。本程式不蒐集、不上傳；但輸出的檔案與你存的設定檔（含名單）會出現學生姓名，請依學校的規定保管。我們的原始碼公開，因此<strong>永遠不會</strong>把學生資料放進公開的專案。</p>
+
+        <h2>9. 本政策的修改</h2>
+        <p>內容變更時，會更新本頁開頭的日期；歷次修改都可以在 GitHub 的版本紀錄查到。</p>
+
+        <h2>10. 聯絡方式</h2>
+        <p>有疑問或想回報問題，請到 <a href="https://github.com/derliang/survey-feedback-helper/issues">GitHub Issues</a> 留言。Issues 是公開的，<strong>請不要貼學生資料或任何個人資料</strong>。</p>
+
+        <hr />
+
+        <section id="english" lang="en" aria-label="English version">
+          <h1 style="margin-top: var(--sp-6)">Privacy Policy (English)</h1>
+          <p class="meta">Last updated: 2026-11-01 (Taipei time). Applies to the web app “Survey Feedback Helper” (問卷回饋小幫手) at <a href="https://derliang.github.io/survey-feedback-helper/">https://derliang.github.io/survey-feedback-helper/</a>. The Traditional Chinese text above is the original; this is a faithful summary.</p>
+
+          <section class="box" aria-label="Summary">
+            <h2>Summary</h2>
+            <ul>
+              <li>There is <strong>no server</strong>, and the app <strong>collects no usage data</strong> (not even anonymous statistics).</li>
+              <li>Survey results and student rosters are processed <strong>only in your own browser</strong>. They are never sent to us.</li>
+              <li>Google sign-in is <strong>optional</strong>. You can use an Excel file instead.</li>
+              <li>The optional “save to Google Drive” backup is <strong>off by default</strong> and asks for your explicit confirmation first.</li>
+            </ul>
+          </section>
+
+          <h2>What we do not collect</h2>
+          <p>No server, database or account system, so we cannot receive your data. No analytics, no ads, no tracking cookies. Fonts for exported documents are served from this site itself, not from third parties.</p>
+
+          <h2>Where your data lives</h2>
+          <ul>
+            <li>Survey results (your Excel file or Google Sheet) are processed in browser memory only and are not written to browser storage.</li>
+            <li>Settings, rosters and review progress are saved in a folder on your computer that you choose (desktop Chrome or Edge), or downloaded by you on other devices.</li>
+            <li>The browser only remembers a folder access handle and interface preferences (language, appearance, whether cloud backup is on). It does not remember survey answers or roster contents.</li>
+            <li>For offline use, the app caches its own code and fonts, never survey data.</li>
+          </ul>
+
+          <h2>Google sign-in (optional)</h2>
+          <ul>
+            <li>The app requests a single scope, <code>drive.file</code>. It lets the app access only files you pick with Google’s file picker and the settings file the app itself creates. It cannot see other files in your Drive, and it does not ask for your email, contacts or calendar. The exact wording on Google’s consent screen is still to be checked.</li>
+            <li>The spreadsheet you choose is read directly from Google by your browser and processed there. It does not pass through us, because we have no server.</li>
+            <li>The sign-in token is kept in browser memory only. It disappears when you reload or close the tab.</li>
+            <li>When you sign in, your browser loads Google’s sign-in script from <code>accounts.google.com</code>; Google handles your sign-in under its own policies.</li>
+            <li>The app’s use and transfer of information received from Google APIs adheres to the <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>, including the Limited Use requirements: data is used only to provide the user-facing features, and is not used for advertising, sold, read by humans, or used to train models.</li>
+          </ul>
+
+          <h2>Optional cloud backup (off by default)</h2>
+          <p>If you turn it on, each time your settings change the app saves one file, “問卷小幫手設定.sfh”, to your own Google Drive (overwriting the previous copy). The file contains settings, templates and the student roster you imported, but not survey answers. We cannot see it. If you sign in with a school account, your school’s administrator may be able to see it. Turning the option off stops further saving; the copy already in your Drive stays until you delete it yourself. The app only writes to Drive and never reads it back over your local files.</p>
+
+          <h2>Sharing</h2>
+          <p>We hold no data, so we have nothing to sell, rent or share. Data only goes to Google, if you choose to use it. This site is hosted on GitHub Pages; GitHub, as the host, may log ordinary connection information (such as IP addresses) under its own privacy statement, and this project has no access to those logs.</p>
+
+          <h2>Revoking access and deleting data</h2>
+          <ul>
+            <li>Turn off “save to Google Drive” in the app’s Settings; you may also disconnect Google there.</li>
+            <li>Remove the app’s access in your Google Account, under Security, “third-party apps and services” (exact name to be checked).</li>
+            <li>Delete “問卷小幫手設定.sfh” from your Google Drive yourself.</li>
+            <li>Use “Forget this folder” in Settings, or clear this site’s data in your browser.</li>
+          </ul>
+
+          <h2>Student data</h2>
+          <p>Student data belongs to teachers and schools. The app does not collect or upload it, but exported files and the saved settings file (which includes the roster) contain student names; please store them according to your school’s rules. This project never puts student data into its public repository.</p>
+
+          <h2>Changes and contact</h2>
+          <p>When this policy changes, the date at the top is updated, and the history is available in the GitHub repository. For questions, please open an issue at <a href="https://github.com/derliang/survey-feedback-helper/issues">GitHub Issues</a>. Issues are public, so do not post student or personal data there.</p>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
