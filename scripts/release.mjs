@@ -5,12 +5,15 @@
 //   --skip-ci                    只供 dry-run 省時間；與 --yes 併用會被拒絕
 //
 // 流程：確認工作樹乾淨 → npm run ci（含建置）→ 在暫存 worktree 取出 gh-pages
-// → 換成 dist/ 內容並加 .nojekyll → 新 commit（不強制覆寫歷史）→ 一般 push。
+// → 換成 dist/ 內容並加 .nojekyll 與 version.json → 新 commit（不強制覆寫歷史）→ 一般 push
+// → 對來源 main commit 建立並推送 tag（v<版號>）→ gh release create（失敗只警告，不擋發布）。
+// 版號取自 package.json；--yes 要求版號不是 0.0.0，且 tag 還沒存在（要先升版號）。
 import { execFileSync, spawnSync } from 'node:child_process';
-import { cpSync, existsSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { hostname, tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { buildVersionJson, changelogHint, isValidVersion, releaseNotes, tagName } from './release-meta.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const args = new Set(process.argv.slice(2));
@@ -41,6 +44,29 @@ if (head !== mainSha) {
   const msg = '發布來源必須等於 origin/main；請先合併 PR，並在 main 上執行。';
   if (publish) fail(msg);
   console.warn(`[警告] ${msg}（dry-run 僅提醒）`);
+}
+
+// 1b. 版號（package.json）與 tag
+const version = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).version;
+const tag = tagName(version);
+console.log(`版號：${version}（tag ${tag}）`);
+if (!isValidVersion(version)) fail(`package.json 的版號不是 x.y.z：${version}`);
+const changelog = readFileSync(join(root, 'CHANGELOG.md'), 'utf8');
+console.log(changelogHint(changelog, version));
+{
+  const problems = [];
+  if (version === '0.0.0') problems.push('版號仍是 0.0.0，請先在 package.json 升版號');
+  try {
+    git(root, 'rev-parse', '--verify', `refs/tags/${tag}`);
+    problems.push(`本機已有 tag ${tag}，請先升版號`);
+  } catch {
+    /* 沒有 tag：正常 */
+  }
+  if (git(root, 'ls-remote', '--tags', 'origin', `refs/tags/${tag}`)) problems.push(`遠端已有 tag ${tag}，請先升版號`);
+  for (const p of problems) {
+    if (publish) fail(p);
+    console.warn(`[警告] ${p}（dry-run 僅提醒；--yes 會被擋）`);
+  }
 }
 
 // 2. 全部檢查（含建置）
@@ -78,6 +104,9 @@ try {
   }
   cpSync(join(root, 'dist'), wt, { recursive: true });
   writeFileSync(join(wt, '.nojekyll'), '');
+  const versionJson = buildVersionJson({ version, commit: mainSha });
+  writeFileSync(join(wt, 'version.json'), JSON.stringify(versionJson, null, 2) + '\n');
+  console.log(`version.json：${JSON.stringify(versionJson)}`);
   git(wt, 'add', '-A');
 
   const stat = git(wt, 'status', '--porcelain');
@@ -106,6 +135,27 @@ try {
       const remote = git(root, 'rev-parse', 'origin/gh-pages');
       if (remote !== sha) fail(`push 後遠端 gh-pages（${remote}）與剛建立的 commit（${sha}）不一致。`);
       console.log(`\n已發布：gh-pages @ ${sha}（來源 main ${mainSha}）\n正式站：${SITE}\n（Pages 部署通常需 1～2 分鐘，請到網址確認。）`);
+
+      // 發布已完成；以下 tag 與 Release 失敗只警告，不影響已上線的站
+      try {
+        git(
+          root,
+          '-c', `user.name=${author}`,
+          '-c', 'user.email=noreply@anthropic.com',
+          'tag', '-a', tag, mainSha, '-m', `${tag}（${versionJson.releaseDate}）`,
+        );
+        git(root, 'push', 'origin', `refs/tags/${tag}`);
+        console.log(`已建立並推送 tag ${tag} → ${mainSha.slice(0, 7)}`);
+        const gh = spawnSync(
+          'gh',
+          ['release', 'create', tag, '--verify-tag', '--title', tag, '--notes', releaseNotes(changelog, version, mainSha)],
+          { cwd: root, encoding: 'utf8' },
+        );
+        if (gh.status === 0) console.log(`GitHub Release：${gh.stdout.trim()}`);
+        else console.warn(`[警告] gh release create 失敗（不影響發布）：${(gh.stderr || gh.error || '').toString().trim()}`);
+      } catch (e) {
+        console.warn(`[警告] tag／Release 失敗（站已發布）：${e.message}`);
+      }
     }
   }
 } finally {

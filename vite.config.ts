@@ -45,7 +45,7 @@ export default defineConfig(({ command }) => ({
   plugins: [preact(), precachePlugin()],
   build: { target: 'es2022', sourcemap: false },
   test: {
-    include: ['src/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'scripts/**/*.test.mjs'],
     environment: 'node',
   },
 }));
