@@ -12,6 +12,7 @@ export function ensureEditable(t: EditorTemplate, mine: EditorTemplate[]): Edito
   const copy: EditorTemplate = JSON.parse(JSON.stringify(t));
   copy.id = `mine-${newId()}`;
   copy.builtin = false;
+  copy.basedOn = t.id;
   copy.name = uniqueName(`${t.name}（我的）`, mine);
   return copy;
 }
