@@ -44,7 +44,7 @@ F.push(D('D51 桌機：安裝為應用程式｜安裝不是必要，只是桌面
 
 // D52 離線與已就緒
 F.push(D('D52 桌機：離線與已就緒｜裝完或快取完成時顯示一次「已可離線使用」。離線時頁首出現淡色提示：統計與輸出照常，只有雲端硬碟不能用。', 2,
-  `<div style="padding:12px 16px 0;display:flex;flex-direction:column;gap:8px">${notice('', 'info', '目前沒有網路。統計與輸出照常可用，Google 雲端硬碟暫時不能用。')}${notice('ok', 'check', '已可離線使用。下次沒有網路也能打開。')}</div>${body(main(`${h('準備資料')}<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">${[['問卷類型', '票選幹部', '已確認', 'ok'], ['欄位對應', '已完成', '已確認', 'ok'], ['Google 雲端硬碟', '離線時無法使用', '離線', ''], ['資料檢查', '3 項待處理', '請處理', 'warn']].map(([a, b, c, k]) => `<div class="qcard" style="gap:6px"><div style="display:flex"><b>${a}</b><span style="margin-left:auto">${tag(c, k)}</span></div><span class="small muted">${b}</span></div>`).join('')}</div>`))}${nav('下一步：看統計')}`));
+  `<div style="padding:12px 16px 0;display:flex;flex-direction:column;gap:8px">${notice('', 'info', '目前沒有網路。統計與輸出照常可用，Google 試算表暫時不能讀取。')}${notice('ok', 'check', '已可離線使用。下次沒有網路也能打開。')}</div>${body(main(`${h('準備資料')}<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">${[['問卷類型', '票選幹部', '已確認', 'ok'], ['欄位對應', '已完成', '已確認', 'ok'], ['Google 雲端硬碟', '離線時無法使用', '離線', ''], ['資料檢查', '3 項待處理', '請處理', 'warn']].map(([a, b, c, k]) => `<div class="qcard" style="gap:6px"><div style="display:flex"><b>${a}</b><span style="margin-left:auto">${tag(c, k)}</span></div><span class="small muted">${b}</span></div>`).join('')}</div>`))}${nav('下一步：看統計')}`));
 
 // D53 有新版本
 F.push(D('D53 桌機：有新版本｜更新會重新載入頁面、資料會清掉，所以資料已載入時主動作是「先輸出」，更新排在後面；沒載入資料時才直接更新。', 3,

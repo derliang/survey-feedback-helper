@@ -36,8 +36,10 @@
   --d4: #0c7a88;
   --d5: #8a6a0a;
   --d0: #7b8494;          /* 其他、未分類 */
-  --warn-bar: #e3a012;       /* 同票、需處理的長條 */
-  --bar-muted: #c3c9d6;   /* 未當選、未突顯的長條 */
+  --warn-bar: #b97f00;       /* 同票、需處理的長條（對卡片 3.4:1） */
+  --bar-muted: #7f889b;   /* 未當選、未突顯的長條（對卡片 3.6:1） */
+  --ctl: #7f889b;         /* 控制項外框（選項卡、列按鈕）：對卡片與頁面底 3:1 以上 */
+  --ext-excel: #1d6f42;   /* 外部服務代表色：僅用於自畫的 Excel「X」圖示，不是品牌色 */
   --scrim: rgba(12, 14, 20, 0.5);
   --shadow: rgba(20, 24, 40, 0.16);
   --shadow-sm: rgba(20, 24, 40, 0.08);   /* 卡片的細微層次 */
@@ -97,7 +99,8 @@
     --d5: #d6b43a;
     --d0: #8f97a8;
     --warn-bar: #f0b429;
-    --bar-muted: #3a404d;
+    --bar-muted: #6e7789;
+    --ctl: #6e7789;
     --scrim: rgba(0, 0, 0, 0.65);
     --shadow: rgba(0, 0, 0, 0.6);
     --shadow-sm: rgba(0, 0, 0, 0.4);
@@ -131,7 +134,8 @@
   --d5: #d6b43a;
   --d0: #8f97a8;
   --warn-bar: #f0b429;
-  --bar-muted: #3a404d;
+  --bar-muted: #6e7789;
+  --ctl: #6e7789;
   --scrim: rgba(0, 0, 0, 0.65);
   --shadow: rgba(0, 0, 0, 0.6);
   --shadow-sm: rgba(0, 0, 0, 0.4);
@@ -228,7 +232,7 @@ button{font-family:inherit}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
 .chip{min-height:var(--tap-min);padding:0 16px;border-radius:999px;border:1px solid var(--ink3);background:var(--card);color:var(--ink);font:600 15px/1.2 var(--font);cursor:pointer}
 .chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink)}
-.rcard{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;min-height:64px;padding:12px 14px;border:1.5px solid var(--line);border-radius:var(--r-md);background:var(--card);text-align:left;cursor:pointer;color:var(--ink);width:100%;font:inherit}
+.rcard{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;min-height:64px;padding:12px 14px;border:1.5px solid var(--ctl);border-radius:var(--r-md);background:var(--card);text-align:left;cursor:pointer;color:var(--ink);width:100%;font:inherit}
 .rcard b{display:block;font-size:var(--fs-md);line-height:1.35}
 .rcard small{display:block;font-size:var(--fs-sm);color:var(--ink2);line-height:1.45}
 .rcard[aria-checked="true"]{border-color:var(--accent);background:var(--accent-soft)}
@@ -257,7 +261,7 @@ button{font-family:inherit}
 .track>i{display:block;height:100%;border-radius:6px;background:var(--bar-muted)}
 .track>i.lead{background:var(--accent)}
 .track>i.tie{background:var(--warn-bar)}
-.rowbtn{box-shadow:0 1px 2px var(--shadow-sm);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;min-height:64px;padding:10px 14px;background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r-md);text-align:left;color:var(--ink);cursor:pointer;width:100%;font:inherit}
+.rowbtn{box-shadow:0 1px 2px var(--shadow-sm);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;min-height:64px;padding:10px 14px;background:var(--card);border:1px solid var(--ctl);border-radius:var(--r-md);text-align:left;color:var(--ink);cursor:pointer;width:100%;font:inherit}
 .rowbtn .nm{font-weight:600;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rowbtn .sm{font-size:var(--fs-xs);color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rowbtn .rt{display:flex;align-items:center;gap:4px;color:var(--ink2)}
@@ -313,6 +317,28 @@ button{font-family:inherit}
 .opt[aria-checked="true"]{font-weight:700}
 .sheet .btn{margin-top:12px}
 
+
+/* 2026-11-01 桌機頂端列：步驟（數字圖示＋完成度）、重新開始、設定 */
+.dsteps{display:flex;align-items:center;gap:2px;margin:0 auto}
+.ds{display:inline-flex;align-items:center;gap:8px;min-height:var(--tap-min);padding:0 12px;border:0;border-radius:var(--r-sm);background:transparent;color:var(--ink3);font:600 var(--fs-sm)/1.2 var(--font);cursor:pointer;white-space:nowrap}
+.ds .n{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;border:2px solid var(--ink3);font-size:var(--fs-xs);font-weight:700;flex:none}
+.ds .n svg.ic{width:14px;height:14px;stroke-width:3}
+.ds small{font-size:var(--fs-xs);font-weight:600}
+.ds.done{color:var(--ink2)}
+.ds.done .n{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.ds.cur{background:var(--accent-soft);color:var(--accent-ink)}
+.ds.cur .n{border-color:var(--accent-ink);color:var(--accent-ink)}
+.ds:disabled{cursor:not-allowed}
+.dsep{width:14px;height:2px;background:var(--line);flex:none}
+.btn-ghost{background:transparent;color:var(--ink2);border:1.5px solid transparent}
+.btn .ic{width:20px;height:20px}
+.xl{display:inline-block;width:1em;height:1em;vertical-align:-.15em}
+.chk{display:inline-grid;place-items:center;width:22px;height:22px;border:2px solid var(--ink3);border-radius:6px;background:var(--card);color:var(--on-accent);flex:none}
+.chk[data-on="true"]{background:var(--accent);border-color:var(--accent)}
+.chk svg.ic{width:14px;height:14px;stroke-width:3}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:stretch}
+.pair>*{display:flex;flex-direction:column;gap:10px;height:100%}
+.pair .foot{margin-top:auto;display:flex;gap:8px}
 
 /* ===== 輸出文件（A4）：794 × 1123，用 .doc-warm 的 --doc-* token；紙張永遠淺色 ===== */
 .scale>.paper{position:absolute;left:0;top:0;transform-origin:0 0}
@@ -479,6 +505,18 @@ button{font-family:inherit}
 <symbol id="i-comment" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></symbol>
 <symbol id="i-pagebreak" viewBox="0 0 24 24"><path d="M3 12h4M10 12h4M17 12h4"/></symbol>
 <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 18l5-5 4 3 3-3 4 4"/></symbol>
+<symbol id="i-gear" viewBox="0 0 24 24"><path d="M10.3 3h3.4l.5 2.4 1.7.7 2.1-1.3 2.4 2.4-1.3 2.1.7 1.7 2.4.5v3.4l-2.4.5-.7 1.7 1.3 2.1-2.4 2.4-2.1-1.3-1.7.7-.5 2.4h-3.4l-.5-2.4-1.7-.7-2.1 1.3-2.4-2.4 1.3-2.1-.7-1.7L3 13.7v-3.4l2.4-.5.7-1.7-1.3-2.1 2.4-2.4 2.1 1.3 1.7-.7z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-c-bar" viewBox="0 0 24 24"><path d="M5 20V11M12 20V4M19 20v-6"/></symbol>
+<symbol id="i-c-stack" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="4" rx="1"/><rect x="3" y="11" width="18" height="4" rx="1"/><path d="M9 5v4M14 11v4"/><path d="M3 19h18"/></symbol>
+<symbol id="i-c-pie" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v9h9"/></symbol>
+<symbol id="i-c-donut" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></symbol>
+<symbol id="i-c-hist" viewBox="0 0 24 24"><path d="M4 20v-7h4v7M8 20V6h4v14M12 20V9h4v11M16 20v-5h4v5"/></symbol>
+<symbol id="i-c-radar" viewBox="0 0 24 24"><path d="M12 3l8 6-3 10H7L4 9z"/><path d="M12 8l4 3-1.5 5h-5L8 11z"/></symbol>
+<symbol id="i-c-scatter" viewBox="0 0 24 24"><path d="M3 3v18h18"/><circle cx="8" cy="15" r="1.4"/><circle cx="11" cy="10" r="1.4"/><circle cx="15" cy="14" r="1.4"/><circle cx="18" cy="7" r="1.4"/></symbol>
+<symbol id="i-c-box" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M7 7h10v10H7zM7 12h10"/></symbol>
+<symbol id="i-c-dots" viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h18"/><circle cx="8" cy="7" r="1.8"/><circle cx="15" cy="12" r="1.8"/><circle cx="11" cy="17" r="1.8"/></symbol>
+<symbol id="i-c-heat" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7"/><rect x="13" y="4" width="7" height="7"/><rect x="4" y="13" width="7" height="7"/><rect x="13" y="13" width="7" height="7"/></symbol>
+<symbol id="i-c-diff" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/><path d="M9 5v4M15 10v4M12 15v4"/></symbol>
 </svg>
 <div class="wrap">
 <header class="pagehead"><p class="small muted">設計規範的模擬頁，使用虛構資料。規範見 docs/design/DESIGN.md。</p><h1>統計操作畫面（手機）</h1><p class="muted">票選（職位總覽、抽籤、唱票）、意見調查（量表、複選、開放題、交叉分析）、報告回饋（清單、詳情）、歷次趨勢。人名與數字皆為虛構。</p></header>
@@ -493,6 +531,7 @@ button{font-family:inherit}
 <figure class="fig" style="margin:0"><div class="scale" data-w="390" data-h="844"><div class="dev"><div class="appbar"><button class="icbtn" type="button" aria-label="返回"><svg class="ic"><use href="#i-back"/></svg></button><span class="ttl">統計結果</span><button class="icbtn" type="button" aria-label="設定"><svg class="ic"><use href="#i-sliders"/></svg></button></div><div class="stepper"><div class="segs"><span class="st on">開啟</span><span class="st on">對應</span><span class="st on cur">統計</span><span class="st">輸出</span></div></div><div class="scr" style="gap:10px"><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"><div class="tile"><div class="l">班級平均</div><div class="n">79.8</div></div><div class="tile"><div class="l">最高</div><div class="n">86.0</div></div><div class="tile"><div class="l">最低</div><div class="n">72.7</div></div></div><div class="seg" role="group" aria-label="檢視"><button type="button" aria-pressed="true">排名</button><button type="button" aria-pressed="false">落差</button><button type="button" aria-pressed="false">一致性</button></div><button class="rowbtn" type="button"><div><div class="nm"><span style="display:inline-block;width:1.4em;color:var(--ink3)">1</span>第 6 組　在地小吃</div><div class="sm">加權 86.0 · 自評 +2.0</div></div><span class="rt"><span class="tag tag-ok">86.0</span><svg class="ic"><use href="#i-next"/></svg></span></button><button class="rowbtn" type="button"><div><div class="nm"><span style="display:inline-block;width:1.4em;color:var(--ink3)">2</span>第 1 組　水資源</div><div class="sm">加權 85.2 · 自評 +2.0</div></div><span class="rt"><span class="tag tag-ok">85.2</span><svg class="ic"><use href="#i-next"/></svg></span></button><button class="rowbtn" type="button"><div><div class="nm"><span style="display:inline-block;width:1.4em;color:var(--ink3)">3</span>第 3 組　垃圾減量</div><div class="sm">加權 81.9 · 自評 +2.0</div></div><span class="rt"><span class="tag">81.9</span><svg class="ic"><use href="#i-next"/></svg></span></button><button class="rowbtn" type="button"><div><div class="nm"><span style="display:inline-block;width:1.4em;color:var(--ink3)">6</span>第 2 組　校園植物</div><div class="sm">加權 76.9 · 自評 +6.0</div></div><span class="rt"><span class="tag">76.9</span><svg class="ic"><use href="#i-next"/></svg></span></button><button class="rowbtn" type="button"><div><div class="nm"><span style="display:inline-block;width:1.4em;color:var(--ink3)">8</span>第 4 組　交通安全</div><div class="sm">加權 72.7 · 自評 +10.3</div></div><span class="rt"><span class="tag tag-warn">72.7</span><svg class="ic"><use href="#i-next"/></svg></span></button></div><div class="actbar"><button class="btn btn-secondary" type="button">上一步</button><button class="btn btn-primary" type="button">下一步：輸出</button></div></div></div><figcaption><b>5h 報告回饋：被評對象清單</b>以被評學生（或組）為單位。排名、加權分數、自評落差；落差大的加警示。可切換排序與一致性。</figcaption></figure>
 <figure class="fig" style="margin:0"><div class="scale" data-w="390" data-h="844"><div class="dev"><div class="appbar"><button class="icbtn" type="button" aria-label="返回"><svg class="ic"><use href="#i-back"/></svg></button><span class="ttl">第 1 組　水資源</span><button class="icbtn" type="button" aria-label="說明"><svg class="ic"><use href="#i-help"/></svg></button></div><div class="stepper"><div class="segs"><span class="st on">開啟</span><span class="st on">對應</span><span class="st on cur">統計</span><span class="st">輸出</span></div></div><div class="scr" style="gap:10px"><div style="display:grid;grid-template-columns:1.2fr 1fr;gap:8px"><div class="tile" style="background:var(--accent-soft);border-color:transparent"><div class="l" style="color:var(--accent-ink)">加權總分</div><div class="n" style="color:var(--accent-ink)">85.2</div></div><div style="display:grid;gap:8px"><div class="tile"><div class="l">自評</div><div class="n">87.2</div></div><div class="tile"><div class="l">班均</div><div class="n">79.8</div></div></div></div><div class="legend" style="display:flex;gap:12px;flex-wrap:wrap;font-size:var(--fs-xs);color:var(--ink2)"><span>藍條：同學給分</span><span>黃虛線：班均</span><span>黑線：自評</span></div><div class="qcard" style="gap:12px"><div class="cmp"><div class="h"><span style="font-weight:600">內容完整 · 30%</span><span class="v"><b>4.3</b> <span class="small muted">班均 4</span></span></div><div class="tr"><i style="width:86%"></i><u style="left:80%"></u><em style="left:calc(90% - 1px)"></em></div></div><div class="cmp"><div class="h"><span style="font-weight:600">創意 · 25%</span><span class="v"><b>4</b> <span class="small muted">班均 3.8</span></span></div><div class="tr"><i style="width:80%"></i><u style="left:76%"></u><em style="left:calc(84.00000000000001% - 1px)"></em></div></div><div class="cmp"><div class="h"><span style="font-weight:600">表達 · 25%</span><span class="v"><b>4.2</b> <span class="small muted">班均 3.9</span></span></div><div class="tr"><i style="width:84.00000000000001%"></i><u style="left:78%"></u><em style="left:calc(80% - 1px)"></em></div></div><div class="cmp"><div class="h"><span style="font-weight:600">團隊合作 · 20%</span><span class="v"><b>4.6</b> <span class="small muted">班均 4.2</span></span></div><div class="tr"><i style="width:92%"></i><u style="left:84.00000000000001%"></u><em style="left:calc(96% - 1px)"></em></div></div></div><button class="rowbtn" type="button"><div><div class="nm">留言 5 則</div><div class="sm">優點 3、建議 2，等老師審稿</div></div><span class="rt"><span class="tag tag-warn">待審稿</span><svg class="ic"><use href="#i-next"/></svg></span></button></div><div class="actbar"><button class="btn btn-secondary" type="button">上一步</button><button class="btn btn-primary" type="button">下一步：輸出</button></div></div></div><figcaption><b>5i 報告回饋：單一對象詳情</b>同學給的分、班均、自評放同一條線。下方是這位學生的留言，之後在「老師審稿」處理。</figcaption></figure>
 <figure class="fig" style="margin:0"><div class="scale" data-w="390" data-h="844"><div class="dev"><div class="appbar"><button class="icbtn" type="button" aria-label="返回"><svg class="ic"><use href="#i-back"/></svg></button><span class="ttl">歷次趨勢</span><button class="icbtn" type="button" aria-label="說明"><svg class="ic"><use href="#i-help"/></svg></button></div><div class="stepper"><div class="segs"><span class="st on">開啟</span><span class="st on">對應</span><span class="st on cur">統計</span><span class="st">輸出</span></div></div><div class="scr" style="gap:12px"><div class="filechip"><svg class="ic"><use href="#i-trend"/></svg><div><b>三年二班　3 次問卷</b><span>8/30 開學、9/20、10/12 期中</span></div></div><div class="qcard" style="gap:12px"><svg viewBox="0 0 358 190" style="width:100%;height:auto" role="img" aria-label="三次問卷的平均分數變化"><line x1="28" x2="330" y1="150" y2="150" stroke="var(--line-soft)"/><text x="22" y="154" text-anchor="end" font-size="11" fill="var(--ink3)">3</text><line x1="28" x2="330" y1="117.5" y2="117.5" stroke="var(--line-soft)"/><text x="22" y="121.5" text-anchor="end" font-size="11" fill="var(--ink3)">3.5</text><line x1="28" x2="330" y1="85" y2="85" stroke="var(--line-soft)"/><text x="22" y="89" text-anchor="end" font-size="11" fill="var(--ink3)">4</text><line x1="28" x2="330" y1="52.5" y2="52.5" stroke="var(--line-soft)"/><text x="22" y="56.5" text-anchor="end" font-size="11" fill="var(--ink3)">4.5</text><line x1="28" x2="330" y1="20" y2="20" stroke="var(--line-soft)"/><text x="22" y="24" text-anchor="end" font-size="11" fill="var(--ink3)">5</text><text x="36" y="178" text-anchor="middle" font-size="12" fill="var(--ink2)">8/30</text><text x="160" y="178" text-anchor="middle" font-size="12" fill="var(--ink2)">9/20</text><text x="284" y="178" text-anchor="middle" font-size="12" fill="var(--ink2)">10/12</text><polyline fill="none" stroke="var(--d1)" stroke-width="2.5" stroke-linejoin="round" points="36,91.5 160,78.50000000000003 284,60.94999999999999"/><circle cx="36" cy="91.5" r="3.5" fill="var(--d1)"/><circle cx="160" cy="78.50000000000003" r="3.5" fill="var(--d1)"/><circle cx="284" cy="60.94999999999999" r="5" fill="var(--d1)"/><text x="294" y="64.94999999999999" font-size="12" font-weight="700" fill="var(--ink)">4.37</text><polyline fill="none" stroke="var(--d2)" stroke-width="2.5" stroke-linejoin="round" points="36,65.50000000000001 160,58.99999999999997 284,55.10000000000001"/><circle cx="36" cy="65.50000000000001" r="3.5" fill="var(--d2)"/><circle cx="160" cy="58.99999999999997" r="3.5" fill="var(--d2)"/><circle cx="284" cy="55.10000000000001" r="5" fill="var(--d2)"/><text x="294" y="59.10000000000001" font-size="12" font-weight="700" fill="var(--ink)">4.46</text><polyline fill="none" stroke="var(--d3)" stroke-width="2.5" stroke-linejoin="round" points="36,98.00000000000001 160,111 284,121.4"/><circle cx="36" cy="98.00000000000001" r="3.5" fill="var(--d3)"/><circle cx="160" cy="111" r="3.5" fill="var(--d3)"/><circle cx="284" cy="121.4" r="5" fill="var(--d3)"/><text x="294" y="125.4" font-size="12" font-weight="700" fill="var(--ink)">3.44</text></svg><div style="display:flex;align-items:center;gap:8px;font-size:var(--fs-sm)"><i style="width:14px;height:4px;border-radius:2px;background:var(--d1);flex:none"></i><span style="flex:1">活動內容有趣</span><b>3.9 → 4.37</b><span class="tag tag-ok">上升</span></div><div style="display:flex;align-items:center;gap:8px;font-size:var(--fs-sm)"><i style="width:14px;height:4px;border-radius:2px;background:var(--d2);flex:none"></i><span style="flex:1">老師說明清楚</span><b>4.3 → 4.46</b><span class="tag tag-ok">上升</span></div><div style="display:flex;align-items:center;gap:8px;font-size:var(--fs-sm)"><i style="width:14px;height:4px;border-radius:2px;background:var(--d3);flex:none"></i><span style="flex:1">活動場地舒適</span><b>3.8 → 3.44</b><span class="tag tag-warn">下降</span></div></div><div class="notice warn"><svg class="ic"><use href="#i-warn"/></svg><div>「活動場地舒適」連續兩次下降，從 3.8 降到 3.44。</div></div></div><div class="actbar"><button class="btn btn-secondary" type="button">上一步</button><button class="btn btn-primary" type="button">下一步：輸出</button></div></div></div><figcaption><b>5j 歷次趨勢</b>同一班多次問卷並排。折線在線尾直接標分數與題名，不靠圖例對色。下方表格列出變化與方向，下降用文字說明。</figcaption></figure>
+
 
 </div>
 </div>

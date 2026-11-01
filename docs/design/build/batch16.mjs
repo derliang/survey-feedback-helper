@@ -2,15 +2,15 @@
 import * as K from './deskkit.mjs';
 const { L, D, side, main, rside, nav, modal, mhead, mfoot, prog, dropzone, round, centered, rail, fbox, bgOpen, h, th, td, qrow, nvr, tgl, body, pane, flex1, foot, fchip, table, tag, btn, notice, tile, tiles, seg, chips, rcard, rowbtn, ic, icbtn, brow, addPages, write, scr } = K;
 const F = [];
-const recent = () => rside(340, `${h('最近的專案', '只記住設定，不含學生資料')}${rowbtn('三年二班 幹部票選', '10/28 · 票選幹部', '', false, true)}${rowbtn('小組報告 評分', '10/12 · 報告回饋', '', false, true)}${rowbtn('開啟專案檔…', '從檔案還原設定', '', false, true)}<div style="margin-top:auto">${btn('用示範資料試試看', 'secondary', { block: true })}</div>`);
+const recent = () => rside(340, `${h('最近的問卷', '只記住設定，不含學生資料')}${rowbtn('三年二班 幹部票選', '10/28 · 票選幹部', '', false, true)}${rowbtn('小組報告 評分', '10/12 · 報告回饋', '', false, true)}${rowbtn('開啟設定檔…', '從檔案還原設定', '', false, true)}<div style="margin-top:auto">${btn('用示範資料試試看', 'secondary', { block: true })}</div>`);
 const openLayout = (center, step = 1) => body(flex1(centered(560, center), 'padding:24px;align-items:stretch;justify-content:center'), recent());
 
 // D12 選檔來源
 F.push(D('D12 桌機：選檔來源｜按「選擇檔案」後，在畫面中央開一個對話框，列出三個來源與示範資料。每一項寫清楚會發生什麼事；Esc 或「取消」關閉。', 1,
-  `${bgOpen()}${modal(600, `${mhead('從哪裡選檔案？')}${rowbtn('這台電腦的檔案', '開啟檔案總管選 xlsx 或 csv；也可以直接把檔案拖到畫面上', '', false, true)}${rowbtn('Google 雲端硬碟', '用資料夾讀取（不用登入），或登入後用選檔視窗挑檔案', '', false, true)}${rowbtn('開啟專案檔', '還原之前存的欄位對應與設定，之後再選這學期的問卷檔', '', false, true)}${rowbtn('示範資料', '虛構的三年二班資料，用來試用，不含任何真實姓名', '', false, true)}${mfoot(btn('取消', 'secondary'))}`)}`, ''));
+  `${bgOpen()}${modal(600, `${mhead('從哪裡選檔案？')}${rowbtn('這台電腦的檔案', '開啟檔案總管選 xlsx 或 csv；也可以直接把檔案拖到畫面上', '', false, true)}${rowbtn('Google 雲端硬碟', '用資料夾讀取（不用登入），或登入後用選檔視窗挑檔案', '', false, true)}${rowbtn('開啟設定檔', '還原之前存的欄位對應與設定，之後再選這學期的問卷檔', '', false, true)}${rowbtn('示範資料', '虛構的三年二班資料，用來試用，不含任何真實姓名', '', false, true)}${mfoot(btn('取消', 'secondary'))}`)}`, ''));
 
 // D13 讀取中
-F.push(D('D13 桌機：讀取中｜選好檔案後立刻顯示檔名、進度與「資料只在這台電腦處理」。讀取時「下一步」停用，右邊的最近專案照常顯示。', 1,
+F.push(D('D13 桌機：讀取中｜選好檔案後立刻顯示檔名、進度與「資料只在這台電腦處理」。讀取時「下一步」停用，右邊的最近問卷照常顯示。', 1,
   `${openLayout(`${h('開啟問卷檔')}${fchip('file', '三年二班_幹部票選.xlsx', '1.1 MB')}${prog(62)}<div style="display:flex;flex-direction:column;gap:4px"><b>正在讀取…</b><span class="small muted">讀取 41 筆回覆，通常幾秒內完成。</span></div>${notice('', 'lock', '資料只在這台電腦的瀏覽器處理，不會上傳。')}`)}${foot(btn('取消', 'secondary'), btn('下一步：對應欄位', 'primary', { dis: true }))}`, ''));
 
 // D14 讀不到檔案
@@ -27,8 +27,8 @@ F.push(D('D16 桌機：準備資料（總覽）｜第 2 步的入口：四件事
   `${body(main(`${fchip('file', '三年二班_幹部票選.xlsx', '41 筆回覆 · 9 欄')}${h('準備資料', '四件事，前兩件做完就能看統計。')}<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">${prep('list', '問卷類型', '票選幹部', '已確認', 'ok')}${prep('table', '欄位對應', '9 欄，2 欄請確認', '請確認', 'warn')}${prep('users', '學生名單', '找出沒填、冒名與重複', '選用', '')}${prep('flag', '資料檢查', '重複、空白、無效票、格式異常', '3 項待處理', 'warn')}</div>`), rside(340, `${h('還缺什麼')}${rowbtn('欄位對應', '先完成才能看統計', tag('必做', 'warn'), true, true)}${rowbtn('學生名單', '之後再做也可以', tag('選用', ''), false, true)}${rowbtn('資料檢查', '輸出前建議處理完', tag('建議', 'accent'), false, true)}${notice('', 'info', '名單與資料檢查可以之後再做，統計結果會在你處理後自動更新。')}`))}${nav('下一步：看統計')}`));
 
 // D17 問卷類型
-F.push(D('D17 桌機：問卷類型｜系統先猜，老師確認。三種類型並排成卡片，每種用一句話講它會幫你做什麼；右邊說明系統怎麼猜的，不是黑盒子。', 2,
-  `${body(main(`${h('這是哪一種問卷？', '看起來像「票選幹部」，你可以更改。')}<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">${rcard('票選幹部 ' + tag('建議', 'ok'), '各職位得票與排名、同票抽籤、防弊檢查', true, 'min-height:140px')}${rcard('意見調查', '單選、複選、量表、開放題、交叉分析', false, 'min-height:140px')}${rcard('報告回饋', '以被評學生為單位：加權、去最高最低、自評對他評、小組互評', false, 'min-height:140px')}</div>`), rside(360, `${h('系統怎麼猜的')}<p class="small" style="margin:0;line-height:1.8">「班長、副班長、風紀股長、衛生股長」這幾欄，每欄只有 4 到 6 種答案，而且答案都是人名，所以猜是票選。</p>${tiles([['可能是票選', '4 欄'], ['可能是量表', '0 欄']])}${notice('', 'info', '選錯也沒關係，之後隨時可以回來改，欄位對應會重新猜。')}`))}${nav('確定')}`));
+F.push(D('D17 桌機：問卷類型｜系統先智慧判斷，老師確認。三種類型並排成卡片，每種用一句話講它會幫你做什麼；右邊說明系統怎麼智慧判斷的，不是黑盒子。', 2,
+  `${body(main(`${h('這是哪一種問卷？', '看起來像「票選幹部」，你可以更改。')}<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">${rcard('票選幹部 ' + tag('建議', 'ok'), '各職位得票與排名、同票抽籤、防弊檢查', true, 'min-height:140px')}${rcard('意見調查', '單選、複選、量表、開放題、交叉分析', false, 'min-height:140px')}${rcard('報告回饋', '以被評學生為單位：加權、去最高最低、自評對他評、小組互評', false, 'min-height:140px')}</div>`), rside(360, `${h('系統怎麼智慧判斷的')}<p class="small" style="margin:0;line-height:1.8">「班長、副班長、風紀股長、衛生股長」這幾欄，每欄只有 4 到 6 種答案，而且答案都是人名，所以智慧判斷是票選。</p>${tiles([['可能是票選', '4 欄'], ['可能是量表', '0 欄']])}${notice('', 'info', '選錯也沒關係，之後隨時可以回來改，欄位對應會重新智慧判斷。')}`))}${nav('確定')}`));
 
 // D18 欄位用途下拉
 const cols = [['時間戳記', '時間戳記'], ['班級', '班級'], ['座號', '座號'], ['姓名', '姓名'], ['班長', '班長（票選）'], ['副班長', '副班長（票選）'], ['風紀股長', '風紀股長（票選）']];
@@ -36,7 +36,7 @@ const maprow = (a, b, cur) => `<div style="display:flex;align-items:center;gap:1
 const rows = [['2026/10/12 10:12', '2', '6', '林小宇', '陳怡安', '王品妍', '周冠宇'], ['2026/10/12 10:13', '2', '17', '趙子安', '林小宇', '王品妍', '蔡佳穎'], ['2026/10/12 10:15', '2', '9', '周宜靜', '林小宇', '李冠廷', '周冠宇'], ['2026/10/12 10:15', '2', '21', '張語彤', '陳怡安', '王品妍', '周冠宇']];
 const menu = ['時間戳記', '班級', '座號', '姓名', '投票選項（單選）', '量表題', '複選題', '開放題', '不使用這欄'].map((t, i) => `<div class="qrow"${i === 4 ? ' aria-current="true"' : ''} style="min-height:36px">${i === 4 ? ic('check') : '<span style="width:1.2em"></span>'}<span style="flex:1">${t}</span></div>`).join('');
 F.push(D('D18 桌機：選擇欄位用途（下拉選單）｜手機用底部面板，桌機改成貼在欄位旁的下拉選單。選項 40px 高，目前選的打勾；點外面或按 Esc 關閉，鍵盤可用 ↑ ↓ Enter。', 2,
-  `${body(pane(520, `${h('欄位對應', '系統已猜好，不對的才需要改。')}${cols.slice(0, 5).map((c, i) => maprow(c[0], c[1], i === 4)).join('')}<div style="position:absolute;left:216px;top:300px;width:300px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:0 8px 24px var(--shadow-sm);padding:6px;z-index:2">${menu}</div>${maprow('風紀股長', '風紀股長（票選）', false)}`, 'padding:20px;border-right:1px solid var(--line-soft);overflow:hidden;position:relative'), flex1(`${h('資料預覽', '前 4 列，共 41 列')}${fbox(`<table style="border-collapse:collapse;width:100%;font-size:var(--fs-sm)"><thead><tr>${['時間戳記', '班級', '座號', '姓名', '班長', '副班長', '風紀股長'].map((c, i) => `<th style="${th}${i === 4 ? ';background:var(--accent-soft);color:var(--accent-ink)' : ''}">${c}</th>`).join('')}</tr></thead><tbody>${rows.map((r) => `<tr>${r.map((c, i) => `<td style="${td}${i === 4 ? ';background:var(--accent-soft)' : ''}">${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`)}`, 'padding:20px;overflow:hidden;gap:14px'))}${nav('下一步：看統計')}`));
+  `${body(pane(520, `${h('欄位對應', '系統已智慧判斷好，不對的才需要改。')}${cols.slice(0, 5).map((c, i) => maprow(c[0], c[1], i === 4)).join('')}<div style="position:absolute;left:216px;top:300px;width:300px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:0 8px 24px var(--shadow-sm);padding:6px;z-index:2">${menu}</div>${maprow('風紀股長', '風紀股長（票選）', false)}`, 'padding:20px;border-right:1px solid var(--line-soft);overflow:hidden;position:relative'), flex1(`${h('資料預覽', '前 4 列，共 41 列')}${fbox(`<table style="border-collapse:collapse;width:100%;font-size:var(--fs-sm)"><thead><tr>${['時間戳記', '班級', '座號', '姓名', '班長', '副班長', '風紀股長'].map((c, i) => `<th style="${th}${i === 4 ? ';background:var(--accent-soft);color:var(--accent-ink)' : ''}">${c}</th>`).join('')}</tr></thead><tbody>${rows.map((r) => `<tr>${r.map((c, i) => `<td style="${td}${i === 4 ? ';background:var(--accent-soft)' : ''}">${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`)}`, 'padding:20px;overflow:hidden;gap:14px'))}${nav('下一步：看統計')}`));
 
 // D19 報告回饋欄位對應
 const crit = [['內容完整', '5、4、4、3…', 30], ['創意', '4、4、5、3…', 25], ['表達', '4、5、4、4…', 25], ['團隊合作', '5、5、4、4…', 20]];
@@ -54,8 +54,8 @@ F.push(D('D21 桌機：名單對照（未填）｜上方四個數字看全貌，
 
 // D22 名單對照：需確認
 const guess = (a, b, n) => `<div class="qcard" style="gap:10px;padding:14px 16px"><div style="display:flex;align-items:center;gap:12px"><div><div class="small muted">填答的名字</div><b style="font-size:var(--fs-lg)">${a}</b></div><span style="color:var(--ink3)">${ic('next')}</span><div><div class="small muted">名單裡最接近</div><b style="font-size:var(--fs-lg)">${b}（${n} 號）</b></div></div><div style="display:flex;gap:8px">${btn('是同一人', 'primary', { sm: true })}${btn('不是，另選', 'secondary', { sm: true })}${btn('排除這筆', 'secondary', { sm: true })}</div></div>`;
-F.push(D('D22 桌機：名單對照（需確認）｜打錯名字或冒名的情況。系統猜最接近的人，老師一鍵確認，不用自己查；三個按鈕橫排在每張卡上。', 2,
-  `${body(side(260, cmpTabs(1)), main(`${tiles([['已對應', 39], ['需確認', 2, 'warn'], ['未填', 1, 'warn'], ['重複', 1, 'warn']])}${h('需確認 2 筆', '名字和名單對不上，請確認是不是同一人。')}${guess('王小明', '王大明', 1)}${guess('林雅挺', '林雅婷', 2)}`), rside(320, `${h('系統怎麼猜')}<p class="small" style="margin:0;line-height:1.8">比較字形相近與座號，找出名單裡最接近的一位。只提供建議，不會自動套用。</p>${notice('warn', 'warn', '「排除這筆」不會刪除原始資料，只是不納入統計。')}`))}${nav('完成對照')}`));
+F.push(D('D22 桌機：名單對照（需確認）｜打錯名字或冒名的情況。系統智慧判斷最接近的人，老師一鍵確認，不用自己查；三個按鈕橫排在每張卡上。', 2,
+  `${body(side(260, cmpTabs(1)), main(`${tiles([['已對應', 39], ['需確認', 2, 'warn'], ['未填', 1, 'warn'], ['重複', 1, 'warn']])}${h('需確認 2 筆', '名字和名單對不上，請確認是不是同一人。')}${guess('王小明', '王大明', 1)}${guess('林雅挺', '林雅婷', 2)}`), rside(320, `${h('系統怎麼智慧判斷')}<p class="small" style="margin:0;line-height:1.8">比較字形相近與座號，找出名單裡最接近的一位。只提供建議，不會自動套用。</p>${notice('warn', 'warn', '「排除這筆」不會刪除原始資料，只是不納入統計。')}`))}${nav('完成對照')}`));
 
 write('frag-b16.html', F);
 addPages({ id: 'desk-a', short: '桌機：資料進來與檢查', name: '桌機-資料進來與檢查', title: '桌機（1280）：資料進來與檢查', intro: '選檔來源、讀取中與錯誤、瀏覽器過舊、準備資料總覽、問卷類型、欄位對應、名單匯入與對照。人名與數字皆為虛構。', frag: 'frag-b16.html' });

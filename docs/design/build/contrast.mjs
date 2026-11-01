@@ -19,7 +19,7 @@ const pairs = [
   ['ink3', 'paper', 4.5], ['ink3', 'card', 4.5], ['ink3', 'sunk', 4.5],
   ['on-accent', 'accent', 4.5], ['accent-ink', 'accent-soft', 4.5], ['accent-ink', 'paper', 4.5], ['accent-ink', 'card', 4.5], ['accent', 'card', 3],
   ['ok', 'ok-soft', 4.5], ['warn', 'warn-soft', 4.5], ['bad', 'bad-soft', 4.5], ['bad', 'card', 4.5], ['bad', 'paper', 4.5],
-  ['d1', 'card', 3], ['d2', 'card', 3], ['d3', 'card', 3], ['d4', 'card', 3], ['d5', 'card', 3], ['d0', 'card', 3], ['bar-muted', 'card', 1.5],
+  ['d1', 'card', 3], ['d2', 'card', 3], ['d3', 'card', 3], ['d4', 'card', 3], ['d5', 'card', 3], ['d0', 'card', 3], ['bar-muted', 'card', 3], ['warn-bar', 'card', 3], ['ctl', 'card', 3], ['ctl', 'paper', 3],
   
 ];
 let bad = 0;

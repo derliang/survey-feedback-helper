@@ -1,4 +1,4 @@
-// 桌機補完 C：編輯器、範本庫、專案檔（D33–D43）
+// 桌機補完 C：編輯器、範本庫、設定檔（D33–D43）
 import * as K from './deskkit.mjs';
 const { W, L, frameWH, D, side, main, rside, nav, modal, mhead, mfoot, round, centered, rail, fbox, h, th, td, nvr, tgl, body, pane, flex1, foot, fchip, kbd, tag, btn, notice, tile, tiles, seg, chips, rcard, opt, rowbtn, ic, icbtn, grp, addPages, write, field } = K;
 const F = [];
@@ -52,14 +52,14 @@ F.push(D('D40 桌機：匯出分享範本｜說清楚檔案含什麼、不含什
 F.push(D('D41 桌機：匯入範本｜選檔後先預覽再匯入。同名時問「取代」或「兩份都留」，預設兩份都留，不會悄悄蓋掉老師自己的版本。', 4,
   `${lib()}${modal(700, `${mhead('匯入範本')}${fchip('file', '科任老師分享_回饋單.sfhtpl', '來自檔案 · 51 KB · 範本格式 v1')}<div style="display:flex;gap:16px"><div style="background:var(--sunk);padding:10px;border-radius:var(--r-sm)">${mp(0.2)}</div><div style="display:flex;flex-direction:column;gap:8px;flex:1"><b>個人回饋單：學生版（科任版）</b><span class="small muted">2 頁 · 含 1 張圖片（Logo） · 7 個區塊</span>${notice('warn', 'warn', '你已經有同名的範本「三年二班 學生版回饋單」。')}${grp('同名時怎麼處理', `<div style="display:flex;flex-direction:column;gap:6px">${rcard('兩份都留', '新的會加上「（2）」', true)}${rcard('取代舊的', '舊版會先備份一份', false)}</div>`)}</div></div><span class="small muted">格式相容。這份檔案不含任何學生資料。</span>${mfoot(btn('取消', 'secondary'), btn('匯入範本', 'primary'))}`)}`));
 
-// D42 儲存專案檔
-F.push(D('D42 桌機：儲存專案檔｜專案檔記住「怎麼對應欄位、用什麼設定與範本」，下學期同一份問卷格式再開就不用重做。學生資料不會存進去。', 3,
-  `${body(main(`${h('統計結果')}<div class="qcard"><div class="small muted">背景頁面</div></div>`))}${modal(640, `${mhead('儲存專案檔')}<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div class="qcard" style="gap:6px"><b>專案檔會記住</b><span class="small muted" style="line-height:1.7">問卷類型、欄位對應、評分權重、統計設定、選用的範本、檔名規則。</span></div><div class="qcard" style="gap:6px"><b>不會記住</b><span class="small muted" style="line-height:1.7">問卷回覆、學生名單、輸出檔。資料檔每次都要重新選。</span></div></div>${field('pn', '專案名稱', '三年二班 幹部票選', '建議包含班級與用途，下學期才找得到。')}${grp('存到哪裡', `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${rcard('這台電腦', '下載成 .sfh 檔案', true)}${rcard('Google 雲端硬碟', '用選檔視窗存到你的雲端硬碟', false)}</div>`)}${mfoot(btn('取消', 'secondary'), btn('儲存專案檔', 'primary'))}`)}`));
+// D42 儲存設定檔
+F.push(D('D42 桌機：儲存設定檔｜設定檔記住「怎麼對應欄位、用什麼設定與範本」，下學期同一份問卷格式再開就不用重做。學生資料不會存進去。', 3,
+  `${body(main(`${h('統計結果')}<div class="qcard"><div class="small muted">背景頁面</div></div>`))}${modal(640, `${mhead('儲存設定檔')}<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div class="qcard" style="gap:6px"><b>設定檔會記住</b><span class="small muted" style="line-height:1.7">問卷類型、欄位對應、評分權重、統計設定、選用的範本、檔名規則。</span></div><div class="qcard" style="gap:6px"><b>不會記住</b><span class="small muted" style="line-height:1.7">問卷回覆、學生名單、輸出檔。資料檔每次都要重新選。</span></div></div>${field('pn', '設定檔名稱', '三年二班 幹部票選', '建議包含班級與用途，下學期才找得到。')}${grp('存到哪裡', `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${rcard('這台電腦', '下載成 .sfh 檔案', true)}${rcard('Google 雲端硬碟', '用選檔視窗存到你的雲端硬碟', false)}</div>`)}${mfoot(btn('取消', 'secondary'), btn('儲存設定檔', 'primary'))}`)}`));
 
-// D43 開啟專案檔後
-F.push(D('D43 桌機：開啟專案檔後｜設定都還原了，但專案檔沒有資料，所以請老師選這學期的問卷檔。選完比對欄位，找不到的欄位標出來，一鍵重新對應。', 2,
-  `${body(main(`${notice('ok', 'check', '已載入專案「三年二班 幹部票選」。欄位對應、設定與範本已還原。')}${fchip('file', '114下_幹部票選.xlsx', '已讀取 41 列 · 欄位比對完成')}${notice('warn', 'warn', '有 2 個欄位和專案檔的對不上：「班級」「座號」。', btn('重新對應這 2 個', 'secondary', { sm: true }))}<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">${[['問卷類型', '票選幹部', '已確認', 'ok'], ['欄位對應', '9 個欄位，2 個需要確認', '請確認', 'warn'], ['資料檢查', '尚未檢查', '等待', '']].map(([a, b, c, k]) => `<div class="qcard" style="gap:6px"><div style="display:flex"><b>${a}</b><span style="margin-left:auto">${tag(c, k)}</span></div><span class="small muted">${b}</span></div>`).join('')}</div>`), rside(320, `${h('專案檔記住了什麼')}<div style="line-height:1.9"><span>${ic('check')} 問卷類型</span><br><span>${ic('check')} 欄位對應</span><br><span>${ic('check')} 評分權重與設定</span><br><span>${ic('check')} 範本與檔名規則</span></div>${notice('', 'lock', '資料檔沒有存進專案檔，每次都要重新選。')}`))}${nav('下一步：看統計')}`));
+// D43 開啟設定檔後
+F.push(D('D43 桌機：開啟設定檔後｜設定都還原了，但設定檔沒有資料，所以請老師選這學期的問卷檔。選完比對欄位，找不到的欄位標出來，一鍵重新對應。', 2,
+  `${body(main(`${notice('ok', 'check', '已載入設定檔「三年二班 幹部票選」。欄位對應、設定與範本已還原。')}${fchip('file', '114下_幹部票選.xlsx', '已讀取 41 列 · 欄位比對完成')}${notice('warn', 'warn', '有 2 個欄位和設定檔的對不上：「班級」「座號」。', btn('重新對應這 2 個', 'secondary', { sm: true }))}<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">${[['問卷類型', '票選幹部', '已確認', 'ok'], ['欄位對應', '9 個欄位，2 個需要確認', '請確認', 'warn'], ['資料檢查', '尚未檢查', '等待', '']].map(([a, b, c, k]) => `<div class="qcard" style="gap:6px"><div style="display:flex"><b>${a}</b><span style="margin-left:auto">${tag(c, k)}</span></div><span class="small muted">${b}</span></div>`).join('')}</div>`), rside(320, `${h('設定檔記住了什麼')}<div style="line-height:1.9"><span>${ic('check')} 問卷類型</span><br><span>${ic('check')} 欄位對應</span><br><span>${ic('check')} 評分權重與設定</span><br><span>${ic('check')} 範本與檔名規則</span></div>${notice('', 'lock', '資料檔沒有存進設定檔，每次都要重新選。')}`))}${nav('下一步：看統計')}`));
 
 write('frag-b18.html', F);
-addPages({ id: 'desk-c', short: '桌機：編輯器、範本與專案檔', name: '桌機-編輯器範本與專案檔', title: '桌機（1280）：編輯器、範本庫與專案檔', intro: '文字區塊屬性、加入區塊、頁面設定、個別學生版本、拖曳排序、範本庫與選單、匯出與匯入範本、儲存與開啟專案檔。人名與數字皆為虛構。', frag: 'frag-b18.html' });
+addPages({ id: 'desk-c', short: '桌機：編輯器、範本與設定檔', name: '桌機-編輯器範本與設定檔', title: '桌機（1280）：編輯器、範本庫與設定檔', intro: '文字區塊屬性、加入區塊、頁面設定、個別學生版本、拖曳排序、範本庫與選單、匯出與匯入範本、儲存與開啟設定檔。人名與數字皆為虛構。', frag: 'frag-b18.html' });
 console.log(F.length);

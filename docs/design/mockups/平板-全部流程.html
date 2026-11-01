@@ -36,8 +36,10 @@
   --d4: #0c7a88;
   --d5: #8a6a0a;
   --d0: #7b8494;          /* 其他、未分類 */
-  --warn-bar: #e3a012;       /* 同票、需處理的長條 */
-  --bar-muted: #c3c9d6;   /* 未當選、未突顯的長條 */
+  --warn-bar: #b97f00;       /* 同票、需處理的長條（對卡片 3.4:1） */
+  --bar-muted: #7f889b;   /* 未當選、未突顯的長條（對卡片 3.6:1） */
+  --ctl: #7f889b;         /* 控制項外框（選項卡、列按鈕）：對卡片與頁面底 3:1 以上 */
+  --ext-excel: #1d6f42;   /* 外部服務代表色：僅用於自畫的 Excel「X」圖示，不是品牌色 */
   --scrim: rgba(12, 14, 20, 0.5);
   --shadow: rgba(20, 24, 40, 0.16);
   --shadow-sm: rgba(20, 24, 40, 0.08);   /* 卡片的細微層次 */
@@ -97,7 +99,8 @@
     --d5: #d6b43a;
     --d0: #8f97a8;
     --warn-bar: #f0b429;
-    --bar-muted: #3a404d;
+    --bar-muted: #6e7789;
+    --ctl: #6e7789;
     --scrim: rgba(0, 0, 0, 0.65);
     --shadow: rgba(0, 0, 0, 0.6);
     --shadow-sm: rgba(0, 0, 0, 0.4);
@@ -131,7 +134,8 @@
   --d5: #d6b43a;
   --d0: #8f97a8;
   --warn-bar: #f0b429;
-  --bar-muted: #3a404d;
+  --bar-muted: #6e7789;
+  --ctl: #6e7789;
   --scrim: rgba(0, 0, 0, 0.65);
   --shadow: rgba(0, 0, 0, 0.6);
   --shadow-sm: rgba(0, 0, 0, 0.4);
@@ -228,7 +232,7 @@ button{font-family:inherit}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
 .chip{min-height:var(--tap-min);padding:0 16px;border-radius:999px;border:1px solid var(--ink3);background:var(--card);color:var(--ink);font:600 15px/1.2 var(--font);cursor:pointer}
 .chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink)}
-.rcard{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;min-height:64px;padding:12px 14px;border:1.5px solid var(--line);border-radius:var(--r-md);background:var(--card);text-align:left;cursor:pointer;color:var(--ink);width:100%;font:inherit}
+.rcard{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;min-height:64px;padding:12px 14px;border:1.5px solid var(--ctl);border-radius:var(--r-md);background:var(--card);text-align:left;cursor:pointer;color:var(--ink);width:100%;font:inherit}
 .rcard b{display:block;font-size:var(--fs-md);line-height:1.35}
 .rcard small{display:block;font-size:var(--fs-sm);color:var(--ink2);line-height:1.45}
 .rcard[aria-checked="true"]{border-color:var(--accent);background:var(--accent-soft)}
@@ -257,7 +261,7 @@ button{font-family:inherit}
 .track>i{display:block;height:100%;border-radius:6px;background:var(--bar-muted)}
 .track>i.lead{background:var(--accent)}
 .track>i.tie{background:var(--warn-bar)}
-.rowbtn{box-shadow:0 1px 2px var(--shadow-sm);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;min-height:64px;padding:10px 14px;background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r-md);text-align:left;color:var(--ink);cursor:pointer;width:100%;font:inherit}
+.rowbtn{box-shadow:0 1px 2px var(--shadow-sm);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;min-height:64px;padding:10px 14px;background:var(--card);border:1px solid var(--ctl);border-radius:var(--r-md);text-align:left;color:var(--ink);cursor:pointer;width:100%;font:inherit}
 .rowbtn .nm{font-weight:600;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rowbtn .sm{font-size:var(--fs-xs);color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rowbtn .rt{display:flex;align-items:center;gap:4px;color:var(--ink2)}
@@ -313,6 +317,28 @@ button{font-family:inherit}
 .opt[aria-checked="true"]{font-weight:700}
 .sheet .btn{margin-top:12px}
 
+
+/* 2026-11-01 桌機頂端列：步驟（數字圖示＋完成度）、重新開始、設定 */
+.dsteps{display:flex;align-items:center;gap:2px;margin:0 auto}
+.ds{display:inline-flex;align-items:center;gap:8px;min-height:var(--tap-min);padding:0 12px;border:0;border-radius:var(--r-sm);background:transparent;color:var(--ink3);font:600 var(--fs-sm)/1.2 var(--font);cursor:pointer;white-space:nowrap}
+.ds .n{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;border:2px solid var(--ink3);font-size:var(--fs-xs);font-weight:700;flex:none}
+.ds .n svg.ic{width:14px;height:14px;stroke-width:3}
+.ds small{font-size:var(--fs-xs);font-weight:600}
+.ds.done{color:var(--ink2)}
+.ds.done .n{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.ds.cur{background:var(--accent-soft);color:var(--accent-ink)}
+.ds.cur .n{border-color:var(--accent-ink);color:var(--accent-ink)}
+.ds:disabled{cursor:not-allowed}
+.dsep{width:14px;height:2px;background:var(--line);flex:none}
+.btn-ghost{background:transparent;color:var(--ink2);border:1.5px solid transparent}
+.btn .ic{width:20px;height:20px}
+.xl{display:inline-block;width:1em;height:1em;vertical-align:-.15em}
+.chk{display:inline-grid;place-items:center;width:22px;height:22px;border:2px solid var(--ink3);border-radius:6px;background:var(--card);color:var(--on-accent);flex:none}
+.chk[data-on="true"]{background:var(--accent);border-color:var(--accent)}
+.chk svg.ic{width:14px;height:14px;stroke-width:3}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:stretch}
+.pair>*{display:flex;flex-direction:column;gap:10px;height:100%}
+.pair .foot{margin-top:auto;display:flex;gap:8px}
 
 /* ===== 輸出文件（A4）：794 × 1123，用 .doc-warm 的 --doc-* token；紙張永遠淺色 ===== */
 .scale>.paper{position:absolute;left:0;top:0;transform-origin:0 0}
@@ -479,6 +505,18 @@ button{font-family:inherit}
 <symbol id="i-comment" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></symbol>
 <symbol id="i-pagebreak" viewBox="0 0 24 24"><path d="M3 12h4M10 12h4M17 12h4"/></symbol>
 <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 18l5-5 4 3 3-3 4 4"/></symbol>
+<symbol id="i-gear" viewBox="0 0 24 24"><path d="M10.3 3h3.4l.5 2.4 1.7.7 2.1-1.3 2.4 2.4-1.3 2.1.7 1.7 2.4.5v3.4l-2.4.5-.7 1.7 1.3 2.1-2.4 2.4-2.1-1.3-1.7.7-.5 2.4h-3.4l-.5-2.4-1.7-.7-2.1 1.3-2.4-2.4 1.3-2.1-.7-1.7L3 13.7v-3.4l2.4-.5.7-1.7-1.3-2.1 2.4-2.4 2.1 1.3 1.7-.7z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-c-bar" viewBox="0 0 24 24"><path d="M5 20V11M12 20V4M19 20v-6"/></symbol>
+<symbol id="i-c-stack" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="4" rx="1"/><rect x="3" y="11" width="18" height="4" rx="1"/><path d="M9 5v4M14 11v4"/><path d="M3 19h18"/></symbol>
+<symbol id="i-c-pie" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v9h9"/></symbol>
+<symbol id="i-c-donut" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></symbol>
+<symbol id="i-c-hist" viewBox="0 0 24 24"><path d="M4 20v-7h4v7M8 20V6h4v14M12 20V9h4v11M16 20v-5h4v5"/></symbol>
+<symbol id="i-c-radar" viewBox="0 0 24 24"><path d="M12 3l8 6-3 10H7L4 9z"/><path d="M12 8l4 3-1.5 5h-5L8 11z"/></symbol>
+<symbol id="i-c-scatter" viewBox="0 0 24 24"><path d="M3 3v18h18"/><circle cx="8" cy="15" r="1.4"/><circle cx="11" cy="10" r="1.4"/><circle cx="15" cy="14" r="1.4"/><circle cx="18" cy="7" r="1.4"/></symbol>
+<symbol id="i-c-box" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M7 7h10v10H7zM7 12h10"/></symbol>
+<symbol id="i-c-dots" viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h18"/><circle cx="8" cy="7" r="1.8"/><circle cx="15" cy="12" r="1.8"/><circle cx="11" cy="17" r="1.8"/></symbol>
+<symbol id="i-c-heat" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7"/><rect x="13" y="4" width="7" height="7"/><rect x="4" y="13" width="7" height="7"/><rect x="13" y="13" width="7" height="7"/></symbol>
+<symbol id="i-c-diff" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/><path d="M9 5v4M15 10v4M12 15v4"/></symbol>
 </svg>
 <div class="wrap">
 <header class="pagehead"><p class="small muted">設計規範的模擬頁，使用虛構資料。規範見 docs/design/DESIGN.md。</p><h1>平板（820 直向）：開啟到輸出、設定、雲端硬碟、離開確認；橫向投影唱票</h1><p class="muted">平板每一步都用左右分欄；觸控點擊區不低於 44px。與手機、桌機共用同一套 token 與元件。</p></header>
@@ -570,6 +608,7 @@ button{font-family:inherit}
 <figure class="fig" style="margin:0"><div class="scale" data-w="820" data-h="1000"><div class="dev" style="width:820px;height:1000px;border-radius:28px"><div class="appbar" style="padding:0 16px;gap:12px"><span class="brand"><svg class="ic"><use href="#i-bars"/></svg></span><b style="font-size:var(--fs-lg)">Google 雲端硬碟</b><div class="stepper" style="border:0;padding:0;background:transparent;margin-left:auto;width:300px"><div class="segs"><span class="st on cur">開啟</span><span class="st">對應</span><span class="st">統計</span><span class="st">輸出</span></div></div><button class="icbtn" type="button" aria-label="設定"><svg class="ic"><use href="#i-sliders"/></svg></button></div><div style="flex:1;min-height:0;display:flex;justify-content:center;padding:32px 20px;overflow:hidden"><div style="width:560px;display:flex;flex-direction:column;gap:14px"><div style="display:flex;flex-direction:column;gap:4px"><h2 style="margin:0;font-size:var(--fs-xl)">連線後可以直接選檔、存檔</h2><p class="small muted" style="margin:0">不連線也能用：選「這台平板的檔案」，系統選檔視窗本來就看得到雲端硬碟。</p></div><div class="qcard" style="gap:6px"><b>這個網站可以</b><div class="small" style="display:flex;gap:8px"><svg class="ic"><use href="#i-check"/></svg><span>開啟你在選檔視窗點選的檔案</span></div><div class="small" style="display:flex;gap:8px"><svg class="ic"><use href="#i-check"/></svg><span>把輸出檔存進你指定的位置</span></div></div><div class="qcard" style="gap:6px"><b>這個網站不能</b><div class="small" style="display:flex;gap:8px"><svg class="ic"><use href="#i-x"/></svg><span>看到或改動你雲端硬碟裡其他檔案</span></div><div class="small" style="display:flex;gap:8px"><svg class="ic"><use href="#i-x"/></svg><span>看到你的信箱或聯絡人</span></div><div class="small" style="display:flex;gap:8px"><svg class="ic"><use href="#i-x"/></svg><span>在你不知道時存取任何檔案</span></div></div><div class="notice"><svg class="ic"><use href="#i-lock"/></svg><div>資料仍然只在你的瀏覽器處理，不經過任何伺服器。可以隨時在 Google 帳戶「第三方存取」撤銷。</div></div><div style="display:flex;gap:8px"><button class="btn btn-secondary" type="button" style="flex:1">不連線，用平板檔案</button><button class="btn btn-primary" type="button" style="flex:1">連線 Google</button></div></div></div></div></div><figcaption style="max-width:640px"><b>T10 平板：Google 雲端硬碟連線</b>與手機同一套說明：可以做什麼、不能做什麼，並提供不登入的替代路徑。限寬置中。</figcaption></figure>
 <figure class="fig" style="margin:0"><div class="scale" data-w="1024" data-h="768"><div class="dev" style="width:1024px;height:768px;border-radius:12px"><div style="flex:1;min-height:0;display:flex;flex-direction:column;padding:24px 40px;gap:6px;background:var(--paper)"><div style="display:flex;align-items:center"><span class="small muted" style="font-size:var(--fs-lg)">班長 · 第 1 位候選人／共 4 位</span><span style="margin-left:auto"><button class="icbtn" type="button" aria-label="離開唱票模式"><svg class="ic"><use href="#i-x"/></svg></button></span></div><div style="flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:88px;font-weight:800;line-height:1.2;letter-spacing:.04em">林小宇</div><div class="mono" style="font-size:220px;font-weight:800;line-height:1;color:var(--accent);font-variant-numeric:tabular-nums">11</div><div style="font-size:40px;font-weight:700;color:var(--ink2)">票</div></div><div style="display:flex;align-items:center;gap:16px"><div class="prog" style="flex:1" role="progressbar" aria-valuenow="27" aria-valuemin="0" aria-valuemax="100"><i style="width:27%"></i></div><span class="small muted">已唱 11／40 張有效票</span></div><div style="display:flex;gap:12px;padding-top:8px"><button class="btn btn-secondary" type="button" style="min-width:150px;height:72px;font-size:var(--fs-lg)">上一位</button><button class="btn btn-primary" type="button" style="flex:1;height:72px;font-size:var(--fs-xl)">下一票　＋1</button><button class="btn btn-secondary" type="button" style="min-width:150px;height:72px;font-size:var(--fs-lg)">唱完了</button></div></div></div></div><figcaption style="max-width:640px"><b>T11 平板橫向：投影唱票</b>1024×768。平板接投影或直接給全班看。姓名與票數極大，「下一票」整排最大的按鈕；也可用螢幕右側的大區塊點一下加一票。</figcaption></figure>
 <figure class="fig" style="margin:0"><div class="scale" data-w="820" data-h="1000"><div class="dev" style="width:820px;height:1000px;border-radius:28px"><div class="appbar" style="padding:0 16px;gap:12px"><span class="brand"><svg class="ic"><use href="#i-bars"/></svg></span><b style="font-size:var(--fs-lg)">統計結果</b><div class="stepper" style="border:0;padding:0;background:transparent;margin-left:auto;width:300px"><div class="segs"><span class="st on">開啟</span><span class="st on">對應</span><span class="st on cur">統計</span><span class="st">輸出</span></div></div><button class="icbtn" type="button" aria-label="設定"><svg class="ic"><use href="#i-sliders"/></svg></button></div><div style="flex:1;min-height:0;display:flex"><div class="pane" style="width:270px;padding:12px;border-right:1px solid var(--line-soft)"><div class="small muted" style="font-weight:700">職位</div><div class="qrow" aria-current="true"><span style="flex:1">班長</span></div><div class="qrow"><span style="flex:1">副班長</span></div><div class="qrow"><span style="flex:1">風紀股長</span></div><div class="qrow"><span style="flex:1">衛生股長</span></div></div><div class="pane" style="flex:1;padding:20px;overflow:hidden"><div class="seg" role="group" aria-label="檢視"><button type="button" aria-pressed="true">結果</button><button type="button" aria-pressed="false">防弊</button><button type="button" aria-pressed="false">唱票</button></div><div style="display:flex;flex-direction:column;gap:4px"><h2 style="margin:0;font-size:var(--fs-xl)">班長</h2></div><div class="qcard" style="gap:10px"><div class="brow"><div class="h"><span class="nm">林小宇 <span class="tag tag-ok">當選</span></span><span class="v"><b>18</b> · 45%</span></div><div class="track"><i class="lead" style="width:45%"></i></div></div><div class="brow"><div class="h"><span class="nm">陳怡安 <span class="tag tag-accent">候補</span></span><span class="v"><b>12</b> · 30%</span></div><div class="track"><i style="width:30%"></i></div></div><div class="brow"><div class="h"><span class="nm">張子豪</span><span class="v"><b>6</b> · 15%</span></div><div class="track"><i style="width:15%"></i></div></div><div class="brow"><div class="h"><span class="nm">黃思穎</span><span class="v"><b>4</b> · 10%</span></div><div class="track"><i style="width:10%"></i></div></div></div></div></div><div class="scrim"></div><div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:480px;background:var(--card);border-radius:var(--r-lg);padding:24px;display:flex;flex-direction:column;gap:14px;box-shadow:0 12px 40px var(--shadow-sm)"><h2 style="margin:0;font-size:var(--fs-xl)">要離開嗎？</h2><p style="margin:0;line-height:1.7">問卷資料不會保存，離開後要重新開啟檔案。要留下結果，請先輸出。</p><div style="display:flex;flex-direction:column;gap:8px"><button class="btn btn-primary btn-block" type="button">先輸出</button><button class="btn btn-secondary btn-block" type="button">直接離開</button><button class="btn btn-ghost btn-block" type="button">取消</button></div></div></div></div><figcaption style="max-width:640px"><b>T12 平板：離開前確認</b>關閉頁面或回到首頁前，說明「資料不保存」，主動作是「先輸出」；對話框置中、寬 480。</figcaption></figure>
+
 
 </div>
 </div>
