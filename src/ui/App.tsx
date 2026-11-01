@@ -11,6 +11,7 @@ import { StatsView } from './views/StatsView';
 import { Prepare } from './views/Prepare';
 import { EditorRoute } from './editor/Loader';
 import { GuideRoute } from './guide/Loader';
+import { CourseRoute } from './views/CourseLoader';
 
 export function App() {
   const st = useApp();
@@ -53,8 +54,8 @@ export function App() {
       )}
       {st.route === 'home' && <Home />}
       {st.route === 'prepare' && (st.session ? <Prepare /> : <Home />)}
-      {st.route === 'stats' && <StatsView />}
-      {st.route === 'output' && <OutputView />}
+      {st.route === 'stats' && (st.session?.kind === 'course' ? <CourseRoute part="stats" /> : <StatsView />)}
+      {st.route === 'output' && (st.session?.kind === 'course' ? <CourseRoute part="output" /> : <OutputView />)}
       {st.route === 'method' && <MethodView />}
       {st.route === 'editor' && <EditorRoute />}
       {(st.route === 'guide' || st.route === 'templates') && <GuideRoute />}

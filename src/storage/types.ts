@@ -1,6 +1,6 @@
 import type { SavedMapping, Student } from '../core';
 
-export type SurveyKind = 'vote' | 'opinion' | 'feedback';
+export type SurveyKind = 'vote' | 'opinion' | 'feedback' | 'course';
 
 /** 存進資料夾的一份問卷設定（只有欄位標題與對應，不含任何作答內容）。 */
 export interface SavedSurvey {

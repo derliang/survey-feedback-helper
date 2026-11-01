@@ -29,7 +29,7 @@ const enCore: DeepPartial<Strings> = {
     recent: 'Recent surveys',
     recentEmpty: 'No recent surveys yet. Surveys you have processed will appear here.',
     autoFill: 'Auto-filled after choosing the file',
-    kindNames: { vote: 'Election', opinion: 'Opinion survey', feedback: 'Presentation feedback' },
+    kindNames: { vote: 'Election', opinion: 'Opinion survey', feedback: 'Presentation feedback', course: 'Course sign-up' },
   },
   home2: {
     templates: 'Use a quick template',
