@@ -233,3 +233,4 @@
 - [x] （程式層已做，畫面接線待金鑰）Google 登入視窗打不開的預防：`auth.preload()`／`isReady()`、`signIn` 同步開彈窗、`SignInPopupBlocked` 與 `popup_closed` 分流、單元測試模擬慢載；畫面已接（`GoogleConnect.tsx`：登入前先看一下卡、停用態、popup_failed_to_open／popup_closed 說明、Picker 後進對應欄位），三項 VITE_GOOGLE_* 缺任一就維持「尚未開放」，**未用真金鑰實測**。原：預載登入腳本、載好前停用按鈕、`popup_failed_to_open` 中文說明（根因與做法見取消帳號限制決定記錄；google-ui 施工）
 - [x] 設計員重審 D57／S1／S2／D58／S0 並補「登入視窗被擋」畫面（2026-11-01 第七輪，分支 designer-google，見 DESIGN.md 5.25 與[取消帳號限制](docs/decisions/2026-11-01-取消帳號限制.md)〈設計員重審〉）；`docs/design` 內「僅限私人 Gmail」字樣已同步。**使用說明（`src/`）與停用態／被擋畫面的實作待施工，設計稿已定**
 - [ ] 通知 google-setup：OAuth 同意畫面使用者類型不再限私人 Gmail
+- [ ] e2e「資料夾：選擇、重開後仍記得」（`tests/e2e/app.spec.ts`）在多個對話同時跑 `npm run ci`、機器吃重時偶爾失敗（2026-11-01 在 main 目錄 3 次中失敗 3 次，單獨與重跑皆過）；查是否等待時間不足或 OPFS 競態。
