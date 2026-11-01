@@ -1,5 +1,5 @@
 import type { Student } from '../core';
-import type { FolderData, SavedRoster, SavedSurvey, SurveyKind } from './types';
+import type { FolderData, PhraseCategory, SavedRoster, SavedSurvey, SurveyKind } from './types';
 
 /** 資料夾裡存設定與名單的檔名；副檔名 .sfh 為「設定檔」，內容是 JSON。 */
 export const SETTINGS_FILE = '問卷小幫手設定.sfh';
@@ -68,7 +68,23 @@ export function parseFolderData(text: string): FolderData {
   const o = raw as { surveys?: unknown; rosters?: unknown };
   const surveys = (Array.isArray(o.surveys) ? o.surveys : []).map(parseSurvey).filter((x): x is SavedSurvey => x !== null);
   const rosters = (Array.isArray(o.rosters) ? o.rosters : []).map(parseRoster).filter((x): x is SavedRoster => x !== null);
-  return { version: 1, surveys, rosters };
+  const phrases = parsePhrases((raw as { phrases?: unknown }).phrases);
+  return phrases ? { version: 1, surveys, rosters, phrases } : { version: 1, surveys, rosters };
+}
+
+function parsePhrases(v: unknown): PhraseCategory[] | undefined {
+  if (!Array.isArray(v)) return undefined;
+  const out: PhraseCategory[] = [];
+  for (const c of v) {
+    if (typeof c !== 'object' || c === null) continue;
+    const o = c as Record<string, unknown>;
+    if (typeof o.id !== 'string' || typeof o.name !== 'string' || !Array.isArray(o.phrases)) continue;
+    const phrases = o.phrases
+      .filter((p): p is { title: string; text: string } => typeof p === 'object' && p !== null && typeof (p as { text?: unknown }).text === 'string')
+      .map((p) => ({ title: typeof p.title === 'string' ? p.title : p.text.slice(0, 6), text: p.text }));
+    out.push({ id: o.id, name: o.name, phrases });
+  }
+  return out;
 }
 
 export function serializeFolderData(data: FolderData): string {
@@ -84,7 +100,8 @@ export function mergeFolderData(base: FolderData, incoming: FolderData): FolderD
   }
   const rosters = new Map(base.rosters.map((r) => [r.id, r]));
   for (const r of incoming.rosters) rosters.set(r.id, r);
-  return { version: 1, surveys: [...surveys.values()], rosters: [...rosters.values()] };
+  const phrases = base.phrases ?? incoming.phrases;
+  return { version: 1, surveys: [...surveys.values()], rosters: [...rosters.values()], ...(phrases ? { phrases } : {}) };
 }
 
 /** 新增或更新一份問卷設定。 */

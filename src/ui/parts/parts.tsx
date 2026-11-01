@@ -49,7 +49,23 @@ export function Sheet(props: { title: string; onClose: () => void; children: Com
   useEffect(() => {
     const prev = document.activeElement as HTMLElement | null;
     ref.current?.focus();
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && props.onClose();
+    // 鍵盤：Esc 關閉；Tab 只在面板內循環（不跑到後面的頁面）
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') return props.onClose();
+      if (e.key !== 'Tab' || !ref.current) return;
+      const items = [...ref.current.querySelectorAll<HTMLElement>('a[href],button:not([disabled]),input:not([disabled]),select,textarea,[tabindex]:not([tabindex="-1"])')];
+      if (items.length === 0) return e.preventDefault();
+      const first = items[0] as HTMLElement;
+      const last = items[items.length - 1] as HTMLElement;
+      const at = document.activeElement;
+      if (e.shiftKey && (at === first || at === ref.current)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && at === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
     document.addEventListener('keydown', onKey);
     return () => {
       document.removeEventListener('keydown', onKey);

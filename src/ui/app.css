@@ -1171,3 +1171,186 @@ button.tile {
 .bar-actions .btn {
   position: relative;
 }
+
+/* ───────── 動態與轉場（設計稿第六輪 M1：全部 ≤ 220ms，頁面切換不做動畫；減少動態時全部關閉） ───────── */
+.btn,
+.chip,
+.seg button,
+.card-btn,
+.ds,
+.cm {
+  transition:
+    background-color var(--dur) ease,
+    border-color var(--dur) ease,
+    color var(--dur) ease;
+}
+.scrim {
+  animation: scrim-in 220ms ease-out;
+}
+.sheet {
+  animation: sheet-up 220ms ease-out;
+}
+@keyframes scrim-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes sheet-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+@keyframes sheet-left {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+@keyframes sheet-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+@media (min-width: 600px) {
+  .sheet {
+    animation-name: sheet-left;
+  }
+}
+@media (min-width: 1024px) {
+  .sheet {
+    animation-name: sheet-pop;
+  }
+}
+
+/* 圖表另存圖片 */
+.chart-fig {
+  margin: 0;
+}
+.chart-tools {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  justify-content: flex-end;
+}
+
+/* 常用評語 */
+.phrase-h {
+  margin: var(--sp-4) 0 0;
+}
+.phrase-tabs {
+  overflow-x: auto;
+  flex-wrap: nowrap;
+}
+.phrase-tabs button {
+  white-space: nowrap;
+}
+.phrase-chips {
+  margin: var(--sp-2) 0;
+}
+.chip.phrase {
+  cursor: pointer;
+  min-height: var(--tap-min);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  border: 1px solid var(--ctl);
+}
+.phrase-save,
+.phrase-edit li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin: var(--sp-2) 0;
+}
+.phrase-edit {
+  list-style: none;
+  padding: 0;
+}
+
+/* 教學頁與快速範本 */
+.guide-nav,
+.tpl-grid {
+  display: grid;
+  gap: var(--sp-3);
+}
+.guide-nav {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  margin-bottom: var(--sp-4);
+}
+.guide-nav button[aria-current='page'] {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.tips {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: var(--sp-3);
+}
+.tips li {
+  display: flex;
+  gap: var(--sp-3);
+  align-items: flex-start;
+}
+.tips .num {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+.tpl-grid {
+  grid-template-columns: 1fr;
+}
+.tpl-card {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-height: var(--tap);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-sm);
+  border: 2px solid var(--ctl);
+  background: var(--card);
+  cursor: pointer;
+}
+.tpl-card[aria-checked='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.tpl-q {
+  padding-left: var(--sp-5);
+  display: grid;
+  gap: var(--sp-1);
+}
+.tpl-split {
+  display: grid;
+  gap: var(--sp-4);
+}
+.todo-check {
+  font-weight: 700;
+  color: var(--warn);
+}
+@media (min-width: 1024px) {
+  .tpl-split {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+  .tpl-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.home-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin: var(--sp-3) 0 0;
+}
+.demo-tag {
+  flex: none;
+}

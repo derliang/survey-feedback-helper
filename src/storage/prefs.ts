@@ -1,8 +1,12 @@
 // 介面偏好（只存在這個瀏覽器；不放任何作答資料或名單）
 export type Theme = 'auto' | 'light' | 'dark';
 
+export type Lang = 'zh' | 'en';
+
 export interface Prefs {
   theme: Theme;
+  /** 介面語言；預設繁體中文。 */
+  lang: Lang;
   /** 已按過「知道了」的提示。 */
   dismissed: string[];
 }
@@ -14,10 +18,11 @@ export function loadPrefs(): Prefs {
     const raw = JSON.parse(localStorage.getItem(KEY) ?? '{}') as Partial<Prefs>;
     return {
       theme: raw.theme === 'light' || raw.theme === 'dark' ? raw.theme : 'auto',
+      lang: raw.lang === 'en' ? 'en' : 'zh',
       dismissed: Array.isArray(raw.dismissed) ? raw.dismissed.filter((x): x is string => typeof x === 'string') : [],
     };
   } catch {
-    return { theme: 'auto', dismissed: [] };
+    return { theme: 'auto', lang: 'zh', dismissed: [] };
   }
 }
 

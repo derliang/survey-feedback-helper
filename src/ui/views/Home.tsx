@@ -1,5 +1,5 @@
 import { useRef, useState } from 'preact/hooks';
-import { dismiss, downloadSettings, importSettings, openSurveyFile, reauthorize, set, useApp } from '../../app/store';
+import { dismiss, downloadSettings, go, importSettings, openSurveyFile, reauthorize, set, useApp } from '../../app/store';
 import { isTouchDevice, recentSurveys } from '../../storage';
 import { strings as S } from '../strings';
 import { Icon, Notice } from '../parts/parts';
@@ -136,6 +136,14 @@ export function Home() {
               e.currentTarget.value = '';
             }}
           />
+          <p class="home-links">
+            <button class="btn ghost small" type="button" onClick={() => go('templates')}>
+              {S.home2.templates}
+            </button>
+            <button class="btn ghost small" type="button" onClick={() => go('guide')}>
+              {S.home2.guide}
+            </button>
+          </p>
           <details class="howto">
             <summary>{S.load.howExport}</summary>
             <p>{S.load.howExportBody}</p>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'preact/hooks';
+import { useEffect, useMemo, useState } from 'preact/hooks';
 import { type FeedbackSummary, type TargetResult, cellText, selfVsOthers } from '../../core';
 import {
   type Question,
@@ -12,16 +12,41 @@ import { canGoStats } from '../../app/progress';
 import { feedbackKey, openKey } from '../../app/output';
 import { reviewCounts, setTeacher } from '../../app/review';
 import { go, loadReview, set, setStats, updateReview, useApp } from '../../app/store';
-import { barsSvg, columnsSvg, pairedBarsSvg } from '../chart-svg';
+import { barsSvg, columnsSvg, pairedBarsSvg, svgSize, svgTitle, toPrintSvg } from '../chart-svg';
+import { svgToJpg } from '../chart-png';
+import { downloadBytes } from '../../storage';
 import { strings as S } from '../strings';
 import { ActBar, Notice, useWide } from '../parts/parts';
 import { CommentList, Keywords, SaveNote } from './ReviewParts';
+import { TeacherComment } from './Phrases';
 
 const f1 = (n: number | null | undefined): string => (n === null || n === undefined ? '—' : n.toFixed(1));
 const pct = (x: number): string => `${Math.round(x * 100)}%`;
 
 function Chart({ svg }: { svg: string }) {
-  return <div class="chart" dangerouslySetInnerHTML={{ __html: svg }} />;
+  const [failed, setFailed] = useState(false);
+  const save = async () => {
+    try {
+      const print = toPrintSvg(svg);
+      const { w, h } = svgSize(svg);
+      const bytes = await svgToJpg(print, w, h);
+      downloadBytes(`${svgTitle(svg)}.jpg`, bytes, 'image/jpeg');
+      setFailed(false);
+    } catch {
+      setFailed(true);
+    }
+  };
+  return (
+    <figure class="chart-fig">
+      <div class="chart" dangerouslySetInnerHTML={{ __html: svg }} />
+      <figcaption class="chart-tools">
+        <button class="btn ghost small" type="button" onClick={() => void save()}>
+          {S.stats.saveImage}
+        </button>
+        {failed && <span class="hint" role="alert">{S.stats.saveImageFailed}</span>}
+      </figcaption>
+    </figure>
+  );
 }
 
 function Tile({ label, value, note }: { label: string; value: string; note?: string }) {
@@ -183,12 +208,11 @@ function FeedbackMain({ summary, sel, wide }: { summary: FeedbackSummary; sel: s
       <section class="card">
         <h3>{S.review.teacherTitle}</h3>
         <p class="hint">{S.review.teacherHelp}</p>
-        <textarea
-          class="input area"
-          rows={4}
-          aria-label={S.review.teacherTitle}
+        <TeacherComment
           value={review?.teacher[t.key] ?? ''}
-          onInput={(e) => updateReview((r) => setTeacher(r, t.key, (e.target as HTMLTextAreaElement).value))}
+          onChange={(v) => updateReview((r) => setTeacher(r, t.key, v))}
+          studentName={personName(t)}
+          allNames={summary.targets.map(personName)}
         />
       </section>
     </>
