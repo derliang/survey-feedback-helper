@@ -1,12 +1,15 @@
 import { type Cell, isBlankCell, parseNumber, round1 } from './text';
 import { type PersonRef } from './roster';
 import { personKey } from './check';
+import { mean, trimExtremes } from './mean';
 
 export interface FeedbackItem {
   id: string;
   label: string;
   /** 權重（相對值）。未給時等重。 */
   weight?: number;
+  /** 反向題：分數換成 min+max−分數 再統計（量表標籤見 scale.ts）。 */
+  reversed?: boolean;
 }
 
 export interface FeedbackScale {
@@ -54,8 +57,10 @@ export interface ItemStat {
   itemId: string;
   /** 他評分數的平均；沒有有效分數為 null。 */
   mean: number | null;
-  /** 有效分數筆數。 */
+  /** 有效分數筆數（去極端值前）。 */
   n: number;
+  /** 有套用去極端值（各去掉最高、最低 trim 個）；筆數不足時不去除，為 false。 */
+  trimmed: boolean;
 }
 
 export interface TargetResult {
@@ -98,23 +103,26 @@ export interface FeedbackSummary {
  * - 自評（填寫者與被評者同一人）不計入他評平均，另存 selfScores
  * - 無效分數（非數字、超出量表）不計入並列入 problems
  * - 權重預設等重；總分只在有分數的項目間正規化
+ * - 反向題（item.reversed）在驗證範圍後換算；自評也同樣換算
+ * - trim：每題各去掉最高、最低 trim 個後再平均（去極端值）；該題有效筆數 ≤ 2×trim 時不去除
  * - totalGroups：全班應有幾組（例如名單裡要報告的人數）；未提供時班均只寫「已計入」
  */
 export function summarizeFeedback(
   records: readonly FeedbackRecord[],
   items: readonly FeedbackItem[],
-  opts: { scale?: FeedbackScale; totalGroups?: number } = {},
+  opts: { scale?: FeedbackScale; totalGroups?: number; trim?: number } = {},
 ): FeedbackSummary {
   const scale = opts.scale ?? DEFAULT_SCALE;
   const weights = effectiveWeights(items);
+  const trim = Math.max(0, Math.floor(opts.trim ?? 0));
   const problems: ScoreProblem[] = [];
-  type Acc = { person: PersonRef; sums: number[]; ns: number[]; raters: Set<string>; raterCount: number; self: Record<string, number | null> | null; comments: { recordId: number; text: string }[] };
+  type Acc = { person: PersonRef; vals: number[][]; raters: Set<string>; raterCount: number; self: Record<string, number | null> | null; comments: { recordId: number; text: string }[] };
   const byTarget = new Map<string, Acc>();
 
   for (const r of records) {
     const key = personKey(r.target);
     if (key === null) continue;
-    const acc = byTarget.get(key) ?? { person: r.target, sums: items.map(() => 0), ns: items.map(() => 0), raters: new Set(), raterCount: 0, self: null, comments: [] };
+    const acc = byTarget.get(key) ?? { person: r.target, vals: items.map(() => []), raters: new Set(), raterCount: 0, self: null, comments: [] };
     byTarget.set(key, acc);
     const isSelf = personKey(r.rater) === key;
     const parsed = items.map((it) => {
@@ -129,7 +137,7 @@ export function summarizeFeedback(
         problems.push({ recordId: r.id, itemId: it.id, kind: 'outOfRange' });
         return null;
       }
-      return n;
+      return it.reversed ? scale.min + scale.max - n : n;
     });
     if (isSelf) {
       acc.self = Object.fromEntries(items.map((it, i) => [it.id, parsed[i] ?? null]));
@@ -137,21 +145,17 @@ export function summarizeFeedback(
     }
     acc.raterCount++;
     parsed.forEach((v, i) => {
-      if (v !== null) {
-        acc.sums[i] = (acc.sums[i] ?? 0) + v;
-        acc.ns[i] = (acc.ns[i] ?? 0) + 1;
-      }
+      if (v !== null) acc.vals[i]?.push(v);
     });
     const text = typeof r.comment === 'string' ? r.comment.trim() : '';
     if (text !== '') acc.comments.push({ recordId: r.id, text });
   }
 
   const targets: TargetResult[] = [...byTarget].map(([key, a]) => {
-    const itemStats: ItemStat[] = items.map((it, i) => ({
-      itemId: it.id,
-      n: a.ns[i] ?? 0,
-      mean: (a.ns[i] ?? 0) > 0 ? (a.sums[i] as number) / (a.ns[i] as number) : null,
-    }));
+    const itemStats: ItemStat[] = items.map((it, i) => {
+      const t = trimExtremes(a.vals[i] ?? [], trim);
+      return { itemId: it.id, n: (a.vals[i] ?? []).length, mean: mean(t.values), trimmed: t.trimmed };
+    });
     let wsum = 0;
     let total = 0;
     itemStats.forEach((s, i) => {
