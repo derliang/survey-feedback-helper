@@ -49,6 +49,8 @@ export interface PersonalOutput {
   input: PersonalFeedbackInput;
   /** 這份將放進去的留言（預覽給老師看）。 */
   comments: string[];
+  /** 與 comments 一一對應的審稿鍵（預覽內「留著／隱藏／改寫」用）。 */
+  commentKeys: string[];
 }
 
 /** 每位被評對象一份個人回饋單的輸入。 */
@@ -69,7 +71,8 @@ export function personalInputs(
   const classSd = mu === null ? null : Math.sqrt(totals.reduce((a, b) => a + (b - mu) ** 2, 0) / totals.length);
   const gaps = new Map(selfVsOthers(summary).map((g) => [g.key, g]));
   return sorted.map((t) => {
-    const view = buildView(reviewedTarget(t, review, audience), summary, audience, { map });
+    const reviewed = reviewedTarget(t, review, audience);
+    const view = buildView(reviewed, summary, audience, { map });
     const items = (view.items ?? []).map((it, i) => ({ label: itemLabels[i] ?? it.label, mine: it.mean, classMean: it.classMean }));
     const comments = view.comments;
     const seat = seatText(t.person);
@@ -91,7 +94,8 @@ export function personalInputs(
         .map((g) => ({ item: summary.items.find((i) => i.id === g.itemId)?.label ?? g.itemId, others: g.others as number, self: g.self as number })),
     };
     const prefix = seat === '' ? '' : `${seat.padStart(2, '0')} `;
-    return { key: t.key, fileName: `${prefix}${nameText(t.person)}`, input, comments };
+    const commentKeys = reviewed.comments.slice(0, comments.length).map((c) => feedbackKey(c.recordId));
+    return { key: t.key, fileName: `${prefix}${nameText(t.person)}`, input, comments, commentKeys };
   });
 }
 

@@ -125,3 +125,30 @@ test('歷次趨勢：加入之前的問卷後並排成表與折線，可移除',
   await card.getByRole('button', { name: '移除' }).click();
   await expect(card.getByText('至少要有兩次問卷')).toBeVisible();
 });
+
+test('去識別化預覽：每則留言可留著、隱藏（可還原）、改寫，勾選開關照舊', async ({ page }) => {
+  await prepared(page);
+  await step(page, '統計').click();
+  await page.locator('.wb-list').getByRole('button', { name: /林雅婷/ }).click();
+  await page.getByTestId('comment').first().getByRole('button', { name: '採用' }).click();
+  await step(page, '輸出').click();
+  await page.getByRole('radio', { name: '學生版' }).click();
+  await page.getByRole('button', { name: '先預覽學生版' }).click();
+  const dlg = page.getByRole('dialog');
+  await expect(dlg.getByTestId('pv-keep').first()).toBeDisabled();
+
+  await dlg.getByTestId('pv-hide').first().click();
+  await expect(dlg.getByTestId('pv-restore').first()).toBeVisible();
+  await dlg.getByTestId('pv-restore').first().click();
+  await expect(dlg.getByTestId('pv-hide').first()).toBeVisible();
+
+  await dlg.getByTestId('pv-rewrite').first().click();
+  await dlg.getByTestId('pv-draft').fill('改寫後的留言');
+  await dlg.getByTestId('pv-save').click();
+  await expect(dlg.getByTestId('preview')).toContainText('改寫後的留言');
+
+  await expect(dlg.getByRole('button', { name: '預覽過了' })).toBeDisabled();
+  await dlg.getByRole('checkbox', { name: /我已逐則看過預覽/ }).check();
+  await dlg.getByRole('button', { name: '預覽過了' }).click();
+  await expect(page.getByRole('button', { name: /^全部 \d+ 位/ })).toBeEnabled();
+});
