@@ -14,3 +14,4 @@ export * from './scale';
 export * from './advanced';
 export * from './trend';
 export * from './anonymize';
+export * from './possible-names';
