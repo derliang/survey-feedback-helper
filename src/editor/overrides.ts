@@ -63,6 +63,16 @@ export interface OverrideItem {
   id: string;
   label: string;
   what: string;
+  /** 區塊覆寫的哪一部分（隱藏／改內容），var 沒有。 */
+  part?: BlockPart;
+}
+export type BlockPart = 'hidden' | 'patch';
+
+/** 只拿掉區塊覆寫的某一部分，其餘保留（全拿掉就回傳空物件，setBlockOverride 會刪除該項）。 */
+export function withoutBlockPart(ov: BlockOverride | undefined, part: BlockPart): BlockOverride {
+  const rest: BlockOverride = { ...(ov ?? {}) };
+  delete rest[part];
+  return rest;
 }
 /** 面板列出被改過的項目，可逐項還原。 */
 export function listOverrides(t: EditorTemplate, s: StudentOverride | undefined): OverrideItem[] {
@@ -72,8 +82,8 @@ export function listOverrides(t: EditorTemplate, s: StudentOverride | undefined)
   const out: OverrideItem[] = [];
   for (const [id, ov] of Object.entries(s.blocks)) {
     const label = names.get(id) ?? '（已刪除的區塊）';
-    if (ov.hidden) out.push({ kind: 'block', id, label, what: '隱藏' });
-    if (ov.patch) out.push({ kind: 'block', id, label, what: `改了 ${Object.keys(ov.patch).join('、')}` });
+    if (ov.hidden) out.push({ kind: 'block', id, label, what: '隱藏', part: 'hidden' });
+    if (ov.patch) out.push({ kind: 'block', id, label, what: `改了 ${Object.keys(ov.patch).join('、')}`, part: 'patch' });
   }
   for (const k of Object.keys(s.vars ?? {})) out.push({ kind: 'var', id: k, label: `{${k}}`, what: '換了內容' });
   return out;

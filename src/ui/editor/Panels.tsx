@@ -1,7 +1,7 @@
 // 屬性面板：依區塊類型顯示；分段控制、籌碼與開關為主，不需要輸入數字（手機友善）。
 import { useRef } from 'preact/hooks';
 import { describeCondition } from '../../editor/condition';
-import { listOverrides } from '../../editor/overrides';
+import { listOverrides, withoutBlockPart } from '../../editor/overrides';
 import { wordNotes } from '../../editor/word';
 import type { Condition, EBlock, EBlockKind, EditorTemplate, ReportVersion } from '../../editor/types';
 import { KIND_NAMES, STAT_KEYS, type StatKey } from '../../editor/types';
@@ -537,7 +537,7 @@ export function StudentPanel(props: { t: EditorTemplate; students: { key: string
                 <span>
                   {it.label}：{it.what}
                 </span>
-                <button type="button" class="btn ghost small" onClick={() => (it.kind === 'block' ? overrideBlock(it.id, {}) : overrideVar(it.id, undefined))}>
+                <button type="button" class="btn ghost small" onClick={() => (it.kind === 'block' && it.part ? overrideBlock(it.id, withoutBlockPart(m[props.student!]?.blocks[it.id], it.part)) : overrideVar(it.id, undefined))}>
                   還原
                 </button>
               </li>
