@@ -27,8 +27,8 @@
 - [x] **Google 試算表直讀的畫面**（桌機稿 D12、D13、D44～D46）（R-044，已裁示改 Sheets API 直讀，硬規則 4 已改）：「從雲端硬碟選擇」改直讀文案（讀到目前最新內容、不改原檔、可重新讀取），連線畫面一併改；v0.4 實測 `drive.file`＋Picker 能否讀到、超額不綁帳單是否只會被擋
 - [x] **隱私從簡**（桌機稿 D54、D56；DESIGN.md 已同步。其餘文件已於 PR #6 同步）：取消「管理名單／一鍵刪除」入口與存放期限；R-005、R-031 文案重寫（**取代**10-31 的隱私兩句與審稿意見的兩句）；硬規則 5（不進 repo）保留；同步 `CONTRIBUTING.md`、`.github/pull_request_template.md`、`README.md`、`SECURITY.md`、藍圖、DESIGN.md、兩份 10-30 決定記錄；R-003「最近的專案」做法對齊
 - [x] **精準用字**（桌機稿 D14、D8 匯出教學已重做；仍待：有回應後的畫面、實際下載、Safari／手機介面的核對）（硬規則 10）：已實測，見[Google 介面核對紀錄](docs/design/Google介面核對紀錄.md)；**待做**：設計員重做匯出教學（R-006、R-033），所有舊文案「建立回應試算表」改成「連結至試算表」等原字；補核對有回應後的畫面、實際下載、Safari／手機介面
-- [~] **載入速度**（硬規則 9）：效能預算與 CI 檢查已做；輸出與字型延遲載入、Service Worker 快取已做於分支 export-fonts（2026-11-01，PR 待審）。**待做**：應用程式要在進入輸出頁時呼叫 `registerAssetCache()`（`src/export/index.ts` 匯出）；首屏 2 秒要等 UI 做出來才能量
-- [~] **樣本對照**：虛構測試資料集產生函式已做（2026-11-01 分支 core-deid：`src/core/sample-dataset.ts`，姓名／座號對不上、書名多種寫法、自評、量表 0～10、雙欄、不寫檔）；**待做**：個人回饋單涵蓋「平均列」、填寫者與被評對象雙欄的欄位對應精靈測試。見[決定記錄](docs/decisions/2026-11-01-去識別化名單外人名偵測.md)
+- [~] **載入速度**（硬規則 9）：效能預算與 CI 檢查已做；輸出與字型延遲載入、Service Worker 快取已做；輸出頁進入時已呼叫 `registerAssetCache()`（2026-11-01 確認）；首屏已用 `scripts/measure-first-screen.mjs` 量（Fast 4G＋4× 降速約 1.85 秒，Slow 4G 第一次造訪 2.1～3.5 秒略超過，見 [docs/performance.md](docs/performance.md)）。**待做**：真機量測
+- [x] **樣本對照**：虛構測試資料集產生函式（`src/core/sample-dataset.ts`）＋精靈與個人回饋單平均列測試（`src/app/sample-wizard.test.ts`，2026-11-01 分支 impl-quality）。見[決定記錄](docs/decisions/2026-11-01-去識別化名單外人名偵測.md)
 
 ### B. 審稿意見（2026-11-01，R-030～R-044，全文見[審稿意見裁示](docs/decisions/2026-11-01-審稿意見裁示.md)）
 
@@ -94,11 +94,11 @@
 - [x] 三種問卷統計：票選幹部、意見調查、報告回饋（2026-11-01，分支 app-v01b：統計畫面 `src/ui/views/StatsView.tsx`、接線 `src/app/analysis.ts`；圖表只做橫條、成對橫條、直條三種，其餘七種圖與換圖、縮圖選擇器見下方待辦）
 - [x] 票選防弊（多票、自投、時間戳異常）、可重現抽籤（記錄種子）（2026-11-01，分支 app-v01b：計票規則三項可選、同票抽籤顯示種子與重抽；逐張覆寫票未做）
 - [x] （2026-11-01，分支 export-fonts）xlsx 輸出：`src/export/xlsx.ts`（自寫 fflate；樣式、欄寬、凍結列；已用本機 Excel 實際開啟驗證）
-- [~] 測試用虛構資料；依樣本結構做，蒐集多種 Google 表單匯出樣本（核取方塊、格狀題等）（2026-11-01 分支 app-v01：`tests/e2e/fixtures.ts` 已有報告回饋虛構樣本，測試時才產生 xlsx；**其餘樣本與格狀題、核取方塊仍待做**）
+- [~] 測試用虛構資料；依樣本結構做，蒐集多種 Google 表單匯出樣本（核取方塊、格狀題等）（2026-11-01：`src/app/form-samples.test.ts` 已涵蓋核取方塊、格狀題、核取方塊格狀、線性量表、票選，測試時才產生 xlsx；**待核對**：欄位標題寫法是自編近似，尚未對照真實 Google 匯出檔）
 - [x] 問卷作答資料不寫入瀏覽器儲存空間（只在記憶體，見硬規則 6）（2026-11-01，分支 app-v01；e2e 檢查 localStorage、sessionStorage、IndexedDB 不含作答內容）
 - [x] 隱私聲明（網頁，從簡三句；**定稿仍待使用者確認**）、瀏覽器版本提示（2026-11-01，分支 app-v01；README 已於 PR #6 同步）
 - [x] **輸出頁接線**（2026-11-01，分支 app-v01b）：進輸出頁呼叫 `registerAssetCache()`；統計結果→範本輸入在 `src/app/output.ts`；可下載班級總表（xlsx／docx／PDF）、個人回饋單（單人 PDF／docx、全班批次 zip）、意見調查與票選的報告（xlsx／docx／PDF）；學生版／家長版輸出前警語＋強制預覽＋勾選確認
-- [~] 統計計算自動化測試（核心在 core-stats／adv-stats；接線與審稿在 `src/app/stats.test.ts`，2026-11-01）；**效能壓力測試並記錄上限仍待做**
+- [x] 統計計算自動化測試（核心在 core-stats／adv-stats；接線與審稿在 `src/app/stats.test.ts`）；效能壓力測試與上限已記錄（`src/core/perf.test.ts`、[docs/performance.md](docs/performance.md)，2026-11-01）
 - [~] 手機／平板／桌機版面與觸控操作（2026-11-01：統計與輸出已有三種寬度的版面與 e2e；實機驗證待 v1.0）
 - [x] 載入效能預算達標（硬規則 9）（已完成：`npm run check:budget` 在 `npm run ci` 內，2026-11-01 實測首頁 85.7 KB gzip，預算 150 KB）
 
@@ -163,8 +163,8 @@
 - [x] PWA 離線可用（程式本身；輸出字型要輸出過一次才存）
 - [x] 深色模式、鍵盤操作（面板 Tab 循環）、圖表另存圖片（JPG）、動態與轉場（進場；出場、展開收合未做）
 - [~] Google 表單設計教學頁、示範資料入口（R-001）已做；**範本表單**待使用者用私人 Gmail 建立並把連結填入 `src/app/guide-config.ts`；**題型名稱與「發布」字樣待實際核對**（目前全標「待核對」）
-- [~] 英文介面：骨架已做（主要畫面）；其餘字串、教學頁與 Google 英文介面名稱待翻譯與核對
-- [~] 文件完整、完整測試：新功能都有單元與 e2e；總整理待做
+- [~] 英文介面：主要畫面字串已補齊（`src/ui/strings.en.more.ts`，覆蓋率測試 `strings.en.test.ts`，2026-11-01）；**待做**：`google` 登入面板、`guide` 表單教學頁、`tpl` 快速範本題目三段，需先對照真實 Google 英文介面名稱（硬規則 10）
+- [~] 文件完整、完整測試：新功能都有單元與 e2e；測試總覽已整理於 [docs/testing.md](docs/testing.md)（2026-11-01）；**待做**：真機測試
 - [ ] 實機驗證：iPhone／Android 手機與平板（特別是 iOS Safari 的拖曳、鍵盤彈出、捲動、PWA 加入主畫面與離線） 負責：使用者（需實機）
 - [x] （2026-11-01，分支 ui-polish）編輯器目錄的深色模式樣式（A8、A9）：紙張加 `doc-warm`、預覽檯面 `--sunk`，三寬度淺深色截圖在 `docs/design/verify/ui-polish/` 負責：無人（待派設計員／施工）
 
