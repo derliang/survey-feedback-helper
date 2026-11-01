@@ -18,6 +18,8 @@ export interface PersonalFeedbackInput {
   average: { mine: number | null; classMean: number | null };
   praise: string[];
   advice: string[];
+  /** 優點區塊的標題；不分優點與建議、一律放「留言」時改成「同學的留言」。 */
+  praiseTitle?: string;
   teacherComment?: string;
   /** 已畫好的圖表（PNG）。 */
   chartPng?: Uint8Array;
@@ -68,7 +70,7 @@ export function personalFeedbackDoc(inp: PersonalFeedbackInput): DocModel {
   ];
   if (inp.chartPng) blocks.push({ type: 'image', png: inp.chartPng, w: 440, h: 190, after: 12 });
   if (inp.praise.length) {
-    blocks.push({ type: 'heading', text: '同學的優點回饋', size: 14, color: NAVY, before: 6, after: 6 });
+    blocks.push({ type: 'heading', text: inp.praiseTitle ?? '同學的優點回饋', size: 14, color: NAVY, before: 6, after: 6 });
     blocks.push({ type: 'bullets', items: inp.praise, size: 11, after: 10 });
   }
   if (inp.advice.length) {
