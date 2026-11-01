@@ -1,4 +1,9 @@
-# 設計系統成品頁（2026-10-31）
+# 設計系統成品頁（2026-10-31；2026-11-01 第四輪另發新頁）
+
+- **最新（第四輪，2026-11-01）**：https://claude.ai/artifact/EwXdcUYGxE5LbytqbYuY2W（私人）。已含 R-029、DESIGN.md 5.20、5.21、5.22 與擋下帳號的規則；元件 32 個（新增 AccountChooser、ChartPicker、ReviewRow，Stepper 改數字步驟列）、圖示 51 個。**它是另一個成品頁**，舊三頁沒有被覆蓋；舊三頁（下方）反映第二輪以前，**已被這一頁取代**。
+- 更新最新頁：`node docs/design/build/ds.mjs`，再用 Artifact publish 到上面的網址（`root` 設為 `docs/design/design-system`，檔案路徑是 `project/…`；圖示在 `project/assets/Icons/*.svg`，是素材上傳，不是檔案）。新增圖示要先上傳，把 id 補進 `assets.json`（現在的 id 屬於新頁，舊頁的 id 在 git 歷史）。新增元件寫在 `build/ds-extra.mjs`。
+
+以下是第三輪以前的連結與說明（舊頁）：
 
 - 成品頁（derliang@gmail.com 帳號，私人）：https://claude.ai/artifact/857AdkhXWshr4UNaQzELkQ
 - 畫面設計（149 張）：https://claude.ai/artifact/VNReJ26aV2zkEh9GUQeFKg
