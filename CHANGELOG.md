@@ -4,10 +4,15 @@
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-01
+
 ### 新增
 - 建立專案：公開 repo、README、todo、版本記錄、決定記錄、功能藍圖、GPL-3.0 授權。
 - 定案技術選型、產品架構與發布規則（`main` 即上線、全專案零費用、資料不落地）。
 - 協作文件：CONTRIBUTING、SECURITY、Issue 與 PR 範本、第三方套件登錄。
+
+### 發布流程
+- 發布時產生 `version.json`（版號、台北發布日、來源 SHA）、建立 tag 與 GitHub Release（供 Teacher Hub 顯示版本）。
 
 ### v1.0 打磨（分支 polish-v10，尚未發布）
 - PWA：離線也能開（只快取程式本身）、可加入主畫面。

@@ -11,7 +11,7 @@ checkUnused();
 const RAIL = {
   'new:H1': ['home', 0], 'new:1b': ['home', 0], 'new:1c': ['home', 0], 'new:1d': ['home', 0], 'flow-data:1e': ['home', 0], 'new:E3': ['home', 0], 'new:E4': ['home', 0], 'new:E5': ['sys', 4],
   'new:Gd1': ['google', 0], 'new:Gd2': ['google', 2], 'new:Gd3': ['google', 3],
-  'new:G1': ['help', 0], 'new:G2': ['help', 0], 'new:S0': ['help', 1], 'new:S1': ['help', 1], 'new:S2': ['help', 1], 'flow-out:9': ['help', 2],
+  'new:G1': ['help', 0], 'new:G2': ['help', 0], 'new:S0': ['help', 1], 'new:S0b': ['help', 1], 'new:S1': ['help', 1], 'new:S1b': ['help', 1], 'new:S2': ['help', 1], 'flow-out:9': ['help', 2],
   'new:2': ['prep', 0], 'new:2a': ['prep', 0], 'new:2b': ['prep', 1], 'core:2b': ['prep', 1], 'new:3a': ['prep', 2], 'new:3b': ['prep', 2], 'flow-data:3c': ['prep', 2], 'new:W': ['prep', 4], 'flow-data:4a': ['prep', 3], 'flow-data:4b': ['prep', 3],
   'core:3': ['survey', 0], 'flow-stats:5a': ['vote', 0], 'new:V1': ['vote', 2], 'flow-stats:5b': ['vote', 0], 'flow-guard:11a': ['vote', 1], 'flow-guard:11b': ['vote', 1], 'flow-guard:11c': ['vote', 3],
   'new:5d': ['survey', 0], 'new:5d2': ['survey', 0], 'flow-stats:5e': ['survey', 1], 'flow-stats:5f': ['survey', 6], 'flow-stats:5g': ['survey', 5], 'new:E6': ['survey', 0], 'new:Gal': ['chart', 0], 'new:Save': ['chart', 2], 'flow-guard:11d': ['chart', 3], 'flow-guard:11e': ['chart', 4],
@@ -23,7 +23,7 @@ const RAIL = {
   'flow-out:10a': ['sys', 4], 'flow-out:10c': ['sys', 4], 'flow-sys:12a': ['sys', 0], 'flow-sys:12b': ['sys', 1], 'flow-sys:12c': ['sys', 2], 'flow-sys:12e': ['sys', 3],
 };
 // 內容較長的平板畫面：加高畫面框（平板預設 1000）；noBlock＝底部兩顆鈕不撐滿
-const TALL = { 'new:S1': { h: 1260, noBlock: true }, 'new:S2': { h: 1120 } };
+const TALL = { 'new:S1': { noBlock: true }, 'new:S1b': { noBlock: true }, 'new:S2': { h: 900 } };
 const T = (cap, W, H, inner) => mframeWH(cap, W, H, inner, W > 1000 ? 12 : 28);
 
 // ---- 手工：投影唱票（橫向 1024×768，定案 B：全部候選人同列）

@@ -13,7 +13,7 @@
 - [ ] **第五輪設計稿待你決定**（[決定記錄](docs/decisions/2026-11-01-設計稿第五輪.md)）：快速範本題目與入口、「班規議題票選」放進票選幹部類型是否可接受、沒有資料夾時保存提示是否擴到每個畫面（建議頂端「設定」鈕加警示小點）、範本表單需你用私人 Gmail 建立
 - [ ] **待你回覆**（見桌機設計稿第 2 輪）：預設常用評語草稿（[草稿全文](docs/design/預設常用評語草稿.md)）、隱私三句定稿。**已定案**：首頁＝雙欄、唱票＝全部候選人同列、Logo＝乙，見[定案記錄](docs/decisions/2026-11-01-桌機設計稿定案.md)
 - [ ] （可選）刪除 2026-11-01 核對 Google 介面時，在你的帳號建的測試表單「未命名表單」與回應試算表「未命名表單 (回覆)」；沒有動既有的「自評表」
-- [ ] v0.4 前：建立 Google Cloud 專案與 OAuth 用戶端 ID，**不要綁定帳單帳戶**，確認帳單頁顯示未綁定（Google 一律走私人 Gmail，見[邊界條件](docs/decisions/2026-11-01-邊界條件.md)補充，不需向資訊組確認）
+- [ ] v0.4 前：建立 Google Cloud 專案與 OAuth 用戶端 ID，**不要綁定帳單帳戶**，確認帳單頁顯示未綁定（任何 Google 帳號都能用，見[取消帳號限制](docs/decisions/2026-11-01-取消帳號限制.md)；不需向資訊組確認）
 - [ ] v1.0 前：iPhone／Android 手機與平板實機驗證（見 v1.0）
 
 ## 待套用的裁示
@@ -49,7 +49,7 @@
 - [x] **規範差異**（2026-11-01 完成：外框與圖形對比 3:1 已改 tokens；長條粗細與字級把實際值寫進 DESIGN.md；`doc.css` 色碼已轉成 `--doc-*` token；見 [設計系統 README](docs/design/design-system/README.md)）
 - [x] （2026-11-01 第四輪）把 R-029 與所有裁示（含 5.20、5.21、擋下帳號）同步進設計系統成品頁：檔案已重建、另發新連結 https://claude.ai/artifact/EwXdcUYGxE5LbytqbYuY2W（私人；舊整合成品頁未覆蓋）。新頁**尚未逐元件在瀏覽器看過**，使用者確認連結後再決定舊三頁是否標「已取代」
 
-- [ ] **學校帳號擋下：待實測與待核對**：設計稿已改成偵測後擋下（[決定記錄](docs/decisions/2026-11-01-擋下學校帳號.md)）。實作前要實測：`drive.file` 權杖能否呼叫 `about.get` 取得信箱、撤銷權杖後能否重開選帳號視窗、Google 選帳號視窗「使用其他帳戶」字樣，三件事使用者已裁示（非 Gmail 個人帳號**一律擋下**、**要**畫示意卡（第四輪已畫：桌機 D58、手機與平板 S0）、先不加 `openid email` 範圍，先實測 `about.get`）。仍待：實測與「使用其他帳戶」字樣核對（所有示意圖標「字樣待核對」）；實作時 `about.get` 不行再回來問（改硬規則 4 要使用者同意）
+- [x] ~~**學校帳號擋下：待實測與待核對**~~（2026-11-01 已作廢：不再擋下，見[取消帳號限制](docs/decisions/2026-11-01-取消帳號限制.md)；仍待核對的是 Google 視窗字樣）：設計稿已改成偵測後擋下（[決定記錄](docs/decisions/2026-11-01-擋下學校帳號.md)）。實作前要實測：`drive.file` 權杖能否呼叫 `about.get` 取得信箱、撤銷權杖後能否重開選帳號視窗、Google 選帳號視窗「使用其他帳戶」字樣，三件事使用者已裁示（非 Gmail 個人帳號**一律擋下**、**要**畫示意卡（第四輪已畫：桌機 D58、手機與平板 S0）、先不加 `openid email` 範圍，先實測 `about.get`）。仍待：實測與「使用其他帳戶」字樣核對（所有示意圖標「字樣待核對」）；實作時 `about.get` 不行再回來問（改硬規則 4 要使用者同意）
 
 ## 暫緩（有使用者裁示）
 
@@ -70,7 +70,7 @@
 - [ ] 啟用 `main` 分支保護（程式類只能經 PR 合併；因為沒有 CI，不設必要狀態檢查，靠 PR 附本機 `npm run ci` 證據）；須放行純文件類直接 push（見 CLAUDE.md〈工作流程〉）。需使用者在 repo 設定操作
 - [x] （2026-11-01，PR local-release 待合併）GitHub Pages 發布流程改為本機 `npm run release`（推 `gh-pages` 分支，Pages 已設為從 gh-pages 部署，站台已上線）；見[決定](docs/decisions/2026-11-01-Pages改本機發布.md)。用 `--yes` 發布前需使用者說「發布」
 - [ ] 第一次用 `npm run release -- --yes` 實際發布（本 PR 只做 dry-run 驗證）
-- [ ] **Teacher Hub 卡片轉正**：第一版上線、有 GitHub Pages 網址後，通知 `derliang/teacher-hub` 把「問卷回饋小幫手」候選卡改為可點的即開即用或 Beta 卡，並在它的 `tools.json` 加一筆。工具要有 `version.json`（版號與發布日），否則 teacher-hub 的自動同步會失敗。流程見該 repo 的 `docs/PUBLISHING.md` 3.1。背景見 [決定記錄](docs/decisions/2026-10-30-發佈到Teacher-Hub先佔位.md)
+- [ ] **Teacher Hub 卡片轉正**：第一版上線、有 GitHub Pages 網址後，通知 `derliang/teacher-hub` 把「問卷回饋小幫手」候選卡改為可點的即開即用或 Beta 卡，並在它的 `tools.json` 加一筆。工具要有 `version.json`（版號與發布日），否則 teacher-hub 的自動同步會失敗。（發布腳本已會產生 `version.json`、tag、Release，見[發布版本資訊](docs/decisions/2026-11-01-發布版本資訊.md)；第一次發布前要先把 `package.json` 升到 0.1.0 並整理 CHANGELOG。）流程見該 repo 的 `docs/PUBLISHING.md` 3.1。背景見 [決定記錄](docs/decisions/2026-10-30-發佈到Teacher-Hub先佔位.md)
 - [x] （2026-11-01）引入第一個套件時，核對授權與費用並登錄 [docs/third-party.md](docs/third-party.md)
 
 ## v0.1 本機版核心
@@ -195,7 +195,7 @@
 - [x] 2026-10-30 討論並定案功能範圍、技術選型、發布規則（見 docs/decisions）
 - [x] 2026-10-30 建立公開 repo 與規劃文件
 
-- [ ] 設計員：補「選帳號前先看一下」示意卡；擋下畫面（含非 Gmail 個人帳號）附說明圖解，依 [擋下學校帳號](docs/decisions/2026-11-01-擋下學校帳號.md) 使用者裁示。
+- [x] ~~設計員：補「選帳號前先看一下」示意卡；擋下畫面附說明圖解~~ 已作廢：取消帳號限制後改為「登入前先看一下」與「登入視窗被擋」，見 DESIGN.md 5.25。
 - [ ] （等 OAuth 用戶端 ID；偵測與擋下純邏輯已做於 `src/google/account.ts`、`session.ts`）實測 `about.get` 在 `drive.file` 權杖下能否取得信箱（判斷學校帳號用）；不行再問是否加 `openid email`。
 
 - [x] （2026-11-01，第五輪）舊設計系統成品頁三頁標題已加「已取代」（不刪）。擋下畫面按鈕主次維持：主「改用私人 Gmail 登入」、次「改用 Excel 檔」（使用者 2026-11-01 裁示）。
@@ -231,5 +231,5 @@
 
 - [x] 依[取消帳號限制](docs/decisions/2026-11-01-取消帳號限制.md)：移除帳號判斷與 `about.get` 取信箱（`src/google`，測試同步）；使用說明「連接 Google 帳號」文案改為任何帳號皆可（google-ui，分支 google-ui）。畫面接線待金鑰
 - [x] （程式層已做，畫面接線待金鑰）Google 登入視窗打不開的預防：`auth.preload()`／`isReady()`、`signIn` 同步開彈窗、`SignInPopupBlocked` 與 `popup_closed` 分流、單元測試模擬慢載；畫面端按鈕停用與「準備 Google 登入…」尚未接。原：預載登入腳本、載好前停用按鈕、`popup_failed_to_open` 中文說明（根因與做法見取消帳號限制決定記錄；google-ui 施工）
-- [ ] 設計員重審 D57／S1／S2／D58／S0 並補「Drive 連不上」畫面；使用說明去掉「僅限私人 Gmail」
+- [x] 設計員重審 D57／S1／S2／D58／S0 並補「登入視窗被擋」畫面（2026-11-01 第七輪，分支 designer-google，見 DESIGN.md 5.25 與[取消帳號限制](docs/decisions/2026-11-01-取消帳號限制.md)〈設計員重審〉）；`docs/design` 內「僅限私人 Gmail」字樣已同步。**使用說明（`src/`）與停用態／被擋畫面的實作待施工，設計稿已定**
 - [ ] 通知 google-setup：OAuth 同意畫面使用者類型不再限私人 Gmail

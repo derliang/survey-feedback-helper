@@ -6,7 +6,7 @@
 ## 硬規則（使用者要求，不得違反）
 
 1. **純網頁、免安裝、無後端**；手機、平板、桌機各自設計版面與操作（mobile-first）。
-2. **發布 = 本機執行 `npm run release -- --yes`**（2026-11-01 起；不用 GitHub Actions，避免收費）：合併到 `main` **不會**上線，`main` 只是原始碼。PR 階段必須在本機跑完 `npm run ci` 並附證據。**使用者 2026-11-01 常態授權：不必等全部功能完成，調度員可隨時發布**（`main` 已含審過的 PR、`npm run ci` 全綠、HEAD = `origin/main` 時，每合併一批有意義的進展就發布一次，讓使用者能隨時在線上測試）；發布後確認 `gh-pages` 的 SHA 與正式站網址並回報。見[Pages 改本機發布](docs/decisions/2026-11-01-Pages改本機發布.md)。
+2. **發布 = 本機執行 `npm run release -- --yes`**（2026-11-01 起；不用 GitHub Actions，避免收費）：合併到 `main` **不會**上線，`main` 只是原始碼。PR 階段必須在本機跑完 `npm run ci` 並附證據。**使用者 2026-11-01 常態授權：不必等全部功能完成，調度員可隨時發布**（`main` 已含審過的 PR、`npm run ci` 全綠、HEAD = `origin/main` 時，每合併一批有意義的進展就發布一次，讓使用者能隨時在線上測試）；發布後確認 `gh-pages` 的 SHA 與正式站網址並回報。發布會同時在 `gh-pages` 放 `version.json`（版號取自 `package.json`、台北日期、來源 SHA），並建立 tag `v<版號>` 與 GitHub Release；**每次發布前先升 `package.json` 版號並整理 CHANGELOG 區段**，見[發布版本資訊](docs/decisions/2026-11-01-發布版本資訊.md)。見[Pages 改本機發布](docs/decisions/2026-11-01-Pages改本機發布.md)。
 3. **全專案零費用**：Google API、字型、CDN、套件、部署都不得產生費用。引入任何套件、字型、服務前先核對授權（須與 GPL-3.0 相容）與費用，並登錄 [docs/third-party.md](docs/third-party.md)。
 4. **Google Cloud 專案絕不綁定帳單帳戶**，不啟用需要帳單的服務；Google 權限只用 `drive.file`；API 金鑰限 Pages 網址、只開 Drive、Picker 與 Google Sheets API（2026-11-01 使用者裁示改為直讀 Google 試算表，見[審稿意見裁示](docs/decisions/2026-11-01-審稿意見裁示.md)）。
 5. **不把學生資料放進 repo**（repo 公開）：絕不把學生資料（問卷結果、名單、輸出檔）commit 進 repo；`.gitignore` 已擋 xlsx／csv／docx／pdf。示範資料只用虛構資料。不蒐集任何使用數據（連匿名統計也不要）。
