@@ -1565,3 +1565,230 @@ details[open] > :not(summary) {
   border: 0;
   cursor: pointer;
 }
+/* 選課分組志願（docs/design/DESIGN.md 5.27）：只組合既有元件與 tokens */
+.input.num {
+  max-width: 8rem;
+  text-align: right;
+}
+.input.bad {
+  border: 2px solid var(--bad);
+}
+.field-err {
+  display: block;
+  color: var(--bad);
+  font-size: var(--fs-sm);
+  margin-top: var(--sp-1);
+}
+.rule-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.rule-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--sp-2);
+}
+.course-table td {
+  vertical-align: top;
+  padding: var(--sp-1) var(--sp-2);
+}
+.merge-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.merge-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.merge-btns {
+  display: inline-flex;
+  gap: var(--sp-2);
+}
+.cbar {
+  height: 12px;
+  border-radius: 6px;
+  background: var(--bar-muted);
+  overflow: hidden;
+}
+.cbar > span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+.cbar.bad > span {
+  background: var(--warn-bar);
+}
+.crow {
+  width: 100%;
+  min-height: 64px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  text-align: left;
+  background: var(--card);
+  border: 1px solid var(--ctl);
+  border-radius: var(--r-sm);
+  padding: var(--sp-2) var(--sp-3);
+  cursor: pointer;
+}
+.crow.on {
+  border: 2px solid var(--accent);
+  background: var(--accent-soft);
+}
+.crow.drop-on {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.cr-top {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+.cr-top strong {
+  flex: 1 1 auto;
+}
+.cr-tags {
+  display: inline-flex;
+  gap: var(--sp-1);
+  flex-wrap: wrap;
+}
+.cr-n {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.seed-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.side-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
+}
+.roster-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+.roster-head h3 {
+  flex: 1 1 auto;
+}
+.srows {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+.srow {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-1) var(--sp-2);
+  border-bottom: 1px solid var(--line-soft);
+  background: var(--card);
+}
+.srow.dragging {
+  box-shadow: 0 4px 12px var(--shadow);
+  transform: scale(1.02);
+}
+.sr-name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.sr-tags {
+  display: inline-flex;
+  gap: var(--sp-1);
+  flex-wrap: wrap;
+}
+.handle {
+  cursor: grab;
+  color: var(--ink3);
+  user-select: none;
+  touch-action: none;
+  padding: 0 var(--sp-1);
+}
+.move-opt .mo-main {
+  display: flex;
+  flex-direction: column;
+}
+.move-opt:disabled {
+  color: var(--ink3);
+}
+.prio-list {
+  max-height: 40vh;
+  overflow-y: auto;
+}
+.check.row52 {
+  min-height: 52px;
+}
+.chosen {
+  font-size: var(--fs-sm);
+  color: var(--ink2);
+}
+.pref-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.pref-row .pr-name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.out-grid {
+  display: grid;
+  gap: var(--sp-4);
+  grid-template-columns: minmax(0, 1fr);
+}
+.filecard {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 64px;
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--ctl);
+  border-radius: var(--r-sm);
+  background: var(--card);
+  cursor: pointer;
+}
+.fc-main {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+.hit-course {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--sp-1) var(--sp-2);
+}
+.hit-course .cbar {
+  grid-column: 1 / -1;
+}
+@media (min-width: 1024px) {
+  .out-grid {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+.course-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.course-rules {
+  max-width: 860px;
+}
+.tiles.course-tiles {
+  grid-template-columns: repeat(3, 1fr);
+}

@@ -22,7 +22,7 @@ function stepState(i: number, st: ReturnType<typeof getState>): { enabled: boole
 export function TopBar() {
   const st = useApp();
   const unsaved = st.dirty && st.folder.state !== 'ready';
-  const steps: StepDef[] = STEP_ROUTES.map((route, i) => ({ route, label: S.steps[i] as string }));
+  const steps: StepDef[] = STEP_ROUTES.map((route, i) => ({ route, label: (i === 2 && st.session?.kind === 'course' ? S.course.step : S.steps[i]) as string }));
   return (
     <header class="topbar">
       <div class="appbar">
