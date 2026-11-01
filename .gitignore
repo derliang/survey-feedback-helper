@@ -13,6 +13,7 @@ prototypes/**/dist/
 *.otf
 *.woff
 *.woff2
+!public/fonts/NotoSansTC-VF.woff2
 
 # 系統與編輯器
 .DS_Store
