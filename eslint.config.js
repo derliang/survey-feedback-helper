@@ -11,7 +11,7 @@ export default tseslint.config(
   },
   {
     // 統計核心必須是不依賴瀏覽器的純函式（硬規則 7）
-    files: ['src/core/**/*.ts'],
+    files: ['src/core/**/*.ts', 'src/editor/**/*.ts'],
     rules: {
       'no-restricted-globals': ['error', 'window', 'document', 'localStorage', 'sessionStorage', 'navigator'],
     },
