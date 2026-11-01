@@ -10,6 +10,7 @@ import { OutputView } from './views/OutputView';
 import { StatsView } from './views/StatsView';
 import { Prepare } from './views/Prepare';
 import { EditorRoute } from './editor/Loader';
+import { GuideRoute } from './guide/Loader';
 
 export function App() {
   const st = useApp();
@@ -56,6 +57,7 @@ export function App() {
       {st.route === 'output' && <OutputView />}
       {st.route === 'method' && <MethodView />}
       {st.route === 'editor' && <EditorRoute />}
+      {(st.route === 'guide' || st.route === 'templates') && <GuideRoute />}
       {st.route === 'settings' && <Settings />}
       <FolderDialog />
       <RestartDialog />

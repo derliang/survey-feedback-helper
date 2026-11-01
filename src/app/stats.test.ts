@@ -15,6 +15,7 @@ function session(csv: string, roles: Record<string, string>, kind: Session['kind
     fileName: 't.csv', sourceLabel: 'Excel 檔', name: '測試問卷', table, cols, kind, kindReason: '', kindConfirmed: true,
     scale: detectScale(table, cols), mappingConfirmed: true, recognition: null, surveyId: 's1', previousRows: null,
     rosterRows: null, rosterMixed: false, rosterSkipped: false, rosterName: '', resolutions: {}, excluded: [], titleMerges: {}, checkHandled: [],
+    demo: false,
   };
 }
 
