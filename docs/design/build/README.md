@@ -8,3 +8,11 @@
 - `txt.mjs <frag檔> <編號…>` 取出某些畫面的純文字（寫另一裝置版時對文案用）；`list.mjs` 列出全部畫面。
 - `wide.mjs`：平板與桌機共用工具。`contrast.mjs`：token 對比檢查。
 - 規範以 `docs/design/DESIGN.md` 與 `tokens.css` 為準；這個資料夾只是產生器。
+
+## 手機與平板第二輪（2026-11-01）
+
+- `batch31–33.mjs` 產生手機第二輪新畫面（`frag-b31–33.html`）；`m2kit.mjs` 是手機與平板共用工具（數字步驟列、頂端列、用語整理 `patchOld`、`tabletize`）。
+- `phones.mjs` 是**手機畫面總表**：舊畫面（整理過用語）加新畫面，依使用順序分 11 組；被取代的舊畫面列在 `DROP`。`mk.mjs` 與 `batch34.mjs` 都從這裡取畫面。
+- `batch34.mjs` 把每個手機畫面自動轉成平板版（`frag-b34.html`、`tablet-secs.json`），另有 6 張保留的手工平板稿（`KEEP`）。新增手機畫面要在 `RAIL` 登記平板左欄。
+- 順序：`node batch31.mjs; node batch32.mjs; node batch33.mjs; node batch34.mjs; node mk.mjs`（產生模擬頁）；`node mk.mjs artifact` 產生成品頁。成品頁 `survey-*.html` 是產物，不進版控。
+- 舊的 `batch4–12、14`、`frag-core` 等手機與平板稿仍是 `phones.mjs` 的來源（被取代的畫面不再顯示）。

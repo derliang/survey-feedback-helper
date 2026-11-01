@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>意見調查統計與圖表（平板）（模擬頁）</title>
+<style>
+:root {
+  /* 色彩：表面 */
+  --paper: #f4f5f7;       /* 頁面底 */
+  --card: #ffffff;        /* 卡片、導覽列、輸入框底 */
+  --sunk: #eceef2;        /* 凹陷底：分段控制軌道、進度軌道、停用 */
+  /* 色彩：文字 */
+  --ink: #14171f;
+  --ink2: #444b5a;
+  --ink3: #5b6373;
+  /* 色彩：線 */
+  --line: #cfd3dc;
+  --line-soft: #e3e6ec;
+  /* 色彩：強調（鈷藍，唯一的強調色；深色版用較深的藍搭白字，不用粉彩色） */
+  --accent: #2554d8;
+  --on-accent: #ffffff;
+  --accent-soft: #e7edff;
+  --accent-ink: #1b3fa6;
+  /* 色彩：語意（不算強調色） */
+  --ok: #17713f;
+  --ok-soft: #dcf1e3;
+  --warn: #7a4f00;
+  --warn-soft: #fdf0d0;
+  --bad: #a8262b;
+  --bad-soft: #fbe2e0;
+  /* 色彩：圖表資料色（色盲友善；一定要搭配文字標籤，不單靠顏色） */
+  --d1: #2554d8;
+  --d2: #cf5f12;
+  --d3: #b3367a;
+  --d4: #0c7a88;
+  --d5: #8a6a0a;
+  --d0: #7b8494;          /* 其他、未分類 */
+  --warn-bar: #b97f00;       /* 同票、需處理的長條（對卡片 3.4:1） */
+  --bar-muted: #7f889b;   /* 未當選、未突顯的長條（對卡片 3.6:1） */
+  --ctl: #7f889b;         /* 控制項外框（選項卡、列按鈕）：對卡片與頁面底 3:1 以上 */
+  --ext-excel: #1d6f42;   /* 外部服務代表色：僅用於自畫的 Excel「X」圖示，不是品牌色 */
+  --scrim: rgba(12, 14, 20, 0.5);
+  --shadow: rgba(20, 24, 40, 0.16);
+  --shadow-sm: rgba(20, 24, 40, 0.08);   /* 卡片的細微層次 */
+
+  /* 字型：介面一律系統字型，不載入網路字型 */
+  --font: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Heiti TC", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Consolas, "Courier New", monospace;
+  --fs-xs: 13px;
+  --fs-sm: 14px;
+  --fs-md: 16px;   /* 手機輸入框不得小於 16，避免 iOS 自動放大 */
+  --fs-lg: 18px;
+  --fs-xl: 22px;
+  --fs-2xl: 28px;
+  --lh-body: 1.65;
+  --lh-tight: 1.3;
+
+  /* 間距（4 的倍數）、圓角、點擊區、動態 */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --r-sm: 8px;     /* 按鈕、輸入框、選項 */
+  --r-md: 12px;    /* 卡片、面板、提示 */
+  --r-lg: 20px;    /* 底部彈出面板上緣 */
+  --tap: 48px;     /* 手機預設點擊高度；任何可點元件不得低於 44px */
+  --tap-min: 44px;
+  --dur: 160ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0e1014;
+    --card: #171a20;
+    --sunk: #0b0c10;
+    --ink: #eceef3;
+    --ink2: #b9bfcc;
+    --ink3: #8f97a8;
+    --line: #2b303a;
+    --line-soft: #20242c;
+    --accent: #3d68f0;
+    --on-accent: #ffffff;
+    --accent-soft: #1a2850;
+    --accent-ink: #9db8ff;
+    --ok: #6fd39a;
+    --ok-soft: #12291c;
+    --warn: #f2c35c;
+    --warn-soft: #2e2410;
+    --bad: #ff9d96;
+    --bad-soft: #3a1b1d;
+    --d1: #6f93ff;
+    --d2: #f08a47;
+    --d3: #e579b3;
+    --d4: #3fc0d0;
+    --d5: #d6b43a;
+    --d0: #8f97a8;
+    --warn-bar: #f0b429;
+    --bar-muted: #6e7789;
+    --ctl: #6e7789;
+    --scrim: rgba(0, 0, 0, 0.65);
+    --shadow: rgba(0, 0, 0, 0.6);
+    --shadow-sm: rgba(0, 0, 0, 0.4);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper: #0e1014;
+  --card: #171a20;
+  --sunk: #0b0c10;
+  --ink: #eceef3;
+  --ink2: #b9bfcc;
+  --ink3: #8f97a8;
+  --line: #2b303a;
+  --line-soft: #20242c;
+  --accent: #3d68f0;
+  --on-accent: #ffffff;
+  --accent-soft: #1a2850;
+  --accent-ink: #9db8ff;
+  --ok: #6fd39a;
+  --ok-soft: #12291c;
+  --warn: #f2c35c;
+  --warn-soft: #2e2410;
+  --bad: #ff9d96;
+  --bad-soft: #3a1b1d;
+  --d1: #6f93ff;
+  --d2: #f08a47;
+  --d3: #e579b3;
+  --d4: #3fc0d0;
+  --d5: #d6b43a;
+  --d0: #8f97a8;
+  --warn-bar: #f0b429;
+  --bar-muted: #6e7789;
+  --ctl: #6e7789;
+  --scrim: rgba(0, 0, 0, 0.65);
+  --shadow: rgba(0, 0, 0, 0.6);
+  --shadow-sm: rgba(0, 0, 0, 0.4);
+  color-scheme: dark;
+}
+
+/*
+ * 輸出文件主題「溫暖」（個人回饋單預設）：紙張永遠是淺色，不隨深色模式改變。
+ * 用法：文件預覽與 PDF／Word 輸出的容器加 class="doc-warm"。
+ */
+.doc-warm {
+  --doc-paper: #fffdf9;
+  --doc-ink: #33291f;
+  --doc-ink2: #66554a;
+  --doc-line: #ead9c3;
+  --doc-accent: #a84f00;
+  --doc-accent-soft: #ffecd2;
+  --doc-leaf: #2f6f55;
+  --doc-leaf-soft: #e1f1e8;
+  --doc-card: #ffffff;
+  --doc-sunk: #efe8dc;
+  --doc-sunk2: #f4eee4;
+  --doc-blue-soft: #e3eaff;
+  --doc-blue-ink: #1b3fa6;
+  --doc-s1: #cf5f12;
+  --doc-s2: #eaa06a;
+  --doc-s3: #ddd5c8;
+  --doc-s4: #7f9be3;
+  --doc-s5: #2554d8;
+}
+
+/* 版面概念：上方基礎規格（色票、字級、元件），下方手機畫面並排，最後斷點示意。畫面用真實 token。 */
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:var(--fs-md)/var(--lh-body) var(--font);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 64px}
+.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1,h2,h3,h4,p{margin:0}
+h1{font-size:var(--fs-2xl);line-height:var(--lh-tight);text-wrap:balance}
+h2{font-size:var(--fs-xl);line-height:var(--lh-tight);text-wrap:balance}
+h3{font-size:var(--fs-lg);line-height:var(--lh-tight)}
+.muted{color:var(--ink2)}
+.small{font-size:var(--fs-sm)}
+.mono{font-family:var(--font-mono);font-size:var(--fs-xs)}
+svg.ic{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+button{font-family:inherit}
+
+/* 頁首 */
+.top{display:flex;flex-direction:column;gap:16px}
+.top-row{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.top-row>div{min-width:0}
+.assump{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:12px}
+.assump p{background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r-md);padding:14px 16px;font-size:var(--fs-sm);line-height:1.6}
+.assump b{display:block;font-size:var(--fs-md);margin-bottom:4px}
+.sec{display:flex;flex-direction:column;gap:20px}
+.sec-head{display:flex;flex-direction:column;gap:4px;max-width:70ch}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr))}
+.spec{box-shadow:0 1px 2px var(--shadow-sm);background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r-md);padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.spec h3{font-size:var(--fs-md)}
+.spec .cap{font-size:var(--fs-xs);color:var(--ink3)}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+
+/* 色票 */
+.sws{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr))}
+.sw{display:flex;flex-direction:column;gap:6px;min-width:0}
+.sw i{display:block;height:48px;border-radius:var(--r-sm);border:1px solid var(--line)}
+.sw b{font:600 var(--fs-xs)/1.3 var(--font-mono);word-break:break-all}
+.sw span{font-size:var(--fs-xs);color:var(--ink2);line-height:1.4}
+.sw code{font:var(--fs-xs)/1.2 var(--font-mono);color:var(--ink3)}
+.scale-row{display:flex;gap:16px;align-items:baseline;border-bottom:1px solid var(--line-soft);padding-block:8px;flex-wrap:wrap}
+.scale-row .k{width:112px;flex:none;font-size:var(--fs-xs);color:var(--ink3)}
+.sp-demo{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap}
+.sp-demo div{background:var(--accent);border-radius:2px;width:var(--w);height:24px}
+.sp-demo figure{margin:0;display:flex;flex-direction:column;gap:6px;font-size:var(--fs-xs);color:var(--ink2)}
+
+
+/* ===== 元件（與實作共用的 class 名稱）===== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:var(--tap);padding:0 20px;border-radius:var(--r-sm);border:1px solid transparent;font:600 var(--fs-md)/1.2 var(--font);cursor:pointer;text-decoration:none;transition:background var(--dur),border-color var(--dur)}
+.btn-primary{background:var(--accent);color:var(--on-accent);box-shadow:0 1px 2px var(--shadow)}
+.btn:active:not([disabled]){filter:brightness(.92)}
+.btn-secondary{background:var(--card);color:var(--ink);border-color:var(--ink3);box-shadow:0 1px 2px var(--shadow-sm)}
+.btn-ghost{background:transparent;color:var(--accent-ink)}
+.btn-danger{background:transparent;color:var(--bad);border-color:var(--bad)}
+.btn[disabled]{background:var(--sunk);color:var(--ink3);border-color:var(--line-soft);cursor:not-allowed}
+.btn-sm{min-height:var(--tap-min);padding:0 16px;font-size:15px}
+.btn-block{width:100%}
+.icbtn{display:inline-flex;align-items:center;justify-content:center;width:var(--tap);height:var(--tap);border:0;background:transparent;color:var(--ink);border-radius:var(--r-sm);cursor:pointer;flex:none}
+.pressed{background:var(--accent-ink);color:var(--card)}
+.tag{display:inline-flex;align-items:center;gap:4px;min-height:26px;padding:0 8px;border-radius:6px;font-size:var(--fs-xs);font-weight:600;background:var(--sunk);color:var(--ink2);white-space:nowrap}
+.tag-accent{background:var(--accent-soft);color:var(--accent-ink)}
+.tag-ok{background:var(--ok-soft);color:var(--ok)}
+.tag-warn{background:var(--warn-soft);color:var(--warn)}
+.tag-bad{background:var(--bad-soft);color:var(--bad)}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-weight:600;font-size:var(--fs-sm)}
+.field .hint{font-size:var(--fs-xs);color:var(--ink3)}
+.input{min-height:var(--tap);padding:0 14px;border:1px solid var(--ink3);border-radius:var(--r-sm);background:var(--card);color:var(--ink);font:var(--fs-md)/1.2 var(--font);width:100%}
+.input.err{border-color:var(--bad);border-width:2px}
+.field .errmsg{font-size:var(--fs-xs);color:var(--bad);font-weight:600}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;padding:4px;background:var(--sunk);border-radius:var(--r-md)}
+.seg button{min-height:var(--tap-min);border:0;border-radius:var(--r-sm);background:transparent;color:var(--ink2);font:600 15px/1.2 var(--font);cursor:pointer;padding:0 8px}
+.seg button[aria-pressed="true"]{background:var(--card);color:var(--accent-ink);box-shadow:0 1px 2px var(--shadow)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{min-height:var(--tap-min);padding:0 16px;border-radius:999px;border:1px solid var(--ink3);background:var(--card);color:var(--ink);font:600 15px/1.2 var(--font);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink)}
+.rcard{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;min-height:64px;padding:12px 14px;border:1.5px solid var(--ctl);border-radius:var(--r-md);background:var(--card);text-align:left;cursor:pointer;color:var(--ink);width:100%;font:inherit}
+.rcard b{display:block;font-size:var(--fs-md);line-height:1.35}
+.rcard small{display:block;font-size:var(--fs-sm);color:var(--ink2);line-height:1.45}
+.rcard[aria-checked="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--ink3);display:grid;place-items:center;flex:none;background:var(--card)}
+[aria-checked="true"]>.dot,.opt[aria-checked="true"] .dot{border-color:var(--accent);background:var(--accent)}
+[aria-checked="true"]>.dot::after,.opt[aria-checked="true"] .dot::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--on-accent)}
+.notice{display:grid;grid-template-columns:auto 1fr;gap:10px;padding:12px 14px;border-radius:var(--r-md);font-size:var(--fs-sm);line-height:1.55;background:var(--accent-soft);color:var(--accent-ink)}
+.notice svg.ic{width:20px;height:20px;margin-top:2px}
+.notice.warn{background:var(--warn-soft);color:var(--warn)}
+.notice.bad{background:var(--bad-soft);color:var(--bad)}
+.notice.ok{background:var(--ok-soft);color:var(--ok)}
+.notice .acts{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
+.tile{box-shadow:0 1px 2px var(--shadow-sm);background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r-md);padding:10px 14px;min-width:0}
+.tile .l{font-size:var(--fs-xs);color:var(--ink2)}
+.tile .n{font-size:var(--fs-2xl);font-weight:700;line-height:1.2;font-variant-numeric:tabular-nums}
+.tile.warn{background:var(--warn-soft);border-color:transparent;box-shadow:none}
+.tile.warn .l,.tile.warn .n{color:var(--warn)}
+.prog{height:8px;border-radius:4px;background:var(--sunk);overflow:hidden}
+.prog>i{display:block;height:100%;background:var(--accent);border-radius:4px}
+.brow{display:flex;flex-direction:column;gap:6px}
+.brow .h{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.brow .nm{font-weight:600;display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-width:0}
+.brow .v{font-variant-numeric:tabular-nums;font-size:var(--fs-sm);color:var(--ink2);white-space:nowrap}
+.brow .v b{color:var(--ink);font-size:var(--fs-md)}
+.track{height:12px;border-radius:6px;background:var(--sunk)}
+.track>i{display:block;height:100%;border-radius:6px;background:var(--bar-muted)}
+.track>i.lead{background:var(--accent)}
+.track>i.tie{background:var(--warn-bar)}
+.rowbtn{box-shadow:0 1px 2px var(--shadow-sm);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;min-height:64px;padding:10px 14px;background:var(--card);border:1px solid var(--ctl);border-radius:var(--r-md);text-align:left;color:var(--ink);cursor:pointer;width:100%;font:inherit}
+.rowbtn .nm{font-weight:600;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rowbtn .sm{font-size:var(--fs-xs);color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rowbtn .rt{display:flex;align-items:center;gap:4px;color:var(--ink2)}
+.rowbtn.need{border-color:var(--warn);border-width:1.5px}
+.rowbtn>div{min-width:0}
+
+/* ===== 手機畫面框 ===== */
+.figs{display:flex;flex-wrap:wrap;gap:32px 24px;align-items:flex-start}
+.fig{display:flex;flex-direction:column;gap:10px}
+.fig figcaption{max-width:390px;font-size:var(--fs-sm);line-height:1.55}
+.fig figcaption b{display:block;font-size:var(--fs-md)}
+.scale{position:relative}
+.scale>.dev{position:absolute;left:0;top:0;transform-origin:0 0}
+.dev{width:390px;height:844px;border:1px solid var(--ink3);border-radius:34px;overflow:hidden;background:var(--paper);position:relative;display:flex;flex-direction:column;color:var(--ink)}
+.appbar{display:flex;align-items:center;gap:4px;min-height:56px;padding:0 4px 0 8px;background:var(--card);border-bottom:1px solid var(--line-soft);flex:none}
+.appbar .ttl{flex:1;font-size:17px;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-left:4px}
+.brand{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:8px;background:var(--accent);color:var(--on-accent);flex:none}
+.brand svg.ic{width:20px;height:20px;stroke-width:3}
+.stepper{padding:10px 16px 12px;background:var(--card);border-bottom:1px solid var(--line-soft);flex:none}
+.stepper .segs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.st{display:flex;flex-direction:column;gap:6px;font-size:var(--fs-xs);font-weight:600;color:var(--ink3);line-height:1.2}
+.st::before{content:"";height:4px;border-radius:2px;background:var(--line)}
+.st.on{color:var(--ink2)}
+.st.on::before{background:var(--accent)}
+.st.cur{color:var(--accent-ink)}
+.scr{flex:1;min-height:0;overflow:hidden;padding:16px;display:flex;flex-direction:column;gap:16px}
+.actbar{flex:none;padding:12px 16px 24px;background:var(--card);border-top:1px solid var(--line-soft);display:flex;gap:12px}
+.actbar .btn-primary,.actbar .btn-block{flex:1}
+.picker{box-shadow:0 1px 2px var(--shadow-sm);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:176px;border:2px dashed var(--ink3);border-radius:var(--r-md);background:var(--card);color:var(--ink);text-align:center;padding:20px;cursor:pointer;width:100%;font:inherit}
+.picker .big{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:var(--accent-soft);color:var(--accent-ink)}
+.picker .big svg.ic{width:28px;height:28px}
+.picker b{font-size:var(--fs-lg)}
+.picker small{font-size:var(--fs-sm);color:var(--ink2);line-height:1.5}
+.filechip{box-shadow:0 1px 2px var(--shadow-sm);display:flex;gap:10px;align-items:center;padding:10px 14px;background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r-md);font-size:var(--fs-sm)}
+.filechip>div{min-width:0}
+.filechip b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.filechip span{color:var(--ink2);font-size:var(--fs-xs)}
+.pager{display:grid;grid-template-columns:var(--tap) 1fr var(--tap);align-items:center;gap:4px}
+.pager .c{text-align:center;min-width:0}
+.pager .c small{display:block;font-size:var(--fs-xs);color:var(--ink2)}
+.pager .c b{font-size:var(--fs-lg)}
+.qcard{box-shadow:0 1px 2px var(--shadow-sm);background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r-md);padding:8px 14px 16px;display:flex;flex-direction:column;gap:14px}
+.grp{display:flex;flex-direction:column;gap:8px}
+.grp>.gl{font-weight:700;font-size:var(--fs-sm);color:var(--ink2)}
+.sumline{display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:var(--r-md);background:var(--sunk);font-size:var(--fs-sm);line-height:1.5}
+.scrim{position:absolute;inset:0;background:var(--scrim)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--card);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:8px 16px 24px;box-shadow:0 -8px 24px var(--shadow);display:flex;flex-direction:column;gap:4px}
+.sheet .grab{width:40px;height:4px;border-radius:2px;background:var(--ink3);margin:4px auto 8px}
+.sheet h3{font-size:var(--fs-lg);line-height:1.4}
+.sheet .sub{font-size:var(--fs-sm);color:var(--ink2);margin-bottom:4px}
+.opt{display:flex;align-items:center;gap:12px;min-height:52px;padding:0 4px;border:0;border-bottom:1px solid var(--line-soft);background:transparent;color:var(--ink);font:inherit;text-align:left;width:100%;cursor:pointer}
+.opt small{color:var(--ink3);margin-left:auto;font-size:var(--fs-xs)}
+.opt[aria-checked="true"]{font-weight:700}
+.sheet .btn{margin-top:12px}
+
+
+/* 2026-11-01 桌機頂端列：步驟（數字圖示＋完成度）、重新開始、設定 */
+.dsteps{display:flex;align-items:center;gap:2px;margin:0 auto}
+.ds{display:inline-flex;align-items:center;gap:8px;min-height:var(--tap-min);padding:0 12px;border:0;border-radius:var(--r-sm);background:transparent;color:var(--ink3);font:600 var(--fs-sm)/1.2 var(--font);cursor:pointer;white-space:nowrap}
+.ds .n{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;border:2px solid var(--ink3);font-size:var(--fs-xs);font-weight:700;flex:none}
+.ds .n svg.ic{width:14px;height:14px;stroke-width:3}
+.ds small{font-size:var(--fs-xs);font-weight:600}
+.ds.done{color:var(--ink2)}
+.ds.done .n{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.ds.cur{background:var(--accent-soft);color:var(--accent-ink)}
+.ds.cur .n{border-color:var(--accent-ink);color:var(--accent-ink)}
+.ds:disabled{cursor:not-allowed}
+.dsep{width:14px;height:2px;background:var(--line);flex:none}
+.btn-ghost{background:transparent;color:var(--ink2);border:1.5px solid transparent}
+.btn .ic{width:20px;height:20px}
+.xl{display:inline-block;width:1em;height:1em;vertical-align:-.15em}
+.chk{display:inline-grid;place-items:center;width:22px;height:22px;border:2px solid var(--ink3);border-radius:6px;background:var(--card);color:var(--on-accent);flex:none}
+.chk[data-on="true"]{background:var(--accent);border-color:var(--accent)}
+.chk svg.ic{width:14px;height:14px;stroke-width:3}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:stretch}
+.pair>*{display:flex;flex-direction:column;gap:10px;height:100%}
+.pair .foot{margin-top:auto;display:flex;gap:8px}
+
+/* 2026-11-01 手機與平板第二輪：數字步驟列（R-004）、單行審稿列（R-019）、同一排卡片等高（R-026） */
+.st .sl{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.st .sn{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;border:2px solid currentColor;font-size:12px;font-weight:700;flex:none;line-height:1}
+.st .sn svg.ic{width:12px;height:12px;stroke-width:3.5}
+.st.on:not(.cur) .sn{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.st.cur .sn{border-color:var(--accent-ink)}
+.rv{display:flex;align-items:center;gap:8px;min-height:60px;padding:6px 8px 6px 12px;background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r-sm)}
+.rv .tx{flex:1;min-width:0;font-size:var(--fs-sm);line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.rv .ac{display:flex;gap:2px;flex:none}
+.rv .ac button{width:44px;height:44px;border:1px solid var(--ctl);border-radius:var(--r-sm);background:var(--card);color:var(--ink2);display:grid;place-items:center;cursor:pointer;padding:0}
+.rv .ac button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink)}
+.rv.flag{border-color:var(--warn);border-width:1.5px}
+.eq{display:grid;gap:8px;align-items:stretch}
+.eq>*{display:flex;flex-direction:column}
+
+/* ===== 輸出文件（A4）：794 × 1123，用 .doc-warm 的 --doc-* token；紙張永遠淺色 ===== */
+.scale>.paper{position:absolute;left:0;top:0;transform-origin:0 0}
+.docfig{width:100%;display:flex;flex-wrap:wrap;gap:16px 28px;align-items:flex-start;margin:0}
+.docfig figcaption{flex:1 1 280px;max-width:380px;font-size:var(--fs-sm);line-height:1.65;display:flex;flex-direction:column;gap:8px}
+.docfig figcaption b{font-size:var(--fs-md)}
+.docfig figcaption ul{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px}
+.paper{width:794px;height:1123px;background:var(--doc-paper);color:var(--doc-ink);border:1px solid var(--doc-line);box-shadow:0 8px 24px var(--shadow-sm);padding:44px 52px 64px;display:flex;flex-direction:column;gap:18px;font:16px/1.6 var(--font);overflow:hidden;position:relative;--blue:var(--doc-s5);--blue2:var(--doc-s4);--mid:var(--doc-s3);--or2:var(--doc-s2);--or1:var(--doc-s1)}
+.paper *{box-sizing:border-box}
+.paper h1,.paper h2,.paper h3,.paper h4,.paper p{margin:0}
+.ph{display:flex;justify-content:space-between;gap:12px;font-size:12px;color:var(--doc-ink2);padding-bottom:10px;border-bottom:1px solid var(--doc-line)}
+.pf{position:absolute;left:52px;right:52px;bottom:26px;display:flex;justify-content:space-between;gap:12px;font-size:12px;color:var(--doc-ink2)}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;color:var(--doc-accent)}
+.dt h1{font-size:32px;line-height:1.25;color:var(--doc-ink);margin-top:4px}
+.dt .meta{display:flex;gap:6px 18px;flex-wrap:wrap;font-size:13px;color:var(--doc-ink2);margin-top:8px}
+.sh{display:flex;flex-direction:column;gap:2px;margin-top:2px}
+.sh h2{font-size:20px;line-height:1.3}
+.sh p{font-size:13px;color:var(--doc-ink2)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.kpi{border:1px solid var(--doc-line);border-radius:10px;padding:10px 12px;background:var(--doc-card);display:flex;flex-direction:column;gap:2px;min-width:0}
+.kpi.hi{background:var(--doc-accent-soft);border-color:transparent}
+.kpi .n{font-size:30px;line-height:1.15;font-weight:700;font-variant-numeric:tabular-nums}
+.kpi .n small{font-size:14px;font-weight:600;color:var(--doc-ink2);margin-left:2px}
+.kpi .l{font-size:13px;font-weight:600}
+.kpi .s{font-size:12px;color:var(--doc-ink2);line-height:1.4}
+.finds{display:flex;flex-direction:column;gap:8px;padding:0;margin:0;list-style:none}
+.finds li{display:grid;grid-template-columns:10px 1fr;gap:10px;font-size:14.5px;line-height:1.55}
+.finds li::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--doc-accent);margin-top:8px}
+.finds b{color:var(--doc-accent)}
+.dtable{width:100%;border-collapse:collapse;font-size:13.3px;font-variant-numeric:tabular-nums}
+.dtable th{font-weight:700;text-align:left;color:var(--doc-ink2);font-size:12px;padding:6px 8px;border-bottom:1.5px solid var(--doc-ink);white-space:nowrap}
+.dtable td{padding:7px 8px;border-bottom:1px solid var(--doc-line);vertical-align:middle}
+.dtable .r{text-align:right}
+.dtable .c{text-align:center}
+.dtable tr.hl td{background:var(--doc-accent-soft)}
+.dtable .dim{color:var(--doc-ink2)}
+.pill{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:700;background:var(--doc-accent-soft);color:var(--doc-accent);white-space:nowrap}
+.pill.g{background:var(--doc-leaf-soft);color:var(--doc-leaf)}
+.pill.n{background:var(--doc-sunk);color:var(--doc-ink2)}
+.pill.b{background:var(--doc-blue-soft);color:var(--doc-blue-ink)}
+.lk{display:flex;height:16px;border-radius:4px;overflow:hidden;gap:1px;background:var(--doc-paper);min-width:180px}
+.lk i{display:block;height:100%}
+.lkrow{display:grid;grid-template-columns:200px 1fr 64px;gap:12px;align-items:center;font-size:13.5px}
+.lkrow .q{line-height:1.4}
+.lkrow .m{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;font-size:16px}
+.lkrow .m small{display:block;font-weight:400;font-size:11px;color:var(--doc-ink2)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--doc-ink2)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+.hbar{display:grid;grid-template-columns:150px 1fr 92px;gap:10px;align-items:center;font-size:13.5px}
+.hbar .t{height:12px;border-radius:6px;background:var(--doc-sunk)}
+.hbar .t i{display:block;height:100%;border-radius:6px;background:var(--blue2)}
+.hbar .t i.k{background:var(--blue)}
+.hbar .t i.o{background:var(--doc-accent)}
+.hbar .v{white-space:nowrap;text-align:right;font-variant-numeric:tabular-nums;font-size:13px}
+.hbar .v b{font-size:14px}
+.hm{display:grid;gap:3px;font-size:12.5px;font-variant-numeric:tabular-nums}
+.hm div{padding:6px 4px;text-align:center;border-radius:4px;background:var(--doc-sunk2)}
+.hm .h{background:transparent;font-weight:700;color:var(--doc-ink2);font-size:12px}
+.hm .rl{text-align:left;background:transparent;font-weight:600;padding-left:2px}
+.note{font-size:12px;color:var(--doc-ink2);line-height:1.5}
+.callout{background:var(--doc-accent-soft);border-radius:10px;padding:10px 14px;font-size:13.5px;line-height:1.55}
+.callout.g{background:var(--doc-leaf-soft)}
+.callout b{color:var(--doc-accent)}
+.callout.g b{color:var(--doc-leaf)}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.card{border:1px solid var(--doc-line);border-radius:10px;background:var(--doc-card);padding:12px 14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.quote{border:1px solid var(--doc-line);border-radius:10px;background:var(--doc-card);padding:10px 14px;font-size:14px;line-height:1.55;display:flex;flex-direction:column;gap:4px}
+.quote .by{font-size:12px;color:var(--doc-ink2)}
+.kw{display:flex;gap:6px 8px;flex-wrap:wrap}
+.kw span{display:inline-flex;gap:6px;align-items:baseline;padding:3px 10px;border-radius:999px;background:var(--doc-sunk);font-size:13px}
+.kw span b{font-size:11.5px;color:var(--doc-accent);font-variant-numeric:tabular-nums}
+.kw span.big{font-size:16px;font-weight:700;background:var(--doc-accent-soft)}
+.divider{height:1px;background:var(--doc-line);border:0;margin:0}
+.bignum{font-size:56px;font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums;color:var(--doc-accent)}
+.pair{display:grid;grid-template-columns:120px 1fr 64px;gap:10px;align-items:center;font-size:14px}
+.pair .tr{position:relative;height:22px;border-radius:5px;background:var(--doc-sunk)}
+.pair .tr i{position:absolute;left:0;top:3px;height:16px;border-radius:4px;background:var(--blue)}
+.pair .tr em{position:absolute;top:-2px;bottom:-2px;width:3px;border-radius:2px;background:var(--doc-ink);font-style:normal}
+.pair .tr u{position:absolute;top:0;bottom:0;width:0;border-left:2px dashed var(--doc-accent);text-decoration:none}
+.pair .v{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.pair .v small{display:block;font-size:11px;font-weight:400;color:var(--doc-ink2)}
+.podium{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.pod{border:1px solid var(--doc-line);border-radius:12px;background:var(--doc-card);padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+.pod .role{font-size:13px;font-weight:700;color:var(--doc-accent);letter-spacing:.08em}
+.pod .nm{font-size:30px;font-weight:700;line-height:1.2}
+.pod .sub{font-size:12.5px;color:var(--doc-ink2)}
+.stamp{display:inline-flex;gap:6px;align-items:center;font-size:12px;border:1px dashed var(--doc-ink2);border-radius:6px;padding:2px 8px;color:var(--doc-ink2)}
+.wordtag{font-size:11.5px;font-weight:600;color:var(--doc-ink2);border:1px solid var(--doc-line);border-radius:4px;padding:0 6px;margin-left:6px;background:var(--doc-card)}
+.paper .cols2 .hbar{grid-template-columns:62px 1fr 88px;font-size:13px}
+.blk{background:var(--doc-paper);color:var(--doc-ink);border:1px solid var(--doc-line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;font:14px/1.5 var(--font);min-width:0}
+.blk *{box-sizing:border-box}
+.blk h3,.blk h4,.blk p{margin:0}
+.blk .bh{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.blk .bh b{font-size:15px}
+.blkgrid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr))}
+.dtable.tight td{padding:4px 8px}
+.dtable.tight th{padding:5px 8px}
+
+.cmp{display:flex;flex-direction:column;gap:6px}
+.cmp .h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:var(--fs-sm)}
+.cmp .v{font-variant-numeric:tabular-nums}
+.cmp .tr{position:relative;height:20px;border-radius:5px;background:var(--sunk)}
+.cmp .tr i{position:absolute;left:0;top:3px;height:14px;border-radius:4px;background:var(--accent)}
+.cmp .tr u{position:absolute;top:0;bottom:0;border-left:2px dashed var(--warn-bar);text-decoration:none}
+.cmp .tr em{position:absolute;top:-2px;bottom:-2px;width:3px;border-radius:2px;background:var(--ink);font-style:normal}
+
+.tgl{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:56px;padding:8px 14px;background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r-md);width:100%;font:inherit;color:var(--ink);cursor:pointer}
+.tgl .sw2{width:52px;height:32px;border-radius:16px;background:var(--ink3);position:relative;flex:none}
+.tgl .sw2::after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:var(--card);transition:left var(--dur)}
+.tgl[aria-checked="true"] .sw2{background:var(--accent)}
+.tgl[aria-checked="true"] .sw2::after{left:23px;background:var(--on-accent)}
+
+.pane{display:flex;flex-direction:column;gap:12px;overflow:hidden;flex:none;min-width:0}
+.qrow{display:flex;gap:10px;align-items:center;min-height:48px;padding:0 12px;border-radius:var(--r-sm);color:var(--ink);font-size:var(--fs-md)}
+.qrow[aria-current]{background:var(--accent-soft);color:var(--accent-ink);font-weight:700}
+.actbar.desk .btn{flex:none;min-width:140px}
+
+.pagehead{display:flex;flex-direction:column;gap:6px;max-width:72ch}.round{display:flex;flex-direction:column;gap:32px}
+.scale{position:static!important;width:auto!important;height:auto!important}
+.scale>.dev,.scale>.paper{position:relative!important;transform:none!important}
+.figs{overflow-x:auto}
+.docfig{overflow-x:auto}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+<symbol id="i-next" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
+<symbol id="i-down" viewBox="0 0 24 24"><path d="M5 9l7 7 7-7"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+<symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h8M18 7h2M4 17h2M12 17h8"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></symbol>
+<symbol id="i-file" viewBox="0 0 24 24"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></symbol>
+<symbol id="i-dice" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8.5 8.5h.01M15.5 8.5h.01M12 12h.01M8.5 15.5h.01M15.5 15.5h.01"/></symbol>
+<symbol id="i-down-arrow" viewBox="0 0 24 24"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></symbol>
+<symbol id="i-bars" viewBox="0 0 24 24"><path d="M5 19v-7M12 19V5M19 19v-10"/></symbol>
+<symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 114 2c-.8.6-1.5 1-1.5 2M12 17h.01"/></symbol>
+<symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 19c0-3 3-5 6-5s6 2 6 5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14c3 0 5 1.8 5 4.5"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4-4"/></symbol>
+<symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19z"/></symbol>
+<symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 6.2A9 9 0 0121 12a13 13 0 01-3 3.6M6.5 7.5A13 13 0 003 12s3.5 6 9 6a8.6 8.6 0 003.2-.6"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></symbol>
+<symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol>
+<symbol id="i-cast" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></symbol>
+<symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></symbol>
+<symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 18a4 4 0 01-.5-8A6 6 0 0118 9.5 4.3 4.3 0 0117 18z"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 10-2.3 5.7M20 5v5h-5"/></symbol>
+<symbol id="i-trend" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></symbol>
+<symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5M4 9h10a6 6 0 010 12h-3"/></symbol>
+<symbol id="i-redo" viewBox="0 0 24 24"><path d="M15 14l5-5-5-5M20 9H10a6 6 0 000 12h3"/></symbol>
+<symbol id="i-grip" viewBox="0 0 24 24"><path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01" stroke-width="3.2"/></symbol>
+<symbol id="i-up" viewBox="0 0 24 24"><path d="M5 15l7-7 7 7"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></symbol>
+<symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+<symbol id="i-type" viewBox="0 0 24 24"><path d="M5 6h14M12 6v13"/></symbol>
+<symbol id="i-table" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="M3 10h18M9 5v14"/></symbol>
+<symbol id="i-comment" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></symbol>
+<symbol id="i-pagebreak" viewBox="0 0 24 24"><path d="M3 12h4M10 12h4M17 12h4"/></symbol>
+<symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 18l5-5 4 3 3-3 4 4"/></symbol>
+<symbol id="i-gear" viewBox="0 0 24 24"><path d="M10.3 3h3.4l.5 2.4 1.7.7 2.1-1.3 2.4 2.4-1.3 2.1.7 1.7 2.4.5v3.4l-2.4.5-.7 1.7 1.3 2.1-2.4 2.4-2.1-1.3-1.7.7-.5 2.4h-3.4l-.5-2.4-1.7-.7-2.1 1.3-2.4-2.4 1.3-2.1-.7-1.7L3 13.7v-3.4l2.4-.5.7-1.7-1.3-2.1 2.4-2.4 2.1 1.3 1.7-.7z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-c-bar" viewBox="0 0 24 24"><path d="M5 20V11M12 20V4M19 20v-6"/></symbol>
+<symbol id="i-c-stack" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="4" rx="1"/><rect x="3" y="11" width="18" height="4" rx="1"/><path d="M9 5v4M14 11v4"/><path d="M3 19h18"/></symbol>
+<symbol id="i-c-pie" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v9h9"/></symbol>
+<symbol id="i-c-donut" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></symbol>
+<symbol id="i-c-hist" viewBox="0 0 24 24"><path d="M4 20v-7h4v7M8 20V6h4v14M12 20V9h4v11M16 20v-5h4v5"/></symbol>
+<symbol id="i-c-radar" viewBox="0 0 24 24"><path d="M12 3l8 6-3 10H7L4 9z"/><path d="M12 8l4 3-1.5 5h-5L8 11z"/></symbol>
+<symbol id="i-c-scatter" viewBox="0 0 24 24"><path d="M3 3v18h18"/><circle cx="8" cy="15" r="1.4"/><circle cx="11" cy="10" r="1.4"/><circle cx="15" cy="14" r="1.4"/><circle cx="18" cy="7" r="1.4"/></symbol>
+<symbol id="i-c-box" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M7 7h10v10H7zM7 12h10"/></symbol>
+<symbol id="i-c-dots" viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h18"/><circle cx="8" cy="7" r="1.8"/><circle cx="15" cy="12" r="1.8"/><circle cx="11" cy="17" r="1.8"/></symbol>
+<symbol id="i-c-heat" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7"/><rect x="13" y="4" width="7" height="7"/><rect x="4" y="13" width="7" height="7"/><rect x="13" y="13" width="7" height="7"/></symbol>
+<symbol id="i-c-diff" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/><path d="M9 5v4M15 10v4M12 15v4"/></symbol>
+</svg>
+<div class="wrap">
+<header class="pagehead"><p class="small muted">設計規範的模擬頁，使用虛構資料。規範見 docs/design/DESIGN.md。</p><h1>意見調查統計與圖表（平板）</h1><p class="muted">第 3 步。量表、複選、開放題、交叉分析、累積讀取、圖表圖庫與勾選換圖、圖表另存、量表標籤與反向計分。 平板 820 直向／1024 橫向，與手機一一對應。</p></header>
+<div class="figs">
+<figure class="fig" style="margin:0"><div class="scale" data-w="820" data-h="1000"><div class="dev" style="width:820px;height:1000px;border-radius:28px"><div class="appbar" style="padding:0 12px;gap:10px"><span class="brand"><svg class="ic"><use href="#i-bars"/></svg></span><b style="font-size:17px;white-space:nowrap">統計：讀書報告回饋</b><div style="margin-left:auto;width:330px"><div class="stepper"><div class="segs"><span class="st on"><span class="sl"><span class="sn"><svg class="ic"><use href="#i-check"/></svg></span>開啟問卷</span></span><span class="st on"><span class="sl"><span class="sn"><svg class="ic"><use href="#i-check"/></svg></span>準備資料</span></span><span class="st on cur"><span class="sl"><span class="sn">3</span>統計</span></span><span class="st"><span class="sl"><span class="sn">4</span>輸出</span></span></div></div></div><button class="icbtn" type="button" aria-label="重新開始"><svg class="ic"><use href="#i-refresh"/></svg></button><button class="icbtn" type="button" aria-label="設定"><svg class="ic"><use href="#i-gear"/></svg></button></div><div style="flex:1;min-height:0;display:flex"><div class="pane" style="width:236px;padding:12px 8px;border-right:1px solid var(--line-soft);background:var(--card);gap:2px"><div class="small muted" style="font-weight:700;padding:4px 12px">題目</div><div class="qrow" aria-current="true"><span style="flex:1">1 簡報內容（充實度）</span></div><div class="qrow"><span style="flex:1">2 簡報設計</span></div><div class="qrow"><span style="flex:1">3 講述的內容</span></div><div class="qrow"><span style="flex:1">4 台風</span></div><div class="qrow"><span style="flex:1">5 時間控制</span></div><div class="qrow"><span style="flex:1">交叉分析</span></div><div class="qrow"><span style="flex:1">開放題留言</span></div></div><div class="pane" style="flex:1;padding:8px 0;align-items:stretch"><div style="width:100%;max-width:560px;margin:0 auto;flex:1;min-height:0;display:flex;flex-direction:column"><div class="scr" data-t="1" style="gap:10px"><div class="seg" role="group" aria-label="檢視"><button type="button" aria-pressed="true">題目</button><button type="button" aria-pressed="false">交叉</button><button type="button" aria-pressed="false">留言</button></div><div class="pager"><button class="icbtn" type="button" aria-label="上一題"><svg class="ic"><use href="#i-back"/></svg></button><div class="c"><small>第 1 題 · 0～10 分 · 56 筆</small><b>簡報內容（充實度）</b></div><button class="icbtn" type="button" aria-label="下一題"><svg class="ic"><use href="#i-next"/></svg></button></div><div style="display:flex;gap:8px"><button class="btn btn-secondary btn-sm" type="button"><svg class="ic"><use href="#i-c-bar"/></svg>圖表</button><button class="btn btn-secondary btn-sm" type="button"><svg class="ic"><use href="#i-refresh"/></svg>重新讀取</button></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"><div class="tile"><div class="l">平均</div><div class="n">8.4</div></div><div class="tile"><div class="l">中位數</div><div class="n">9</div></div><div class="tile"><div class="l">標準差</div><div class="n">1.2</div></div></div><div class="qcard"><div style="display:flex;align-items:center;gap:6px"><b style="flex:1">分數分布 · 堆疊橫條</b><button class="btn btn-ghost btn-sm" type="button">換圖</button><button class="btn btn-ghost btn-sm" type="button">隱藏</button></div><div class="grp"><div class="brow"><div class="h"><span class="nm">10 分</span><span class="v"><b>14</b> · 25%</span></div><div class="track"><i style="width:25%"></i></div></div><div class="brow"><div class="h"><span class="nm">9 分</span><span class="v"><b>18</b> · 32%</span></div><div class="track"><i class="lead" style="width:32%"></i></div></div><div class="brow"><div class="h"><span class="nm">8 分</span><span class="v"><b>12</b> · 21%</span></div><div class="track"><i style="width:21%"></i></div></div><div class="brow"><div class="h"><span class="nm">7 分以下</span><span class="v"><b>12</b> · 22%</span></div><div class="track"><i style="width:22%"></i></div></div></div></div></div></div></div></div><div class="actbar desk" style="justify-content:flex-end"><button class="btn btn-secondary" type="button">上一步</button><button class="btn btn-primary" type="button">下一步：輸出</button></div></div></div><figcaption style="max-width:640px"><b>5d 量表題</b>先看平均、中位數、標準差，再看分數分布。每張圖右上有「換圖」「隱藏」；畫面頂端的「圖表」按鈕開勾選清單（R-017、R-018）。量表預設堆疊橫條。</figcaption></figure>
+<figure class="fig" style="margin:0"><div class="scale" data-w="820" data-h="1000"><div class="dev" style="width:820px;height:1000px;border-radius:28px"><div class="appbar" style="padding:0 12px;gap:10px"><span class="brand"><svg class="ic"><use href="#i-bars"/></svg></span><b style="font-size:17px;white-space:nowrap">統計：讀書報告回饋</b><div style="margin-left:auto;width:330px"><div class="stepper"><div class="segs"><span class="st on"><span class="sl"><span class="sn"><svg class="ic"><use href="#i-check"/></svg></span>開啟問卷</span></span><span class="st on"><span class="sl"><span class="sn"><svg class="ic"><use href="#i-check"/></svg></span>準備資料</span></span><span class="st on cur"><span class="sl"><span class="sn">3</span>統計</span></span><span class="st"><span class="sl"><span class="sn">4</span>輸出</span></span></div></div></div><button class="icbtn" type="button" aria-label="重新開始"><svg class="ic"><use href="#i-refresh"/></svg></button><button class="icbtn" type="button" aria-label="設定"><svg class="ic"><use href="#i-gear"/></svg></button></div><div style="flex:1;min-height:0;display:flex"><div class="pane" style="width:236px;padding:12px 8px;border-right:1px solid var(--line-soft);background:var(--card);gap:2px"><div class="small muted" style="font-weight:700;padding:4px 12px">題目</div><div class="qrow" aria-current="true"><span style="flex:1">1 簡報內容（充實度）</span></div><div class="qrow"><span style="flex:1">2 簡報設計</span></div><div class="qrow"><span style="flex:1">3 講述的內容</span></div><div class="qrow"><span style="flex:1">4 台風</span></div><div class="qrow"><span style="flex:1">5 時間控制</span></div><div class="qrow"><span style="flex:1">交叉分析</span></div><div class="qrow"><span style="flex:1">開放題留言</span></div></div><div class="pane" style="flex:1;padding:8px 0;align-items:stretch"><div style="width:100%;max-width:560px;margin:0 auto;flex:1;min-height:0;display:flex;flex-direction:column"><div class="scr" data-t="1" style="gap:10px"><div class="seg" role="group" aria-label="檢視"><button type="button" aria-pressed="true">題目</button><button type="button" aria-pressed="false">交叉</button><button type="button" aria-pressed="false">留言</button></div><div class="pager"><button class="icbtn" type="button" aria-label="上一題"><svg class="ic"><use href="#i-back"/></svg></button><div class="c"><small>第 1 題 · 0～10 分 · 56 筆</small><b>簡報內容（充實度）</b></div><button class="icbtn" type="button" aria-label="下一題"><svg class="ic"><use href="#i-next"/></svg></button></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"><div class="tile"><div class="l">平均</div><div class="n">8.4</div></div><div class="tile"><div class="l">中位數</div><div class="n">9</div></div><div class="tile"><div class="l">標準差</div><div class="n">1.2</div></div></div><div class="qcard"><div style="display:flex;align-items:center;gap:6px"><b style="flex:1">分數分布 · 堆疊橫條</b><button class="btn btn-ghost btn-sm" type="button">換圖</button><button class="btn btn-ghost btn-sm" type="button">隱藏</button></div><div class="grp"><div class="brow"><div class="h"><span class="nm">10 分</span><span class="v"><b>14</b> · 25%</span></div><div class="track"><i style="width:25%"></i></div></div><div class="brow"><div class="h"><span class="nm">9 分</span><span class="v"><b>18</b> · 32%</span></div><div class="track"><i class="lead" style="width:32%"></i></div></div><div class="brow"><div class="h"><span class="nm">8 分</span><span class="v"><b>12</b> · 21%</span></div><div class="track"><i style="width:21%"></i></div></div><div class="brow"><div class="h"><span class="nm">7 分以下</span><span class="v"><b>12</b> · 22%</span></div><div class="track"><i style="width:22%"></i></div></div></div></div></div></div></div></div><div class="actbar desk" style="justify-content:flex-end"><button class="btn btn-secondary" type="button">上一步</button><button class="btn btn-primary" type="button">下一步：輸出</button></div><div class="scrim"></div><div class="sheet" style="left:auto;right:0;top:0;bottom:0;width:400px;border-radius:var(--r-lg) 0 0 var(--r-lg);padding:24px 20px;justify-content:flex-start;box-shadow:-8px 0 24px var(--shadow);overflow:hidden" role="dialog" aria-label="這題要顯示的圖"><h3>這題要顯示的圖</h3><p class="sub">只列出適用於「量表題」的圖。</p><button class="opt" role="checkbox" aria-checked="true" type="button" style="min-height:60px"><span class="chk" data-on="true"><svg class="ic"><use href="#i-check"/></svg></span><span style="color:var(--accent-ink)"><svg class="ic"><use href="#i-c-stack"/></svg></span><span style="display:flex;flex-direction:column;line-height:1.3;flex:1"><b>堆疊橫條</b><span style="font-size:var(--fs-xs);color:var(--ink2);font-weight:400">各分數各占多少</span></span></button><button class="opt" role="checkbox" aria-checked="true" type="button" style="min-height:60px"><span class="chk" data-on="true"><svg class="ic"><use href="#i-check"/></svg></span><span style="color:var(--accent-ink)"><svg class="ic"><use href="#i-c-hist"/></svg></span><span style="display:flex;flex-direction:column;line-height:1.3;flex:1"><b>直方圖</b><span style="font-size:var(--fs-xs);color:var(--ink2);font-weight:400">分數集中在哪一段</span></span></button><button class="opt" role="checkbox" aria-checked="false" type="button" style="min-height:60px"><span class="chk" data-on="false"><svg class="ic"><use href="#i-check"/></svg></span><span style="color:var(--accent-ink)"><svg class="ic"><use href="#i-c-box"/></svg></span><span style="display:flex;flex-direction:column;line-height:1.3;flex:1"><b>盒鬚圖</b><span style="font-size:var(--fs-xs);color:var(--ink2);font-weight:400">中間範圍與極端值</span></span></button><button class="opt" role="checkbox" aria-checked="false" type="button" style="min-height:60px"><span class="chk" data-on="false"><svg class="ic"><use href="#i-check"/></svg></span><span style="color:var(--accent-ink)"><svg class="ic"><use href="#i-c-dots"/></svg></span><span style="display:flex;flex-direction:column;line-height:1.3;flex:1"><b>圓點圖</b><span style="font-size:var(--fs-xs);color:var(--ink2);font-weight:400">比較許多項目</span></span></button><button class="btn btn-primary btn-block" type="button">完成</button></div></div></div><figcaption style="max-width:640px"><b>5e 圖表勾選與換圖</b>點「圖表」開底部面板：只列出適用於「量表題」的圖，每項有縮圖圖示與一句用途，勾選決定這題顯示哪些圖（R-017、R-018）。選擇存在設定，不含資料；單一學生的圖表可在審稿頁覆寫（R-024）。</figcaption></figure>
+<figure class="fig" style="margin:0"><div class="scale" data-w="820" data-h="1000"><div class="dev" style="width:820px;height:1000px;border-radius:28px"><div class="appbar" style="padding:0 12px;gap:10px"><span class="brand"><svg class="ic"><use href="#i-bars"/></svg></span><b style="font-size:17px;white-space:nowrap">統計結果</b><div style="margin-left:auto;width:330px"><div class="stepper"><div class="segs"><span class="st on"><span class="sl"><span class="sn"><svg class="ic"><use href="#i-check"/></svg></span>開啟問卷</span></span><span class="st on"><span class="sl"><span class="sn"><svg class="ic"><use href="#i-check"/></svg></span>準備資料</span></span><span class="st on cur"><span class="sl"><span class="sn">3</span>統計</span></span><span class="st"><span class="sl"><span class="sn">4</span>輸出</span></span></div></div></div><button class="icbtn" type="button" aria-label="重新開始"><svg class="ic"><use href="#i-refresh"/></svg></button><button class="icbtn" type="button" aria-label="設定"><svg class="ic"><use href="#i-gear"/></svg></button></div><div style="flex:1;min-height:0;display:flex"><div class="pane" style="width:236px;padding:12px 8px;border-right:1px solid var(--line-soft);background:var(--card);gap:2px"><div class="small muted" style="font-weight:700;padding:4px 12px">題目</div><div class="qrow"><span style="flex:1">1 簡報內容（充實度）</span></div><div class="qrow" aria-current="true"><span style="flex:1">2 簡報設計</span></div><div class="qrow"><span style="flex:1">3 講述的內容</span></div><div class="qrow"><span style="flex:1">4 台風</span></div><div class="qrow"><span style="flex:1">5 時間控制</span></div><div class="qrow"><span style="flex:1">交叉分析</span></div><div class="qrow"><span style="flex:1">開放題留言</span></div></div><div class="pane" style="flex:1;padding:8px 0;align-items:stretch"><div style="width:100%;max-width:560px;margin:0 auto;flex:1;min-height:0;display:flex;flex-direction:column"><div class="scr" data-t="1" style="gap:10px"><div class="seg" role="group" aria-label="檢視"><button type="button" aria-pressed="true">題目</button><button type="button" aria-pressed="false">交叉</button><button type="button" aria-pressed="false">留言</button></div><div class="qcard" style="gap:12px"><div class="pager"><button class="icbtn" type="button" aria-label="上一題"><svg class="ic"><use href="#i-back"/></svg></button><div class="c"><small>第 7 題 ／ 9 · 複選</small><b>希望增加的活動</b></div><button class="icbtn" type="button" aria-label="下一題"><svg class="ic"><use href="#i-next"/></svg></button></div><div class="notice"><svg class="ic"><use href="#i-info"/></svg><div>複選題：比例以 41 位填答者為基準，所以加總會超過 100%。</div></div><div class="brow"><div class="h"><span class="nm">戶外參訪</span><span class="v"><b>26</b> · 63%</span></div><div class="track"><i class="lead" style="width:63%"></i></div></div><div class="brow"><div class="h"><span class="nm">手作課</span><span class="v"><b>19</b> · 46%</span></div><div class="track"><i style="width:46%"></i></div></div><div class="brow"><div class="h"><span class="nm">桌遊</span><span class="v"><b>17</b> · 41%</span></div><div class="track"><i style="width:41%"></i></div></div><div class="brow"><div class="h"><span class="nm">運動會</span><span class="v"><b>14</b> · 34%</span></div><div class="track"><i style="width:34%"></i></div></div><div class="brow"><div class="h"><span class="nm">其他</span><span class="v"><b>3</b> · 7%</span></div><div class="track"><i style="width:7%"></i></div></div></div></div></div></div></div><div class="actbar desk" style="justify-content:flex-end"><button class="btn btn-secondary" type="button">上一步</button><button class="btn btn-primary" type="button">下一步：輸出</button></div></div></div><figcaption style="max-width:640px"><b>5e 意見調查：複選題</b>複選的比例以「填答人數」為基準，加總會超過 100%，畫面上直接寫明，避免老師誤會。</figcaption></figure>
+<figure class="fig" style="margin:0"><div class="scale" data-w="820" data-h="1000"><div class="dev" style="width:820px;height:1000px;border-radius:28px"><div class="appbar" style="padding:0 12px;gap:10px"><span class="brand"><svg class="ic"><use href="#i-bars"/></svg></span><b style="font-size:17px;white-space:nowrap">統計結果</b><div style="margin-left:auto;width:330px"><div class="stepper"><div class="segs"><span class="st on"><span class="sl"><span class="sn"><svg class="ic"><use href="#i-check"/></svg></span>開啟問卷</span></span><span class="st on"><span class="sl"><span class="sn"><svg class="ic"><use href="#i-check"/></svg></span>準備資料</span></span><span class="st on cur"><span class="sl"><span class="sn">3</span>統計</span></span><span class="st"><span class="sl"><span class="sn">4</span>輸出</span></span></div></div></div><button class="icbtn" type="button" aria-label="重新開始"><svg class="ic"><use href="#i-refresh"/></svg></button><button class="icbtn" type="button" aria-label="設定"><svg class="ic"><use href="#i-gear"/></svg></button></div><div style="flex:1;min-height:0;display:flex"><div class="pane" style="width:236px;padding:12px 8px;border-right:1px solid var(--line-soft);background:var(--card);gap:2px"><div class="small muted" style="font-weight:700;padding:4px 12px">題目</div><div class="qrow"><span style="flex:1">1 簡報內容（充實度）</span></div><div class="qrow"><span style="flex:1">2 簡報設計</span></div><div class="qrow"><span style="flex:1">3 講述的內容</span></div><div class="qrow"><span style="flex:1">4 台風</span></div><div class="qrow"><span style="flex:1">5 時間控制</span></div><div class="qrow"><span style="flex:1">交叉分析</span></div><div class="qrow" aria-current="true"><span style="flex:1">開放題留言</span></div></div><div class="pane" style="flex:1;padding:8px 0;align-items:stretch"><div style="width:100%;max-width:560px;margin:0 auto;flex:1;min-height:0;display:flex;flex-direction:column"><div class="scr" data-t="1" style="gap:10px"><div class="seg" role="group" aria-label="檢視"><button type="button" aria-pressed="false">題目</button><button type="button" aria-pressed="false">交叉</button><button type="button" aria-pressed="true">留言</button></div><div style="display:flex;gap:8px"><input class="input" aria-label="搜尋留言" value="戶外" style="flex:1"><button class="btn btn-secondary" type="button" style="padding:0 14px"><svg class="ic"><use href="#i-search"/></svg></button></div><div class="chips"><button class="chip" type="button" aria-pressed="false">全部 28</button><button class="chip" type="button" aria-pressed="true">戶外活動 11</button><button class="chip" type="button" aria-pressed="false">時間安排 7</button><button class="chip" type="button" aria-pressed="false">場地天氣 6</button></div><div class="qcard" style="gap:6px;padding:12px 14px"><div style="line-height:1.6">希望下次可以去校外參觀，不要只在教室。多辦<mark style="background:var(--accent-soft);color:var(--accent-ink);border-radius:3px;padding:0 2px">戶外</mark>活動。</div><div><span class="tag tag-accent">戶外活動</span></div></div><div class="qcard" style="gap:6px;padding:12px 14px"><div style="line-height:1.6"><mark style="background:var(--accent-soft);color:var(--accent-ink);border-radius:3px;padding:0 2px">戶外</mark>寫生很好玩，希望每學期都有。</div><div><span class="tag tag-accent">戶外活動</span></div></div><div class="qcard" style="gap:6px;padding:12px 14px"><div style="line-height:1.6">操場太熱了，<mark style="background:var(--accent-soft);color:var(--accent-ink);border-radius:3px;padding:0 2px">戶外</mark>活動建議早上辦。</div><div><span class="tag tag-accent">場地與天氣</span></div></div></div></div></div></div><div class="actbar desk" style="justify-content:flex-end"><button class="btn btn-secondary" type="button">上一步</button><button class="btn btn-primary" type="button">下一步：輸出</button></div></div></div><figcaption style="max-width:640px"><b>5f 開放題：留言與主題</b>留言依關鍵詞分組，可搜尋、依主題篩選。關鍵詞在原文中標出。不使用 AI，結果可重現。</figcaption></figure>
+<figure class="fig" style="margin:0"><div class="scale" data-w="820" data-h="1000"><div class="dev" style="width:820px;height:1000px;border-radius:28px"><div class="appbar" style="padding:0 12px;gap:10px"><span class="brand"><svg class="ic"><use href="#i-bars"/></svg></span><b style="font-size:17px;white-space:nowrap">統計結果</b><div style="margin-left:auto;width:330px"><div class="stepper"><div class="segs"><span class="st on"><span class="sl"><span class="sn"><svg class="ic"><use href="#i-check"/></svg></span>開啟問卷</span></span><span class="st on"><span class="sl"><span class="sn"><svg class="ic"><use href="#i-check"/></svg></span>準備資料</span></span><span class="st on cur"><span class="sl"><span class="sn">3</span>統計</span></span><span class="st"><span class="sl"><span class="sn">4</span>輸出</span></span></div></div></div><button class="icbtn" type="button" aria-label="重新開始"><svg class="ic"><use href="#i-refresh"/></svg></button><button class="icbtn" type="button" aria-label="設定"><svg class="ic"><use href="#i-gear"/></svg></button></div><div style="flex:1;min-height:0;display:flex"><div class="pane" style="width:236px;padding:12px 8px;border-right:1px solid var(--line-soft);background:var(--card);gap:2px"><div class="small muted" style="font-weight:700;padding:4px 12px">題目</div><div class="qrow"><span style="flex:1">1 簡報內容（充實度）</span></div><div class="qrow"><span style="flex:1">2 簡報設計</span></div><div class="qrow"><span style="flex:1">3 講述的內容</span></div><div class="qrow"><span style="flex:1">4 台風</span></div><div class="qrow"><span style="flex:1">5 時間控制</span></div><div class="qrow" aria-current="true"><span style="flex:1">交叉分析</span></div><div class="qrow"><span style="flex:1">開放題留言</span></div></div><div class="pane" style="flex:1;padding:8px 0;align-items:stretch"><div style="width:100%;max-width:560px;margin:0 auto;flex:1;min-height:0;display:flex;flex-direction:column"><div class="scr" data-t="1" style="gap:10px"><div class="seg" role="group" aria-label="檢視"><button type="button" aria-pressed="false">題目</button><button type="button" aria-pressed="true">交叉</button><button type="button" aria-pressed="false">留言</button></div><button class="rowbtn" type="button"><div><div class="nm">分組依據</div><div class="sm">小組</div></div><span class="rt"><span class="tag tag-accent">更改</span><svg class="ic"><use href="#i-next"/></svg></span></button><button class="rowbtn" type="button"><div><div class="nm">看哪些題</div><div class="sm">全部 6 題量表</div></div><span class="rt"><span class="tag tag-accent">更改</span><svg class="ic"><use href="#i-next"/></svg></span></button><div style="overflow-x:auto;border:1px solid var(--line-soft);border-radius:var(--r-md);background:var(--card)"><table style="border-collapse:separate;border-spacing:2px;font-size:var(--fs-sm);font-variant-numeric:tabular-nums;min-width:440px"><thead><tr><th style="text-align:left;padding:6px 8px;position:sticky;left:0;background:var(--card)">小組</th><th style="padding:6px;color:var(--ink2);font-size:var(--fs-xs)">說明</th><th style="padding:6px;color:var(--ink2);font-size:var(--fs-xs)">內容</th><th style="padding:6px;color:var(--ink2);font-size:var(--fs-xs)">表達</th><th style="padding:6px;color:var(--ink2);font-size:var(--fs-xs)">推薦</th><th style="padding:6px;color:var(--ink2);font-size:var(--fs-xs)">時間</th><th style="padding:6px;color:var(--ink2);font-size:var(--fs-xs)">場地</th></tr></thead><tbody><tr><th style="text-align:left;padding:8px;position:sticky;left:0;background:var(--card);font-weight:600;white-space:nowrap">第 1 組 <span style="color:var(--ink3);font-weight:400;font-size:var(--fs-xs)">7人</span></th><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 60%,var(--card))">4.6</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 53%,var(--card))">4.4</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 49%,var(--card))">4.3</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 53%,var(--card))">4.4</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 39%,var(--card))">4.0</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 21%,var(--card))">3.5</td></tr><tr><th style="text-align:left;padding:8px;position:sticky;left:0;background:var(--card);font-weight:600;white-space:nowrap">第 2 組 <span style="color:var(--ink3);font-weight:400;font-size:var(--fs-xs)">7人</span></th><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 53%,var(--card))">4.4</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 49%,var(--card))">4.3</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 39%,var(--card))">4.0</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 42%,var(--card))">4.1</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 35%,var(--card))">3.9</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 11%,var(--card))">3.2</td></tr><tr><th style="text-align:left;padding:8px;position:sticky;left:0;background:var(--card);font-weight:600;white-space:nowrap">第 3 組 <span style="color:var(--ink3);font-weight:400;font-size:var(--fs-xs)">7人</span></th><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 49%,var(--card))">4.3</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 60%,var(--card))">4.6</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 53%,var(--card))">4.4</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 49%,var(--card))">4.3</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 42%,var(--card))">4.1</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 35%,var(--card))">3.9</td></tr><tr><th style="text-align:left;padding:8px;position:sticky;left:0;background:var(--card);font-weight:600;white-space:nowrap">第 4 組 <span style="color:var(--ink3);font-weight:400;font-size:var(--fs-xs)">7人</span></th><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 60%,var(--card))">4.7</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 49%,var(--card))">4.3</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 42%,var(--card))">4.1</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 35%,var(--card))">3.9</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 28%,var(--card))">3.7</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 4%,var(--card))">3.0</td></tr><tr><th style="text-align:left;padding:8px;position:sticky;left:0;background:var(--card);font-weight:600;white-space:nowrap">第 5 組 <span style="color:var(--ink3);font-weight:400;font-size:var(--fs-xs)">7人</span></th><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 49%,var(--card))">4.3</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 42%,var(--card))">4.1</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 39%,var(--card))">4.0</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 42%,var(--card))">4.1</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 35%,var(--card))">3.9</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 18%,var(--card))">3.4</td></tr><tr><th style="text-align:left;padding:8px;position:sticky;left:0;background:var(--card);font-weight:600;white-space:nowrap">第 6 組 <span style="color:var(--ink3);font-weight:400;font-size:var(--fs-xs)">6人</span></th><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 56%,var(--card))">4.5</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 56%,var(--card))">4.5</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 49%,var(--card))">4.3</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 46%,var(--card))">4.2</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 42%,var(--card))">4.1</td><td style="padding:8px 6px;text-align:center;font-weight:600;background:color-mix(in srgb,var(--accent) 28%,var(--card))">3.7</td></tr></tbody></table></div><div class="notice warn"><svg class="ic"><use href="#i-warn"/></svg><div>每組只有 6–7 人，差異可能是隨機造成的，請當作討論起點。</div></div></div></div></div></div><div class="actbar desk" style="justify-content:flex-end"><button class="btn btn-secondary" type="button">上一步</button><button class="btn btn-primary" type="button">下一步：輸出</button></div></div></div><figcaption style="max-width:640px"><b>5g 交叉分析</b>選一個分組、選量表題，得到「各組平均」熱圖。第一欄固定，表格可左右滑。顏色越深分數越高，格內一定有數字。</figcaption></figure>
+<figure class="fig" style="margin:0"><div class="scale" data-w="820" data-h="1000"><div class="dev" style="width:820px;height:1000px;border-radius:28px"><div class="appbar" style="padding:0 12px;gap:10px"><span class="brand"><svg class="ic"><use href="#i-bars"/></svg></span><b style="font-size:17px;white-space:nowrap">統計：讀書報告回饋</b><div style="margin-left:auto;width:330px"><div class="stepper"><div class="segs"><span class="st on"><span class="sl"><span class="sn"><svg class="ic"><use href="#i-check"/></svg></span>開啟問卷</span></span><span class="st on"><span class="sl"><span class="sn"><svg class="ic"><use href="#i-check"/></svg></span>準備資料</span></span><span class="st on cur"><span class="sl"><span class="sn">3</span>統計</span></span><span class="st"><span class="sl"><span class="sn">4</span>輸出</span></span></div></div></div><button class="icbtn" type="button" aria-label="重新開始"><svg class="ic"><use href="#i-refresh"/></svg></button><button class="icbtn" type="button" aria-label="設定"><svg class="ic"><use href="#i-gear"/></svg></button></div><div style="flex:1;min-height:0;display:flex"><div class="pane" style="width:236px;padding:12px 8px;border-right:1px solid var(--line-soft);background:var(--card);gap:2px"><div class="small muted" style="font-weight:700;padding:4px 12px">題目</div><div class="qrow" aria-current="true"><span style="flex:1">1 簡報內容（充實度）</span></div><div class="qrow"><span style="flex:1">2 簡報設計</span></div><div class="qrow"><span style="flex:1">3 講述的內容</span></div><div class="qrow"><span style="flex:1">4 台風</span></div><div class="qrow"><span style="flex:1">5 時間控制</span></div><div class="qrow"><span style="flex:1">交叉分析</span></div><div class="qrow"><span style="flex:1">開放題留言</span></div></div><div class="pane" style="flex:1;padding:8px 0;align-items:stretch"><div style="width:100%;max-width:560px;margin:0 auto;flex:1;min-height:0;display:flex;flex-direction:column"><div class="scr" data-t="1" style="gap:10px"><div class="notice"><svg class="ic"><use href="#i-info"/></svg><div><b>比上次多 12 筆。</b>上次讀取是 10/28 10:42（44 筆）。統計已包含新回覆；排名可能有變化。</div></div><div class="seg" role="group" aria-label="範圍"><button type="button" aria-pressed="true">全部累積 56 筆</button><button type="button" aria-pressed="false">只看新增 12 筆</button></div><div class="pager"><button class="icbtn" type="button" aria-label="上一題"><svg class="ic"><use href="#i-back"/></svg></button><div class="c"><small>第 1 題 · 0～10 分 · 56 筆</small><b>簡報內容（充實度）</b></div><button class="icbtn" type="button" aria-label="下一題"><svg class="ic"><use href="#i-next"/></svg></button></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"><div class="tile"><div class="l">平均</div><div class="n">8.4</div></div><div class="tile"><div class="l">中位數</div><div class="n">9</div></div><div class="tile"><div class="l">標準差</div><div class="n">1.2</div></div></div><div class="grp"><div class="brow"><div class="h"><span class="nm">10 分</span><span class="v"><b>14</b> · 25%</span></div><div class="track"><i style="width:25%"></i></div></div><div class="brow"><div class="h"><span class="nm">9 分</span><span class="v"><b>18</b> · 32%</span></div><div class="track"><i class="lead" style="width:32%"></i></div></div><div class="brow"><div class="h"><span class="nm">8 分</span><span class="v"><b>12</b> · 21%</span></div><div class="track"><i style="width:21%"></i></div></div><div class="brow"><div class="h"><span class="nm">7 分以下</span><span class="v"><b>12</b> · 22%</span></div><div class="track"><i style="width:22%"></i></div></div></div><p class="small muted" style="margin:0">這次讀取：來源 Google 試算表 · 今天 14:05 · 回覆 56 筆（新增 12 筆）。已認得這份問卷。</p></div></div></div></div><div class="actbar desk" style="justify-content:flex-end"><button class="btn btn-secondary" type="button">上一步</button><button class="btn btn-primary" type="button">下一步：輸出</button></div></div></div><figcaption style="max-width:640px"><b>E6 重新讀取後的統計（累積）</b>再讀到新回覆時，統計用「全部累積」，頂端寫「比上次多 12 筆」，並可切換「只看新增」。已認得這份問卷，欄位對應來自設定檔（邊界條件 3）。</figcaption></figure>
+<figure class="fig" style="margin:0"><div class="scale" data-w="820" data-h="1000"><div class="dev" style="width:820px;height:1000px;border-radius:28px"><div class="appbar" style="padding:0 12px;gap:10px"><span class="brand"><svg class="ic"><use href="#i-bars"/></svg></span><b style="font-size:17px;white-space:nowrap">圖表圖庫</b><div style="margin-left:auto;width:330px"><div class="stepper"><div class="segs"><span class="st"><span class="sl"><span class="sn">1</span>開啟問卷</span></span><span class="st"><span class="sl"><span class="sn">2</span>準備資料</span></span><span class="st"><span class="sl"><span class="sn">3</span>統計</span></span><span class="st"><span class="sl"><span class="sn">4</span>輸出</span></span></div></div></div><button class="icbtn" type="button" aria-label="重新開始"><svg class="ic"><use href="#i-refresh"/></svg></button><button class="icbtn" type="button" aria-label="設定"><svg class="ic"><use href="#i-gear"/></svg></button></div><div style="flex:1;min-height:0;display:flex"><div class="pane" style="width:236px;padding:12px 8px;border-right:1px solid var(--line-soft);background:var(--card);gap:2px"><div class="small muted" style="font-weight:700;padding:4px 12px">圖表</div><div class="qrow" aria-current="true"><span style="flex:1">圖表圖庫</span></div><div class="qrow"><span style="flex:1">勾選與換圖</span></div><div class="qrow"><span style="flex:1">另存圖片</span></div><div class="qrow"><span style="flex:1">量表標籤</span></div><div class="qrow"><span style="flex:1">反向計分</span></div></div><div class="pane" style="flex:1;padding:8px 0;align-items:stretch"><div style="width:100%;max-width:560px;margin:0 auto;flex:1;min-height:0;display:flex;flex-direction:column"><div class="scr" data-t="1" style="gap:8px"><div class="grp" style="gap:6px"><div class="qcard" style="padding:10px 12px;gap:4px;flex-direction:row;align-items:center"><span style="color:var(--accent-ink)"><svg class="ic"><use href="#i-c-bar"/></svg></span><div style="flex:1;min-width:0"><b>長條圖</b> <span class="tag tag-accent">票選預設</span><div class="small muted">誰得最多票、哪個選項最多</div></div></div><div class="qcard" style="padding:10px 12px;gap:4px;flex-direction:row;align-items:center"><span style="color:var(--accent-ink)"><svg class="ic"><use href="#i-c-stack"/></svg></span><div style="flex:1;min-width:0"><b>堆疊橫條</b> <span class="tag tag-accent">量表預設</span><div class="small muted">一題各分數各占多少</div></div></div><div class="qcard" style="padding:10px 12px;gap:4px;flex-direction:row;align-items:center"><span style="color:var(--accent-ink)"><svg class="ic"><use href="#i-c-diff"/></svg></span><div style="flex:1;min-width:0"><b>對照條</b> <span class="tag tag-accent">報告回饋預設</span><div class="small muted">每位同學跟班均差多少</div></div></div><div class="qcard" style="padding:10px 12px;gap:4px;flex-direction:row;align-items:center"><span style="color:var(--accent-ink)"><svg class="ic"><use href="#i-trend"/></svg></span><div style="flex:1;min-width:0"><b>折線圖</b> <span class="tag tag-accent">趨勢預設</span><div class="small muted">同一班多次問卷的變化</div></div></div><div class="qcard" style="padding:10px 12px;gap:4px;flex-direction:row;align-items:center"><span style="color:var(--accent-ink)"><svg class="ic"><use href="#i-c-heat"/></svg></span><div style="flex:1;min-width:0"><b>熱圖</b> <span class="tag tag-accent">交叉預設</span><div class="small muted">兩個題目交叉後哪格人多</div></div></div><div class="qcard" style="padding:10px 12px;gap:4px;flex-direction:row;align-items:center"><span style="color:var(--accent-ink)"><svg class="ic"><use href="#i-c-donut"/></svg></span><div style="flex:1;min-width:0"><b>圓環／圓餅</b> <div class="small muted">各選項占整體幾成（少於 6 個）</div></div></div><div class="qcard" style="padding:10px 12px;gap:4px;flex-direction:row;align-items:center"><span style="color:var(--accent-ink)"><svg class="ic"><use href="#i-c-hist"/></svg></span><div style="flex:1;min-width:0"><b>直方圖</b> <div class="small muted">分數集中在哪一段</div></div></div><div class="qcard" style="padding:10px 12px;gap:4px;flex-direction:row;align-items:center"><span style="color:var(--accent-ink)"><svg class="ic"><use href="#i-c-radar"/></svg></span><div style="flex:1;min-width:0"><b>雷達圖</b> <div class="small muted">一位同學五個項目的強弱</div></div></div><div class="qcard" style="padding:10px 12px;gap:4px;flex-direction:row;align-items:center"><span style="color:var(--accent-ink)"><svg class="ic"><use href="#i-c-scatter"/></svg></span><div style="flex:1;min-width:0"><b>散布圖</b> <div class="small muted">兩題的分數有沒有一起變高</div></div></div><div class="qcard" style="padding:10px 12px;gap:4px;flex-direction:row;align-items:center"><span style="color:var(--accent-ink)"><svg class="ic"><use href="#i-c-box"/></svg></span><div style="flex:1;min-width:0"><b>盒鬚圖</b> <div class="small muted">分數的中間範圍與極端值</div></div></div><div class="qcard" style="padding:10px 12px;gap:4px;flex-direction:row;align-items:center"><span style="color:var(--accent-ink)"><svg class="ic"><use href="#i-c-dots"/></svg></span><div style="flex:1;min-width:0"><b>圓點圖</b> <div class="small muted">用點比較許多項目，比長條更清爽</div></div></div></div></div></div></div></div></div></div><figcaption style="max-width:640px"><b>Gal 圖表圖庫（十一種）（長畫面，實機可捲動，這裡完整展開）</b>新增七種（圓環／圓餅、堆疊橫條、直方圖、雷達圖、散布圖、盒鬚圖、圓點圖）；每種附一句用途，藍色標籤是該種統計的預設圖。不做儀表板：每個統計畫面有「圖表」按鈕勾要顯示的圖（R-017、R-018、R-024、R-029）。</figcaption></figure>
+<figure class="fig" style="margin:0"><div class="scale" data-w="820" data-h="1000"><div class="dev" style="width:820px;height:1000px;border-radius:28px"><div class="appbar" style="padding:0 12px;gap:10px"><span class="brand"><svg class="ic"><use href="#i-bars"/></svg></span><b style="font-size:17px;white-space:nowrap">統計：讀書報告回饋</b><div style="margin-left:auto;width:330px"><div class="stepper"><div class="segs"><span class="st on"><span class="sl"><span class="sn"><svg class="ic"><use href="#i-check"/></svg></span>開啟問卷</span></span><span class="st on"><span class="sl"><span class="sn"><svg class="ic"><use href="#i-check"/></svg></span>準備資料</span></span><span class="st on cur"><span class="sl"><span class="sn">3</span>統計</span></span><span class="st"><span class="sl"><span class="sn">4</span>輸出</span></span></div></div></div><button class="icbtn" type="button" aria-label="重新開始"><svg class="ic"><use href="#i-refresh"/></svg></button><button class="icbtn" type="button" aria-label="設定"><svg class="ic"><use href="#i-gear"/></svg></button></div><div style="flex:1;min-height:0;display:flex"><div class="pane" style="width:236px;padding:12px 8px;border-right:1px solid var(--line-soft);background:var(--card);gap:2px"><div class="small muted" style="font-weight:700;padding:4px 12px">圖表</div><div class="qrow"><span style="flex:1">圖表圖庫</span></div><div class="qrow"><span style="flex:1">勾選與換圖</span></div><div class="qrow" aria-current="true"><span style="flex:1">另存圖片</span></div><div class="qrow"><span style="flex:1">量表標籤</span></div><div class="qrow"><span style="flex:1">反向計分</span></div></div><div class="pane" style="flex:1;padding:8px 0;align-items:stretch"><div style="width:100%;max-width:560px;margin:0 auto;flex:1;min-height:0;display:flex;flex-direction:column"><div class="scr" data-t="1" style="gap:10px"><div class="seg" role="group" aria-label="檢視"><button type="button" aria-pressed="true">題目</button><button type="button" aria-pressed="false">交叉</button><button type="button" aria-pressed="false">留言</button></div><div class="pager"><button class="icbtn" type="button" aria-label="上一題"><svg class="ic"><use href="#i-back"/></svg></button><div class="c"><small>第 1 題 · 0～10 分 · 56 筆</small><b>簡報內容（充實度）</b></div><button class="icbtn" type="button" aria-label="下一題"><svg class="ic"><use href="#i-next"/></svg></button></div><div class="qcard"><div style="display:flex;align-items:center;gap:6px"><b style="flex:1">分數分布 · 堆疊橫條</b><button class="btn btn-ghost btn-sm" type="button">換圖</button><button class="btn btn-ghost btn-sm" type="button">隱藏</button></div><div class="grp"><div class="brow"><div class="h"><span class="nm">10 分</span><span class="v"><b>14</b> · 25%</span></div><div class="track"><i style="width:25%"></i></div></div><div class="brow"><div class="h"><span class="nm">9 分</span><span class="v"><b>18</b> · 32%</span></div><div class="track"><i class="lead" style="width:32%"></i></div></div><div class="brow"><div class="h"><span class="nm">8 分</span><span class="v"><b>12</b> · 21%</span></div><div class="track"><i style="width:21%"></i></div></div><div class="brow"><div class="h"><span class="nm">7 分以下</span><span class="v"><b>12</b> · 22%</span></div><div class="track"><i style="width:22%"></i></div></div></div></div></div></div></div></div><div class="actbar desk" style="justify-content:flex-end"><button class="btn btn-secondary" type="button">上一步</button><button class="btn btn-primary" type="button">下一步：輸出</button></div><div class="scrim"></div><div class="sheet" style="left:auto;right:0;top:0;bottom:0;width:400px;border-radius:var(--r-lg) 0 0 var(--r-lg);padding:24px 20px;justify-content:flex-start;box-shadow:-8px 0 24px var(--shadow);overflow:hidden" role="dialog" aria-label="另存圖表"><h3>另存圖表</h3><p class="sub">「簡報內容（充實度）」的分數分布</p><div class="grp"><span class="gl">格式</span><div class="seg" role="group" aria-label="格式"><button type="button" aria-pressed="false">PNG 圖片</button><button type="button" aria-pressed="true">JPG 圖片</button><button type="button" aria-pressed="false">SVG 向量</button></div><span class="gl">大小</span><div class="seg" role="group" aria-label="大小"><button type="button" aria-pressed="false">1200px</button><button type="button" aria-pressed="false">2400px</button><button type="button" aria-pressed="true">4800px</button></div><span class="gl">背景</span><div class="seg" role="group" aria-label="背景"><button type="button" aria-pressed="true">白底</button><button type="button" aria-pressed="false">透明</button></div></div><p class="small muted">JPG 不支援透明，背景固定白底。4800px 約 9 MB，存檔會多花幾秒。</p><button class="btn btn-primary btn-block" type="button">另存</button><button class="btn btn-secondary btn-block" type="button">取消</button></div></div></div><figcaption style="max-width:640px"><b>Save 圖表另存圖片</b>格式加了 JPG；大小加到寬度 4800px（現有 1200、2400）。JPG 不支援透明，背景固定白底。手機輸出大圖可能較慢，4800px 約 9 MB，提示會多花幾秒。</figcaption></figure>
+<figure class="fig" style="margin:0"><div class="scale" data-w="820" data-h="1000"><div class="dev" style="width:820px;height:1000px;border-radius:28px"><div class="appbar" style="padding:0 12px;gap:10px"><span class="brand"><svg class="ic"><use href="#i-bars"/></svg></span><b style="font-size:17px;white-space:nowrap">量表標籤</b><div style="margin-left:auto;width:330px"><div class="stepper"><div class="segs"><span class="st"><span class="sl"><span class="sn">1</span>開啟問卷</span></span><span class="st"><span class="sl"><span class="sn">2</span>準備資料</span></span><span class="st"><span class="sl"><span class="sn">3</span>統計</span></span><span class="st"><span class="sl"><span class="sn">4</span>輸出</span></span></div></div></div><button class="icbtn" type="button" aria-label="重新開始"><svg class="ic"><use href="#i-refresh"/></svg></button><button class="icbtn" type="button" aria-label="設定"><svg class="ic"><use href="#i-gear"/></svg></button></div><div style="flex:1;min-height:0;display:flex"><div class="pane" style="width:236px;padding:12px 8px;border-right:1px solid var(--line-soft);background:var(--card);gap:2px"><div class="small muted" style="font-weight:700;padding:4px 12px">圖表</div><div class="qrow"><span style="flex:1">圖表圖庫</span></div><div class="qrow"><span style="flex:1">勾選與換圖</span></div><div class="qrow"><span style="flex:1">另存圖片</span></div><div class="qrow" aria-current="true"><span style="flex:1">量表標籤</span></div><div class="qrow"><span style="flex:1">反向計分</span></div></div><div class="pane" style="flex:1;padding:8px 0;align-items:stretch"><div style="width:100%;max-width:560px;margin:0 auto;flex:1;min-height:0;display:flex;flex-direction:column"><div class="scr" data-t="1" style="gap:12px"><div class="grp"><span class="gl">套用預設</span><div class="chips"><button class="chip" type="button" aria-pressed="true">同意程度</button><button class="chip" type="button" aria-pressed="false">滿意度</button><button class="chip" type="button" aria-pressed="false">頻率</button><button class="chip" type="button" aria-pressed="false">自訂</button></div></div><div class="qcard" style="gap:10px"><div style="display:flex;align-items:center;gap:10px"><b class="mono" style="width:1.2em">1</b><div class="input" style="flex:1;min-height:44px;display:flex;align-items:center">非常不同意</div></div><div style="display:flex;align-items:center;gap:10px"><b class="mono" style="width:1.2em">2</b><div class="input" style="flex:1;min-height:44px;display:flex;align-items:center">不同意</div></div><div style="display:flex;align-items:center;gap:10px"><b class="mono" style="width:1.2em">3</b><div class="input" style="flex:1;min-height:44px;display:flex;align-items:center">普通</div></div><div style="display:flex;align-items:center;gap:10px"><b class="mono" style="width:1.2em">4</b><div class="input" style="flex:1;min-height:44px;display:flex;align-items:center">同意</div></div><div style="display:flex;align-items:center;gap:10px"><b class="mono" style="width:1.2em">5</b><div class="input" style="flex:1;min-height:44px;display:flex;align-items:center">非常同意</div></div></div><div class="grp"><span class="gl">預覽</span><div class="brow"><div class="h"><span class="nm">1 非常不同意</span><span class="v"><b>0</b> · 0%</span></div><div class="track"><i style="width:0%"></i></div></div><div class="brow"><div class="h"><span class="nm">4 同意</span><span class="v"><b>13</b> · 32%</span></div><div class="track"><i style="width:32%"></i></div></div><div class="brow"><div class="h"><span class="nm">5 非常同意</span><span class="v"><b>22</b> · 54%</span></div><div class="track"><i class="lead" style="width:54%"></i></div></div></div></div></div></div></div><div class="actbar desk" style="justify-content:flex-end"><button class="btn btn-secondary" type="button">上一步</button><button class="btn btn-primary" type="button">套用到所有量表題</button></div></div></div><figcaption style="max-width:640px"><b>11d 量表標籤</b>量表題的 1–5 分要顯示成什麼字。先給常見預設，也能自訂；標籤即時預覽在圖表上，且每個分數都標明數字，不只靠文字。</figcaption></figure>
+<figure class="fig" style="margin:0"><div class="scale" data-w="820" data-h="1000"><div class="dev" style="width:820px;height:1000px;border-radius:28px"><div class="appbar" style="padding:0 12px;gap:10px"><span class="brand"><svg class="ic"><use href="#i-bars"/></svg></span><b style="font-size:17px;white-space:nowrap">反向計分</b><div style="margin-left:auto;width:330px"><div class="stepper"><div class="segs"><span class="st"><span class="sl"><span class="sn">1</span>開啟問卷</span></span><span class="st"><span class="sl"><span class="sn">2</span>準備資料</span></span><span class="st"><span class="sl"><span class="sn">3</span>統計</span></span><span class="st"><span class="sl"><span class="sn">4</span>輸出</span></span></div></div></div><button class="icbtn" type="button" aria-label="重新開始"><svg class="ic"><use href="#i-refresh"/></svg></button><button class="icbtn" type="button" aria-label="設定"><svg class="ic"><use href="#i-gear"/></svg></button></div><div style="flex:1;min-height:0;display:flex"><div class="pane" style="width:236px;padding:12px 8px;border-right:1px solid var(--line-soft);background:var(--card);gap:2px"><div class="small muted" style="font-weight:700;padding:4px 12px">圖表</div><div class="qrow"><span style="flex:1">圖表圖庫</span></div><div class="qrow"><span style="flex:1">勾選與換圖</span></div><div class="qrow"><span style="flex:1">另存圖片</span></div><div class="qrow"><span style="flex:1">量表標籤</span></div><div class="qrow" aria-current="true"><span style="flex:1">反向計分</span></div></div><div class="pane" style="flex:1;padding:8px 0;align-items:stretch"><div style="width:100%;max-width:560px;margin:0 auto;flex:1;min-height:0;display:flex;flex-direction:column"><div class="scr" data-t="1" style="gap:12px"><p class="small muted">反向題的分數會換成「6 − 原分數」，再計算平均與分布。原始資料不會被修改。</p><button class="tgl" role="switch" aria-checked="false" type="button"><span style="text-align:left"><b style="display:block">第 3 題　分組讓我有機會表達</b></span><span class="sw2"></span></button><button class="tgl" role="switch" aria-checked="true" type="button"><span style="text-align:left"><b style="display:block">第 5 題　活動時間太趕</b><span class="small muted">平均 3.8 → 2.2</span></span><span class="sw2"></span></button><button class="tgl" role="switch" aria-checked="true" type="button"><span style="text-align:left"><b style="display:block">第 6 題　場地讓我不舒服</b><span class="small muted">平均 3.5 → 2.5</span></span><span class="sw2"></span></button><div class="notice warn"><svg class="ic"><use href="#i-warn"/></svg><div>第 6 題標為反向後，總平均會跟著改變。若不確定，請回到題目文字確認。</div></div><div class="qcard" style="gap:4px"><b>輸出文件上會標示</b><div class="small">「第 5、6 題為反向計分」，讓看報告的人知道數字的意思。</div></div></div></div></div></div><div class="actbar desk" style="justify-content:flex-end"><button class="btn btn-secondary" type="button">上一步</button><button class="btn btn-primary" type="button">套用</button></div></div></div><figcaption style="max-width:640px"><b>11e 反向計分</b>問法相反的題目（例如「時間太趕」）要把分數倒過來。勾選哪些題是反向，並預覽倒過來後的平均，避免老師忘記而算錯。</figcaption></figure>
+</div>
+</div>
+</body>
+</html>
