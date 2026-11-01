@@ -247,9 +247,9 @@ export async function renderPdf(doc: DocModel, fonts: Fonts, opts: { baseK?: num
         break;
       }
       case 'stats': {
-        const n = Math.max(1, b.items.length);
+        const n = Math.max(1, b.cards.length);
         const cw = (w - GEO.statsGap * (n - 1)) / n;
-        b.items.forEach((it, i) => {
+        b.cards.forEach((it, i) => {
           const cx = x + i * (cw + GEO.statsGap);
           fillRect(cx, y, cw, GEO.statsH, b.fill ?? '#fff1de', '#ead9c3');
           const vw = bold.widthOfTextAtSize(it.value, GEO.statsValueSize);

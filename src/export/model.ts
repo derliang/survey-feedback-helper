@@ -88,7 +88,7 @@ export interface HeroBlock extends BlockBase {
 /** 進階區塊：摘要數字列（幾張並排的數字卡）。 */
 export interface StatsBlock extends BlockBase {
   type: 'stats';
-  items: { label: string; value: string }[];
+  cards: { label: string; value: string }[];
   fill?: string;
   color?: string;
 }
@@ -186,7 +186,7 @@ export function collectChars(doc: DocModel): { regular: string; bold: string } {
     } else if (b.type === 'hero') {
       add(bol, b.title);
       add(reg, b.subtitle);
-    } else if (b.type === 'stats') b.items.forEach((it) => (add(bol, it.value), add(reg, it.label)));
+    } else if (b.type === 'stats') b.cards.forEach((it) => (add(bol, it.value), add(reg, it.label)));
     else if (b.type === 'callout') {
       add(bol, b.title);
       add(reg, b.text);

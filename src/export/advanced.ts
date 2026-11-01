@@ -4,7 +4,7 @@ import type { Block, CalloutBlock, HeroBlock, StatsBlock, TableBlock } from './m
 
 export const hero = (title: string, subtitle?: string, extra: Partial<HeroBlock> = {}): HeroBlock => ({ type: 'hero', title, ...(subtitle ? { subtitle } : {}), after: 10, ...extra });
 
-export const stats = (items: { label: string; value: string }[], extra: Partial<StatsBlock> = {}): StatsBlock => ({ type: 'stats', items, after: 10, ...extra });
+export const stats = (cards: { label: string; value: string }[], extra: Partial<StatsBlock> = {}): StatsBlock => ({ type: 'stats', cards, after: 10, ...extra });
 
 export const praise = (text: string, title = '你的強項'): CalloutBlock => ({ type: 'callout', tone: 'praise', title, text, after: 8 });
 export const hint = (text: string, title = '下一步可以試試'): CalloutBlock => ({ type: 'callout', tone: 'hint', title, text, after: 8 });

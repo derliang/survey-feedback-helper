@@ -45,7 +45,7 @@ function blockHtml(b: Block, doc: DocModel, w: number): string {
     case 'hero':
       return `<div style="${sp}background:${b.fill ?? HERO_FILL};color:${b.color ?? '#fff'};padding:${pt(GEO.heroPad)}"><div style="font-size:${pt(b.size ?? 22)};font-weight:700;line-height:1.5">${nl(b.title)}</div>${b.subtitle ? `<div style="margin-top:4pt;font-size:${pt(GEO.heroSubSize)};line-height:${pt(GEO.heroSubLh)}">${nl(b.subtitle)}</div>` : ''}</div>`;
     case 'stats':
-      return `<div style="${sp}display:flex;gap:${pt(GEO.statsGap)}">${b.items
+      return `<div style="${sp}display:flex;gap:${pt(GEO.statsGap)}">${b.cards
         .map((it) => `<div style="flex:1;height:${pt(GEO.statsH)};background:${b.fill ?? '#fff1de'};border:0.5pt solid #ead9c3;text-align:center;display:flex;flex-direction:column;justify-content:center"><div style="font-size:${pt(GEO.statsValueSize)};font-weight:700;color:${b.color ?? HERO_FILL}">${esc(it.value)}</div><div style="font-size:${pt(GEO.statsLabelSize)};color:#66554a">${esc(it.label)}</div></div>`)
         .join('')}</div>`;
     case 'callout': {

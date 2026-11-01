@@ -175,20 +175,20 @@ export async function renderDocx(doc: DocModel, opts: { fontName?: string } = {}
       out.push(boxTable(w, b.fill ?? HERO_FILL, undefined, paras, GEO.heroPad));
       sp(b.after ?? 0);
     } else if (b.type === 'stats') {
-      const n = Math.max(1, b.items.length);
+      const n = Math.max(1, b.cards.length);
       const cw = w / n;
       const gapB = { style: BorderStyle.SINGLE, size: GEO.statsGap * 4, color: 'FFFFFF' }; // 白色粗框線當欄距
       out.push(
         new Table({
           width: { size: tw(w), type: WidthType.DXA },
-          columnWidths: b.items.map(() => tw(cw)),
+          columnWidths: b.cards.map(() => tw(cw)),
           layout: TableLayoutType.FIXED,
           borders: { top: noBorder, bottom: noBorder, left: noBorder, right: noBorder, insideHorizontal: noBorder, insideVertical: gapB },
           rows: [
             new TableRow({
               cantSplit: true,
               height: { value: tw(GEO.statsH), rule: HeightRule.EXACT },
-              children: b.items.map(
+              children: b.cards.map(
                 (it) =>
                   new TableCell({
                     width: { size: tw(cw), type: WidthType.DXA },
