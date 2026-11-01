@@ -58,8 +58,17 @@ export interface PickerApi {
   pickSpreadsheet(token: string): Promise<PickedFile | null>;
 }
 
+export interface DriveApi {
+  /**
+   * 把文字檔存到使用者自己的雲端硬碟（drive.file：只看得到本程式建立的檔案）。
+   * 同名檔案已存在就覆蓋內容，否則新建；回傳檔案 id。
+   */
+  saveText(token: string, name: string, text: string): Promise<string>;
+}
+
 export interface GoogleServices {
   auth: GoogleAuth;
+  drive: DriveApi;
   sheets: SheetsApi;
   picker: PickerApi;
 }

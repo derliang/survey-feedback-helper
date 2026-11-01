@@ -9,6 +9,8 @@ export interface Prefs {
   lang: Lang;
   /** 已按過「知道了」的提示。 */
   dismissed: string[];
+  /** 雲端自動備份（預設關，需老師明確同意；DESIGN.md 5.28）。 */
+  cloudBackup: boolean;
 }
 
 const KEY = 'sfh-prefs';
@@ -20,9 +22,10 @@ export function loadPrefs(): Prefs {
       theme: raw.theme === 'light' || raw.theme === 'dark' ? raw.theme : 'auto',
       lang: raw.lang === 'en' ? 'en' : 'zh',
       dismissed: Array.isArray(raw.dismissed) ? raw.dismissed.filter((x): x is string => typeof x === 'string') : [],
+      cloudBackup: raw.cloudBackup === true,
     };
   } catch {
-    return { theme: 'auto', lang: 'zh', dismissed: [] };
+    return { theme: 'auto', lang: 'zh', dismissed: [], cloudBackup: false };
   }
 }
 

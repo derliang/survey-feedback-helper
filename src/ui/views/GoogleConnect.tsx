@@ -1,10 +1,17 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import { openSurveyTable } from "../../app/store";
+import { setCloudToken } from "../../app/cloud";
+import {
+  backupToDrive,
+  openSurveyTable,
+  updatePrefs,
+  useApp,
+} from "../../app/store";
 import { readGoogleConfig } from "../../google/config";
 import type { ConnectResult } from "../../google/session";
 import type { GoogleServices } from "../../google/types";
 import { strings as S } from "../strings";
 import { AccountChooser, Icon, Notice, Sheet, useWide } from "../parts/parts";
+import { CloudExplain, CloudSwitch } from "./CloudParts";
 
 const env = () => import.meta.env as Record<string, string | undefined>;
 
@@ -30,7 +37,10 @@ type Phase = "intro" | "reading" | "blocked" | "closed" | "failed" | "empty";
 export function GoogleConnectDialog(props: {
   onClose: () => void;
   onExcel: () => void;
+  /** 只登入、不選試算表（設定頁與備份失敗提示用）。 */
+  loginOnly?: boolean;
 }) {
+  const app = useApp();
   const [svc, setSvc] = useState<GoogleServices | null>(null);
   const [ready, setReady] = useState(false);
   const [phase, setPhase] = useState<Phase>("intro");
@@ -83,7 +93,10 @@ export function GoogleConnectDialog(props: {
       return setPhase("empty");
     }
     setMessage(r.message);
-    if (r.failure === "auth") token = null;
+    if (r.failure === "auth") {
+      token = null;
+      setCloudToken(null);
+    }
     setPhase("failed");
   };
 
@@ -100,6 +113,9 @@ export function GoogleConnectDialog(props: {
         return setPhase("failed");
       }
       token = r.token;
+      setCloudToken(r.token);
+      void backupToDrive();
+      if (props.loginOnly) return props.onClose();
       await read(svc, r.token);
     });
   };
@@ -163,7 +179,8 @@ export function GoogleConnectDialog(props: {
     <p class="hint">
       <Icon name="info" />
       <span>
-        <strong>{S.google.noLoginTitle}</strong> {S.google.noLogin}
+        <strong>{S.google.noLoginTitle}</strong> {S.google.noLogin}{" "}
+        {S.cloud.noLoginExtra}
       </span>
     </p>
   );
@@ -191,6 +208,15 @@ export function GoogleConnectDialog(props: {
             <strong>{S.google.lead}</strong>
           </p>
           <AccountChooser />
+          {phase === "intro" && (
+            <>
+              <CloudExplain />
+              <CloudSwitch
+                on={app.prefs.cloudBackup}
+                onChange={(v) => updatePrefs({ cloudBackup: v })}
+              />
+            </>
+          )}
           {!ready && phase === "intro" && (
             <p class="hint" id="g-why" role="status">
               <Icon name="info" />

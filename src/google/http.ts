@@ -2,7 +2,11 @@ import { GoogleApiError } from "./types";
 
 export type FetchLike = (
   url: string,
-  init?: { headers?: Record<string, string> },
+  init?: {
+    method?: string;
+    headers?: Record<string, string>;
+    body?: string;
+  },
 ) => Promise<{
   ok: boolean;
   status: number;
@@ -16,11 +20,23 @@ export async function getJson(
   token: string,
   apiKey?: string,
 ): Promise<unknown> {
+  return sendJson(fetchFn, url, token, {}, apiKey);
+}
+
+/** 寫入用（POST／PATCH）：失敗同樣丟 GoogleApiError。 */
+export async function sendJson(
+  fetchFn: FetchLike,
+  url: string,
+  token: string,
+  init: { method?: string; headers?: Record<string, string>; body?: string },
+  apiKey?: string,
+): Promise<unknown> {
   const full = apiKey
     ? `${url}${url.includes("?") ? "&" : "?"}key=${encodeURIComponent(apiKey)}`
     : url;
   const res = await fetchFn(full, {
-    headers: { Authorization: `Bearer ${token}` },
+    ...init,
+    headers: { ...init.headers, Authorization: `Bearer ${token}` },
   });
   if (res.ok) return res.json();
   let reason = "";
