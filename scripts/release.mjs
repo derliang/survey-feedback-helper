@@ -13,6 +13,7 @@ import { cpSync, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, wri
 import { hostname, tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { NO_GOOGLE_MESSAGE, distHasGoogleConfig, trackedEnvFiles } from './release-env.mjs';
 import { buildVersionJson, changelogHint, isValidVersion, releaseNotes, tagName } from './release-meta.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -77,6 +78,23 @@ if (skipCi) {
   console.log('\n== npm run ci ==');
   const r = spawnSync('npm run ci', { cwd: root, stdio: 'inherit', shell: true });
   if (r.status !== 0) fail('npm run ci 未全綠，不發布。');
+}
+
+// 2b. 金鑰檢查：.env 檔不得進 git；dist 必須含 Google 設定（否則會靜默發出「尚未開放」的版本）
+{
+  const tracked = trackedEnvFiles(git(root, 'ls-files'));
+  if (tracked.length > 0) fail(`這些 .env 檔被 git 追蹤了（金鑰不得進 repo）：${tracked.join('、')}`);
+  for (const f of ['.env.local', '.env.production.local']) {
+    try {
+      git(root, 'check-ignore', '-q', f);
+    } catch {
+      fail(`.gitignore 沒有忽略 ${f}，請先補上再發布。`);
+    }
+  }
+  if (!distHasGoogleConfig(join(root, 'dist'))) {
+    if (publish) fail(NO_GOOGLE_MESSAGE);
+    console.warn(`[警告] ${NO_GOOGLE_MESSAGE}（dry-run 僅提醒；--yes 會被擋）`);
+  }
 }
 
 // 3. 在暫存 worktree 取出 gh-pages，換成 dist/
