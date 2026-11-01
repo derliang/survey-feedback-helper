@@ -4,6 +4,7 @@ import { defaultStatsOpts, looksMulti, opinionQuestions } from './analysis';
 import { analyzeColumns, detectScale, inferKind, mappingProblems } from './columns';
 import { tableFromFile } from './load';
 import type { Session } from './store';
+import { emptyCourseState } from './course-app';
 
 // 多種 Google 表單匯出的虛構樣本（核取方塊、格狀題、線性量表、票選）。
 // xlsx 在測試時才產生、不 commit 資料檔；欄位標題的寫法是依公開文件描述自編的近似，尚未對照真實匯出檔（待核對）。
@@ -19,7 +20,7 @@ async function sessionOf(name: string, headers: string[], rows: (string | number
   return {
     fileName: name, sourceLabel: 'Excel 檔', name, table, cols, kind, kindReason: '', kindConfirmed: true,
     scale: detectScale(table, cols), mappingConfirmed: true, recognition: null, surveyId: 's', previousRows: null,
-    rosterRows: null, rosterMixed: false, rosterSkipped: false, rosterName: '', resolutions: {}, excluded: [], titleMerges: {}, checkHandled: [],
+    rosterRows: null, rosterMixed: false, rosterSkipped: false, rosterName: '', resolutions: {}, excluded: [], titleMerges: {}, checkHandled: [], course: emptyCourseState(),
     demo: false,
   };
 }

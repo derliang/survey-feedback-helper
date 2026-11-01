@@ -8,7 +8,7 @@ export function emptyFolderData(): FolderData {
   return { version: 1, surveys: [], rosters: [] };
 }
 
-const KINDS: SurveyKind[] = ['vote', 'opinion', 'feedback'];
+const KINDS: SurveyKind[] = ['vote', 'opinion', 'feedback', 'course'];
 
 function str(v: unknown, fallback = ''): string {
   return typeof v === 'string' ? v : fallback;

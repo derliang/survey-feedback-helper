@@ -5,6 +5,7 @@ import { analyzeColumns, detectScale } from './columns';
 import { AUDIENCE_NAMES, classSummaryInput, opinionSheets, personalInputs, voteSheets } from './output';
 import { commentState, emptyReview, finalText, flaggedWords, parseReview, reviewCounts, serializeReview, setComment, setKeywords, setRewrite, setTeacher } from './review';
 import type { Session } from './store';
+import { emptyCourseState } from './course-app';
 import { barsSvg, columnsSvg, pairedBarsSvg, PRINT } from '../ui/chart-svg';
 
 // 全部是虛構資料
@@ -14,7 +15,7 @@ function session(csv: string, roles: Record<string, string>, kind: Session['kind
   return {
     fileName: 't.csv', sourceLabel: 'Excel 檔', name: '測試問卷', table, cols, kind, kindReason: '', kindConfirmed: true,
     scale: detectScale(table, cols), mappingConfirmed: true, recognition: null, surveyId: 's1', previousRows: null,
-    rosterRows: null, rosterMixed: false, rosterSkipped: false, rosterName: '', resolutions: {}, excluded: [], titleMerges: {}, checkHandled: [],
+    rosterRows: null, rosterMixed: false, rosterSkipped: false, rosterName: '', resolutions: {}, excluded: [], titleMerges: {}, checkHandled: [], course: emptyCourseState(),
     demo: false,
   };
 }

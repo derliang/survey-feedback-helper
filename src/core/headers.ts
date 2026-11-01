@@ -30,6 +30,7 @@ export type FieldRole =
   | 'score'
   | 'choice'
   | 'comment'
+  | 'preference'
   | 'ignore';
 
 /** 已存設定：角色 → 欄位標題（存的是老師看到的原標題）。同一角色多欄（如五題評分）存陣列。 */
@@ -142,6 +143,7 @@ export function suggestRoles(headers: readonly string[]): RoleSuggestion[] {
     if (/座號/.test(h)) return hit(isTarget ? 'targetSeat' : 'respondentSeat');
     if (/書名|書籍|書目/.test(h)) return hit('bookTitle');
     if (/姓名|名字|填寫者|被回饋者/.test(h)) return hit(isTarget ? 'targetName' : 'respondentName');
+    if (/志願/.test(h)) return hit('preference', 'low');
     if (/意見|回饋|建議|心得|留言|想法/.test(h)) return hit('comment', 'low');
     return { index, role: null, confidence: 'low' };
   });

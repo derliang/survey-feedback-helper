@@ -4,7 +4,7 @@ import type { SurveyKind } from '../../storage';
 import { strings as S } from '../strings';
 import { ActBar } from '../parts/parts';
 
-const KINDS: SurveyKind[] = ['feedback', 'vote', 'opinion'];
+const KINDS: SurveyKind[] = ['course', 'feedback', 'vote', 'opinion'];
 
 export function TypeView() {
   const s = useApp().session;
@@ -38,6 +38,14 @@ export function TypeView() {
           );
         })}
       </div>
+      {s.kind === 'course' && (
+        <details class="howto" data-testid="course-howto">
+          <summary>
+            {S.type.courseHow} <span class="tag warn">{S.type.toVerify}</span>
+          </summary>
+          <p>{S.type.courseHowBody}</p>
+        </details>
+      )}
       <details class="howto" open={suggested.kind === s.kind}>
         <summary>{S.type.howTitle}</summary>
         <p>{suggested.reason}</p>

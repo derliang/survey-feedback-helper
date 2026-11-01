@@ -7,6 +7,7 @@ import {
   type Table,
   buildMapping,
   cellText,
+  guessRank,
   isBlankCell,
   parseNumber,
   resolveMapping,
@@ -25,6 +26,8 @@ export interface ColumnInfo {
   /** 系統沒把握或老師還沒看過，需要確認。 */
   confirm: boolean;
   samples: string[];
+  /** 志願欄才有：第幾志願（1 起算）。 */
+  rank?: number;
 }
 
 export interface Scale {
@@ -66,7 +69,7 @@ function guessByContent(values: Cell[]): { role: Role; confirm: boolean } | null
 /** 欄位智慧判斷：標題優先，再看內容；沒把握的標「請確認」。 */
 export function analyzeColumns(table: Table): ColumnInfo[] {
   const sug = suggestRoles(table.headers);
-  return table.headers.map((header, index) => {
+  const cols = table.headers.map((header, index) => {
     const s = sug[index];
     let role: Role | null = s?.role ?? null;
     let confirm = s?.confidence === 'low' && role !== null;
@@ -82,6 +85,42 @@ export function analyzeColumns(table: Table): ColumnInfo[] {
     }
     return { index, header, label: header, role, confirm, samples: samplesOf(table, index) };
   });
+  return assignRanks(cols);
+}
+
+/** 志願欄的順序：欄名猜得到就用，猜不到或重複的接在最後；一律標「請確認」（順序由老師把關）。 */
+export function assignRanks(cols: ColumnInfo[]): ColumnInfo[] {
+  const prefs = cols.filter((c) => c.role === 'preference');
+  const taken = new Set<number>();
+  const guessed = new Map<number, number>();
+  for (const c of prefs) {
+    const g = guessRank(c.header);
+    if (g !== null && !taken.has(g)) {
+      taken.add(g);
+      guessed.set(c.index, g);
+    }
+  }
+  let next = 1;
+  return cols.map((c) => {
+    if (c.role !== 'preference') {
+      if (c.rank === undefined) return c;
+      const rest = { ...c };
+      delete rest.rank;
+      return rest;
+    }
+    let r = guessed.get(c.index);
+    if (r === undefined) {
+      while (taken.has(next)) next++;
+      r = next;
+      taken.add(r);
+    }
+    return { ...c, rank: r };
+  });
+}
+
+/** 依第幾志願排序的志願欄。 */
+export function prefColumns(cols: readonly ColumnInfo[]): ColumnInfo[] {
+  return cols.filter((c) => c.role === 'preference').sort((a, b) => (a.rank ?? 99) - (b.rank ?? 99) || a.index - b.index);
 }
 
 /** 套用已存的對應（認得讀過）：標題比對成功的欄位直接帶入且免確認，新增的欄位仍需確認。 */
@@ -89,13 +128,16 @@ export function applySavedMapping(table: Table, saved: SavedMapping, labels: Rec
   const base = analyzeColumns(table);
   const { columns } = resolveMapping(table.headers, saved);
   for (const [role, idxs] of Object.entries(columns)) {
-    for (const i of idxs) {
+    idxs.forEach((i, n) => {
       const col = base[i];
       if (col) {
         col.role = role as Role;
         col.confirm = false;
+        // 志願欄存檔時依第幾志願排序，順序即志願
+        if (role === 'preference') col.rank = n + 1;
+        else delete col.rank;
       }
-    }
+    });
   }
   return base.map((c) => ({ ...c, label: labels[c.header] ?? c.header }));
 }
@@ -104,9 +146,11 @@ export function applySavedMapping(table: Table, saved: SavedMapping, labels: Rec
 export function toSavedMapping(cols: readonly ColumnInfo[]): SavedMapping {
   const byRole: Record<string, number[]> = {};
   for (const c of cols) {
-    if (c.role === null) continue;
+    if (c.role === null || c.role === 'preference') continue;
     (byRole[c.role] ??= []).push(c.index);
   }
+  const prefs = prefColumns(cols);
+  if (prefs.length > 0) byRole.preference = prefs.map((c) => c.index);
   return buildMapping(
     cols.map((c) => c.header),
     byRole,
@@ -128,6 +172,9 @@ export function inferKind(cols: readonly ColumnInfo[]): { kind: SurveyKind; reas
   if (has(cols, 'targetName') && names >= 2 && scores >= 1) {
     return { kind: 'feedback', reason: `有「填寫者」與「被評對象」兩種姓名欄，並有 ${scores} 題評分，所以判斷是報告回饋。` };
   }
+  if (has(cols, 'preference')) {
+    return { kind: 'course', reason: '欄名有「第一志願」「第二志願」等字樣，所以判斷是選課分組志願。' };
+  }
   const titles = cols.map((c) => c.header).join(' ');
   if (/班長|幹部|票選|投票|推薦|當選/.test(titles)) {
     return { kind: 'vote', reason: '欄位標題有「班長、幹部、票選」等字樣，所以判斷是票選幹部。' };
@@ -139,7 +186,10 @@ export function inferKind(cols: readonly ColumnInfo[]): { kind: SurveyKind; reas
 export function mappingProblems(kind: SurveyKind, cols: readonly ColumnInfo[]): string[] {
   const out: string[] = [];
   const content = cols.filter((c) => c.role === 'score' || c.role === 'choice' || c.role === 'comment').length;
-  if (kind === 'vote') {
+  if (kind === 'course') {
+    if (!has(cols, 'preference')) out.push('選課分組志願需要至少一欄「志願」。');
+    if (!has(cols, 'respondentName') && !has(cols, 'respondentSeat')) out.push('選課分組志願需要「填寫者姓名」或「填寫者座號」，才分得出是誰。');
+  } else if (kind === 'vote') {
     if (!has(cols, 'choice')) out.push('票選幹部需要至少一欄「選擇題」（例如班長、副班長）。');
   } else if (kind === 'feedback') {
     if (!has(cols, 'respondentName')) out.push('報告回饋需要一欄「填寫者姓名」。');
@@ -202,4 +252,86 @@ export function buildCheckRecords(table: Table, cols: readonly ColumnInfo[]): Ch
       cols.filter((c) => c.role === 'score' || c.role === 'choice').map((c) => [String(c.index), r[c.index] ?? null]),
     ),
   }));
+}
+
+/** 志願順序整理成 1、2、3…（中間有空缺就補齊）。 */
+export function compactRanks(cols: readonly ColumnInfo[]): ColumnInfo[] {
+  const order = new Map(prefColumns(cols).map((c, i) => [c.index, i + 1]));
+  return cols.map((c) => {
+    if (c.role !== 'preference') {
+      if (c.rank === undefined) return c;
+      const rest = { ...c };
+      delete rest.rank;
+      return rest;
+    }
+    return { ...c, rank: order.get(c.index) ?? 1 };
+  });
+}
+
+/** 改某欄的角色；改成「志願」時接在最後一個志願後面，離開「志願」時順序自動補齊。 */
+export function withRole(cols: readonly ColumnInfo[], index: number, role: Role): ColumnInfo[] {
+  const used = prefColumns(cols).filter((c) => c.index !== index).length;
+  return compactRanks(
+    cols.map((c) => {
+      if (c.index !== index) return c;
+      const next: ColumnInfo = { ...c, role, confirm: false };
+      if (role === 'preference') next.rank = used + 1;
+      return next;
+    }),
+  );
+}
+
+/** 指定某欄為第幾志願；原本佔著該順位的欄跟它對調。 */
+export function withRank(cols: readonly ColumnInfo[], index: number, rank: number): ColumnInfo[] {
+  const me = cols.find((c) => c.index === index);
+  if (!me || me.role !== 'preference') return [...cols];
+  const mine = me.rank ?? 1;
+  return cols.map((c) => {
+    if (c.index === index) return { ...c, rank, confirm: false };
+    if (c.role === 'preference' && c.rank === rank) return { ...c, rank: mine };
+    return c;
+  });
+}
+
+/** 志願順序上移或下移一格。 */
+export function movePref(cols: readonly ColumnInfo[], index: number, dir: -1 | 1): ColumnInfo[] {
+  const order = prefColumns(cols);
+  const at = order.findIndex((c) => c.index === index);
+  const to = at + dir;
+  if (at < 0 || to < 0 || to >= order.length) return [...cols];
+  const a = order[at] as ColumnInfo;
+  const b = order[to] as ColumnInfo;
+  return cols.map((c) => {
+    if (c.index === a.index) return { ...c, rank: to + 1, confirm: false };
+    if (c.index === b.index) return { ...c, rank: at + 1, confirm: false };
+    return c;
+  });
+}
+
+export interface GridGroup {
+  /** 題目名稱（欄名「題目 [列名]」方括號前的部分） */
+  question: string;
+  /** 已當成志願的欄，依志願順序 */
+  members: ColumnInfo[];
+  /** 同一題但沒當成志願的欄 */
+  unmatched: ColumnInfo[];
+}
+
+const GRID = /^(.*?)\s*[[［]\s*(.+?)\s*[\]］]\s*$/;
+
+/** 「選擇題方格」匯出的志願：欄名都是「題目 [列名]」且至少兩欄是志願，就合併成一組。欄名格式待核對真實匯出。 */
+export function gridGroup(cols: readonly ColumnInfo[]): GridGroup | null {
+  const prefs = prefColumns(cols);
+  const byQ = new Map<string, ColumnInfo[]>();
+  for (const c of prefs) {
+    const m = GRID.exec(c.header.normalize('NFKC'));
+    if (!m) continue;
+    const q = (m[1] as string).trim();
+    byQ.set(q, [...(byQ.get(q) ?? []), c]);
+  }
+  const best = [...byQ].sort((a, b) => b[1].length - a[1].length)[0];
+  if (!best || best[1].length < 2) return null;
+  const [question, members] = best;
+  const unmatched = cols.filter((c) => c.role !== 'preference' && (GRID.exec(c.header.normalize('NFKC'))?.[1] ?? '').trim() === question);
+  return { question, members, unmatched };
 }
