@@ -70,8 +70,8 @@ const L1 = '<rect width="64" height="64" rx="14" style="fill:var(--accent)"/><pa
 const L2 = '<rect width="64" height="64" rx="14" style="fill:var(--accent)"/><rect x="14" y="34" width="9" height="16" rx="2" style="fill:var(--on-accent)"/><rect x="27" y="24" width="9" height="26" rx="2" style="fill:var(--on-accent)"/><rect x="40" y="14" width="9" height="36" rx="2" style="fill:var(--on-accent)"/><path d="M13 20l7 7 12-14" style="fill:none;stroke:var(--on-accent);stroke-width:4;stroke-linecap:round;stroke-linejoin:round" transform="translate(30 -2) scale(.6)"/>';
 const L3 = '<rect width="64" height="64" rx="14" style="fill:var(--accent)"/><rect x="14" y="12" width="36" height="40" rx="5" style="fill:var(--on-accent)"/><path d="M21 24h10M21 32h14M21 40h8" style="stroke:var(--accent);stroke-width:3.5;stroke-linecap:round"/><path d="M38 38l5 5 9-12" style="fill:none;stroke:var(--ok);stroke-width:5;stroke-linecap:round;stroke-linejoin:round"/>';
 const lcard = (id, nm, sm, svg) => `<div class="qcard" style="gap:12px;align-items:flex-start"><div style="display:flex;align-items:flex-end;gap:16px">${lg(svg, 96)}${lg(svg, 48)}${lg(svg, 32)}${lg(svg, 16)}</div><div style="display:flex;align-items:center;gap:10px"><span style="width:32px;height:32px">${lg(svg, 32)}</span><b>問卷回饋小幫手</b></div><b>${id}｜${nm}</b><span class="small muted" style="line-height:1.6">${sm}</span></div>`;
-F.push(D('Logo 三案｜品牌名稱「問卷回饋小幫手」。三案都只用主色（鈷藍）與白，16px 還認得出來；大小依序是 96、48、32、16px。請挑一案或指出要改的地方。', 1,
-  `${body(main(`${h('Logo 提案', '深色模式一樣成立（圖形用 token 色）。')}<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">${lcard('甲', '對話泡泡＋長條', '「回饋」與「統計」合在一個圖：泡泡裡有四根長條。最直接，但 16px 時長條會糊。', L1)}${lcard('乙', '長條＋勾', '三根升高的長條加右上的勾，像「統計完成」。最簡單、小尺寸最清楚。', L2)}${lcard('丙', '問卷紙＋綠勾', '一張寫著選項的問卷，右下一個勾。最像「問卷」，但綠勾是主色外的第二色。', L3)}</div>`, 'gap:14px'))}`, '', 800, { lock: [2, 3, 4] }));
+F.push(D('Logo 定案：乙（長條＋勾）｜使用者 2026-11-01 選定。只用主色（鈷藍）與白，16px 仍認得出；大小依序 96、48、32、16px。落選的甲（對話泡泡＋長條）、丙（問卷紙＋綠勾）記在 DESIGN.md 決策紀錄。', 1,
+  `${body(main(`${h('Logo', '品牌名稱「問卷回饋小幫手」；深色模式一樣成立（圖形用 token 色）。')}<div style="max-width:420px">${lcard('乙', '長條＋勾', '三根升高的長條加右上的勾，像「統計完成」。最簡單、小尺寸最清楚。', L2)}</div>`, 'gap:14px'))}`, '', 800, { lock: [2, 3, 4] }));
 
 // ---- 預設常用評語草稿（R-021，等使用者修改）----
 const DR = [
@@ -86,7 +86,7 @@ F.push(D('D26c 桌機：預設常用評語草稿（六類）｜由 Claude 擬稿
   `${body(main(`${h('預設常用評語（草稿，待你修改）', '短標題顯示在籌碼上，滑過可預覽整句。')}<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">${DR.map(([c, s]) => `<div class="qcard" style="gap:6px;padding:12px 14px"><b>${c}</b>${s.map(([a, b]) => `<div style="display:flex;gap:8px;line-height:1.5;padding:3px 0;border-bottom:1px solid var(--line-soft)"><b style="flex:none;min-width:5em;font-size:var(--fs-sm)">${a}</b><span class="small" style="color:var(--ink2)">${b}</span></div>`).join('')}</div>`).join('')}</div>`, 'gap:12px;overflow:hidden'))}`, '', 800, {}));
 
 write('frag-b23.html', F);
-addPages({ id: 'desk-r2c', short: '桌機 第2輪：審稿與輸出', name: '桌機-第二輪-審稿輸出與設定', title: '桌機（1280）第二輪：審稿、評語、輸出設定、範本庫、設定檔、隱私、Logo', intro: '審稿單行意見與完成人數、改寫等高、常用評語六類與存成常用評語、輸出設定勾選清單與頁首、範本縮圖由真實版面產生、設定檔、從簡的隱私、忘記資料夾、Logo 三案、預設評語草稿。人名與數字皆為虛構。', frag: 'frag-b23.html' });
+addPages({ id: 'desk-r2c', short: '桌機 第2輪：審稿與輸出', name: '桌機-第二輪-審稿輸出與設定', title: '桌機（1280）第二輪：審稿、評語、輸出設定、範本庫、設定檔、隱私、Logo', intro: '審稿單行意見與完成人數、改寫等高、常用評語六類與存成常用評語、輸出設定勾選清單與頁首、範本縮圖由真實版面產生、設定檔、從簡的隱私、忘記資料夾、Logo（定案）、預設評語草稿。人名與數字皆為虛構。', frag: 'frag-b23.html' });
 console.log(F.length);
 // 預設評語草稿文件
 import fs from 'node:fs';

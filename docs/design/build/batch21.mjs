@@ -1,4 +1,4 @@
-// 桌機第二輪 A：首頁三方案、開啟、資料夾、Google 試算表直讀、匯出教學（套用 2026-11-01 邊界條件、審稿意見、10-31 裁示）
+// 桌機第二輪 A：首頁（定案）、開啟、資料夾、Google 試算表直讀、匯出教學（套用 2026-11-01 邊界條件、審稿意見、10-31 裁示）
 import * as K from './deskkit.mjs';
 const { W, L, D, side, main, rside, nav, modal, mhead, mfoot, prog, dropzone, round, centered, rail, fbox, h, nvr, body, pane, flex1, foot, fchip, tag, btn, notice, tile, tiles, seg, chips, rcard, rowbtn, ic, icbtn, brow, addPages, write, field, grp, kbd } = K;
 const F = [];
@@ -16,14 +16,8 @@ const openBtns = () => `<div style="display:flex;gap:8px;flex-wrap:wrap">${btn('
 const dz = (big = false) => `<div style="border:2px dashed var(--ink3);border-radius:var(--r-lg);padding:${big ? 56 : 32}px 24px;display:flex;flex-direction:column;align-items:center;gap:12px;background:var(--card);text-align:center"><span style="font-size:${big ? 44 : 32}px;line-height:1">${xl}</span><b style="font-size:var(--fs-lg)">把 Excel 檔拖到這裡</b><span class="small muted">或用下面的按鈕選擇</span>${openBtns()}</div>`;
 
 // ---- 首頁三方案（R-001～R-005、R-028、R-030、邊界條件 1～3）----
-F.push(D('H1甲 桌機首頁・穩妥・雙欄｜沿用既有「左邊開新檔、右邊最近的問卷」，把留白、比例與層次重排：標題變大、主動作只有一個藍色按鈕、最近的問卷改成卡片，並在卡上標出「新增 N 筆」。拿掉示範資料與雲端硬碟入口（R-001、R-002）。', 1,
+F.push(D('H1 桌機首頁（定案：雙欄）｜沿用既有「左邊開新檔、右邊最近的問卷」，把留白、比例與層次重排：標題變大、主動作只有一個藍色按鈕、最近的問卷改成卡片，並在卡上標出「新增 N 筆」。拿掉示範資料與雲端硬碟入口（R-001、R-002）。', 1,
   `${body(flex1(centered(520, `${h('今天要處理哪一份問卷？', '把 Excel 檔拖進來，或直接開啟 Google 試算表。')}${dz()}`), 'padding:24px;justify-content:center'), rside(420, `${h('最近的問卷', '點一下就接續，不必再對應欄位')}${R1()}${R2()}${R3()}<div style="margin-top:auto">${btn('開啟設定檔…', 'secondary', { block: true })}</div>`))}<div style="padding:10px 20px;border-top:1px solid var(--line-soft);background:var(--card)">${folderBar()}</div>`, '', 800, { prog: {}, lock: [2, 3, 4] }));
-
-F.push(D('H1乙 桌機首頁・卡片牆・單欄置中｜只做一件事：開檔。大拖放區在上、最近的問卷橫排三張卡在下，視線由上往下，沒有第二個主動作。比甲更簡潔，但最近的問卷較不顯眼。', 1,
-  `${body(flex1(`<div style="margin:auto;width:880px;display:flex;flex-direction:column;gap:22px"><div style="text-align:center">${h('今天要處理哪一份問卷？')}</div>${dz(true)}<div style="display:flex;flex-direction:column;gap:10px"><div style="display:flex;align-items:center"><b>最近的問卷</b><span style="margin-left:auto">${btn('開啟設定檔…', 'secondary', { sm: true })}</span></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">${R1()}${R2()}${R3()}</div></div></div>`, 'padding:24px'))}<div style="padding:10px 20px;border-top:1px solid var(--line-soft);background:var(--card)">${folderBar()}</div>`, '', 800, { lock: [2, 3, 4] }));
-
-F.push(D('H1丙 桌機首頁・接續優先｜把「接續上次」放最上面。學期內每次報告都累積，最常見的動作是「接著做同一份」，所以頂端大卡直接顯示上次做到哪、有幾筆新回覆，一鍵繼續；開新問卷退到下方。適合每週都用的老師，但第一次使用時上方大卡是空的（改顯示教學提示）。', 1,
-  `${body(flex1(`<div style="margin:0 auto;width:960px;display:flex;flex-direction:column;gap:18px"><div class="qcard" style="gap:12px;padding:20px 22px;border-color:var(--accent);border-width:1.5px"><div style="display:flex;align-items:center;gap:8px"><b style="font-size:var(--fs-xl)">接續：讀書報告回饋（三年二班）</b>${tag('Google 試算表', '')}${tag('新增 12 筆', 'accent')}</div><div class="small muted">上次 10/28 · 44 位同學 · 審稿 18／44 人完成 · 已存在設定檔，直接帶入欄位對應</div>${prog(41)}<div style="display:flex;gap:8px">${btn('接續審稿', 'primary')}${btn('看新增的 12 筆', 'secondary')}</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div style="display:flex;flex-direction:column;gap:10px"><b>開啟別的問卷</b>${dz()}</div><div style="display:flex;flex-direction:column;gap:10px"><b>其他最近的問卷</b>${R2()}${R3()}${btn('開啟設定檔…', 'secondary')}</div></div></div>`, 'padding:24px'))}<div style="padding:10px 20px;border-top:1px solid var(--line-soft);background:var(--card)">${folderBar()}</div>`, '', 800, { lock: [2, 3, 4] }));
 
 // ---- D12 選檔來源（R-001、R-002、邊界條件 3）----
 const bgHome = () => body(flex1(centered(520, `${h('今天要處理哪一份問卷？')}${dz()}`), 'padding:24px;justify-content:center'), rside(420, `${h('最近的問卷')}${R1()}${R2()}`));
@@ -85,5 +79,5 @@ F.push(D('E6 桌機：重新讀取後的統計（累積）｜再讀到新回覆�
   `${body(side(260, `${rail('題目')}${['1 簡報內容（充實度）', '2 簡報設計', '3 講述的內容', '4 台風', '5 時間控制'].map((t, i) => nvr(t, i === 0)).join('')}`), main(`<div style="display:flex;align-items:center;gap:12px"><div style="flex:1">${h('第 1 題 · 簡報內容（充實度）', '讀書報告回饋 · 0～10 分')}</div>${btn('重新讀取', 'secondary', { sm: true, icon: 'refresh' })}${seg(['全部累積 56 筆', '只看新增 12 筆'], 0, '範圍')}</div>${notice('ok', 'info', '<b>比上次多 12 筆。</b>上次讀取是 10/28 10:42（44 筆）。統計已包含新回覆；排名可能有變化。')}${tiles([['平均', '8.4'], ['中位數', 9], ['標準差', '1.2'], ['9～10 分', '58%']])}<div class="qcard" style="gap:12px">${cu('10 分', 14, 25, 'lead')}${cu('9 分', 18, 32)}${cu('8 分', 12, 21)}${cu('7 分', 8, 14)}${cu('6 分以下', 4, 7)}</div>`, 'gap:14px'), rside(300, `${h('這次讀取')}<div class="small" style="line-height:1.9">來源：Google 試算表<br>讀取時間：今天 14:05<br>回覆：56 筆（新增 12 筆）<br>已認得這份問卷，欄位對應來自設定檔。</div>`))}${nav('下一步：輸出')}`, '', 800, { prog: {} }));
 
 write('frag-b21.html', F);
-addPages({ id: 'desk-r2a', short: '桌機 第2輪：開啟與雲端', name: '桌機-第二輪-開啟與資料夾', title: '桌機（1280）第二輪：首頁方案、開啟、資料夾、Google 試算表直讀、匯出教學', intro: '套用邊界條件、審稿意見與頁面裁示：首頁三個方案、選來源、存實體資料夾（第一次／授權失效／不支援）、認得讀過、重新開始、匯出教學（用字照實際介面）、Google 試算表直讀、累積統計。人名與數字皆為虛構。', frag: 'frag-b21.html' });
+addPages({ id: 'desk-r2a', short: '桌機 第2輪：開啟與雲端', name: '桌機-第二輪-開啟與資料夾', title: '桌機（1280）第二輪：首頁、開啟、資料夾、Google 試算表直讀、匯出教學', intro: '套用邊界條件、審稿意見與頁面裁示：首頁三個方案、選來源、存實體資料夾（第一次／授權失效／不支援）、認得讀過、重新開始、匯出教學（用字照實際介面）、Google 試算表直讀、累積統計。人名與數字皆為虛構。', frag: 'frag-b21.html' });
 console.log(F.length);
