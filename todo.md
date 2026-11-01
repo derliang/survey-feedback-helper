@@ -70,7 +70,7 @@
 - [ ] 啟用 `main` 分支保護（程式類只能經 PR 合併；因為沒有 CI，不設必要狀態檢查，靠 PR 附本機 `npm run ci` 證據）；須放行純文件類直接 push（見 CLAUDE.md〈工作流程〉）。需使用者在 repo 設定操作
 - [x] （2026-11-01，PR local-release 待合併）GitHub Pages 發布流程改為本機 `npm run release`（推 `gh-pages` 分支，Pages 已設為從 gh-pages 部署，站台已上線）；見[決定](docs/decisions/2026-11-01-Pages改本機發布.md)。用 `--yes` 發布前需使用者說「發布」
 - [ ] 第一次用 `npm run release -- --yes` 實際發布（本 PR 只做 dry-run 驗證）
-- [ ] **Teacher Hub 卡片轉正**：第一版上線、有 GitHub Pages 網址後，通知 `derliang/teacher-hub` 把「問卷回饋小幫手」候選卡改為可點的即開即用或 Beta 卡，並在它的 `tools.json` 加一筆。工具要有 `version.json`（版號與發布日），否則 teacher-hub 的自動同步會失敗。流程見該 repo 的 `docs/PUBLISHING.md` 3.1。背景見 [決定記錄](docs/decisions/2026-10-30-發佈到Teacher-Hub先佔位.md)
+- [ ] **Teacher Hub 卡片轉正**：第一版上線、有 GitHub Pages 網址後，通知 `derliang/teacher-hub` 把「問卷回饋小幫手」候選卡改為可點的即開即用或 Beta 卡，並在它的 `tools.json` 加一筆。工具要有 `version.json`（版號與發布日），否則 teacher-hub 的自動同步會失敗。（發布腳本已會產生 `version.json`、tag、Release，見[發布版本資訊](docs/decisions/2026-11-01-發布版本資訊.md)；第一次發布前要先把 `package.json` 升到 0.1.0 並整理 CHANGELOG。）流程見該 repo 的 `docs/PUBLISHING.md` 3.1。背景見 [決定記錄](docs/decisions/2026-10-30-發佈到Teacher-Hub先佔位.md)
 - [x] （2026-11-01）引入第一個套件時，核對授權與費用並登錄 [docs/third-party.md](docs/third-party.md)
 
 ## v0.1 本機版核心
