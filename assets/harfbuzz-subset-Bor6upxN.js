@@ -1,0 +1,1 @@
+var e=`/survey-feedback-helper/assets/harfbuzz-subset-CE7g_rQT.wasm`;export{e as default};
