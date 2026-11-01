@@ -226,3 +226,30 @@ test('桌機拖曳（5.26）：滑鼠按住移動不到 4px 不開始，超過�
   await expect(page.locator('.blk.lift')).toHaveCount(1);
   await page.mouse.up();
 });
+
+test('桌機（5.26）：圖示鈕工具提示懸停 500ms、鍵盤焦點立即；鍵盤拖曳 Space 拿起、↑↓ 移動、Esc 取消', async ({ page }, info) => {
+  test.skip(info.project.name !== 'desktop', '工具提示與鍵盤拖曳驗桌機');
+  await openLibrary(page);
+  await page.getByRole('button', { name: '編輯「個人回饋單」' }).click();
+  const mv = page.locator('.blk-mv .icbtn').nth(1);
+  const tip = () => mv.evaluate((el) => ({ o: getComputedStyle(el, '::after').opacity, c: getComputedStyle(el, '::after').content }));
+  expect((await tip()).o).toBe('0');
+  await mv.hover();
+  expect((await mv.evaluate((el) => getComputedStyle(el, '::after').transitionDelay))).toBe('0.5s');
+  await expect.poll(async () => (await tip()).o).toBe('1');
+  expect((await tip()).c).toContain('下移');
+  await page.mouse.move(0, 0);
+  await expect.poll(async () => (await tip()).o).toBe('0');
+
+  const names = () => page.locator('.blk-list .blk .blk-name').allTextContents();
+  const before = await names();
+  const grip = page.locator('.blk-list .grip[tabindex="0"]').first();
+  await grip.focus();
+  await page.keyboard.press('Space');
+  await expect(page.locator('.blk-list [role="status"]')).toContainText(/第 1 個，共 \d+ 個/);
+  await page.keyboard.press('ArrowDown');
+  await expect(page.locator('.blk-list [role="status"]')).toContainText('第 2 個');
+  expect((await names())[1]).toBe(before[0]);
+  await page.keyboard.press('Escape');
+  await expect.poll(names).toEqual(before);
+});

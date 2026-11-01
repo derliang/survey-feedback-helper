@@ -85,7 +85,7 @@ export function barsSvg(rows: readonly BarRow[], o: { title: string; max?: numbe
       return (
         `<text x="${labelW - 8}" y="${y + 20}" text-anchor="end" font-size="14" style="fill:${p.ink}">${esc(clip(r.label, narrow ? 6 : 9))}</text>` +
         `<rect x="${labelW}" y="${y + 6}" width="${f1(barW)}" height="18" rx="3" style="fill:${p.grid}"/>` +
-        `<rect x="${labelW}" y="${y + 6}" width="${f1(len)}" height="18" rx="3" style="fill:${fill}"/>` +
+        `<g class="bar" tabindex="0" role="img" aria-label="${esc(r.label)}\u3000${esc(r.note ?? f1(r.value))}"><title>${esc(r.label)}\u3000${esc(r.note ?? f1(r.value))}</title><rect x="${labelW}" y="${y + 6}" width="${f1(len)}" height="18" rx="3" style="fill:${fill}"/></g>` +
         `<text x="${labelW + barW + 8}" y="${y + 20}" font-size="14" style="fill:${p.ink}">${esc(r.note ?? f1(r.value))}</text>`
       );
     })
@@ -147,7 +147,7 @@ export function columnsSvg(values: readonly number[], labels: readonly string[],
       const bh = (v / max) * (h - top - bottom);
       const x = 8 + i * slot + (slot - bw) / 2;
       return (
-        `<rect x="${f1(x)}" y="${f1(h - bottom - bh)}" width="${f1(bw)}" height="${f1(bh)}" rx="2" style="fill:${p.a}"/>` +
+        `<g class="bar" tabindex="0" role="img" aria-label="${esc(labels[i] ?? '')}\u3000${v}"><title>${esc(labels[i] ?? '')}\u3000${v}</title><rect x="${f1(x)}" y="${f1(h - bottom - bh)}" width="${f1(bw)}" height="${f1(bh)}" rx="2" style="fill:${p.a}"/></g>` +
         `<text x="${f1(x + bw / 2)}" y="${f1(h - bottom - bh - 5)}" text-anchor="middle" font-size="12" style="fill:${p.ink}">${v}</text>` +
         `<text x="${f1(x + bw / 2)}" y="${h - 9}" text-anchor="middle" font-size="12" style="fill:${p.muted}">${esc(labels[i] ?? '')}</text>`
       );

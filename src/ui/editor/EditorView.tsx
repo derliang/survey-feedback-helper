@@ -234,6 +234,42 @@ function Edit({ e }: { e: ES }) {
   const canEdit = wide || e.editMode;
   const images = e.data.images;
   const { drag, handleProps } = useDragSort(dropSel);
+  // 鍵盤拖曳（5.26）：Space 拿起、↑↓ 移動、Space 放下、Esc 取消（復原已移動的步數）
+  const [kb, setKb] = useState<{ id: string; moves: number } | null>(null);
+  const [kbMsg, setKbMsg] = useState('');
+  const kbKey = (id: string, ev: KeyboardEvent) => {
+    const total = t0.blocks.length;
+    const pos = (bid: string) => t0.blocks.findIndex((x) => x.id === bid);
+    const say = (i: number) => setKbMsg(`第 ${i + 1} 個，共 ${total} 個`);
+    const refocus = () => requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-bid="${id}"] .grip`)?.focus());
+    if (ev.key === ' ') {
+      ev.preventDefault();
+      if (kb) {
+        setKb(null);
+        setKbMsg(`已放下，第 ${pos(id) + 1} 個`);
+      } else {
+        setKb({ id, moves: 0 });
+        say(pos(id));
+      }
+    } else if (kb && (ev.key === 'ArrowUp' || ev.key === 'ArrowDown')) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const d = ev.key === 'ArrowUp' ? -1 : 1;
+      const i = pos(id);
+      if (i + d < 0 || i + d >= total) return;
+      moveSel(id, d);
+      setKb({ id, moves: kb.moves + 1 });
+      say(i + d);
+      refocus();
+    } else if (kb && ev.key === 'Escape') {
+      ev.preventDefault();
+      ev.stopPropagation();
+      for (let n = 0; n < kb.moves; n++) doUndo();
+      setKb(null);
+      setKbMsg('已取消');
+      refocus();
+    }
+  };
 
   // 鍵盤：Ctrl+Z 復原、Ctrl+Y／Ctrl+Shift+Z 重做、Delete 刪除、↑↓ 移動區塊（輸入文字時不攔截）
   useEffect(() => {
@@ -281,13 +317,25 @@ function Edit({ e }: { e: ES }) {
 
   const blockList = (
     <ul class="blk-list" aria-label="區塊清單">
+      <li class="sr" role="status" aria-live="polite">
+        {kbMsg}
+      </li>
       {names.map(({ id, b, depth }) => {
         const top = t0.blocks.findIndex((x) => x.id === id);
         const dropMark = drag?.target === id ? (drag.before ? 'before' : 'after') : '';
         return (
-          <li key={id} data-bid={id} class={`blk${sel === id ? ' sel' : ''}${drag?.id === id ? ' lift' : ''}${dropMark ? ` drop-${dropMark}` : ''}`} style={{ paddingLeft: depth * 16 }}>
+          <li key={id} data-bid={id} class={`blk${sel === id ? ' sel' : ''}${drag?.id === id || kb?.id === id ? ' lift' : ''}${dropMark ? ` drop-${dropMark}` : ''}`} style={{ paddingLeft: depth * 16 }}>
             {!e.student && (
-              <span class="grip" role="img" aria-label="拖曳把手：長按後拖曳" {...(handleProps(id) as object)}>
+              <span
+                class="grip"
+                role="button"
+                tabIndex={depth === 0 ? 0 : -1}
+                aria-pressed={kb?.id === id}
+                aria-label="拖曳把手：滑鼠或長按拖曳；鍵盤按空白鍵拿起，上下鍵移動，空白鍵放下，Esc 取消"
+                onKeyDown={depth === 0 ? (ev) => kbKey(id, ev as unknown as KeyboardEvent) : undefined}
+                onBlur={() => kb?.id === id && setKb(null)}
+                {...(handleProps(id) as object)}
+              >
                 ⋮⋮
               </span>
             )}

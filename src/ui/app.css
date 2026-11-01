@@ -1468,3 +1468,57 @@ details[open] > :not(summary) {
     border-color var(--dur) ease,
     box-shadow var(--dur) ease;
 }
+
+/* ───────── 工具提示、圖表長條提示、讀取中延遲（設計稿 5.26） ───────── */
+@media (hover: hover) and (pointer: fine) {
+  .icbtn[aria-label] {
+    position: relative;
+  }
+  .icbtn[aria-label]::after {
+    content: attr(aria-label);
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 30;
+    padding: var(--sp-1) var(--sp-2);
+    border-radius: 6px;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: var(--fs-xs);
+    font-weight: 400;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+  }
+  /* 懸停 500ms 後 100ms 淡入；離開立即消失；鍵盤焦點立即出現 */
+  .icbtn[aria-label]:hover::after {
+    opacity: 1;
+    transition: opacity 100ms ease-out 500ms;
+  }
+  .icbtn[aria-label]:focus-visible::after {
+    opacity: 1;
+    transition: opacity 100ms ease-out;
+  }
+}
+/* 圖表長條：懸停或鍵盤聚焦加 2px --ink 外框，提示用原生 title（無動畫） */
+.chart .bar:focus {
+  outline: none;
+}
+.chart .bar:hover rect,
+.chart .bar:focus rect {
+  stroke: var(--ink);
+  stroke-width: 2px;
+}
+/* 讀取中：300ms 內完成就不顯示（減少動態時照樣延遲，因為這是閃爍而非動畫） */
+@keyframes sfh-delayed-show {
+  from {
+    visibility: hidden;
+  }
+  to {
+    visibility: visible;
+  }
+}
+.out .notice[role='status'] {
+  animation: sfh-delayed-show 0s 300ms backwards;
+}
