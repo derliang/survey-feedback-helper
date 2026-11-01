@@ -130,7 +130,7 @@ export function tabletize(fig, rail, o = {}) {
   const sideSheet = sh
     ? sh.replace('<div class="grab"></div>', '').replace('<div class="sheet"', '<div class="sheet" style="left:auto;right:0;top:0;bottom:0;width:400px;border-radius:var(--r-lg) 0 0 var(--r-lg);padding:24px 20px;justify-content:flex-start;box-shadow:-8px 0 24px var(--shadow);overflow:hidden"')
     : '';
-  const foot = action ? `<div class="actbar desk" style="justify-content:flex-end">${action.replace(/^<div class="actbar">/, '').replace(/<\/div>$/, '')}</div>` : '';
+  const foot = action ? `<div class="actbar desk" style="justify-content:flex-end">${(o.noBlock ? action.replace(/ btn-block/g, "") : action).replace(/^<div class="actbar">/, '').replace(/<\/div>$/, '')}</div>` : '';
   const W = 820, H = o.h || 1000;
   const body = `<div style="flex:1;min-height:0;display:flex"><div class="pane" style="width:236px;padding:12px 8px;border-right:1px solid var(--line-soft);background:var(--card);gap:2px">${railHtml(rail[0], rail[1])}</div><div class="pane" style="flex:1;padding:8px 0;align-items:stretch"><div style="width:100%;max-width:560px;margin:0 auto;flex:1;min-height:0;display:flex;flex-direction:column">${rest.join('')}${inner}</div></div></div>`;
   const t = `<figure class="fig" style="margin:0"><div class="scale" data-w="${W}" data-h="${H}"><div class="dev" style="width:${W}px;height:${H}px;border-radius:28px">${tabBar(title, step)}${body}${foot}${scrim}${sideSheet}</div></div><figcaption style="max-width:640px"><b>${p.title}</b>${p.note}</figcaption></figure>`;
