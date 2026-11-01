@@ -15,3 +15,4 @@ export * from './advanced';
 export * from './trend';
 export * from './anonymize';
 export * from './possible-names';
+export * from './course';
