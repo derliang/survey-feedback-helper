@@ -1396,6 +1396,10 @@ mark.pn-low {
 .scrim {
   animation: sfh-fade-in 220ms ease-out;
 }
+/* 展開收合（details）：內容淡入 200ms，只動展開 */
+details[open] > :not(summary) {
+  animation: sfh-fade-in 200ms ease-out;
+}
 .sheet {
   animation: sfh-slide-up 220ms ease-out;
 }

@@ -118,7 +118,7 @@ function Block({ b, c }: { b: EBlock; c: Ctx }) {
       break;
     case 'hero':
       body = (
-        <div class="eb-hero" style={{ background: b.fill ?? '#a84f00', padding: px(16, c.s) }}>
+        <div class="eb-hero" style={{ background: b.fill ?? 'var(--doc-accent)', padding: px(16, c.s) }}>
           <strong style={{ fontSize: px(20, c.s) }}>{fillVars(b.title, c.vars) || '（大標）'}</strong>
           {b.subtitle && <div style={{ fontSize: px(11, c.s) }}>{fillVars(b.subtitle, c.vars)}</div>}
         </div>
@@ -129,7 +129,7 @@ function Block({ b, c }: { b: EBlock; c: Ctx }) {
       body = (
         <div class="eb-stats" style={{ gridTemplateColumns: `repeat(${Math.max(1, b.perRow)}, 1fr)` }}>
           {shown.map((k) => (
-            <div key={k} class="eb-stat" style={{ background: b.fill ?? '#eef3fa', padding: px(8, c.s) }}>
+            <div key={k} class="eb-stat" style={{ background: b.fill ?? 'var(--doc-blue-soft)', padding: px(8, c.s) }}>
               <strong style={{ fontSize: px(20, c.s) }}>{c.vars[STAT_KEYS[k].varName] || '—'}</strong>
               <span style={{ fontSize: px(10, c.s) }}>{STAT_KEYS[k].label}{k === 'rank' ? '（學生版隱藏）' : ''}</span>
             </div>
@@ -225,12 +225,12 @@ export function Preview(props: {
   return (
     <div class={`pv-box${props.thumb ? ' thumb' : ''}`} ref={box} onClick={() => props.interactive && props.onSelect?.(null)}>
       <div
-        class="pv-page"
+        class="pv-page doc-warm"
         style={{
           width: pw * s,
           minHeight: ph * s,
           padding: `${p.mt * s}px ${p.mx * s}px ${p.mb * s}px`,
-          background: p.background ?? '#fff',
+          background: p.background ?? 'var(--doc-card)',
           border: p.frame ? `${Math.max(1, p.frame.width * s)}px solid ${p.frame.color}` : undefined,
           borderRadius: p.frame?.rounded ? 12 * s : 0,
         }}

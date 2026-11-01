@@ -1,4 +1,4 @@
-/* 編輯器樣式：只用 tokens，不寫死色碼（頁面預覽的紙張色除外，那是「輸出文件」的顏色）。 */
+/* 編輯器樣式：只用 tokens，不寫死色碼。紙張（.pv-page）加 doc-warm，內部色彩一律用 --doc-*（紙張永遠淺色，不跟深色模式）。 */
 .lib-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -27,6 +27,11 @@
 .lib-thumb .pv-box {
   pointer-events: none;
 }
+.lib-acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
 .lib-meta {
   display: flex;
   flex-direction: column;
@@ -45,6 +50,12 @@
 }
 
 /* 頁面預覽 */
+/* 預覽檯面：紙張外一律 --sunk（比畫面更深），紙張自帶陰影 */
+.pv-wrap {
+  background: var(--sunk);
+  border-radius: var(--r-md);
+  padding: var(--sp-2);
+}
 .pv-box {
   width: 100%;
   overflow: auto;
@@ -56,8 +67,8 @@
 }
 .pv-page {
   position: relative;
-  background: #fff;
-  color: #222;
+  background: var(--doc-card);
+  color: var(--doc-ink);
   box-shadow: 0 1px 6px var(--shadow);
   margin: 0 auto;
   flex: none;
@@ -65,7 +76,7 @@
 }
 .pv-foot {
   margin-top: 1.5em;
-  color: #8a97a5;
+  color: var(--doc-ink2);
 }
 .pv-logo {
   display: block;
@@ -111,14 +122,14 @@
 }
 .eb-hr {
   border: 0;
-  border-top: 1px solid #c9d6e3;
+  border-top: 1px solid var(--doc-line);
   margin: 0;
 }
 .eb-break {
   text-align: center;
   font-size: 12px;
-  color: #8a97a5;
-  border-top: 2px dashed #c9d6e3;
+  color: var(--doc-ink2);
+  border-top: 2px dashed var(--doc-line);
   padding-top: 2px;
 }
 .eb-cols {
@@ -128,12 +139,12 @@
 .eb-col {
   flex: 1;
   min-width: 0;
-  border: 1px dotted #c9d6e3;
+  border: 1px dotted var(--doc-line);
   padding: 2px;
 }
 .eb-empty {
   font-size: 12px;
-  color: #8a97a5;
+  color: var(--doc-ink2);
   text-align: center;
   padding: 8px 0;
 }
@@ -144,23 +155,23 @@
   font-family: inherit;
   resize: vertical;
   min-height: 3em;
-  background: #fff;
-  color: #222;
+  background: var(--doc-card);
+  color: var(--doc-ink);
 }
 .ph {
-  background: #f2f6fa;
-  border: 1px solid #dce8f4;
+  background: var(--doc-sunk2);
+  border: 1px solid var(--doc-line);
   border-radius: 2px;
 }
 .ph-table > div {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr;
   padding: 3px 6px;
-  border-bottom: 1px solid #dce8f4;
+  border-bottom: 1px solid var(--doc-line);
 }
 .ph-table .ph-head {
-  background: #1f4e79;
-  color: #fff;
+  background: var(--doc-accent);
+  color: var(--doc-card);
   font-weight: 700;
 }
 .ph-chart {
@@ -179,7 +190,7 @@
 .ph-lines i {
   display: block;
   height: 6px;
-  background: #c9d6e3;
+  background: var(--doc-line);
   margin: 6px 0;
   border-radius: 3px;
 }
@@ -188,7 +199,7 @@
   align-items: center;
   justify-content: center;
   font-size: 12px;
-  color: #8a97a5;
+  color: var(--doc-ink2);
 }
 
 /* 編輯畫面 */
@@ -274,6 +285,12 @@
   align-items: center;
   gap: var(--sp-1);
 }
+/* 頁碼在檯面外的畫面框架上，文字用 --ink2（深淺色皆 ≥4.5:1） */
+.zoom-pages {
+  margin-left: var(--sp-2);
+  font-size: var(--fs-sm);
+  color: var(--ink2);
+}
 .blk-list {
   list-style: none;
   margin: 0;
@@ -317,7 +334,7 @@
   bottom: -2px;
 }
 .grip {
-  width: 36px;
+  width: var(--tap-min);
   min-height: 44px;
   display: flex;
   align-items: center;
@@ -401,10 +418,6 @@
   gap: var(--sp-2);
   min-height: 44px;
 }
-.btn.danger {
-  background: var(--bad);
-  color: #fff;
-}
 
 @media (max-width: 899px) {
   .ed-bar {
@@ -429,7 +442,7 @@
 
 /* 進階區塊（預覽）：紙張永遠淺色，色塊文字固定 */
 .eb-hero {
-  color: #fff;
+  color: var(--doc-card);
   border-radius: 4px;
   display: flex;
   flex-direction: column;
@@ -443,19 +456,19 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: #222;
+  color: var(--doc-ink);
   border-radius: 4px;
 }
 .eb-callout {
-  border-left: 4px solid #2f8f4e;
-  background: #e3f3e6;
-  color: #1d5c33;
+  border-left: 4px solid var(--doc-leaf);
+  background: var(--doc-leaf-soft);
+  color: var(--doc-leaf);
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 .eb-callout.hint {
-  border-left-color: #c98512;
-  background: #fff1d6;
-  color: #7a4f00;
+  border-left-color: var(--doc-accent);
+  background: var(--doc-accent-soft);
+  color: var(--doc-accent);
 }
