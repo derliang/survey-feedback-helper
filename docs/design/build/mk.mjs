@@ -1,7 +1,8 @@
 // 建置：成品頁（分組）與 repo 內的各頁模擬頁
 import fs from 'node:fs';
-const sp = 'C:/Users/derli/AppData/Local/Temp/claude/C--Users-derli-Documents-claude-projects-survey-feedback-helper/7debb979-1afb-49a7-80fb-e06703a95e45/scratchpad';
-const repo = 'C:/Users/derli/Documents/claude_projects/survey-feedback-helper-design';
+import { fileURLToPath } from 'node:url';
+const sp = decodeURIComponent(new URL('.', import.meta.url).pathname).slice(1).replace(/\/$/, '');
+const repo = sp + '/../../..';
 const rd = (f) => fs.readFileSync(f, 'utf8');
 const tokens = rd(repo + '/docs/design/tokens.css').replace(/\/\*[\s\S]*?\*\/\s*/, '');
 const css = [rd(sp + '/chrome.css'), rd(sp + '/app.css'), rd(sp + '/doc.css')].join('\n');
@@ -9,7 +10,13 @@ const sprite = rd(sp + '/sprite.html');
 const pages = JSON.parse(rd(sp + '/pages.json'));
 const only = process.argv[2];
 const extra = `.pagehead{display:flex;flex-direction:column;gap:6px;max-width:72ch}.round{display:flex;flex-direction:column;gap:32px}`;
-const inner = (p) => rd(`${sp}/${p.frag}`);
+const R2 = ['desk-r2a', 'desk-r2b', 'desk-r2c'];
+const OLD_DESK = ['flow-wide', 'flow-desk', 'flow-desk2', 'desk-a', 'desk-b', 'desk-c', 'desk-d'];
+const capKey = (f) => ((f.match(/<figcaption[^>]*><b>([^<]*)/) || [])[1] || '').split(' ')[0];
+const SUPERSEDED = new Set(['13a', '13b', '13f', 'D7']);
+for (const id of R2) { const p = pages.find((x) => x.id === id); if (p) for (const f of rd(`${sp}/${p.frag}`).match(/<figure class="fig"[\s\S]*?<\/figure>/g) || []) SUPERSEDED.add(capKey(f)); }
+// 第 2 輪取代的桌機舊畫面，不再出現在舊模擬頁（保留 git 歷史即可）
+const inner = (p) => { const h = rd(`${sp}/${p.frag}`); if (!OLD_DESK.includes(p.id)) return h; return h.replace(/<figure class="fig"[\s\S]*?<\/figure>/g, (f) => (SUPERSEDED.has(capKey(f)) && (p.id !== 'flow-wide' || /<figcaption[^>]*><b>[^<]*桌機/.test(f)) ? '' : f)); };
 const GROUPS = { screens: { file: 'survey-pages.html', title: '問卷回饋小幫手畫面設計', kicker: '畫面設計（手機優先）' }, docs: { file: 'survey-docs.html', title: '問卷回饋小幫手輸出文件', kicker: '輸出文件設計（A4）' } };
 
 function mockup(p) {
@@ -53,27 +60,29 @@ function deviceArtifact() {
   const wide = figsOf(inner(by('flow-wide')));
   const DESK = {};
   const used = new Set();
-  [...wide.filter((f) => capOf(f).includes('桌機')), ...['flow-desk', 'flow-desk2', 'desk-a', 'desk-b', 'desk-c', 'desk-d'].flatMap((id) => figsOf(inner(by(id))))].forEach((f) => { DESK[capOf(f).split(' ')[0]] = f; });
-  const DESK_N = Object.keys(DESK).length;
+  [...wide.filter((f) => capOf(f).includes('桌機')), ...['flow-desk', 'flow-desk2', 'desk-a', 'desk-b', 'desk-c', 'desk-d', 'desk-r2a', 'desk-r2b', 'desk-r2c'].flatMap((id) => figsOf(inner(by(id))))].forEach((f) => { DESK[capOf(f).split(' ')[0]] = f; });
+  const DESK_N = Object.keys(DESK).length - 4;
   const DESK_SECS = [
-    { id: 'd-open', title: '開啟問卷', intro: '第 1 步。拖放或選檔、選檔來源、讀取中、讀不到檔案、瀏覽器過舊。', keys: ['13a', 'D12', 'D13', 'D14', 'D15'] },
-    { id: 'd-prep', title: '準備資料', intro: '第 2 步。總覽、問卷類型、欄位對應、學生名單與對照、資料檢查。', keys: ['D16', 'D17', '13b', 'D18', 'D19', 'D20', 'D21', 'D22', '13c'] },
-    { id: 'd-survey', title: '意見調查統計', intro: '第 3 步。量表、複選、開放題、交叉分析、圖表另存、量表標籤與反向計分。', keys: ['12c', 'D24', 'D5', 'D4', 'D50', 'D10'] },
-    { id: 'd-vote', title: '票選統計與防弊', intro: '第 3 步。各職位結果、同票抽籤、投影唱票、防弊檢查、同人多票、計票規則。', keys: ['D1', 'D23', '13f', 'D47', 'D48', 'D49'] },
-    { id: 'd-fb', title: '報告回饋與歷次趨勢', intro: '第 3 步。以被評對象為單位的統計，與同一班多次問卷的變化。', keys: ['D2', 'D3'] },
-    { id: 'd-out', title: '審稿與輸出', intro: '第 4 步。老師審稿、改寫留言、評語與關鍵字、輸出設定、檔名與去識別化、進度、完成與失敗。', keys: ['13d', 'D25', 'D26', '12e', 'D28', 'D27', 'D6', 'D31'] },
+    { id: 'd-open', title: '開啟問卷（第 2 輪：首頁三方案）', intro: '第 1 步。首頁（定案：雙欄）、選來源、讀取中、讀不到檔案與匯出教學、瀏覽器過舊。', keys: ['H1', 'D12', 'D13', 'D14', 'D15'] },
+    { id: 'd-folder', title: '資料夾與認得讀過（第 2 輪新增）', intro: '設定、名單、審稿進度存實體資料夾：第一次選、授權失效重選、不支援的瀏覽器退回手動；認得讀過；重新開始。', keys: ['E1', 'E2', 'E3', 'E4', 'E5'] },
+    { id: 'd-prep', title: '準備資料', intro: '第 2 步。四件事固定順序並解鎖、問卷類型、欄位對應與名單（可編輯）、名單對照、資料檢查、量表與權重。', keys: ['D16', 'D17', 'D18', 'D19', 'D20', 'D21', 'D22', '13c', 'E7'] },
+    { id: 'd-survey', title: '意見調查統計與圖表', intro: '第 3 步。量表、複選、開放題、交叉分析、累積讀取、圖表圖庫與勾選換圖、圖表另存、量表標籤與反向計分。', keys: ['12c', 'E6', 'D24', 'E8', 'E9', 'D5', 'D4', 'D50', 'D10'] },
+    { id: 'd-vote', title: '票選統計與防弊', intro: '第 3 步。各職位結果、同票抽籤、投影唱票（定案：全部候選人同列）、防弊檢查、逐人票選名單、計票規則。', keys: ['D1', 'D23', '唱票', 'D47', 'D48', 'D49'] },
+    { id: 'd-fb', title: '報告回饋與歷次趨勢', intro: '第 3 步。以被評對象為單位的統計（班均註明已計入組數、含平均列），與同一班多次問卷的變化。', keys: ['D2', 'D3'] },
+    { id: 'd-out', title: '審稿與輸出', intro: '第 4 步。單行意見審稿、改寫、常用評語與存成常用評語、輸出設定（頁首與圖表勾選）、檔名與去識別化、進度、完成與失敗。', keys: ['13d', 'D25', 'D26', 'D26b', 'D26c', '12e', 'D28', 'D27', 'D6', 'D31'] },
     { id: 'd-edit', title: '版面編輯器', intro: '三欄：區塊清單、頁面、屬性。文字與圖表屬性、加入區塊、頁面設定、個別學生版本、拖曳排序。', keys: ['12d', 'D33', 'D34', 'D35', 'D36', 'D37'] },
-    { id: 'd-tpl', title: '範本庫與專案檔', intro: '範本縮圖、選單、匯出與匯入；儲存專案檔，與開啟專案檔後的接續。', keys: ['D38', 'D39', 'D40', 'D41', 'D42', 'D43'] },
-    { id: 'd-drive', title: 'Google 雲端硬碟', intro: '雙軌（資料夾與登入）、選檔視窗、配額用完、已連線設定。', keys: ['D7', 'D44', 'D45', 'D46'] },
-    { id: 'd-set', title: '設定、教學與隱私', intro: '設定與範本、三層預設、備份與還原、隱私與關於、清除本機設定、Google 表單教學。', keys: ['13e', 'D11', 'D29', 'D54', 'D56', 'D8'] },
+    { id: 'd-tpl', title: '範本庫與設定檔', intro: '範本縮圖由真實版面產生、第一次修改內建範本、選單、匯出與匯入；儲存設定檔，與開啟設定檔後的接續。', keys: ['D38', 'D38b', 'D39', 'D40', 'D41', 'D42', 'D43'] },
+    { id: 'd-drive', title: 'Google 試算表直讀', intro: '選取 Google 試算表（直接讀、可重新讀取）、無法連線的說法、資料夾與 Google 連線設定。', keys: ['D44', 'D45', 'D46'] },
+    { id: 'd-set', title: '設定、教學、隱私與品牌', intro: '設定與範本、三層預設、備份與還原、關於與隱私（從簡）、忘記資料夾、教學頁（含示範資料）、Logo（定案：乙）。', keys: ['13e', 'D11', 'D29', 'D54', 'D56', 'D8', 'Logo'] },
     { id: 'd-sys', title: '狀態、提示與系統', intro: '空白、離開確認、快速鍵說明、安裝為應用程式、離線與新版本、第一次載入。', keys: ['D30', 'D32', '13g', 'D51', 'D52', 'D53', 'D55'] },
   ];
   const DEV = [
     { key: 'phone', label: '手機', note: '390 × 844，單手操作、一次一個步驟，底部操作列與底部彈出面板。', secs: ['core', 'flow-data', 'flow-stats', 'flow-out', 'flow-edit', 'flow-tpl', 'flow-drive', 'flow-guard', 'flow-sys'].map((id) => sec(id, by(id), figsOf(inner(by(id))))) },
     { key: 'tablet', label: '平板', note: '820 直向／1024 橫向，左右分欄，觸控點擊區不低於 44px。', secs: [sec('t-flow', by('flow-tablet'), figsOf(inner(by('flow-tablet'))), '平板：開啟到輸出、設定、雲端硬碟、離開確認、投影唱票'), sec('t-wide', by('flow-wide'), wide.filter((f) => capOf(f).includes('平板')), '平板：統計與橫向編輯器', '直向兩欄的統計，與橫向三欄的編輯器。')] },
-    { key: 'desktop', label: '桌機', note: '1280，三欄工作台，鍵盤快速鍵，滑鼠拖曳與雙擊編輯。共 ' + DESK_N + ' 個畫面，依使用順序分組，每個畫面都有對應的手機版。', secs: DESK_SECS.map((s) => sec(s.id, { title: s.title, intro: s.intro }, s.keys.map((k) => { const f = DESK[k]; if (!f) throw new Error('桌機缺畫面 ' + k); used.add(k); return f; }))) },
+    { key: 'desktop', label: '桌機', note: '1280，三欄工作台，鍵盤快速鍵，滑鼠拖曳與雙擊編輯。共 ' + DESK_N + ' 個畫面，依使用順序分組，第 2 輪（2026-11-01）已套用邊界條件、審稿意見與頁面裁示；手機與平板還沒套用。', secs: DESK_SECS.map((s) => sec(s.id, { title: s.title, intro: s.intro }, s.keys.map((k) => { const f = DESK[k]; if (!f) throw new Error('桌機缺畫面 ' + k); used.add(k); return f; }))) },
   ];
-  const left = Object.keys(DESK).filter((k) => !used.has(k));
+  const RETIRED = ['13a', '13b', '13f', 'D7']; // 第 2 輪被取代：13a→首頁甲乙丙、13b→D19、13f→唱票A／B、D7→Google 試算表直讀（D44～D46）
+  const left = Object.keys(DESK).filter((k) => !used.has(k) && !RETIRED.includes(k));
   if (left.length) throw new Error('桌機畫面未分組：' + left.join(','));
   const view = DEV.map((d) => `<section class="dev-view" id="v-${d.key}" hidden><p class="muted">${d.note}</p><nav class="chips" aria-label="${d.label}頁面索引">${d.secs.map((x) => `<a class="chip" style="display:inline-flex;align-items:center;text-decoration:none" href="#${x.id}" data-sec="${x.id}">${(x.title || '').replace(/（.*?）/g, '')}</a>`).join('')}</nav>${d.secs.map((x) => `<section class="sec" id="${x.id}"><div class="pagehead"><h2>${x.title}</h2><p class="muted small">${x.intro}</p></div><div class="figs">${x.figs.join('\n')}</div></section>`).join('\n')}</section>`).join('\n');
   const html = `<title>${G.title}</title>

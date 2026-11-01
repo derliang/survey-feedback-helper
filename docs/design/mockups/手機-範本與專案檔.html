@@ -36,8 +36,10 @@
   --d4: #0c7a88;
   --d5: #8a6a0a;
   --d0: #7b8494;          /* 其他、未分類 */
-  --warn-bar: #e3a012;       /* 同票、需處理的長條 */
-  --bar-muted: #c3c9d6;   /* 未當選、未突顯的長條 */
+  --warn-bar: #b97f00;       /* 同票、需處理的長條（對卡片 3.4:1） */
+  --bar-muted: #7f889b;   /* 未當選、未突顯的長條（對卡片 3.6:1） */
+  --ctl: #7f889b;         /* 控制項外框（選項卡、列按鈕）：對卡片與頁面底 3:1 以上 */
+  --ext-excel: #1d6f42;   /* 外部服務代表色：僅用於自畫的 Excel「X」圖示，不是品牌色 */
   --scrim: rgba(12, 14, 20, 0.5);
   --shadow: rgba(20, 24, 40, 0.16);
   --shadow-sm: rgba(20, 24, 40, 0.08);   /* 卡片的細微層次 */
@@ -97,7 +99,8 @@
     --d5: #d6b43a;
     --d0: #8f97a8;
     --warn-bar: #f0b429;
-    --bar-muted: #3a404d;
+    --bar-muted: #6e7789;
+    --ctl: #6e7789;
     --scrim: rgba(0, 0, 0, 0.65);
     --shadow: rgba(0, 0, 0, 0.6);
     --shadow-sm: rgba(0, 0, 0, 0.4);
@@ -131,7 +134,8 @@
   --d5: #d6b43a;
   --d0: #8f97a8;
   --warn-bar: #f0b429;
-  --bar-muted: #3a404d;
+  --bar-muted: #6e7789;
+  --ctl: #6e7789;
   --scrim: rgba(0, 0, 0, 0.65);
   --shadow: rgba(0, 0, 0, 0.6);
   --shadow-sm: rgba(0, 0, 0, 0.4);
@@ -228,7 +232,7 @@ button{font-family:inherit}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
 .chip{min-height:var(--tap-min);padding:0 16px;border-radius:999px;border:1px solid var(--ink3);background:var(--card);color:var(--ink);font:600 15px/1.2 var(--font);cursor:pointer}
 .chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink)}
-.rcard{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;min-height:64px;padding:12px 14px;border:1.5px solid var(--line);border-radius:var(--r-md);background:var(--card);text-align:left;cursor:pointer;color:var(--ink);width:100%;font:inherit}
+.rcard{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;min-height:64px;padding:12px 14px;border:1.5px solid var(--ctl);border-radius:var(--r-md);background:var(--card);text-align:left;cursor:pointer;color:var(--ink);width:100%;font:inherit}
 .rcard b{display:block;font-size:var(--fs-md);line-height:1.35}
 .rcard small{display:block;font-size:var(--fs-sm);color:var(--ink2);line-height:1.45}
 .rcard[aria-checked="true"]{border-color:var(--accent);background:var(--accent-soft)}
@@ -257,7 +261,7 @@ button{font-family:inherit}
 .track>i{display:block;height:100%;border-radius:6px;background:var(--bar-muted)}
 .track>i.lead{background:var(--accent)}
 .track>i.tie{background:var(--warn-bar)}
-.rowbtn{box-shadow:0 1px 2px var(--shadow-sm);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;min-height:64px;padding:10px 14px;background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r-md);text-align:left;color:var(--ink);cursor:pointer;width:100%;font:inherit}
+.rowbtn{box-shadow:0 1px 2px var(--shadow-sm);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;min-height:64px;padding:10px 14px;background:var(--card);border:1px solid var(--ctl);border-radius:var(--r-md);text-align:left;color:var(--ink);cursor:pointer;width:100%;font:inherit}
 .rowbtn .nm{font-weight:600;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rowbtn .sm{font-size:var(--fs-xs);color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rowbtn .rt{display:flex;align-items:center;gap:4px;color:var(--ink2)}
@@ -313,6 +317,28 @@ button{font-family:inherit}
 .opt[aria-checked="true"]{font-weight:700}
 .sheet .btn{margin-top:12px}
 
+
+/* 2026-11-01 桌機頂端列：步驟（數字圖示＋完成度）、重新開始、設定 */
+.dsteps{display:flex;align-items:center;gap:2px;margin:0 auto}
+.ds{display:inline-flex;align-items:center;gap:8px;min-height:var(--tap-min);padding:0 12px;border:0;border-radius:var(--r-sm);background:transparent;color:var(--ink3);font:600 var(--fs-sm)/1.2 var(--font);cursor:pointer;white-space:nowrap}
+.ds .n{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;border:2px solid var(--ink3);font-size:var(--fs-xs);font-weight:700;flex:none}
+.ds .n svg.ic{width:14px;height:14px;stroke-width:3}
+.ds small{font-size:var(--fs-xs);font-weight:600}
+.ds.done{color:var(--ink2)}
+.ds.done .n{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.ds.cur{background:var(--accent-soft);color:var(--accent-ink)}
+.ds.cur .n{border-color:var(--accent-ink);color:var(--accent-ink)}
+.ds:disabled{cursor:not-allowed}
+.dsep{width:14px;height:2px;background:var(--line);flex:none}
+.btn-ghost{background:transparent;color:var(--ink2);border:1.5px solid transparent}
+.btn .ic{width:20px;height:20px}
+.xl{display:inline-block;width:1em;height:1em;vertical-align:-.15em}
+.chk{display:inline-grid;place-items:center;width:22px;height:22px;border:2px solid var(--ink3);border-radius:6px;background:var(--card);color:var(--on-accent);flex:none}
+.chk[data-on="true"]{background:var(--accent);border-color:var(--accent)}
+.chk svg.ic{width:14px;height:14px;stroke-width:3}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:stretch}
+.pair>*{display:flex;flex-direction:column;gap:10px;height:100%}
+.pair .foot{margin-top:auto;display:flex;gap:8px}
 
 /* ===== 輸出文件（A4）：794 × 1123，用 .doc-warm 的 --doc-* token；紙張永遠淺色 ===== */
 .scale>.paper{position:absolute;left:0;top:0;transform-origin:0 0}
@@ -479,6 +505,18 @@ button{font-family:inherit}
 <symbol id="i-comment" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></symbol>
 <symbol id="i-pagebreak" viewBox="0 0 24 24"><path d="M3 12h4M10 12h4M17 12h4"/></symbol>
 <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 18l5-5 4 3 3-3 4 4"/></symbol>
+<symbol id="i-gear" viewBox="0 0 24 24"><path d="M10.3 3h3.4l.5 2.4 1.7.7 2.1-1.3 2.4 2.4-1.3 2.1.7 1.7 2.4.5v3.4l-2.4.5-.7 1.7 1.3 2.1-2.4 2.4-2.1-1.3-1.7.7-.5 2.4h-3.4l-.5-2.4-1.7-.7-2.1 1.3-2.4-2.4 1.3-2.1-.7-1.7L3 13.7v-3.4l2.4-.5.7-1.7-1.3-2.1 2.4-2.4 2.1 1.3 1.7-.7z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-c-bar" viewBox="0 0 24 24"><path d="M5 20V11M12 20V4M19 20v-6"/></symbol>
+<symbol id="i-c-stack" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="4" rx="1"/><rect x="3" y="11" width="18" height="4" rx="1"/><path d="M9 5v4M14 11v4"/><path d="M3 19h18"/></symbol>
+<symbol id="i-c-pie" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v9h9"/></symbol>
+<symbol id="i-c-donut" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></symbol>
+<symbol id="i-c-hist" viewBox="0 0 24 24"><path d="M4 20v-7h4v7M8 20V6h4v14M12 20V9h4v11M16 20v-5h4v5"/></symbol>
+<symbol id="i-c-radar" viewBox="0 0 24 24"><path d="M12 3l8 6-3 10H7L4 9z"/><path d="M12 8l4 3-1.5 5h-5L8 11z"/></symbol>
+<symbol id="i-c-scatter" viewBox="0 0 24 24"><path d="M3 3v18h18"/><circle cx="8" cy="15" r="1.4"/><circle cx="11" cy="10" r="1.4"/><circle cx="15" cy="14" r="1.4"/><circle cx="18" cy="7" r="1.4"/></symbol>
+<symbol id="i-c-box" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M7 7h10v10H7zM7 12h10"/></symbol>
+<symbol id="i-c-dots" viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h18"/><circle cx="8" cy="7" r="1.8"/><circle cx="15" cy="12" r="1.8"/><circle cx="11" cy="17" r="1.8"/></symbol>
+<symbol id="i-c-heat" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7"/><rect x="13" y="4" width="7" height="7"/><rect x="4" y="13" width="7" height="7"/><rect x="13" y="13" width="7" height="7"/></symbol>
+<symbol id="i-c-diff" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/><path d="M9 5v4M15 10v4M12 15v4"/></symbol>
 </svg>
 <div class="wrap">
 <header class="pagehead"><p class="small muted">設計規範的模擬頁，使用虛構資料。規範見 docs/design/DESIGN.md。</p><h1>範本庫與專案檔（手機）</h1><p class="muted">範本庫、範本選單、匯出分享、匯入、專案檔儲存與開啟後的比對。</p></header>
@@ -489,6 +527,7 @@ button{font-family:inherit}
 <figure class="fig" style="margin:0"><div class="scale" data-w="390" data-h="844"><div class="dev"><div class="appbar"><button class="icbtn" type="button" aria-label="關閉"><svg class="ic"><use href="#i-x"/></svg></button><span class="ttl">匯入範本</span><button class="icbtn" type="button" aria-label="說明"><svg class="ic"><use href="#i-help"/></svg></button></div><div class="scr" style="gap:12px"><div class="filechip"><svg class="ic"><use href="#i-file"/></svg><div><b>科任老師分享_回饋單.sfhtpl</b><span>來自檔案 · 51 KB · 範本格式 v1</span></div></div><div class="qcard" style="gap:6px"><b>個人回饋單：學生版（科任版）</b><div class="small muted">2 頁 · 含 1 張圖片（Logo） · 7 個區塊</div></div><div class="notice warn"><svg class="ic"><use href="#i-warn"/></svg><div>你已經有同名的範本「三年二班 學生版回饋單」。</div></div><div class="grp"><span class="gl">同名時怎麼處理</span><button class="rcard" role="radio" aria-checked="true" type="button"><span class="dot"></span><span><b>兩份都留</b><small>新的會加上「（2）」</small></span></button><button class="rcard" role="radio" aria-checked="false" type="button"><span class="dot"></span><span><b>取代舊的</b><small>舊版會先備份一份</small></span></button></div><div class="notice ok"><svg class="ic"><use href="#i-check"/></svg><div>格式相容。這份檔案不含任何學生資料。</div></div></div><div class="actbar"><button class="btn btn-secondary" type="button">上一步</button><button class="btn btn-primary" type="button">匯入範本</button></div></div></div><figcaption><b>9d 匯入範本</b>選檔後先預覽再匯入。同名時問「取代」或「兩份都留」，預設兩份都留，不會悄悄蓋掉老師自己的版本。</figcaption></figure>
 <figure class="fig" style="margin:0"><div class="scale" data-w="390" data-h="844"><div class="dev"><div class="appbar"><button class="icbtn" type="button" aria-label="關閉"><svg class="ic"><use href="#i-x"/></svg></button><span class="ttl">專案檔</span><button class="icbtn" type="button" aria-label="說明"><svg class="ic"><use href="#i-help"/></svg></button></div><div class="scr" style="gap:14px"><div class="qcard" style="gap:8px"><b>專案檔會記住</b><div class="small">問卷類型、欄位對應、評分權重、統計設定、選用的範本、檔名規則</div><b>不會記住</b><div class="small">問卷回覆、學生名單、輸出檔。資料檔每次都要重新選。</div></div><div class="field"><label for="pn">專案名稱</label><input class="input" id="pn" value="三年二班 幹部票選"><span class="hint">建議包含班級與用途，下學期才找得到。</span></div><div class="grp"><span class="gl">存到哪裡</span><button class="rcard" role="radio" aria-checked="true" type="button"><span class="dot"></span><span><b>這支手機</b><small>下載成 .sfh 檔案</small></span></button><button class="rcard" role="radio" aria-checked="false" type="button"><span class="dot"></span><span><b>Google 雲端硬碟</b><small>用系統選檔視窗存到你的雲端硬碟</small></span></button></div></div><div class="actbar"><button class="btn btn-secondary" type="button">上一步</button><button class="btn btn-primary" type="button">儲存專案檔</button></div></div></div><figcaption><b>9e 儲存專案檔</b>專案檔記住「怎麼對應欄位、用什麼設定與範本」，下學期同一份問卷格式再開就不用重做。學生資料不會存進去。</figcaption></figure>
 <figure class="fig" style="margin:0"><div class="scale" data-w="390" data-h="844"><div class="dev"><div class="appbar"><button class="icbtn" type="button" aria-label="返回"><svg class="ic"><use href="#i-back"/></svg></button><span class="ttl">準備資料</span><button class="icbtn" type="button" aria-label="說明"><svg class="ic"><use href="#i-help"/></svg></button></div><div class="stepper"><div class="segs"><span class="st on">開啟</span><span class="st on cur">對應</span><span class="st">統計</span><span class="st">輸出</span></div></div><div class="scr" style="gap:10px"><div class="notice ok"><svg class="ic"><use href="#i-check"/></svg><div>已載入專案「三年二班 幹部票選」。欄位對應、設定與範本已還原。</div></div><div class="filechip"><svg class="ic"><use href="#i-file"/></svg><div><b>114下_幹部票選.xlsx</b><span>已讀取 41 列 · 欄位比對完成</span></div></div><div class="notice warn"><svg class="ic"><use href="#i-warn"/></svg><div>有 2 個欄位和專案檔的對不上：「班級」「座號」。<div class="acts"><button class="btn btn-secondary btn-sm" type="button">重新對應這 2 個</button></div></div></div><button class="rowbtn" type="button"><div><div class="nm">問卷類型</div><div class="sm">票選幹部</div></div><span class="rt"><span class="tag tag-ok">已確認</span><svg class="ic"><use href="#i-next"/></svg></span></button><button class="rowbtn need" type="button"><div><div class="nm">欄位對應</div><div class="sm">9 個欄位，2 個需要確認</div></div><span class="rt"><span class="tag tag-warn">請確認</span><svg class="ic"><use href="#i-next"/></svg></span></button><button class="rowbtn" type="button"><div><div class="nm">資料檢查</div><div class="sm">尚未檢查</div></div><span class="rt"><span class="tag">等待</span><svg class="ic"><use href="#i-next"/></svg></span></button></div><div class="actbar"><button class="btn btn-secondary" type="button">上一步</button><button class="btn btn-primary" type="button" disabled>下一步：看統計</button></div></div></div><figcaption><b>9f 開啟專案檔後</b>設定都還原了，但專案檔沒有資料，所以請老師選這學期的問卷檔。選完比對欄位，找不到的欄位標出來，一鍵重新對應。</figcaption></figure>
+
 
 </div>
 </div>
