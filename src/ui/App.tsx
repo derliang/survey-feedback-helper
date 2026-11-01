@@ -4,7 +4,10 @@ import { strings as S } from './strings';
 import { Notice } from './parts/parts';
 import { TopBar } from './parts/Chrome';
 import { Home } from './views/Home';
-import { FolderDialog, RestartDialog, Settings, Stub } from './views/Misc';
+import { FolderDialog, RestartDialog, Settings } from './views/Misc';
+import { MethodView } from './views/MethodView';
+import { OutputView } from './views/OutputView';
+import { StatsView } from './views/StatsView';
 import { Prepare } from './views/Prepare';
 
 export function App() {
@@ -48,8 +51,9 @@ export function App() {
       )}
       {st.route === 'home' && <Home />}
       {st.route === 'prepare' && (st.session ? <Prepare /> : <Home />)}
-      {st.route === 'stats' && <Stub which="stats" />}
-      {st.route === 'output' && <Stub which="output" />}
+      {st.route === 'stats' && <StatsView />}
+      {st.route === 'output' && <OutputView />}
+      {st.route === 'method' && <MethodView />}
       {st.route === 'settings' && <Settings />}
       <FolderDialog />
       <RestartDialog />

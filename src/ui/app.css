@@ -881,6 +881,116 @@ button.tile {
   max-width: min(32rem, calc(100vw - 32px));
 }
 
+
+/* 統計工作台、審稿、輸出 */
+.plain-ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.wb {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-4);
+  align-items: start;
+}
+.wb-list,
+.wb-main,
+.wb-side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+.wb-list .rowbtn {
+  width: 100%;
+}
+.chart {
+  position: relative;
+  max-width: 100%;
+  overflow: hidden;
+}
+.chart svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.check {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: var(--tap-min);
+}
+.check input {
+  width: 22px;
+  height: 22px;
+  flex: none;
+}
+.linkbtn {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--accent-ink);
+  text-decoration: underline;
+  font: inherit;
+  cursor: pointer;
+  min-height: var(--tap-min);
+}
+.chip.kw {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  cursor: default;
+  padding-right: var(--sp-2);
+}
+.chip-x {
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  background: none;
+  border: 0;
+  color: var(--ink2);
+  font-size: var(--fs-lg);
+  cursor: pointer;
+}
+.cm-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.cm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: var(--sp-3);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-sm);
+}
+.cm-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+.cm-text {
+  overflow-wrap: anywhere;
+}
+.cm-text.hidden {
+  color: var(--ink3);
+  text-decoration: line-through;
+}
+.preview-list li {
+  overflow-wrap: anywhere;
+}
+.method .card ul {
+  overflow-wrap: anywhere;
+}
+
 /* 平板與桌機 */
 @media (min-width: 600px) {
   .appbar {
@@ -949,6 +1059,12 @@ button.tile {
   .tiles {
     grid-template-columns: repeat(4, 1fr);
   }
+  .wb {
+    grid-template-columns: 240px minmax(0, 1fr);
+  }
+  .wb-side {
+    grid-column: 1 / -1;
+  }
   .scrim {
     justify-content: flex-end;
     align-items: stretch;
@@ -986,6 +1102,12 @@ button.tile {
   }
   .prep-grid {
     grid-template-columns: 340px 1fr;
+  }
+  .wb {
+    grid-template-columns: 240px minmax(0, 1fr) 300px;
+  }
+  .wb-side {
+    grid-column: auto;
   }
 }
 @media (prefers-reduced-motion: reduce) {

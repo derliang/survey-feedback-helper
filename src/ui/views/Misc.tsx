@@ -1,26 +1,7 @@
-import { canGoStats } from '../../app/progress';
 import { choosePickFolder, downloadSettings, forgetThisFolder, go, restart, set, updatePrefs, useApp } from '../../app/store';
 import type { Theme } from '../../storage';
 import { strings as S } from '../strings';
-import { ActBar, Notice, Sheet } from '../parts/parts';
-
-/** 統計與輸出尚未提供（v0.2 之後）；欄位對應等準備工作都已存好。 */
-export function Stub({ which }: { which: 'stats' | 'output' }) {
-  const s = useApp().session;
-  const [title, body] = S.stub[which];
-  const ok = s !== null && canGoStats(s);
-  return (
-    <main class="page" id="main">
-      <h1>{title}</h1>
-      {ok ? <Notice kind="info">{body}</Notice> : <Notice kind="warn">{S.stub.locked}</Notice>}
-      <ActBar>
-        <button class="btn secondary grow" type="button" onClick={() => go(s ? 'prepare' : 'home')}>
-          {S.stub.goPrep}
-        </button>
-      </ActBar>
-    </main>
-  );
-}
+import { ActBar, Sheet } from '../parts/parts';
 
 export function Settings() {
   const st = useApp();

@@ -22,11 +22,13 @@ import {
   upsertSurvey,
 } from '../storage';
 import type { SurveyKind } from '../storage';
+import { type StatsOpts, defaultStatsOpts } from './analysis';
+import { type Review, emptyReview, parseReview, reviewFileName, serializeReview } from './review';
 import { type ColumnInfo, type Scale, analyzeColumns, applySavedMapping, detectScale, inferKind, toSavedLabels, toSavedMapping } from './columns';
 import { LoadError, type FileLike, surveyNameFromFile, tableFromFile } from './load';
 import { type RosterRow, isMixedClasses, rosterFromRows } from './roster-input';
 
-export type Route = 'home' | 'prepare' | 'stats' | 'output' | 'settings';
+export type Route = 'home' | 'prepare' | 'stats' | 'output' | 'settings' | 'method';
 export type Sub = 'type' | 'mapping' | 'roster' | 'compare' | 'check';
 
 /** 一份正在處理的問卷。作答資料只在記憶體，關掉分頁就沒有（硬規則 6）。 */
@@ -75,6 +77,13 @@ export interface AppState {
   /** 從「最近的問卷」卡片點進來，等選檔後優先比對這一份。 */
   pendingRecent: string | null;
   oldBrowser: boolean;
+  /** 統計畫面上老師調整的選項與審稿；只屬於目前這份問卷。 */
+  stats: StatsOpts;
+  review: Review | null;
+  /** 審稿進度存不進資料夾（沒有資料夾或寫入失敗）。 */
+  reviewUnsaved: boolean;
+  /** 統計畫面目前選的題目／職位／被評者。 */
+  statSel: string | null;
 }
 
 const initial: AppState = {
@@ -92,6 +101,10 @@ const initial: AppState = {
   error: null,
   pendingRecent: null,
   oldBrowser: false,
+  stats: defaultStatsOpts(),
+  review: null,
+  reviewUnsaved: false,
+  statSel: null,
 };
 
 let state: AppState = initial;
@@ -267,7 +280,7 @@ export async function openSurveyFile(file: FileLike): Promise<void> {
     titleMerges: {},
     checkHandled: [],
   };
-  set({ session, route: 'prepare', sub: null, error: null, pendingRecent: null });
+  set({ session, route: 'prepare', sub: null, error: null, pendingRecent: null, stats: defaultStatsOpts(), review: null, reviewUnsaved: false, statSel: null });
 }
 
 /** 「是之前的問卷」：帶入已存的對應，跳過欄位對應精靈。 */
@@ -330,10 +343,66 @@ export function requestRestart(): void {
 }
 
 export function restart(): void {
-  set({ confirmRestart: false, session: null, route: 'home', sub: null, error: null, pendingRecent: null });
+  set({ confirmRestart: false, session: null, route: 'home', sub: null, error: null, pendingRecent: null, review: null, statSel: null });
 }
 
 export function go(route: Route, sub: Sub | null = null): void {
   set({ route, sub });
   window.scrollTo?.(0, 0);
+}
+
+/* ───────── 統計選項與審稿 ───────── */
+
+export function setStats(patch: Partial<StatsOpts>): void {
+  set((s) => ({ stats: { ...s.stats, ...patch } }));
+}
+
+/** 進統計畫面時讀回這份問卷的審稿進度（資料夾沒有就從空白開始）。 */
+export async function loadReview(): Promise<void> {
+  const { session, folder, review } = getState();
+  if (!session || review?.surveyId === session.surveyId) return;
+  let loaded = emptyReview(session.surveyId);
+  if (folder.state === 'ready') {
+    try {
+      const text = await folder.store.read(reviewFileName(session.surveyId));
+      if (text !== null) loaded = parseReview(text, session.surveyId);
+    } catch {
+      set({ toast: '審稿進度檔讀不了，已從空白開始。' });
+    }
+  }
+  set({ review: loaded, reviewUnsaved: folder.state !== 'ready' });
+}
+
+let reviewTimer: ReturnType<typeof setTimeout> | undefined;
+
+async function writeReview(): Promise<void> {
+  const { review, folder } = getState();
+  if (!review) return;
+  if (folder.state !== 'ready') {
+    set({ reviewUnsaved: true });
+    return;
+  }
+  try {
+    await folder.store.write(reviewFileName(review.surveyId), serializeReview(review));
+    set({ reviewUnsaved: false });
+  } catch {
+    set({ reviewUnsaved: true, toast: '審稿進度寫入資料夾失敗。' });
+  }
+}
+
+/** 改審稿並稍後存回資料夾（連續打字時合併成一次寫入）。 */
+export function updateReview(fn: (r: Review) => Review): void {
+  const { review, session } = getState();
+  if (!session) return;
+  set({ review: fn(review ?? emptyReview(session.surveyId)) });
+  clearTimeout(reviewTimer);
+  reviewTimer = setTimeout(() => void writeReview(), 500);
+}
+
+export function downloadReview(): void {
+  const { review } = getState();
+  if (review) {
+    downloadText(reviewFileName(review.surveyId), serializeReview(review));
+    set({ reviewUnsaved: false });
+  }
 }

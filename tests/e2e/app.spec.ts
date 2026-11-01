@@ -89,9 +89,9 @@ test('名單對照、資料檢查完整流程', async ({ page }) => {
   await page.getByRole('button', { name: /^書名多種寫法/ }).click();
   await page.getByRole('button', { name: /^合併成/ }).click();
   await noOverflow(page);
-  // 欄位對應完成後可前往統計（統計本身後續版本提供）
+  // 欄位對應完成後可前往統計
   await page.getByRole('button', { name: '下一步：看統計' }).click();
-  await expect(page.getByRole('heading', { name: '統計' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '統計', level: 1 })).toBeVisible();
 });
 
 test('作答資料不寫入瀏覽器儲存（硬規則 6）', async ({ page }) => {
