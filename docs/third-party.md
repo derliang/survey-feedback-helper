@@ -6,19 +6,22 @@
 
 | 套件／資源 | 版本 | 用途 | 授權 | 與 GPL-3.0 相容 | 費用 | 核對日期 |
 |---|---|---|---|---|---|---|
-| pdf-lib | 1.17.1 | 正式候選：程式直接產生 PDF（**不可用其內建 `subset:true`**，會漏字） | MIT | 是 | 免費 | 2026-10-30 |
-| @pdf-lib/fontkit | 1.1.1 | 正式候選：pdf-lib 內嵌自訂字型 | MIT | 是 | 免費 | 2026-10-30 |
-| docx | 9.15.0 | 正式候選：產生 Word（docx） | MIT | 是 | 免費 | 2026-10-30 |
+| pdf-lib | 1.17.1 | 正式：程式直接產生 PDF（`src/export/pdf.ts`，延遲載入）（**不可用其內建 `subset:true`**，會漏字） | MIT | 是 | 免費 | 2026-10-30 |
+| @pdf-lib/fontkit | 1.1.1 | 正式：pdf-lib 內嵌自訂字型 | MIT | 是 | 免費 | 2026-10-30 |
+| docx | 9.15.0 | 正式：產生 Word（docx）（`src/export/docx.ts`，延遲載入） | MIT | 是 | 免費 | 2026-10-30 |
 | subset-font | 2.9.0 | 正式候選：HarfBuzz 字型子集化（主程式需包裝才能在瀏覽器用） | BSD-3-Clause | 是 | 免費 | 2026-10-30 |
-| harfbuzzjs | （subset-font 相依） | 正式候選：HarfBuzz 的 wasm | MIT | 是 | 免費 | 2026-10-30 |
-| fontverter | 2.0.0 | 正式候選：字型格式轉換（WOFF2↔TTF） | BSD-3-Clause | 是 | 免費 | 2026-10-30 |
+| harfbuzzjs | 1.6.4 | 正式：HarfBuzz 子集化 wasm（`harfbuzz-subset.wasm` 約 0.7 MB，由 Vite 打成獨立檔、延遲載入、Service Worker 快取） | MIT | 是 | 免費 | 2026-10-30 |
+| fontverter | 2.0.0 | 原型：字型格式轉換（正式版改用 wawoff2，不再相依） | BSD-3-Clause | 是 | 免費 | 2026-10-30 |
 | fflate | 0.8.3 | 正式：zip 解壓（讀 xlsx，`src/core/xlsx.ts`，延遲載入）；zip 打包（批次輸出）。無間接相依 | MIT | 是 | 免費 | 2026-11-01 |
 | buffer | （原型安裝最新版） | 原型：瀏覽器的 Node `Buffer` 填補層（fontverter 需要） | MIT | 是 | 免費 | 2026-10-30 |
 | esbuild | 0.28.2 | 原型：打包瀏覽器測試 | MIT | 是 | 免費 | 2026-10-30 |
 | playwright-core | 1.64.1 | 原型／測試：驅動 Chromium | Apache-2.0 | 是（Apache-2.0 與 GPL-3.0 相容） | 免費 | 2026-10-30 |
 | pdfjs-dist | 6.4.299 | 原型／測試：解析並渲染 PDF 以比對 | Apache-2.0 | 是 | 免費 | 2026-10-30 |
 | @napi-rs/canvas | 1.0.13 | 原型／測試：Node 端畫圖 | MIT | 是 | 免費 | 2026-10-30 |
-| Noto Sans TC（一般、粗體） | 由本機系統提供 | 正式候選：中文字型（正式版需把字型檔放進專案並明確放行 `.gitignore`） | SIL OFL 1.1 | 是（字型授權獨立於程式；OFL 允許內嵌與隨軟體散布，不可單獨販售字型） | 免費 | 2026-10-30（授權文字尚未逐字核對字型檔內附的 OFL，正式引入前要補） |
+| Noto Sans TC（可變字型，一個檔涵蓋一般與粗體） | 2.04（取自本機 Windows 內建的 `NotoSansTC-VF.ttf`，Adobe 版權；字型檔內 name 表標「non-release」，內容未改） | 正式：`public/fonts/NotoSansTC-VF.woff2`（5.43 MB，TTF 無損轉 WOFF2，`scripts/build-font.mjs`），PDF 輸出時依字重固定後子集化內嵌 | SIL OFL 1.1 | 是（字型授權獨立於程式；OFL 允許內嵌與隨軟體散布，不可單獨販售字型；保留字型名稱只有 'Source'，我們未改名、未改字形） | 免費 | 2026-11-01（授權全文已放在 `public/fonts/OFL.txt`，取自 notofonts/noto-cjk 的 Sans/LICENSE，並與字型檔 name 表內的授權敘述相符） |
+| woff2-encoder | 2.0.0 | 正式：WOFF2 解壓（`src/fonts/woff2.ts`，只載解壓端 wasm，延遲載入）；`scripts/build-font.mjs` 壓縮字型也用它。不用 wawoff2：它在瀏覽器打包後不會初始化（2026-11-01 實測卡死）| MIT | 是 | 免費 | 2026-11-01 |
+| pdfjs-dist | 6.4.299 | 測試：把輸出的 PDF 畫成圖做視覺檢查（`src/export/visual.test.ts`，開發相依，不隨網站發布） | Apache-2.0 | 是 | 免費 | 2026-11-01 |
+| @napi-rs/canvas | 1.1.0 | 測試：Node 端畫布，供 pdfjs 渲染（開發相依，不隨網站發布） | MIT | 是 | 免費 | 2026-11-01 |
 | preact | 11.1.1 | 正式：介面框架（執行時相依） | MIT | 是 | 免費 | 2026-11-01 |
 | vite | 8.3.5 | 建置：打包與開發伺服器（不隨網站發布） | MIT | 是 | 免費 | 2026-11-01 |
 | @preact/preset-vite | 2.10.6 | 建置：Vite 的 Preact 外掛 | MIT | 是 | 免費 | 2026-11-01 |
@@ -32,4 +35,4 @@
 
 ## 預計引入（尚未核對，引入時填入上表）
 
-ExcelJS（xlsx **輸出**用；讀取已改用 fflate 自行解析。2026-11-01 評估：4.4.0 本身 MIT，但間接相依 buffers@0.1.1 沒有授權欄位、chainsaw 標示 "MIT/X11"，`check:licenses` 會擋，且體積大，故讀取不採用；輸出是否採用待輸出器工作時再決定）、圖示字型或圖示集（優先選 OFL／MIT）。
+ExcelJS（**不採用**：xlsx 讀取與輸出都自寫於 fflate，見 [決定記錄](decisions/2026-11-01-xlsx輸出與分支保護.md)）、圖示字型或圖示集（優先選 OFL／MIT）。
