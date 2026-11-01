@@ -30,7 +30,7 @@
 | 設定 | 全域預設、問卷類型範本、單次覆寫；匯出與還原；專案檔 |
 | 其他 | 歷次趨勢比較、離線可用（PWA）、深色模式、Google 表單設計教學與範本 |
 
-完整藍圖見 [docs/feature-blueprint.md](docs/feature-blueprint.md)。
+完整藍圖見 [docs/feature-blueprint.md](docs/feature-blueprint.md)；測試總覽見 [docs/testing.md](docs/testing.md)，效能紀錄與上限見 [docs/performance.md](docs/performance.md)。
 
 ## 版本路線
 
