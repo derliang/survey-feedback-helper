@@ -359,6 +359,8 @@ export const strings = {
     warnTitle: '輸出學生版或家長版前，請先確認留言裡沒有同學的名字',
     warnBody: '程式只能遮蔽名單上的人（換成「某同學」）；名單以外的人名（例如老師、校外人士、綽號）無法自動遮蔽，請先逐則預覽並自己檢查。',
     previewEmpty: '（沒有留言）',
+    print: '用瀏覽器列印',
+    printFail: '無法開啟列印視窗，請確認瀏覽器沒有擋彈出視窗，或改下載 PDF。',
     possibleNameTag: '可能含名單外人名',
     possibleNameHigh: '前後有稱謂，很可能是人名',
     possibleNameLow: '只是姓氏加兩個字，可能誤判',

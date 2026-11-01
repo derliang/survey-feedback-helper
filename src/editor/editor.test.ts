@@ -205,7 +205,7 @@ describe('編譯成輸出文件', () => {
     expect(withAll.blocks.find((b) => b.type === 'bullets')).toMatchObject({ items: ['很棒 王小明'] });
     expect(withAll.footerText).toBe(' 301 王小明');
   });
-  it('版本條件、覆寫、分頁與分隔線、多欄攤平', () => {
+  it('版本條件、覆寫、分頁與分隔線、多欄並排', () => {
     let t: EditorTemplate = { ...personal(), blocks: [] };
     t = insertBlock(t, { ...blankBlock('text', 'x'), when: { kind: 'version', is: ['teacher'] } } as EBlock);
     t = insertBlock(t, blankBlock('divider', 'd'));
@@ -213,10 +213,11 @@ describe('編譯成輸出文件', () => {
     t = insertBlock(t, blankBlock('columns', 'c'));
     t = insertBlock(t, { ...blankBlock('text', 'l'), text: '左' } as EBlock, undefined, { columnsId: 'c', col: 0 });
     t = insertBlock(t, { ...blankBlock('text', 'r'), text: '右' } as EBlock, undefined, { columnsId: 'c', col: 1 });
-    expect(compile(t, ctx()).blocks.map((b) => b.type)).toEqual(['text', 'rule', 'pagebreak', 'text', 'text']);
-    expect(compile(t, ctx({ version: 'parent' })).blocks.map((b) => b.type)).toEqual(['rule', 'pagebreak', 'text', 'text']);
+    expect(compile(t, ctx()).blocks.map((b) => b.type)).toEqual(['text', 'rule', 'pagebreak', 'columns']);
+    expect(compile(t, ctx({ version: 'parent' })).blocks.map((b) => b.type)).toEqual(['rule', 'pagebreak', 'columns']);
     const ov = setBlockOverride({}, 's', 'l', { hidden: true }).s;
-    expect(compile(t, ctx({ override: ov })).blocks.length).toBe(4);
+    const hidden = compile(t, ctx({ override: ov })).blocks.at(-1);
+    expect(hidden?.type === 'columns' && hidden.cols.map((c) => c.length)).toEqual([0, 1]);
   });
   it('圖片：有資料才放；頁面大小與橫式', () => {
     let t: EditorTemplate = { ...personal(), blocks: [] };
@@ -344,5 +345,51 @@ describe('備份合併', () => {
     expect(m.images.x).toBe('data:image/png;base64,AA');
     expect(Object.keys(m.images)).toHaveLength(2);
     expect(summarizeBackup({ surveys: [1], rosters: [] }, m)).toMatchObject({ surveys: 1, overrides: 1, images: 2 });
+  });
+});
+
+describe('compile 進階區塊與版面', () => {
+  const base = () => builtinTemplates()[0]!;
+  const ctx = (version: 'teacher' | 'student' | 'parent'): CompileContext => ({
+    version,
+    vars: { 平均分: '4.2', 班級平均: '3.9', 全班名次: '3' },
+    slot: (n) => (n === 'praise' ? [{ type: 'bullets', items: ['很用心', '表達清楚'], size: 11 }] : []),
+    image: (s) => (s === 'logo' ? new Uint8Array([1]) : undefined),
+  });
+  it('多欄輸出 columns，頁面裝飾進 deco，文字底色保留', () => {
+    const t = base();
+    t.page = { ...t.page, background: '#fffaf0', frame: { color: '#1f4e79', width: 1.5, rounded: false }, headerText: '範例', logoSrc: 'logo' };
+    t.blocks = [
+      { id: 'c', kind: 'columns', cols: [[{ id: 'a', kind: 'text', text: 'A', size: 11, bg: '#eef3fa' }], [{ id: 'b', kind: 'text', text: 'B', size: 11 }]] },
+    ];
+    const d = compile(t, ctx('teacher'));
+    const col = d.blocks[0]!;
+    expect(col.type).toBe('columns');
+    if (col.type === 'columns') {
+      expect(col.cols).toHaveLength(2);
+      expect(col.cols[0]![0]).toMatchObject({ type: 'text', bg: '#eef3fa' });
+    }
+    expect(d.deco).toMatchObject({ background: '#fffaf0', headerText: '範例', frame: { width: 1.5 } });
+    expect(d.deco?.logo?.png).toBeDefined();
+  });
+  it('摘要數字列：名次只在老師版，沒有值的格子略過，依每列格數分行', () => {
+    const t = base();
+    t.blocks = [{ id: 's', kind: 'stats', items: ['mine', 'classMean', 'rank', 'median'], perRow: 2 }];
+    const teacher = compile(t, ctx('teacher')).blocks;
+    expect(teacher).toHaveLength(2);
+    expect(teacher.flatMap((b) => (b.type === 'stats' ? b.cards.map((c) => c.label) : []))).toEqual(['我的平均', '班級平均', '全班名次']);
+    const student = compile(t, ctx('student')).blocks;
+    expect(student.flatMap((b) => (b.type === 'stats' ? b.cards.map((c) => c.label) : []))).toEqual(['我的平均', '班級平均']);
+  });
+  it('標題區與稱讚卡片：稱讚吃槽、沒有內容就略過', () => {
+    const t = base();
+    t.blocks = [
+      { id: 'h', kind: 'hero', title: '大標', subtitle: '副標' },
+      { id: 'p', kind: 'callout', tone: 'praise', title: '強項', text: '', slot: 'praise' },
+      { id: 'q', kind: 'callout', tone: 'hint', title: '提示', text: '' },
+    ];
+    const d = compile(t, ctx('student')).blocks;
+    expect(d.map((b) => b.type)).toEqual(['hero', 'callout']);
+    expect(d[1]).toMatchObject({ tone: 'praise', text: '很用心；表達清楚' });
   });
 });

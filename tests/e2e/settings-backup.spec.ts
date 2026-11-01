@@ -48,3 +48,16 @@ test('備份與還原：下載整包備份，選回後先看摘要、預設合�
   await card.locator('input[type=file]').setInputFiles({ name: 'x.json', mimeType: 'application/json', buffer: Buffer.from('{}') });
   await expect(card.getByText('這不是備份檔')).toBeVisible();
 });
+
+test('編輯器：加入面板有進階區塊，加入標題區與摘要數字列', async ({ page }) => {
+  await page.goto('./');
+  await page.getByRole('button', { name: '範本與版面' }).click();
+  await page.getByTestId('template-card').first().click();
+  const w = page.viewportSize()!.width;
+  if (w < 900) await page.getByRole('button', { name: /編輯/ }).first().click();
+  await page.getByRole('button', { name: /加入/ }).first().click();
+  await expect(page.getByText('進階區塊')).toBeVisible();
+  await page.getByRole('button', { name: '摘要數字列' }).click();
+  await expect(page.getByText('顯示哪些數字')).toBeVisible();
+  await expect(page.getByText('全班名次在學生版與家長版會自動隱藏')).toBeVisible();
+});

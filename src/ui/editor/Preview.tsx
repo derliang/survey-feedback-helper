@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { fillVars } from '../../export/model';
 import { describeCondition } from '../../editor/condition';
-import { PAGE_SIZES, type DataEB, type EBlock, type EditorTemplate } from '../../editor/types';
+import { STAT_KEYS, PAGE_SIZES, type DataEB, type EBlock, type EditorTemplate } from '../../editor/types';
 
 export const SAMPLE_VARS: Record<string, string> = {
   姓名: '林小宇',
@@ -115,6 +115,43 @@ function Block({ b, c }: { b: EBlock; c: Ctx }) {
       break;
     case 'pageBreak':
       body = <div class="eb-break">分頁線</div>;
+      break;
+    case 'hero':
+      body = (
+        <div class="eb-hero" style={{ background: b.fill ?? '#a84f00', padding: px(16, c.s) }}>
+          <strong style={{ fontSize: px(20, c.s) }}>{fillVars(b.title, c.vars) || '（大標）'}</strong>
+          {b.subtitle && <div style={{ fontSize: px(11, c.s) }}>{fillVars(b.subtitle, c.vars)}</div>}
+        </div>
+      );
+      break;
+    case 'stats': {
+      const shown = b.items;
+      body = (
+        <div class="eb-stats" style={{ gridTemplateColumns: `repeat(${Math.max(1, b.perRow)}, 1fr)` }}>
+          {shown.map((k) => (
+            <div key={k} class="eb-stat" style={{ background: b.fill ?? '#eef3fa', padding: px(8, c.s) }}>
+              <strong style={{ fontSize: px(20, c.s) }}>{c.vars[STAT_KEYS[k].varName] || '—'}</strong>
+              <span style={{ fontSize: px(10, c.s) }}>{STAT_KEYS[k].label}{k === 'rank' ? '（學生版隱藏）' : ''}</span>
+            </div>
+          ))}
+        </div>
+      );
+      break;
+    }
+    case 'callout':
+      body = (
+        <div class={`eb-callout ${b.tone}`} style={{ padding: px(10, c.s) }}>
+          <strong style={{ fontSize: px(11, c.s) }}>{fillVars(b.title, c.vars)}</strong>
+          <div style={{ fontSize: px(11, c.s) }}>{b.slot ? '（同學的優點留言會出現在這裡）' : fillVars(b.text, c.vars)}</div>
+        </div>
+      );
+      break;
+    case 'compare':
+      body = (
+        <div class="ph ph-lines" role="img" aria-label="自評對照表示意">
+          自評對照表（同學給的、自己給的、落差）
+        </div>
+      );
       break;
     case 'columns':
       body = (

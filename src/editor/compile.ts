@@ -1,14 +1,17 @@
 // 編譯：範本 ＋ 某位學生的資料 → 輸出器讀的 DocModel。條件、變數、單一學生覆寫都在這裡套用。
-import { A4_LANDSCAPE, A4_PORTRAIT, fillVars, type Block, type DocModel, type PageSetup } from '../export/model';
+import * as advanced from '../export/advanced';
+import { A4_LANDSCAPE, A4_PORTRAIT, fillVars, type Block, type DocModel, type PageDeco, type PageSetup } from '../export/model';
 import { evalCondition } from './condition';
 import { applyOverrides, type StudentOverride } from './overrides';
-import { PAGE_SIZES, type BulletsEB, type DataEB, type EBlock, type EditorTemplate, type PageSpec, type ReportVersion } from './types';
+import { PAGE_SIZES, STAT_KEYS, type BulletsEB, type CalloutEB, type CompareEB, type DataEB, type EBlock, type EditorTemplate, type PageSpec, type ReportVersion } from './types';
+
+export type SlotBlock = DataEB | BulletsEB | CalloutEB | CompareEB;
 
 export interface CompileContext {
   version: ReportVersion;
   vars: Record<string, string | number | undefined>;
   /** 統計資料槽：應用層依 slot 名稱與區塊設定（圖表類型、顏色）回傳要放的區塊；回傳空陣列 = 沒有資料（區塊略過）。 */
-  slot: (slot: string, block: DataEB | BulletsEB) => Block[];
+  slot: (slot: string, block: SlotBlock) => Block[];
   /** 圖片參照 → PNG 位元組；找不到就略過該圖片。 */
   image?: (src: string) => Uint8Array | undefined;
   /** 這位學生的覆寫。 */
@@ -32,8 +35,8 @@ export function compile(template: EditorTemplate, ctx: CompileContext): DocModel
   const fill = (s: string) => fillVars(s, vars);
   const spacing = (b: EBlock) => ({ ...(b.before !== undefined ? { before: b.before } : {}), ...(b.after !== undefined ? { after: b.after } : {}) });
 
-  const out: Block[] = [];
-  const emit = (list: EBlock[]): void => {
+  const emit = (list: EBlock[]): Block[] => {
+    const out: Block[] = [];
     for (const b of list) {
       if (!evalCondition(b.when, cond)) continue;
       switch (b.kind) {
@@ -41,7 +44,7 @@ export function compile(template: EditorTemplate, ctx: CompileContext): DocModel
           out.push({ type: 'heading', text: fill(b.text), size: b.size, ...(b.color ? { color: b.color } : {}), ...spacing(b) });
           break;
         case 'text':
-          out.push({ type: 'text', text: fill(b.text), size: b.size, ...(b.color ? { color: b.color } : {}), ...spacing(b) });
+          out.push({ type: 'text', text: fill(b.text), size: b.size, ...(b.color ? { color: b.color } : {}), ...(b.bg ? { bg: b.bg } : {}), ...spacing(b) });
           break;
         case 'bullets': {
           const items = (b.slot ? ctx.slot(b.slot, b).flatMap((x) => (x.type === 'bullets' ? x.items : [])) : b.items).map(fill);
@@ -64,17 +67,50 @@ export function compile(template: EditorTemplate, ctx: CompileContext): DocModel
         case 'pageBreak':
           out.push({ type: 'pagebreak' });
           break;
-        case 'columns':
-          // 輸出器目前不支援並排：各欄依序（由左到右）上下排列。並排版面見 todo（輸出器加欄位排版後再改）。
-          b.cols.forEach(emit);
+        case 'columns': {
+          const cols = b.cols.map(emit);
+          if (cols.some((c) => c.length)) out.push({ type: 'columns', cols, ...spacing(b) });
+          break;
+        }
+        case 'hero':
+          out.push(advanced.hero(fill(b.title), fill(b.subtitle) || undefined, { ...(b.fill ? { fill: b.fill } : {}), ...spacing(b) }));
+          break;
+        case 'stats': {
+          const cards = b.items
+            .filter((k) => !(k === 'rank' && ctx.version !== 'teacher'))
+            .map((k) => ({ label: STAT_KEYS[k].label, value: String(vars[STAT_KEYS[k].varName] ?? '') }))
+            .filter((c) => c.value !== '');
+          const per = Math.max(1, Math.min(b.perRow, 6));
+          for (let i = 0; i < cards.length; i += per) {
+            const last = i + per >= cards.length;
+            out.push(advanced.stats(cards.slice(i, i + per), { ...(b.fill ? { fill: b.fill } : {}), ...(last ? spacing(b) : { after: 6 }) }));
+          }
+          break;
+        }
+        case 'callout': {
+          const text = b.slot ? ctx.slot(b.slot, b).flatMap((x) => (x.type === 'bullets' ? x.items : [])).join('；') : fill(b.text);
+          if (text) out.push({ type: 'callout', tone: b.tone, title: fill(b.title), text, ...spacing(b) });
+          break;
+        }
+        case 'compare':
+          out.push(...ctx.slot('compare', b).map((x) => ({ ...x, ...spacing(b) })));
           break;
       }
     }
+    return out;
   };
-  emit(t.blocks);
+  const out = emit(t.blocks);
 
   const doc: DocModel = { blocks: out, footerText: fill(t.page.footerText), lineH: t.lineH, page: pageSetup(t.page) };
   const title = ctx.title ?? (t.page.headerText ? fill(t.page.headerText) : undefined);
   if (title) doc.title = title;
+  const logo = t.page.logoSrc ? ctx.image?.(t.page.logoSrc) : undefined;
+  const deco: PageDeco = {
+    ...(t.page.background ? { background: t.page.background } : {}),
+    ...(t.page.frame ? { frame: t.page.frame } : {}),
+    ...(t.page.headerText ? { headerText: fill(t.page.headerText) } : {}),
+    ...(logo ? { logo: { png: logo, w: 90, h: 45 } } : {}),
+  };
+  if (Object.keys(deco).length) doc.deco = deco;
   return doc;
 }

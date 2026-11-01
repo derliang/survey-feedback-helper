@@ -15,9 +15,9 @@ import {
 import { canGoStats } from '../../app/progress';
 import { emptyReview, reviewCounts } from '../../app/review';
 import { go, loadReview, useApp } from '../../app/store';
-import { WORD_FONT_NOTE, loadDocx, loadPdf, loadXlsx, registerAssetCache } from '../../export';
+import { WORD_FONT_NOTE, loadDocx, loadPdf, loadPrint, loadXlsx, registerAssetCache } from '../../export';
 import type { ClassSummaryInput, DocModel, PersonalFeedbackInput } from '../../export';
-import { downloadBytes } from '../../storage';
+import { downloadBytes, isTouchDevice } from '../../storage';
 import { feedbackKey } from '../../app/output';
 import { resolveSettings } from '../../editor/settings';
 import { findPossibleNames, type PossibleName } from '../../core/possible-names';
@@ -196,6 +196,21 @@ export function OutputView() {
       }
     });
 
+  /** 桌機備用：用瀏覽器列印（不產生檔案，在列印視窗選「另存為 PDF」或直接印）。 */
+  const printOne = async () => {
+    setBusy('print');
+    try {
+      const list = await withCharts();
+      const pick = list.find((p) => p.key === (sel?.key ?? '')) ?? list[0]!;
+      const doc = (await docTools()).personal(pick.input, audience);
+      await (await loadPrint()).printDoc(doc);
+    } catch {
+      setMsg({ kind: 'bad', text: S.output.printFail });
+    } finally {
+      setBusy(null);
+    }
+  };
+
   const batch = () =>
     run('batch', async () => {
       const list = await withCharts();
@@ -309,6 +324,11 @@ export function OutputView() {
               <button class="btn secondary" type="button" disabled={personalDis} onClick={() => void onePersonal('docx')}>
                 {S.output.docx}
               </button>
+              {!isTouchDevice() && (
+                <button class="btn secondary" type="button" disabled={personalDis} onClick={() => void printOne()}>
+                  {S.output.print}
+                </button>
+              )}
               <button class="btn primary" type="button" disabled={personalDis} onClick={() => void batch()}>
                 {S.output.allStudents(personal.length)}
               </button>
