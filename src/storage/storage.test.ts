@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { type DirHandleLike, storeFromHandle } from './fsa';
+import { describe, expect, it, vi } from 'vitest';
+import { type DirHandleLike, pendingFolderWrites, storeFromHandle } from './fsa';
 
 /** 記憶體內的假資料夾：getFileHandle 找不到檔案時丟 NotFoundError，與瀏覽器一致。 */
 function fakeDir(): DirHandleLike {
@@ -43,5 +43,29 @@ describe('資料夾儲存提供者', () => {
       throw new DOMException('no', 'NotAllowedError');
     };
     await expect(storeFromHandle(dir).read('a')).rejects.toThrow();
+  });
+  it('寫入進行中才擋離開頁面（beforeunload），寫完即放行', async () => {
+    const handlers: Array<(e: unknown) => void> = [];
+    vi.stubGlobal('window', { addEventListener: (_t: string, h: (e: unknown) => void) => handlers.push(h) });
+    let release!: () => void;
+    const gate = new Promise<void>((r) => (release = r));
+    const dir = fakeDir();
+    const inner = dir.getFileHandle.bind(dir);
+    dir.getFileHandle = async (n, o) => {
+      await gate;
+      return inner(n, o);
+    };
+    const job = storeFromHandle(dir).write('a.sfh', 'x');
+    expect(pendingFolderWrites()).toBe(1);
+    const busy = { preventDefault: vi.fn(), returnValue: undefined as unknown };
+    handlers[0]?.(busy);
+    expect(busy.preventDefault).toHaveBeenCalled();
+    release();
+    await job;
+    expect(pendingFolderWrites()).toBe(0);
+    const idle = { preventDefault: vi.fn(), returnValue: undefined as unknown };
+    handlers[0]?.(idle);
+    expect(idle.preventDefault).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
   });
 });
