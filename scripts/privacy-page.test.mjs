@@ -3,12 +3,9 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
-const page = readFileSync('public/privacy.html', 'utf8').replace(/
-/g, '
-');
-const tokens = readFileSync('docs/design/tokens.css', 'utf8').replace(/
-/g, '
-').replace(/\/\*[\s\S]*?\*\/\s*/, '').trimEnd();
+const read = (f) => readFileSync(f, 'utf8').split('\r\n').join('\n');
+const page = read('public/privacy.html');
+const tokens = read('docs/design/tokens.css').replace(/\/\*[\s\S]*?\*\/\s*/, '').trimEnd();
 
 describe('隱私權政策頁', () => {
   it('內嵌的 tokens 與 docs/design/tokens.css 相同', () => {
