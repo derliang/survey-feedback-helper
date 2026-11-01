@@ -35,6 +35,11 @@ export function TopBar() {
           <span class="brand-name">{S.appName}</span>
         </button>
         {st.session && <span class="file-name">{st.session.fileName}</span>}
+        {st.session?.demo && (
+          <span class="tag warn demo-tag" data-testid="demo-tag">
+            {S.guide.demoTag}
+          </span>
+        )}
         <nav class="stepper" aria-label="步驟">
           <StepList steps={steps} />
         </nav>

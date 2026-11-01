@@ -22,14 +22,16 @@ import {
   upsertRoster,
   upsertSurvey,
 } from '../storage';
-import type { SurveyKind } from '../storage';
+import type { PhraseCategory, SurveyKind } from '../storage';
+import { applyLang } from '../ui/locale';
+import { QUICK_TEMPLATES, TEMPLATE_ID_PREFIX, templateAsSurvey } from './quick-templates';
 import { type StatsOpts, defaultStatsOpts } from './analysis';
 import { type Review, emptyReview, parseReview, reviewFileName, serializeReview } from './review';
 import { type ColumnInfo, type Scale, analyzeColumns, applySavedMapping, detectScale, inferKind, toSavedLabels, toSavedMapping } from './columns';
 import { LoadError, type FileLike, surveyNameFromFile, tableFromFile } from './load';
 import { type RosterRow, isMixedClasses, rosterFromRows } from './roster-input';
 
-export type Route = 'home' | 'prepare' | 'stats' | 'output' | 'settings' | 'method' | 'editor';
+export type Route = 'home' | 'prepare' | 'stats' | 'output' | 'settings' | 'method' | 'editor' | 'guide' | 'templates';
 export type Sub = 'type' | 'mapping' | 'roster' | 'compare' | 'check';
 
 /** 一份正在處理的問卷。作答資料只在記憶體，關掉分頁就沒有（硬規則 6）。 */
@@ -59,6 +61,8 @@ export interface Session {
   excluded: number[];
   titleMerges: Record<string, string>;
   checkHandled: string[];
+  /** 教學頁的示範資料：不寫進資料夾，也不進最近的問卷。 */
+  demo: boolean;
 }
 
 export interface AppState {
@@ -95,7 +99,7 @@ const initial: AppState = {
   folder: { state: 'none' },
   data: emptyFolderData(),
   dirty: false,
-  prefs: { theme: 'auto', dismissed: [] },
+  prefs: { theme: 'auto', lang: 'zh', dismissed: [] },
   folderDialog: false,
   confirmRestart: false,
   toast: null,
@@ -144,6 +148,7 @@ export function isOldBrowser(): boolean {
 export async function boot(): Promise<void> {
   const prefs = loadPrefs();
   applyTheme(prefs.theme);
+  await applyLang(prefs.lang).catch(() => false);
   const folder = await restoreFolder().catch((): FolderStatus => ({ state: 'none' }));
   set({ prefs, folder, oldBrowser: isOldBrowser(), ready: true });
   if (folder.state === 'ready') await loadFromFolder();
@@ -165,6 +170,7 @@ export function updatePrefs(p: Partial<Prefs>): void {
   savePrefs(prefs);
   applyTheme(prefs.theme);
   set({ prefs });
+  if (p.lang) void applyLang(prefs.lang).then((changed) => changed && set({}));
 }
 
 export function dismiss(key: string): void {
@@ -248,7 +254,17 @@ export async function openSurveyFile(file: FileLike): Promise<void> {
     set({ error: e instanceof LoadError ? e.reason : 'unreadable' });
     return;
   }
-  const { data, pendingRecent } = getState();
+  startSession(table, file.name, {});
+}
+
+/** 示範資料（教學頁 R-001）：不比對、不存進資料夾、不進「最近的問卷」，重新開始即清除。 */
+export function openDemoTable(table: Table, rosterRows: RosterRow[]): void {
+  startSession(table, '示範資料.xlsx', { demo: true, rosterRows });
+}
+
+function startSession(table: Table, fileName: string, opts: { demo?: boolean; rosterRows?: RosterRow[] }): void {
+  const file = { name: fileName };
+  const { data, pendingRecent } = opts.demo ? { data: emptyFolderData(), pendingRecent: null } : getState();
   let hit = recognizeConfig(
     table.headers,
     data.surveys.map((s) => ({ id: s.id, name: s.name, headers: s.headers, mapping: s.mapping })),
@@ -257,7 +273,17 @@ export async function openSurveyFile(file: FileLike): Promise<void> {
     const want = data.surveys.find((s) => s.id === pendingRecent);
     if (want) hit = recognizeConfig(table.headers, [{ id: want.id, name: want.name, headers: want.headers, mapping: want.mapping }], 0.5);
   }
-  const saved = hit ? data.surveys.find((s) => s.id === hit.config.id) : undefined;
+  let saved = hit ? data.surveys.find((s) => s.id === hit?.config.id) : undefined;
+  if (!hit) {
+    // 沒有之前存過的：看看是不是用快速範本的題目建的表單（標題相符就自動帶入）
+    const tpls = QUICK_TEMPLATES.map(templateAsSurvey);
+    hit = recognizeConfig(
+      table.headers,
+      tpls.map((t) => ({ id: t.id, name: t.name, headers: t.headers, mapping: t.mapping })),
+    );
+    const tplHit = hit;
+    saved = tplHit ? tpls.find((t) => t.id === tplHit.config.id) : undefined;
+  }
   const cols = analyzeColumns(table);
   const { kind, reason } = inferKind(cols);
   const session: Session = {
@@ -274,10 +300,11 @@ export async function openSurveyFile(file: FileLike): Promise<void> {
     recognition: saved && hit ? { survey: saved, similarity: hit.similarity } : null,
     surveyId: newId(),
     previousRows: null,
-    rosterRows: null,
+    rosterRows: opts.rosterRows ?? null,
     rosterMixed: false,
     rosterSkipped: false,
-    rosterName: '',
+    rosterName: opts.demo ? '示範名單' : '',
+    demo: opts.demo === true,
     resolutions: {},
     excluded: [],
     titleMerges: {},
@@ -295,7 +322,8 @@ export function acceptRecognition(): void {
   const roster = saved.rosterId ? getState().data.rosters.find((r) => r.id === saved.rosterId) : undefined;
   setSession({
     recognition: null,
-    surveyId: saved.id,
+    // 快速範本不是老師存過的問卷：每份新問卷各用自己的編號，不互相覆蓋
+    surveyId: saved.id.startsWith(TEMPLATE_ID_PREFIX) ? newId() : saved.id,
     name: saved.name,
     kind: saved.kind,
     kindConfirmed: true,
@@ -318,7 +346,7 @@ export function rejectRecognition(): void {
 /** 把目前的對應存進設定（資料夾或待下載）。不含任何作答資料。 */
 export async function saveSurvey(): Promise<void> {
   const { session: s, data } = getState();
-  if (!s) return;
+  if (!s || s.demo) return;
   const survey: SavedSurvey = {
     id: s.surveyId,
     name: s.name,
@@ -347,6 +375,11 @@ export function requestRestart(): void {
 
 export function restart(): void {
   set({ confirmRestart: false, session: null, route: 'home', sub: null, error: null, pendingRecent: null, review: null, statSel: null });
+}
+
+/** 存常用評語庫（跟著設定檔：有資料夾就寫進去，沒有就等老師下載）。 */
+export function savePhrases(phrases: PhraseCategory[]): Promise<void> {
+  return persist({ ...getState().data, phrases });
 }
 
 export function go(route: Route, sub: Sub | null = null): void {

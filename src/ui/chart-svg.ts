@@ -12,6 +12,35 @@ export interface Palette {
 export const SCREEN: Palette = { ink: 'var(--ink)', muted: 'var(--ink3)', grid: 'var(--line-soft)', a: 'var(--d1)', b: 'var(--d2)', bg: 'transparent' };
 export const PRINT: Palette = { ink: '#14171f', muted: '#5b6373', grid: '#e3e6ec', a: '#2554d8', b: '#cf5f12', bg: '#ffffff' };
 
+const PRINT_VARS: Record<string, string> = {
+  '--ink': PRINT.ink,
+  '--ink3': PRINT.muted,
+  '--line-soft': PRINT.grid,
+  '--d1': PRINT.a,
+  '--d2': PRINT.b,
+  '--bar-muted': '#7f889b',
+};
+
+/** 把畫面用的圖表（CSS 變數、透明底）換成紙本淺色版：另存圖片時不隨深色模式變色（紙張永遠淺色）。 */
+export function toPrintSvg(svg: string): string {
+  const out = svg.replace(/var\((--[a-z0-9-]+)\)/g, (m, name: string) => PRINT_VARS[name] ?? m);
+  const dim = /viewBox="0 0 (\d+(?:\.\d+)?) (\d+(?:\.\d+)?)"/.exec(out);
+  if (!dim) return out;
+  return out.replace(/(<svg[^>]*>)/, `$1<rect width="${dim[1]}" height="${dim[2]}" style="fill:${PRINT.bg}"/>`);
+}
+
+/** 圖表尺寸（取自 viewBox）。 */
+export function svgSize(svg: string): { w: number; h: number } {
+  const dim = /viewBox="0 0 (\d+(?:\.\d+)?) (\d+(?:\.\d+)?)"/.exec(svg);
+  return { w: dim ? Number(dim[1]) : 560, h: dim ? Number(dim[2]) : 300 };
+}
+
+/** 圖表標題（取自 aria-label），用來當另存圖片的檔名。 */
+export function svgTitle(svg: string): string {
+  const m = /aria-label="([^"]*)"/.exec(svg);
+  return (m?.[1] ?? '圖表').replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+}
+
 const esc = (s: string): string => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const f1 = (n: number): string => (Number.isInteger(n) ? String(n) : n.toFixed(1));
 const FONT = `font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif"`;

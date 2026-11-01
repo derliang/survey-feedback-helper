@@ -1,5 +1,5 @@
 import { choosePickFolder, downloadSettings, forgetThisFolder, go, restart, set, updatePrefs, useApp } from '../../app/store';
-import { type Theme, isTouchDevice } from '../../storage';
+import { type Lang, type Theme, isTouchDevice } from '../../storage';
 import { strings as S } from '../strings';
 import { ActBar, Sheet } from '../parts/parts';
 import { BackupCard, DefaultsCard } from './SettingsExtra';
@@ -65,6 +65,27 @@ export function Settings() {
             </button>
           ))}
         </div>
+      </section>
+
+      <section class="card">
+        <h2>{S.settingsPage.language}</h2>
+        <div class="seg" role="radiogroup" aria-label={S.settingsPage.language}>
+          {(['zh', 'en'] as Lang[]).map((l) => (
+            <button key={l} type="button" role="radio" aria-checked={st.prefs.lang === l} class={st.prefs.lang === l ? 'on' : ''} onClick={() => updatePrefs({ lang: l })}>
+              {S.settingsPage.languages[l]}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>{S.settingsPage.offlineTitle}</h2>
+        <p>{S.settingsPage.offlineBody}</p>
+      </section>
+
+      <section class="card">
+        <h2>{S.settingsPage.shortcutsTitle}</h2>
+        <p>{S.settingsPage.shortcutsBody}</p>
       </section>
 
       <section class="card">

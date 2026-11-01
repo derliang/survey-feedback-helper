@@ -1,3 +1,4 @@
+import { TEMPLATE_ID_PREFIX } from '../../app/quick-templates';
 import { type PrepItem, canGoStats, doneCount, prepItems } from '../../app/progress';
 import { type Sub, acceptRecognition, go, rejectRecognition, useApp } from '../../app/store';
 import { strings as S } from '../strings';
@@ -27,6 +28,7 @@ export function Prepare() {
   const active: Sub | null = st.sub ?? (wide ? (first ? SUB_OF[first.key] : 'check') : null);
   const activeItem = active ? ITEM_OF[active] : null;
   const next = nextAction(items);
+  const tplHit = s.recognition?.survey.id.startsWith(TEMPLATE_ID_PREFIX) ?? false;
   const ready = canGoStats(s);
   const more = s.previousRows !== null ? s.table.rows.length - s.previousRows : null;
 
@@ -101,19 +103,19 @@ export function Prepare() {
       )}
 
       {s.recognition && (
-        <Sheet title={S.recognition.title(s.recognition.survey.name)} onClose={rejectRecognition}
+        <Sheet title={tplHit ? S.recognitionTpl.title(s.recognition.survey.name) : S.recognition.title(s.recognition.survey.name)} onClose={rejectRecognition}
           footer={
             <>
               <button class="btn secondary" type="button" onClick={rejectRecognition}>
-                {S.recognition.no}
+                {tplHit ? S.recognitionTpl.no : S.recognition.no}
               </button>
               <button class="btn primary grow" type="button" onClick={acceptRecognition}>
-                {S.recognition.yes}
+                {tplHit ? S.recognitionTpl.yes : S.recognition.yes}
               </button>
             </>
           }
         >
-          <Notice kind="info">{S.recognition.body(Math.round(s.recognition.similarity * 100))}</Notice>
+          <Notice kind="info">{(tplHit ? S.recognitionTpl.body : S.recognition.body)(Math.round(s.recognition.similarity * 100))}</Notice>
         </Sheet>
       )}
     </main>

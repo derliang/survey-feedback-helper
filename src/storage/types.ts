@@ -31,6 +31,19 @@ export interface FolderData {
   version: 1;
   surveys: SavedSurvey[];
   rosters: SavedRoster[];
+  /** 常用評語（老師自訂過才有；沒有就用內建六類）。 */
+  phrases?: PhraseCategory[];
+}
+
+/** 常用評語：短標題（籌碼顯示用）與整句；整句可含 {姓名}。 */
+export interface Phrase {
+  title: string;
+  text: string;
+}
+export interface PhraseCategory {
+  id: string;
+  name: string;
+  phrases: Phrase[];
 }
 
 /** 儲存提供者：實體資料夾（自動存取）。下載與上傳退回見 download.ts。 */
