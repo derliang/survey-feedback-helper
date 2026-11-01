@@ -1,12 +1,18 @@
 import { useRef, useState } from 'preact/hooks';
 import { dismiss, downloadSettings, importSettings, openSurveyFile, reauthorize, set, useApp } from '../../app/store';
-import { recentSurveys } from '../../storage';
+import { isTouchDevice, recentSurveys } from '../../storage';
 import { strings as S } from '../strings';
 import { Icon, Notice } from '../parts/parts';
+
+// iOS 的「檔案」選擇器遇到不認得的副檔名會把檔案灰掉：試算表加上 MIME，設定檔在觸控裝置不設限（讀進來再檢查格式）。
+const SURVEY_ACCEPT =
+  '.xlsx,.csv,.tsv,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,text/tab-separated-values,application/vnd.ms-excel';
+const CONFIG_ACCEPT = '.sfh,.json,application/json';
 
 export function FolderNotices() {
   const st = useApp();
   const f = st.folder;
+  const touch = isTouchDevice();
   return (
     <>
       {f.state === 'needsPermission' && (
@@ -28,29 +34,25 @@ export function FolderNotices() {
         </Notice>
       )}
       {f.state === 'unsupported' && !st.prefs.dismissed.includes('unsupported') && (
-        <Notice
-          kind="info"
-          title={S.folder.unsupportedTitle}
-          actions={
-            <button class="btn secondary small" type="button" onClick={() => dismiss('unsupported')}>
-              {S.gotIt}
-            </button>
-          }
-        >
-          {S.folder.unsupportedBody} {S.folder.manualBody}
-        </Notice>
+        <div class="notice-line" role="status" data-testid="unsupported-line">
+          <Icon name="info" />
+          <span>{touch ? S.folder.touchLine : S.folder.desktopLine}</span>
+          <button class="btn ghost small" type="button" aria-label={S.folder.closeLine} onClick={() => dismiss('unsupported')}>
+            {S.close}
+          </button>
+        </div>
       )}
       {f.state !== 'ready' && st.dirty && (
         <Notice
           kind="warn"
           title={S.folder.dirtyTitle}
           actions={
-            <button class="btn primary small" type="button" onClick={downloadSettings}>
-              {S.folder.download}
+            <button class="btn primary small" type="button" onClick={() => void downloadSettings()}>
+              {touch ? S.folder.saveToFiles : S.folder.download}
             </button>
           }
         >
-          {S.folder.dirtyBody}
+          {touch ? S.folder.touchDirtyBody : S.folder.dirtyBody}
         </Notice>
       )}
     </>
@@ -95,9 +97,15 @@ export function Home() {
             <span class="drop-or">{S.home.dropOr}</span>
           </div>
           <div class="open-buttons">
-            <button class="btn secondary" type="button" disabled aria-describedby="sheet-why">
-              {S.home.openSheet}
-            </button>
+            <div class="open-cell">
+              <button class="btn secondary" type="button" disabled aria-describedby="sheet-why">
+                {S.home.openSheet}
+              </button>
+              <p class="hint open-why" id="sheet-why">
+                <Icon name="info" />
+                <span>{S.home.openSheetWhy}</span>
+              </p>
+            </div>
             <button class="btn primary" type="button" onClick={() => fileRef.current?.click()}>
               {S.home.pickFile}
             </button>
@@ -105,14 +113,11 @@ export function Home() {
               {S.home.openConfig}
             </button>
           </div>
-          <p class="hint" id="sheet-why">
-            {S.home.openSheetWhy}
-          </p>
           <input
             ref={fileRef}
             type="file"
             hidden
-            accept=".xlsx,.csv,.tsv,.xls"
+            accept={SURVEY_ACCEPT}
             data-testid="file-input"
             onChange={(e) => {
               pick(e.currentTarget.files?.[0]);
@@ -123,7 +128,7 @@ export function Home() {
             ref={cfgRef}
             type="file"
             hidden
-            accept=".sfh,.json"
+            accept={isTouchDevice() ? undefined : CONFIG_ACCEPT}
             data-testid="config-input"
             onChange={(e) => {
               const file = e.currentTarget.files?.[0];
