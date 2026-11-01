@@ -23,7 +23,21 @@ TypeScript + Vite + Preact + Vitest + Playwright；ExcelJS、docx、fflate；PDF
 
 ## 測試與建置指令
 
-尚未建立（專案骨架建立時補）。PR 關卡見決定記錄〈PR 與發布關卡〉。
+需要 Node 24、npm 11。第一次在新電腦：`npm ci`，再 `npx playwright install chromium`（免費下載）。
+
+| 目的 | 指令 |
+|---|---|
+| 開發伺服器 | `npm run dev` |
+| 型別檢查 | `npm run typecheck` |
+| Lint | `npm run lint` |
+| 單元測試（統計核心在 `src/core/`，純函式、不碰瀏覽器 API，lint 會擋） | `npm test` |
+| 建置（輸出 `dist/`，base 為 `/survey-feedback-helper/`） | `npm run build` |
+| 效能預算（首頁 gzip 150 KB，需先建置） | `npm run check:budget` |
+| 端對端（桌機、平板、手機觸控；需先建置，自動以 `scripts/serve-dist.mjs` 提供 `dist/`） | `npm run test:e2e` |
+| 隱私掃描／授權與費用／Google 權限 | `npm run check:privacy`、`npm run check:licenses`、`npm run check:google-scopes` |
+| 以上全部依序跑 | `npm run ci` |
+
+PR 關卡見 `.github/workflows/pr-gate.yml`，部署見 `deploy.yml`（純文件變更不觸發）；細節見[決定記錄〈PR 與發布關卡〉](docs/decisions/2026-10-30-技術選型與發布規則.md)。引入新套件須先登錄 `docs/third-party.md`，`check:licenses` 會擋未登錄的直接相依。
 
 ## 工作流程
 
