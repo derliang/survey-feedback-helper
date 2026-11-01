@@ -1,6 +1,6 @@
 # 待辦 (todo)
 
-> 最後更新：2026-11-01。完成的項目移到最下方「已完成」。決定的原因見 [docs/decisions](docs/decisions/)。**桌機設計稿第 2 輪已定案併入 main**；手機與平板第 2 輪已做（分支 `design-mobile-tablet`，PR 待審，見[決定記錄](docs/decisions/2026-11-01-手機平板第二輪.md)）；程式還沒套用。
+> 最後更新：2026-11-01。完成的項目移到最下方「已完成」。決定的原因見 [docs/decisions](docs/decisions/)。**桌機設計稿第 2 輪已定案併入 main**；手機與平板第 2 輪已做（見[決定記錄](docs/decisions/2026-11-01-手機平板第二輪.md)）；**第 4 輪（2026-11-01）**已畫「選帳號前先看一下」示意卡與擋下圖解、並重建設計系統成品頁（見[決定記錄](docs/decisions/2026-11-01-擋下學校帳號.md)〈第四輪〉）；程式還沒套用。
 
 ## 下一步（依序）
 
@@ -26,7 +26,7 @@
 - [x] **Google 試算表直讀的畫面**（桌機稿 D12、D13、D44～D46）（R-044，已裁示改 Sheets API 直讀，硬規則 4 已改）：「從雲端硬碟選擇」改直讀文案（讀到目前最新內容、不改原檔、可重新讀取），連線畫面一併改；v0.4 實測 `drive.file`＋Picker 能否讀到、超額不綁帳單是否只會被擋
 - [x] **隱私從簡**（桌機稿 D54、D56；DESIGN.md 已同步。其餘文件已於 PR #6 同步）：取消「管理名單／一鍵刪除」入口與存放期限；R-005、R-031 文案重寫（**取代**10-31 的隱私兩句與審稿意見的兩句）；硬規則 5（不進 repo）保留；同步 `CONTRIBUTING.md`、`.github/pull_request_template.md`、`README.md`、`SECURITY.md`、藍圖、DESIGN.md、兩份 10-30 決定記錄；R-003「最近的專案」做法對齊
 - [x] **精準用字**（桌機稿 D14、D8 匯出教學已重做；仍待：有回應後的畫面、實際下載、Safari／手機介面的核對）（硬規則 10）：已實測，見[Google 介面核對紀錄](docs/design/Google介面核對紀錄.md)；**待做**：設計員重做匯出教學（R-006、R-033），所有舊文案「建立回應試算表」改成「連結至試算表」等原字；補核對有回應後的畫面、實際下載、Safari／手機介面
-- [ ] **載入速度**（硬規則 9）：訂效能預算與 CI 檢查（首頁 150 KB gzip、首屏 2 秒）；輸出與字型延遲載入、Service Worker 快取
+- [~] **載入速度**（硬規則 9）：效能預算與 CI 檢查已做；輸出與字型延遲載入、Service Worker 快取已做於分支 export-fonts（2026-11-01，PR 待審）。**待做**：應用程式要在進入輸出頁時呼叫 `registerAssetCache()`（`src/export/index.ts` 匯出）；首屏 2 秒要等 UI 做出來才能量
 - [ ] **樣本對照**：用樣本結構做虛構測試資料（姓名／座號對不上、書名多種寫法、自評）；個人回饋單涵蓋「平均列」；量表 0～10 分、填寫者與被評對象雙欄的欄位對應
 
 ### B. 審稿意見（2026-11-01，R-030～R-044，全文見[審稿意見裁示](docs/decisions/2026-11-01-審稿意見裁示.md)）
@@ -46,9 +46,9 @@
 - [x] **審稿與輸出**（桌機稿 13d、D26、D26b、D38b；R-019（R-019、R-021～R-023、R-025）：單一配色與模擬黑白、常用評語、存成常用評語、完成人數、自訂版面與恢復預設
 - [x] **共用版面與文案**（並排卡片規則寫入 DESIGN.md 5.20；D45 已收斂；R-020（R-020、R-026、R-027）：並排卡片規則寫進 DESIGN.md；D45 文案收斂
 - [x] **規範差異**（2026-11-01 完成：外框與圖形對比 3:1 已改 tokens；長條粗細與字級把實際值寫進 DESIGN.md；`doc.css` 色碼已轉成 `--doc-*` token；見 [設計系統 README](docs/design/design-system/README.md)）
-- [ ] 把 R-029 與所有裁示（含 5.21 手機與平板第二輪）同步進設計系統成品頁（元件成品頁 `design-system/` 尚未重建；桌機稿已另出第 2 輪成品頁）
+- [x] （2026-11-01 第四輪）把 R-029 與所有裁示（含 5.20、5.21、擋下帳號）同步進設計系統成品頁：檔案已重建、另發新連結 https://claude.ai/artifact/EwXdcUYGxE5LbytqbYuY2W（私人；舊整合成品頁未覆蓋）。新頁**尚未逐元件在瀏覽器看過**，使用者確認連結後再決定舊三頁是否標「已取代」
 
-- [ ] **學校帳號擋下：待實測與待核對**：設計稿已改成偵測後擋下（[決定記錄](docs/decisions/2026-11-01-擋下學校帳號.md)）。實作前要實測：`drive.file` 權杖能否呼叫 `about.get` 取得信箱、撤銷權杖後能否重開選帳號視窗、Google 選帳號視窗「使用其他帳戶」字樣，並由使用者決定三件事（非 Gmail 的個人帳號放不放行、要不要畫「選帳號前先看一下」示意卡、是否評估 `openid email` 範圍）
+- [ ] **學校帳號擋下：待實測與待核對**：設計稿已改成偵測後擋下（[決定記錄](docs/decisions/2026-11-01-擋下學校帳號.md)）。實作前要實測：`drive.file` 權杖能否呼叫 `about.get` 取得信箱、撤銷權杖後能否重開選帳號視窗、Google 選帳號視窗「使用其他帳戶」字樣，三件事使用者已裁示（非 Gmail 個人帳號**一律擋下**、**要**畫示意卡（第四輪已畫：桌機 D58、手機與平板 S0）、先不加 `openid email` 範圍，先實測 `about.get`）。仍待：實測與「使用其他帳戶」字樣核對（所有示意圖標「字樣待核對」）；實作時 `about.get` 不行再回來問（改硬規則 4 要使用者同意）
 
 ## 暫緩（有使用者裁示）
 
@@ -56,15 +56,16 @@
 
 ## 開工前置
 
-- [ ] **補驗證**：Safari／iOS 實機、Word for Mac／LibreOffice／Google 文件開 docx、其他範本版面（班級總表）、罕用字與長文
-- [ ] 規劃 Word 字型退讓清單與說明文字；Word for Mac（PingFang TC）重測
-- [ ] 手機等級（CPU 降速）效能重測：未完成，需拆開量字型解壓與子集化耗時
-- [ ] 正式版自己包一層瀏覽器可用的 HarfBuzz 子集化模組（`subset-font` 主程式不能直接在瀏覽器用）
-- [ ] 字型發布為 WOFF2、解壓一次後重複使用，並規劃 Service Worker 快取（字型合計約 5.6 MB；與硬規則 9 一起做）
+- [ ] **補驗證**：Safari／iOS 實機、Word for Mac／LibreOffice／Google 文件開 docx、罕用字（超出 BMP 的字、簡體、假名）與超長留言。（班級總表版面已於 2026-11-01 在 Windows Word／Excel 驗過可開啟）
+- [x] （2026-11-01，分支 export-fonts）Word 字型退讓清單與說明文字：`src/fonts/word-fonts.ts`（微軟正黑體／PingFang TC，`WORD_FONT_NOTE`）
+- [ ] Word for Mac（PingFang TC）重測：沒有 Mac，做不到；Windows Word 已確認 docx 能開、頁數與 PDF 相同（見 [輸出器與字型管線](docs/decisions/2026-11-01-輸出器與字型管線.md)）
+- [ ] 手機等級（CPU 降速）效能重測：桌機 Chromium 實測已有分段耗時（字型解壓＋wasm 初始化約 0.2～0.3 秒、單份 PDF 約 0.1 秒、12 份批次約 0.2 秒；見 `tests/e2e/export.spec.ts` 輸出）；**手機與 CPU 降速未量**，需實機或用 DevTools 降速補量
+- [x] （2026-11-01，分支 export-fonts）自包瀏覽器可用的 HarfBuzz 子集化模組：`src/fonts/subset.ts`（直接用 harfbuzzjs wasm，不再相依 subset-font／fontverter）
+- [x] （2026-11-01，分支 export-fonts）字型發布為 WOFF2（可變字型單一檔 5.43 MB，涵蓋一般與粗體）、解壓一次後重複使用（`loadFonts`）、Service Worker 快取（`public/sw.js`，實測第二次載入不再連網）
 - [x] （2026-11-01，PR design-mobile-tablet 待合併）平板補齊到與手機一一對應（84 個）；**待使用者確認方向後**，再挑審稿、輸出、範本庫手工重排並排預覽
 - [ ] 尚未設計：深色輸出文件預覽細節、動態與轉場
 - [x] （2026-11-01，PR scaffold-ci 待合併）專案骨架：TypeScript + Vite + Preact + Vitest + Playwright，並補專案 `CLAUDE.md` 的測試與建置指令
-- [x] （2026-11-01，PR scaffold-ci 待合併；**輸出視覺比對**等輸出器完成後再補）**PR 關卡**（2026-11-01 改為本機 `npm run ci`，不用 GitHub Actions）：型別與 lint、單元測試、Playwright 端對端（多解析度、觸控）、輸出視覺比對、隱私掃描、授權與費用檢查、Google 權限檢查（只允許 `drive.file`）、**效能預算（硬規則 9）**、建置
+- [x] （2026-11-01，PR scaffold-ci 待合併；輸出視覺比對已於分支 export-fonts 補上：`src/export/visual.test.ts`）**PR 關卡**（2026-11-01 改為本機 `npm run ci`，不用 GitHub Actions）：型別與 lint、單元測試、Playwright 端對端（多解析度、觸控）、輸出視覺比對、隱私掃描、授權與費用檢查、Google 權限檢查（只允許 `drive.file`）、**效能預算（硬規則 9）**、建置
 - [ ] 啟用 `main` 分支保護（程式類只能經 PR 合併；因為沒有 CI，不設必要狀態檢查，靠 PR 附本機 `npm run ci` 證據）；須放行純文件類直接 push（見 CLAUDE.md〈工作流程〉）。需使用者在 repo 設定操作
 - [x] （2026-11-01，PR local-release 待合併）GitHub Pages 發布流程改為本機 `npm run release`（推 `gh-pages` 分支，Pages 已設為從 gh-pages 部署，站台已上線）；見[決定](docs/decisions/2026-11-01-Pages改本機發布.md)。用 `--yes` 發布前需使用者說「發布」
 - [ ] 第一次用 `npm run release -- --yes` 實際發布（本 PR 只做 dry-run 驗證）
@@ -90,25 +91,26 @@
 - [x] 資料檢查（重複、空白、無效票、格式異常、同一人書名多種寫法）（2026-11-01：核心在 core-stats，畫面在分支 app-v01；處理方式用畫面內按鈕，非底部彈出面板，見下方差異）
 - [~] 三種問卷統計：票選幹部、意見調查、報告回饋 （2026-11-01 核心純函式已做於分支 core-stats，UI／檔案存取未做）
 - [~] 票選防弊（多票、自投、時間戳異常）、可重現抽籤（記錄種子） （2026-11-01 核心純函式已做於分支 core-stats，UI／檔案存取未做）
-- [ ] xlsx 輸出
+- [x] （2026-11-01，分支 export-fonts）xlsx 輸出：`src/export/xlsx.ts`（自寫 fflate；樣式、欄寬、凍結列；已用本機 Excel 實際開啟驗證）
 - [~] 測試用虛構資料；依樣本結構做，蒐集多種 Google 表單匯出樣本（核取方塊、格狀題等）（2026-11-01 分支 app-v01：`tests/e2e/fixtures.ts` 已有報告回饋虛構樣本，測試時才產生 xlsx；**其餘樣本與格狀題、核取方塊仍待做**）
 - [x] 問卷作答資料不寫入瀏覽器儲存空間（只在記憶體，見硬規則 6）（2026-11-01，分支 app-v01；e2e 檢查 localStorage、sessionStorage、IndexedDB 不含作答內容）
 - [x] 隱私聲明（網頁，從簡三句；**定稿仍待使用者確認**）、瀏覽器版本提示（2026-11-01，分支 app-v01；README 已於 PR #6 同步）
+- [ ] **輸出頁接線**：進輸出頁時呼叫 `src/fonts` 的 `registerAssetCache()`；`src/export` 範本輸入是一般資料結構，與 `src/core` 統計結果的轉接由介面端做（app-v01 未做輸出頁）
 - [ ] 統計計算自動化測試；效能壓力測試並記錄上限
 - [ ] 手機／平板／桌機版面與觸控操作
 - [ ] 載入效能預算達標（硬規則 9）
 
 ## v0.2 文件模型與輸出器
 
-- [ ] 文件模型（JSON）與區塊定義、變數
-- [ ] 預設範本（班級總表、個人回饋單；個人回饋單涵蓋樣本的「平均列」）
-- [ ] 輸出器：Word（docx）、PDF（程式直接產生、字型子集化）、批次 zip（每位學生一個 PDF）
+- [x] （2026-11-01，分支 export-fonts）文件模型（JSON）與區塊定義、變數：`src/export/model.ts`
+- [x] （2026-11-01，分支 export-fonts）預設範本（班級總表、個人回饋單含平均列）：`src/export/templates.ts`（輸入是一般資料結構；**與 `src/core` 統計結果的接線留給 UI 對話**）
+- [x] （2026-11-01，分支 export-fonts）輸出器：Word（docx）、PDF（程式直接產生、字型子集化）、批次 zip（每位學生一個 PDF）：`src/export/{docx,pdf,batch}.ts`，入口 `src/export/index.ts`（全部延遲載入）
 - [ ] 桌機備用：瀏覽器列印
 - [ ] 老師審稿（採用／隱藏／改寫）與老師評語欄
 - [ ] 關鍵字提醒清單（可自訂；不做智慧判斷）
 - [ ] 統計方法說明頁
 - [ ] 設計系統落地
-- [ ] 輸出視覺檢查測試
+- [x] （2026-11-01，分支 export-fonts）輸出視覺檢查測試：`src/export/visual.test.ts`（子集化與完整字型逐像素比對，防漏字）
 
 ## v0.3 編輯器與設定
 
@@ -169,3 +171,5 @@
 
 - [ ] 設計員：補「選帳號前先看一下」示意卡；擋下畫面（含非 Gmail 個人帳號）附說明圖解，依 [擋下學校帳號](docs/decisions/2026-11-01-擋下學校帳號.md) 使用者裁示。
 - [ ] 實測 `about.get` 在 `drive.file` 權杖下能否取得信箱（判斷學校帳號用）；不行再問是否加 `openid email`。
+
+- [ ] 舊設計系統成品頁三頁標題加「已取代」（不刪；新連結見 [第四輪決定記錄](docs/decisions/)）。擋下畫面按鈕主次維持：主「改用私人 Gmail 登入」、次「改用 Excel 檔」（使用者 2026-11-01 裁示）。
