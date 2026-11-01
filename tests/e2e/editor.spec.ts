@@ -172,3 +172,41 @@ test('沒有資料夾時提示下載備份；有資料夾時重開後範本還�
   await page.getByRole('button', { name: '我的', exact: true }).click();
   await expect(page.getByTestId('template-card')).toHaveCount(1);
 });
+
+test('設計落地：桌機範本卡露出「編輯」「用這份輸出」，其他寬度只有選單', async ({ page }, info) => {
+  await openLibrary(page);
+  const card = page.getByTestId('template-card').first();
+  if (info.project.name === 'desktop') {
+    await expect(card.getByRole('button', { name: /^編輯版面/ })).toBeVisible();
+    await expect(card.getByRole('button', { name: /輸出$/ })).toBeVisible();
+  } else {
+    await expect(card.getByRole('button', { name: /^編輯版面/ })).toHaveCount(0);
+  }
+  await expect(card.getByRole('button', { name: /的選單$/ })).toBeVisible();
+  expect(await smallButtons(page)).toEqual([]);
+});
+
+test('設計落地：紙張用 --doc-* token、縮放旁顯示頁數、把手 ≥44', async ({ page }, info) => {
+  const wide = info.project.name === 'desktop';
+  await openLibrary(page);
+  await page.getByRole('button', { name: '編輯「個人回饋單」' }).click();
+  await expect(page.getByTestId('page-count')).toHaveText(/共 \d+ 頁/);
+  const paper = await page.locator('.pv-page').first().evaluate((el) => ({ cls: el.className, bg: getComputedStyle(el).backgroundColor }));
+  expect(paper.cls).toContain('doc-warm');
+  expect(paper.bg).toBe('rgb(255, 255, 255)');
+  if (!wide) await page.getByRole('button', { name: '區塊清單' }).click();
+  const grip = await page.locator('.grip').first().boundingBox();
+  expect(grip!.width).toBeGreaterThanOrEqual(44);
+  expect(grip!.height).toBeGreaterThanOrEqual(44);
+});
+
+test('設計落地：面板進場有動畫，減少動態時為 0', async ({ page }) => {
+  await openLibrary(page);
+  await page.getByRole('button', { name: '「班級總表」的選單' }).click();
+  const anim = () => page.locator('.sheet').first().evaluate((el) => getComputedStyle(el).animationDuration);
+  expect(await anim()).toBe('0.22s');
+  await page.keyboard.press('Escape');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.getByRole('button', { name: '「班級總表」的選單' }).click();
+  expect(['0s', '']).toContain(await anim());
+});

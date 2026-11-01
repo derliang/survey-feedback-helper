@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'preact/hooks';
 import { getState, go, useApp } from '../../app/store';
 import { applyOverrides, countOverrides } from '../../editor/overrides';
-import { blockName, findBlock } from '../../editor/ops';
-import type { EBlock } from '../../editor/types';
+import { blockName, findBlock, walk } from '../../editor/ops';
+import type { EBlock, EditorTemplate } from '../../editor/types';
 import { wordNotes } from '../../editor/word';
 import { Icon, Notice, Sheet, useWide } from '../parts/parts';
 import './editor.css';
@@ -40,8 +40,31 @@ export default function EditorView() {
 
 // ---- 範本庫 ----
 
+/** 桌機寬度（≥1024）：範本卡直接露出常用動作；較窄只留「選單」。 */
+function useDesk(): boolean {
+  const q = '(min-width: 1024px)';
+  const [desk, setDesk] = useState(() => window.matchMedia(q).matches);
+  useEffect(() => {
+    const m = window.matchMedia(q);
+    const on = () => setDesk(m.matches);
+    m.addEventListener('change', on);
+    return () => m.removeEventListener('change', on);
+  }, []);
+  return desk;
+}
+
+/** 頁數：以分頁線計（內容超出一頁的自動換頁要到輸出才知道）。 */
+function pageCount(t: EditorTemplate): number {
+  let n = 1;
+  walk(t.blocks, (b) => {
+    if (b.kind === 'pageBreak') n += 1;
+  });
+  return n;
+}
+
 function Library({ e }: { e: ES }) {
   const st = useApp();
+  const desk = useDesk();
   const [filter, setFilter] = useState<'all' | 'builtin' | 'mine'>('all');
   const list = allTemplates(e.data).filter((t) => filter === 'all' || (filter === 'builtin') === t.builtin);
   const menu = e.menuFor ? allTemplates(e.data).find((t) => t.id === e.menuFor) : undefined;
@@ -84,9 +107,21 @@ function Library({ e }: { e: ES }) {
                 {e.useId === t.id && <span class="tag ok">輸出用</span>}
               </span>
             </div>
-            <button type="button" class="btn secondary small" onClick={() => setMenuFor(t.id)} aria-label={`「${t.name}」的選單`}>
-              選單
-            </button>
+            <div class="lib-acts">
+              {desk && (
+                <>
+                  <button type="button" class="btn secondary small" onClick={() => openEditor(t.id)} aria-label={`編輯版面「${t.name}」`}>
+                    編輯
+                  </button>
+                  <button type="button" class="btn secondary small" onClick={() => useTemplate(t.id)} aria-label={`用「${t.name}」輸出`}>
+                    用這份輸出
+                  </button>
+                </>
+              )}
+              <button type="button" class="btn secondary small" onClick={() => setMenuFor(t.id)} aria-label={`「${t.name}」的選單`}>
+                選單
+              </button>
+            </div>
           </div>
         ))}
       </div>
@@ -352,7 +387,7 @@ function Edit({ e }: { e: ES }) {
           <button type="button" class="btn secondary small" onClick={() => setPanel('student')}>
             {e.student ? '個別學生版本（使用中）' : '個別學生版本'}
           </button>
-          <Zoom e={e} />
+          <Zoom e={e} pages={pageCount(t0)} />
           <span class="kbd-hint">Ctrl+Z 復原 · Delete 刪除 · ↑↓ 移動 · 雙擊文字直接改</span>
         </div>
         <div class="ed-grid">
@@ -400,7 +435,7 @@ function Edit({ e }: { e: ES }) {
       </div>
       {e.view === 'preview' ? (
         <>
-          <Zoom e={e} />
+          <Zoom e={e} pages={pageCount(t0)} />
           <p class="hint">{e.editMode ? '點一下區塊選取，再按下方「編輯屬性」。' : '捲動模式：單指捲動、雙指縮放，不會誤改。要修改請打開「編輯」。'}</p>
           {pages}
         </>
@@ -432,7 +467,7 @@ function Edit({ e }: { e: ES }) {
   );
 }
 
-function Zoom({ e }: { e: ES }) {
+function Zoom({ e, pages }: { e: ES; pages: number }) {
   const f = e.zoom ?? 1;
   return (
     <div class="zoom" role="group" aria-label="預覽縮放">
@@ -445,6 +480,9 @@ function Zoom({ e }: { e: ES }) {
       <button type="button" class="icbtn" aria-label="放大" disabled={f >= 3} onClick={() => setZoom(Math.min(3, f + 0.25))}>
         ＋
       </button>
+      <span class="zoom-pages" data-testid="page-count">
+        共 {pages} 頁
+      </span>
     </div>
   );
 }
