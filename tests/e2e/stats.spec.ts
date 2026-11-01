@@ -63,6 +63,12 @@ test('輸出：學生版要先預覽，班級總表與批次 PDF 可下載', asy
   await expect(page.getByRole('heading', { name: '輸出', level: 1 })).toBeVisible();
   await noOverflow(page);
 
+  // 輸出用範本：縮圖卡片（由編輯器範本產生），預設選內建個人回饋單
+  const card = page.getByTestId('output-template').first();
+  await expect(card).toBeVisible();
+  await expect(card.getByRole('radio')).toBeChecked();
+  await card.getByRole('radio').check();
+
   const [dl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: /^Excel/ }).first().click()]);
   expect(dl.suggestedFilename()).toBe('讀書報告回饋 (回覆) 班級總表.xlsx');
 
@@ -76,6 +82,10 @@ test('輸出：學生版要先預覽，班級總表與批次 PDF 可下載', asy
   await page.getByRole('button', { name: '預覽過了' }).click();
   await expect(batch).toBeEnabled();
   await noOverflow(page);
+
+  // 單人 PDF 也走範本
+  const [one] = await Promise.all([page.waitForEvent('download', { timeout: 60_000 }), page.getByRole('button', { name: 'PDF', exact: true }).first().click()]);
+  expect(one.suggestedFilename()).toMatch(/\.pdf$/);
 
   const [zip] = await Promise.all([page.waitForEvent('download', { timeout: 90_000 }), batch.click()]);
   expect(zip.suggestedFilename()).toMatch(/個人回饋單 學生版\.zip$/);

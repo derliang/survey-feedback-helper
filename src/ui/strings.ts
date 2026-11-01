@@ -364,6 +364,10 @@ export const strings = {
     fontsNote: '第一次輸出 PDF 或 Word 會下載字型（約 5 MB），之後會快取在瀏覽器。',
     noFeedbackTargets: '沒有可輸出的被評對象。',
     noteNoRank: '回饋單不顯示名次。',
+    templateTitle: '輸出用範本',
+    templateHint: '個人回饋單用這份版面輸出；版面在「範本」頁編輯。',
+    templateEdit: '編輯範本',
+    templateLoading: '範本載入中⋯',
     wordFont: 'Word 檔字型：',
   },
 
