@@ -326,3 +326,23 @@ describe('我的範本來源與圖片', () => {
     expect(Object.keys(back.images)).toEqual(['a']);
   });
 });
+
+describe('備份合併', () => {
+  it('合併時保留目前的、補上備份裡才有的', async () => {
+    const { mergeEditorData, emptyEditorData, summarizeBackup } = await import('./project');
+    const a = emptyEditorData();
+    a.settings.global = { school: '甲校' };
+    a.images = { x: 'data:image/png;base64,AA' };
+    const b = emptyEditorData();
+    b.settings.global = { school: '乙校', deidentify: true };
+    b.settings.byKind = { vote: { version: 'student' } };
+    b.images = { x: 'data:image/png;base64,BB', y: 'data:image/png;base64,CC' };
+    b.overrides = { s1: { 甲: { blocks: {} } } };
+    const m = mergeEditorData(a, b);
+    expect(m.settings.global).toEqual({ school: '甲校', deidentify: true });
+    expect(m.settings.byKind.vote).toEqual({ version: 'student' });
+    expect(m.images.x).toBe('data:image/png;base64,AA');
+    expect(Object.keys(m.images)).toHaveLength(2);
+    expect(summarizeBackup({ surveys: [1], rosters: [] }, m)).toMatchObject({ surveys: 1, overrides: 1, images: 2 });
+  });
+});

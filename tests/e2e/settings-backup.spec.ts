@@ -1,0 +1,50 @@
+import { type Page, expect, test } from '@playwright/test';
+
+const noOverflow = async (page: Page) => {
+  const width = page.viewportSize()!.width;
+  const over = await page.evaluate((w) => Math.max(document.documentElement.scrollWidth, window.innerWidth) - w, width);
+  expect(over).toBeLessThanOrEqual(0);
+};
+
+async function openSettings(page: Page) {
+  await page.goto('./');
+  await page.getByRole('button', { name: '設定', exact: true }).click();
+  await expect(page.getByTestId('defaults-card')).toBeVisible();
+}
+
+test('三層設定：切層、標出來源、還原到上一層、不橫向捲動', async ({ page }) => {
+  await openSettings(page);
+  await noOverflow(page);
+  const card = page.getByTestId('defaults-card');
+  await expect(card.getByText('目前的值：內建預設').first()).toBeVisible();
+  await card.getByLabel('學校名稱').fill('範例國中');
+  await expect(card.getByText('目前的值：全域預設').first()).toBeVisible();
+  await card.getByRole('radio', { name: '問卷類型' }).click();
+  await card.getByRole('radio', { name: '票選' }).click();
+  await card.getByRole('radio', { name: '學生版' }).click();
+  await expect(card.getByText('目前的值：問卷類型範本').first()).toBeVisible();
+  await card.getByRole('radio', { name: '這次輸出' }).click();
+  await expect(card.getByText('只對這一次輸出有效')).toBeVisible();
+  await card.getByRole('radio', { name: '全域預設' }).click();
+  await card.getByRole('button', { name: '還原到上一層的值' }).first().click();
+  await expect(card.getByLabel('學校名稱')).toHaveValue('');
+});
+
+test('備份與還原：下載整包備份，選回後先看摘要、預設合併', async ({ page }) => {
+  await openSettings(page);
+  const card = page.getByTestId('backup-card');
+  await expect(card.getByText('備份檔含學生姓名')).toBeVisible();
+  const [download] = await Promise.all([page.waitForEvent('download'), card.getByRole('button', { name: /^(下載整包備份|儲存整包備份到檔案)$/ }).click()]);
+  const path = await download.path();
+  await card.locator('input[type=file]').setInputFiles(path);
+  const panel = page.getByTestId('restore-panel');
+  await expect(panel.getByText('還沒改任何資料')).toBeVisible();
+  await expect(panel.getByRole('radio', { name: /合併進目前的資料/ })).toHaveAttribute('aria-checked', 'true');
+  await panel.getByRole('radio', { name: /取代目前的資料/ }).click();
+  await expect(panel.getByText('先自動下載')).toBeVisible();
+  await noOverflow(page);
+  await panel.getByRole('button', { name: '取消' }).click();
+  await expect(page.getByTestId('restore-panel')).toHaveCount(0);
+  await card.locator('input[type=file]').setInputFiles({ name: 'x.json', mimeType: 'application/json', buffer: Buffer.from('{}') });
+  await expect(card.getByText('這不是備份檔')).toBeVisible();
+});

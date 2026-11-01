@@ -328,6 +328,16 @@ const MARGINS: [number, string][] = [
   [56.7, '中'],
   [72, '寬'],
 ];
+const FRAME_COLORS: [string, string][] = [
+  ['#1f4e79', '鈷藍'],
+  ['#3d4450', '石墨灰'],
+  ['#7a5230', '暖棕'],
+];
+const FRAME_WIDTHS: [number, string][] = [
+  [0.75, '細'],
+  [1.5, '中'],
+  [3, '粗'],
+];
 const PAGE_BGS: [string, string][] = [
   ['', '白'],
   ['#fffaf0', '暖白'],
@@ -354,7 +364,13 @@ export function PagePanel({ t, images }: { t: EditorTemplate; images: Record<str
         </div>
       </div>
       <Toggle label="頁框" on={!!p.frame} onChange={(v) => patchPage({ frame: v ? { color: '#1f4e79', width: 1.5, rounded: false } : undefined })} />
-      {p.frame && <Toggle label="頁框圓角" on={p.frame.rounded} onChange={(rounded) => patchPage({ frame: { ...p.frame!, rounded } })} />}
+      {p.frame && (
+        <>
+          <Seg label="頁框顏色" value={p.frame.color} opts={FRAME_COLORS} onPick={(color) => patchPage({ frame: { ...p.frame!, color } })} />
+          <Seg label="頁框粗細" value={nearest(p.frame.width, [0.75, 1.5, 3])} opts={FRAME_WIDTHS} onPick={(width) => patchPage({ frame: { ...p.frame!, width } })} />
+          <Toggle label="頁框圓角" on={p.frame.rounded} onChange={(rounded) => patchPage({ frame: { ...p.frame!, rounded } })} />
+        </>
+      )}
       <div class="field">
         <label class="label" for="pg-foot">
           頁尾文字
