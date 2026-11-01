@@ -1,11 +1,12 @@
 import { choosePickFolder, downloadSettings, forgetThisFolder, go, restart, set, updatePrefs, useApp } from '../../app/store';
-import type { Theme } from '../../storage';
+import { type Theme, isTouchDevice } from '../../storage';
 import { strings as S } from '../strings';
 import { ActBar, Sheet } from '../parts/parts';
 
 export function Settings() {
   const st = useApp();
   const f = st.folder;
+  const touch = isTouchDevice();
   return (
     <main class="page" id="main">
       <h1>{S.settingsPage.title}</h1>
@@ -37,13 +38,18 @@ export function Settings() {
             </button>
           )}
           {f.state !== 'ready' && (
-            <button class="btn secondary" type="button" onClick={downloadSettings}>
-              {S.folder.download}
+            <button class="btn secondary" type="button" onClick={() => void downloadSettings()}>
+              {touch ? S.folder.saveToFiles : S.folder.download}
             </button>
           )}
         </div>
         {f.state !== 'unsupported' && f.state !== 'none' && <p class="hint">{S.settingsPage.forgetNote}</p>}
-        {f.state === 'unsupported' && <p class="hint">{S.folder.manualBody}</p>}
+        {f.state === 'unsupported' && (
+          <>
+            <p class="hint">{S.folder.unsupportedBody}</p>
+            <p class="hint">{touch ? S.folder.touchManualBody : S.folder.manualBody}</p>
+          </>
+        )}
       </section>
 
       <section class="card">

@@ -323,6 +323,22 @@ select {
   flex-wrap: wrap;
   margin-top: var(--sp-2);
 }
+.notice-line {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-1) var(--sp-1) var(--sp-1) var(--sp-3);
+  border-radius: var(--r-md);
+  background: var(--accent-soft);
+  color: var(--ink);
+  font-size: var(--fs-sm);
+}
+.notice-line .ic {
+  flex: none;
+}
+.notice-line span {
+  flex: 1;
+}
 .notice-warn {
   background: var(--warn-soft);
   border-color: var(--warn);
@@ -1115,4 +1131,43 @@ button.tile {
     transition: none !important;
     animation: none !important;
   }
+}
+
+.lock-hint {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.lock-hint .ic {
+  width: 18px;
+  height: 18px;
+}
+.open-cell {
+  display: grid;
+  gap: var(--sp-1);
+  align-content: start;
+}
+.open-why {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  margin: 0;
+}
+.open-why .ic {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+.dot-warn {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: var(--warn-bar);
+  border: 2px solid var(--card);
+  box-shadow: 0 0 0 1px var(--warn);
+}
+.bar-actions .btn {
+  position: relative;
 }

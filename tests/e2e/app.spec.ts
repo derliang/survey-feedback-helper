@@ -145,16 +145,18 @@ test('重新開始會先確認，設定頁有隱私三句與忘記資料夾', as
 test('不支援資料夾的瀏覽器：退回下載與上傳，認得讀過', async ({ page }) => {
   await page.addInitScript(() => {
     delete (window as unknown as { showDirectoryPicker?: unknown }).showDirectoryPicker;
+    delete (navigator as unknown as { share?: unknown }).share; // 觸控裝置不支援分享時退回下載
   });
   await page.goto('./');
-  await expect(page.getByText('這個瀏覽器無法自動存到資料夾').first()).toBeVisible();
+  await expect(page.getByTestId('unsupported-line')).toBeVisible();
+  await expect(page.getByTestId('unsupported-line')).toContainText(/無法自動存到資料夾|儲存到檔案/);
   await page.getByTestId('file-input').setInputFiles(surveyFile());
   await confirmType(page);
   await confirmMapping(page);
   // 設定有更新但還沒保存 → 回首頁可下載設定檔
   await page.getByRole('button', { name: '問卷回饋小幫手', exact: true }).click();
   await expect(page.getByText('設定有更新，還沒保存')).toBeVisible();
-  const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: '下載設定檔' }).click()]);
+  const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: /^(下載設定檔|儲存到檔案)$/ }).click()]);
   expect(download.suggestedFilename()).toBe('問卷小幫手設定.sfh');
   const path = await download.path();
   const saved = await (await import('node:fs/promises')).readFile(path, 'utf8');
@@ -169,6 +171,43 @@ test('不支援資料夾的瀏覽器：退回下載與上傳，認得讀過', as
   await expect(page.getByRole('dialog')).toContainText('這是不是之前的《讀書報告回饋 (回覆)》？');
   await page.getByRole('button', { name: '是，用之前的設定' }).click();
   await expect(page.getByTestId('done-count')).toHaveText('完成 2／4');
+});
+
+test('觸控裝置：保存設定送到分享選單，小提示只出現一次', async ({ page }, info) => {
+  test.skip(!info.project.use.hasTouch, '分享選單只在觸控裝置優先');
+  await page.addInitScript(() => {
+    delete (window as unknown as { showDirectoryPicker?: unknown }).showDirectoryPicker;
+    const w = window as unknown as { __shared: { name: string; text: Promise<string> }[] };
+    w.__shared = [];
+    Object.defineProperty(navigator, 'canShare', { value: (d: ShareData) => !!d.files?.length, configurable: true });
+    Object.defineProperty(navigator, 'share', {
+      value: async (d: ShareData) => {
+        for (const f of d.files ?? []) w.__shared.push({ name: f.name, text: f.text() });
+      },
+      configurable: true,
+    });
+  });
+  await page.goto('./');
+  await expect(page.getByTestId('unsupported-line')).toContainText('儲存到檔案');
+  await page.getByTestId('file-input').setInputFiles(surveyFile());
+  await confirmType(page);
+  await confirmMapping(page);
+  await expect(page.getByTestId('unsaved-dot')).toBeVisible();
+  await page.getByRole('button', { name: '問卷回饋小幫手', exact: true }).click();
+  await expect(page.getByText('設定有更新，還沒保存')).toBeVisible();
+  await page.getByRole('button', { name: '儲存到檔案', exact: true }).click();
+  await expect(page.getByText('設定有更新，還沒保存')).toBeHidden();
+  const shared = await page.evaluate(async () => {
+    const w = window as unknown as { __shared: { name: string; text: Promise<string> }[] };
+    return Promise.all(w.__shared.map(async (f) => ({ name: f.name, text: await f.text })));
+  });
+  expect(shared).toHaveLength(1);
+  expect(shared[0]!.name).toBe('問卷小幫手設定.sfh');
+  expect(shared[0]!.text).not.toContain('陳家豪');
+  await page.getByTestId('unsupported-line').getByRole('button').click();
+  await page.reload();
+  await expect(page.getByTestId('unsupported-line')).toBeHidden();
+  await noOverflow(page);
 });
 
 test('資料夾：選擇、重開後仍記得（以瀏覽器內建資料夾模擬）', async ({ page, browserName }, info) => {

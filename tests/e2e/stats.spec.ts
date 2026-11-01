@@ -69,10 +69,10 @@ test('輸出：學生版要先預覽，班級總表與批次 PDF 可下載', asy
   await page.getByRole('radio', { name: '學生版' }).click();
   const batch = page.getByRole('button', { name: /^全部 \d+ 位/ });
   await expect(batch).toBeDisabled();
-  await page.getByRole('button', { name: '預覽將放進去的留言' }).click();
+  await page.getByRole('button', { name: '先預覽學生版' }).click();
   await expect(page.getByTestId('preview')).toBeVisible();
   await expect(page.getByRole('button', { name: '預覽過了' })).toBeDisabled();
-  await page.getByRole('checkbox', { name: /我看過了/ }).check();
+  await page.getByRole('checkbox', { name: /我已逐則看過預覽/ }).check();
   await page.getByRole('button', { name: '預覽過了' }).click();
   await expect(batch).toBeEnabled();
   await noOverflow(page);

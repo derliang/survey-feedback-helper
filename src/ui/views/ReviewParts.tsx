@@ -1,5 +1,6 @@
 import { useState } from 'preact/hooks';
 import { commentState, flaggedWords, setComment, setKeywords, setRewrite, type Review } from '../../app/review';
+import { isTouchDevice } from '../../storage';
 import { downloadReview, updateReview, useApp } from '../../app/store';
 import { strings as S } from '../strings';
 import { Notice } from '../parts/parts';
@@ -138,8 +139,8 @@ export function SaveNote() {
     <Notice
       kind="warn"
       actions={
-        <button class="btn secondary small" type="button" onClick={downloadReview}>
-          {S.review.downloadReview}
+        <button class="btn secondary small" type="button" onClick={() => void downloadReview()}>
+          {isTouchDevice() ? S.folder.saveToFiles : S.review.downloadReview}
         </button>
       }
     >

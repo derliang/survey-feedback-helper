@@ -8,6 +8,7 @@ import {
   SETTINGS_FILE,
   applyTheme,
   downloadText,
+  saveFile,
   emptyFolderData,
   forgetFolder,
   loadPrefs,
@@ -187,9 +188,11 @@ export async function persist(data: FolderData): Promise<void> {
   }
 }
 
-export function downloadSettings(): void {
-  downloadText(SETTINGS_FILE, serializeFolderData(getState().data));
-  set({ dirty: false });
+/** 保存設定檔：手機走分享選單的「儲存到檔案」，桌機與不支援分享的瀏覽器下載。 */
+export async function downloadSettings(): Promise<void> {
+  const text = serializeFolderData(getState().data);
+  const r = await saveFile(SETTINGS_FILE, text, 'application/json', () => downloadText(SETTINGS_FILE, text));
+  if (r !== 'cancelled') set({ dirty: false });
 }
 
 export async function choosePickFolder(): Promise<void> {
@@ -399,10 +402,11 @@ export function updateReview(fn: (r: Review) => Review): void {
   reviewTimer = setTimeout(() => void writeReview(), 500);
 }
 
-export function downloadReview(): void {
+export async function downloadReview(): Promise<void> {
   const { review } = getState();
-  if (review) {
-    downloadText(reviewFileName(review.surveyId), serializeReview(review));
-    set({ reviewUnsaved: false });
-  }
+  if (!review) return;
+  const name = reviewFileName(review.surveyId);
+  const text = serializeReview(review);
+  const r = await saveFile(name, text, 'application/json', () => downloadText(name, text));
+  if (r !== 'cancelled') set({ reviewUnsaved: false });
 }
