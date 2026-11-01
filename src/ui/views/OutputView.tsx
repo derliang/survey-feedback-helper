@@ -1,3 +1,4 @@
+import type { ComponentType } from 'preact';
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { type TargetResult } from '../../core';
 import { feedbackRecords, opinionQuestions, runFeedback, runVote } from '../../app/analysis';
@@ -14,15 +15,43 @@ import {
 import { canGoStats } from '../../app/progress';
 import { emptyReview, reviewCounts } from '../../app/review';
 import { go, loadReview, useApp } from '../../app/store';
-import { WORD_FONT_NOTE, loadDocx, loadPdf, loadTemplates, loadXlsx, registerAssetCache } from '../../export';
+import { WORD_FONT_NOTE, loadDocx, loadPdf, loadXlsx, registerAssetCache } from '../../export';
+import type { ClassSummaryInput, DocModel, PersonalFeedbackInput } from '../../export';
 import { downloadBytes } from '../../storage';
 import { feedbackKey } from '../../app/output';
+import { resolveSettings } from '../../editor/settings';
 import { PRINT, pairedBarsSvg } from '../chart-svg';
 import { svgToPng } from '../chart-png';
 import { strings as S } from '../strings';
 import { ActBar, Icon, Notice, Sheet } from '../parts/parts';
 
 type Fmt = 'xlsx' | 'docx' | 'pdf';
+
+/** 輸出用範本與編輯器資料（延遲載入，和編輯器同一包）：回傳把統計資料編成 DocModel 的函式。 */
+async function docTools() {
+  const [ed, r] = await Promise.all([import('../editor/state'), import('../../app/render')]);
+  await ed.load();
+  const data = ed.es().data;
+  const picks = ed.pickedTemplates();
+  const school = resolveSettings({ global: data.settings.global, byKind: data.settings.byKind, run: {} }, 'feedback').school;
+  const overrides = ed.currentOverrides();
+  return {
+    personal: (inp: PersonalFeedbackInput, audience: Audience): DocModel =>
+      r.personalDocFromTemplate(picks.personal, inp, { version: audience, school, images: data.images, ...(overrides[`${inp.className}-${inp.student.seat}`] ? { override: overrides[`${inp.className}-${inp.student.seat}`]! } : {}) }),
+    summary: (inp: ClassSummaryInput): DocModel => r.classDocFromTemplate(picks.summary, inp, { version: 'teacher', school, images: data.images }),
+  };
+}
+
+const PickerLazy = (() => {
+  let C: ComponentType | null = null;
+  return function Picker() {
+    const [, set] = useState(0);
+    useEffect(() => {
+      if (!C) void import('../editor/OutputPicker').then((m) => { C = m.default; set((n) => n + 1); });
+    }, []);
+    return C ? <C /> : <p class="hint">{S.output.templateLoading}</p>;
+  };
+})();
 const MIME: Record<Fmt | 'zip', string> = {
   xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -118,7 +147,7 @@ export function OutputView() {
       const input = classSummaryInput(s, summary!);
       const name = `${base} 班級總表.${fmt}`;
       if (fmt === 'xlsx') return { name, bytes: (await loadXlsx()).classSummaryXlsx(input), mime: MIME.xlsx };
-      const doc = (await loadTemplates()).classSummaryDoc(input);
+      const doc = (await docTools()).summary(input);
       if (fmt === 'docx') return { name, bytes: await (await loadDocx()).renderDocx(doc), mime: MIME.docx };
       const { renderPdf, loadFonts } = await loadPdf();
       {
@@ -131,7 +160,7 @@ export function OutputView() {
     run(`one-${fmt}`, async () => {
       const list = await withCharts();
       const pick = list.find((p) => p.key === (sel?.key ?? '')) ?? list[0]!;
-      const doc = (await loadTemplates()).personalFeedbackDoc(pick.input);
+      const doc = (await docTools()).personal(pick.input, audience);
       const name = `${pick.fileName} ${AUDIENCE_NAMES[audience]}.${fmt}`;
       if (fmt === 'docx') return { name, bytes: await (await loadDocx()).renderDocx(doc), mime: MIME.docx };
       const { renderPdf, loadFonts } = await loadPdf();
@@ -144,9 +173,9 @@ export function OutputView() {
   const batch = () =>
     run('batch', async () => {
       const list = await withCharts();
-      const { personalFeedbackDoc } = await loadTemplates();
+      const tools = await docTools();
       const { renderBatchZip, loadFonts } = await loadPdf();
-      const items = list.map((p) => ({ name: `${p.fileName} ${AUDIENCE_NAMES[audience]}`, doc: personalFeedbackDoc(p.input) }));
+      const items = list.map((p) => ({ name: `${p.fileName} ${AUDIENCE_NAMES[audience]}`, doc: tools.personal(p.input, audience) }));
       const missing = new Set<string>();
       const bytes = await renderBatchZip(items, await loadFonts(), (d, t) => setBusy(S.output.progress(d, t)), (cs) => cs.forEach((c) => missing.add(c)));
       return { name: `${base} 個人回饋單 ${AUDIENCE_NAMES[audience]}.zip`, bytes, mime: MIME.zip, missing: [...missing] };
@@ -225,6 +254,12 @@ export function OutputView() {
                 </button>
               ))}
             </div>
+          </section>
+
+          <section class="card">
+            <h2>{S.output.templateTitle}</h2>
+            <p class="hint">{S.output.templateHint}</p>
+            <PickerLazy />
           </section>
 
           <section class="card">

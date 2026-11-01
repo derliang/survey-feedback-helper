@@ -8,6 +8,7 @@ import { type History, canRedo, canUndo, commit, createHistory, redo, undo } fro
 import { ensureEditable, exportTemplate, importTemplate, resetToBuiltin, TemplateImportError, uniqueName } from '../../editor/library';
 import { blankBlock, dropBlock, duplicateBlock, findBlock, insertBlock, moveBlock, removeBlock, setColumnCount, setPage, updateBlock } from '../../editor/ops';
 import { type BlockOverride, type OverrideMap, setBlockOverride, setVarOverride } from '../../editor/overrides';
+import { pickTemplates, type TemplatePick } from '../../app/render';
 import { EDITOR_FILE, type EditorData, emptyEditorData, parseEditorData, serializeEditorData } from '../../editor/project';
 import type { EBlock, EBlockKind, EditorTemplate, PageSpec } from '../../editor/types';
 
@@ -145,6 +146,11 @@ export function useTemplate(id: string): void {
   put({ useId: id, menuFor: null });
   save(data);
   toast('之後輸出會用這份範本。');
+}
+/** 輸出頁選範本：和範本庫的「用這份輸出」同一個設定（`settings.global.templateId`），不跳提示。 */
+export function setOutputTemplate(id: string): void {
+  put({ useId: id });
+  save({ ...st.data, settings: { ...st.data.settings, global: { ...st.data.settings.global, templateId: id } } });
 }
 export function duplicate(id: string): void {
   const t = allTemplates().find((x) => x.id === id);
@@ -295,3 +301,6 @@ export function overrideVar(name: string, value: string | undefined): void {
   if (!st.student) return;
   saveOverrides(setVarOverride(currentOverrides(), st.student, name, value));
 }
+
+/** 輸出時實際用的範本（輸出用範本；沒選就用內建）。 */
+export const pickedTemplates = (): TemplatePick => pickTemplates(allTemplates(), st.useId);

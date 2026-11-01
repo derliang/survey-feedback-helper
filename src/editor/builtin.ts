@@ -31,7 +31,7 @@ export function builtinTemplates(): EditorTemplate[] {
       h('p-h1', '各向度評分', 14, { before: 6, after: 6 }),
       { id: 'p-table', kind: 'data', slot: SLOTS.scoreTable, dataKind: 'table', after: 12, label: '評分表（含平均列）' },
       { id: 'p-chart', kind: 'data', slot: SLOTS.chart, dataKind: 'chart', chartType: 'compare', compareLine: true, after: 12, label: '對照圖' },
-      h('p-h2', '同學的優點回饋', 14, { before: 6, after: 6, when: { kind: 'var', name: '有優點', op: 'nonEmpty' } }),
+      h('p-h2', '同學的留言', 14, { before: 6, after: 6, when: { kind: 'var', name: '有優點', op: 'nonEmpty' } }),
       { id: 'p-praise', kind: 'bullets', slot: SLOTS.praise, items: [], size: 11, after: 10, label: '優點留言', when: { kind: 'var', name: '有優點', op: 'nonEmpty' } },
       h('p-h3', '同學的建議', 14, { before: 6, after: 6, when: { kind: 'var', name: '有建議', op: 'nonEmpty' } }),
       { id: 'p-advice', kind: 'bullets', slot: SLOTS.advice, items: [], size: 11, after: 10, label: '建議留言', when: { kind: 'var', name: '有建議', op: 'nonEmpty' } },
