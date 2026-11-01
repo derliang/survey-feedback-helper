@@ -106,3 +106,22 @@ test('圖表長條（5.26）：可聚焦，聚焦時加 2px 外框，標籤含�
   await bar.focus();
   expect(await bar.locator('rect').evaluate((el) => getComputedStyle(el).strokeWidth)).toBe('2px');
 });
+
+test('歷次趨勢：加入之前的問卷後並排成表與折線，可移除', async ({ page }) => {
+  await prepared(page);
+  await step(page, '統計').click();
+  const card = page.getByTestId('trend');
+  await expect(card).toBeVisible();
+  await expect(card.getByText('至少要有兩次問卷')).toBeVisible();
+  await noOverflow(page);
+
+  await page.getByTestId('trend-input').setInputFiles(surveyFile('上一次期中.xlsx'));
+  await expect(page.getByTestId('trend-table')).toBeVisible();
+  await expect(page.getByTestId('trend-table')).toContainText('上一次期中');
+  await expect(page.getByTestId('trend-table')).toContainText('持平');
+  await expect(card.locator('.chart svg')).toBeVisible();
+  await noOverflow(page);
+
+  await card.getByRole('button', { name: '移除' }).click();
+  await expect(card.getByText('至少要有兩次問卷')).toBeVisible();
+});

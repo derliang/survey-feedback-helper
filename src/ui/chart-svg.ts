@@ -155,3 +155,40 @@ export function columnsSvg(values: readonly number[], labels: readonly string[],
     .join('');
   return wrapSvg(w, h, o.title, p, `<line x1="8" y1="${h - bottom}" x2="${w - 8}" y2="${h - bottom}" style="stroke:${p.grid}" stroke-width="1"/>${body}`);
 }
+
+export interface LineSeries {
+  label: string;
+  values: readonly (number | null)[];
+}
+
+/** 折線圖：在線尾直接標題名與分數，不靠圖例對色（線用不同灰階深淺＋最後一點標示）。 */
+export function linesSvg(series: readonly LineSeries[], xLabels: readonly string[], o: { title: string; max: number; min?: number; w?: number; h?: number; palette?: Palette }): string {
+  const p = o.palette ?? SCREEN;
+  const w = o.w ?? 560;
+  const h = o.h ?? 220;
+  const padL = 30;
+  const padR = w < 420 ? 110 : 150;
+  const padT = 14;
+  const padB = 28;
+  const lo = o.min ?? 0;
+  const n = Math.max(xLabels.length, 2);
+  const x = (i: number) => padL + (i * (w - padL - padR)) / (n - 1);
+  const y = (v: number) => padT + (1 - (v - lo) / (o.max - lo || 1)) * (h - padT - padB);
+  const colors = [p.a, p.b, p.ink, p.muted];
+  const grid = [lo, (lo + o.max) / 2, o.max]
+    .map((g) => `<line x1="${padL}" x2="${w - padR}" y1="${f1(y(g))}" y2="${f1(y(g))}" style="stroke:${p.grid}"/><text x="${padL - 4}" y="${f1(y(g) + 4)}" text-anchor="end" font-size="11" style="fill:${p.muted}">${f1(g)}</text>`)
+    .join('');
+  const xl = xLabels.map((l, i) => `<text x="${f1(x(i))}" y="${h - 8}" text-anchor="middle" font-size="11" style="fill:${p.muted}">${esc(clip(l, 6))}</text>`).join('');
+  const lines = series
+    .map((s, si) => {
+      const c = colors[si % colors.length]!;
+      const pts = s.values.map((v, i) => (v === null ? null : ([x(i), y(v), v] as const)));
+      const path = pts.filter((q): q is NonNullable<typeof q> => q !== null).map((q, i) => `${i === 0 ? 'M' : 'L'}${f1(q[0])} ${f1(q[1])}`).join(' ');
+      const dots = pts.map((q) => (q ? `<circle cx="${f1(q[0])}" cy="${f1(q[1])}" r="3" style="fill:${c}"/>` : '')).join('');
+      const last = [...pts].reverse().find((q) => q !== null);
+      const tag = last ? `<text x="${f1(last[0] + 8)}" y="${f1(last[1] + 4)}" font-size="12" style="fill:${p.ink}">${esc(clip(s.label, w < 420 ? 5 : 8))} ${f1(Math.round(last[2] * 10) / 10)}</text>` : '';
+      return `<path d="${path}" fill="none" stroke-width="2" style="stroke:${c}"/>${dots}${tag}`;
+    })
+    .join('');
+  return wrapSvg(w, h, o.title, p, grid + xl + lines);
+}
