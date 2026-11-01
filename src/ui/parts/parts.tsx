@@ -1,3 +1,4 @@
+import { strings } from '../strings';
 import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 
@@ -99,4 +100,29 @@ export function useWide(): boolean {
 
 export function ActBar(props: { children: ComponentChildren }) {
   return <div class="actbar">{props.children}</div>;
+}
+
+/** Google 選帳號畫面的示意圖（自畫、虛構帳號；「選這個」用文字加底色，不只靠顏色）。登入前提示卡與教學共用。 */
+export function AccountChooser() {
+  const G = strings.google;
+  const row = (a: readonly string[], pick: boolean) => (
+    <div class={`g-row${pick ? ' g-pick' : ''}`}>
+      <strong>{a[0]}</strong>
+      <span class="g-mail">{a[1]}</span>
+      <span class="g-note">{a[2]}</span>
+      {pick && <em>{G.pickThis}</em>}
+    </div>
+  );
+  return (
+    <figure class="g-chooser" role="group" aria-label={G.chooserLabel}>
+      {row(G.accountA, false)}
+      {row(G.accountB, true)}
+      <div class="g-row g-other">
+        <strong>{G.other}</strong>
+        <span class="g-note">{G.otherNote}</span>
+        <span class="g-tag">{G.toVerify}</span>
+      </div>
+      <figcaption>{G.chooserNote}</figcaption>
+    </figure>
+  );
 }
