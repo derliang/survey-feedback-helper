@@ -4,6 +4,7 @@ import { compile, pageSetup, type SlotBlock } from '../editor/compile';
 import type { StudentOverride } from '../editor/overrides';
 import { walk } from '../editor/ops';
 import type { EditorTemplate, ReportVersion } from '../editor/types';
+import * as advanced from '../export/advanced';
 import { contentWidth, type Block, type DocModel } from '../export/model';
 import type { ClassSummaryInput, PersonalFeedbackInput } from '../export';
 
@@ -113,6 +114,10 @@ export function personalDocFromTemplate(t: EditorTemplate, inp: PersonalFeedback
     班級平均: fmt1(inp.average.classMean),
     滿分: inp.scaleMax,
     老師評語: inp.teacherComment ?? '',
+    全班名次: inp.stats?.rank ?? '',
+    回收份數: inp.stats?.count ?? '',
+    中位數: inp.stats?.median != null ? fmt1(inp.stats.median) : '',
+    標準差: inp.stats?.sd != null ? inp.stats.sd.toFixed(2) : '',
     有優點: inp.praise.length ? '1' : '',
     有建議: inp.advice.length ? '1' : '',
   };
@@ -130,6 +135,8 @@ export function personalDocFromTemplate(t: EditorTemplate, inp: PersonalFeedback
         return inp.praise.length ? [{ type: 'bullets', items: inp.praise, size }] : [];
       case SLOTS.advice:
         return inp.advice.length ? [{ type: 'bullets', items: inp.advice, size }] : [];
+      case 'compare':
+        return inp.selfCompare?.length ? [advanced.compareTable(inp.selfCompare, { width })] : [];
       case SLOTS.teacherComment:
         return inp.teacherComment ? [{ type: 'text', text: inp.teacherComment, size }] : [];
       default:

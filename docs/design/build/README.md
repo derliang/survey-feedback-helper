@@ -17,3 +17,5 @@
 - 順序：`node batch31.mjs; node batch32.mjs; node batch33.mjs; node batch34.mjs; node mk.mjs`（產生模擬頁）；`node mk.mjs artifact` 產生成品頁。成品頁 `survey-*.html` 是產物，不進版控。
 - 舊的 `batch4–12、14`、`frag-core` 等手機與平板稿仍是 `phones.mjs` 的來源（被取代的畫面不再顯示）。
 - 第六輪：`batch51.mjs`（`node batch51.mjs` 直接寫入 `mockups/{手機,平板,桌機}-第六輪.html`；用 `m2kit`、`deskkit`，深色頁用 tokens.css 深色區塊改成 `.dk` 範圍）。
+- 選課分組志願（2026-11-01）：`node batch71.mjs` 直接寫入 `mockups/{手機,平板,桌機}-選課分組志願.html`（用 `m2kit`、`deskkit`；第 3 步改名「名額與分配」是改 `K.NAMES`／`DK.W.STEP_NAMES`，只在這支程式內生效）。規範見 DESIGN.md 5.27。
+- 雲端自動備份（2026-11-01）：`node batch81.mjs` 直接寫入 `mockups/{手機,平板,桌機}-雲端自動備份.html`（用 `m2kit`、`deskkit`、`acctkit` 的 `chooser`；toast 樣式 `.toast2` 只在這支程式的頁面 CSS 內）。規範見 DESIGN.md 5.28。
