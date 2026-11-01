@@ -214,6 +214,12 @@ test('資料夾：選擇、重開後仍記得（以瀏覽器內建資料夾模�
   test.skip(browserName !== 'chromium', 'File System Access 僅 Chromium');
   await page.addInitScript(() => {
     (window as unknown as { showDirectoryPicker: () => Promise<unknown> }).showDirectoryPicker = () => navigator.storage.getDirectory();
+    // 讓寫入檔案變慢，等於模擬機器吃重：測試不能靠「剛好寫完」才過
+    const close = FileSystemWritableFileStream.prototype.close;
+    FileSystemWritableFileStream.prototype.close = async function (this: FileSystemWritableFileStream) {
+      await new Promise((r) => setTimeout(r, 1500));
+      return close.call(this);
+    };
   });
   await page.goto('./');
   await page.getByRole('button', { name: '選擇資料夾' }).click();
@@ -225,6 +231,21 @@ test('資料夾：選擇、重開後仍記得（以瀏覽器內建資料夾模�
   await page.getByTestId('file-input').setInputFiles(surveyFile());
   await confirmType(page);
   await confirmMapping(page);
+  // 設定是非同步寫進資料夾的；要等檔案真的寫好才重開，否則在吃重時會在寫入中途重載
+  await expect
+    .poll(
+      async () =>
+        page.evaluate(async () => {
+          try {
+            const dir = await navigator.storage.getDirectory();
+            return await (await (await dir.getFileHandle('問卷小幫手設定.sfh')).getFile()).text();
+          } catch {
+            return '';
+          }
+        }),
+      { timeout: 15_000 },
+    )
+    .toContain('讀書報告回饋');
   await page.reload();
   await expect(page.getByText('已連線')).toBeVisible();
   await expect(page.getByRole('button', { name: /讀書報告回饋 \(回覆\)/ })).toBeVisible();
