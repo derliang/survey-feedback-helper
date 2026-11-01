@@ -144,7 +144,7 @@
 - [x] （2026-11-01，export-layout：輸出器已支援 `columns` 區塊，PDF 並排、Word 無框線表格；**`compile` 尚未改成輸出 columns，由 output-wiring／後續接線**）多欄並排：原說明：輸出器目前不支援並排，`compile` 先把各欄由左到右上下攤平；輸出器加欄位排版後改為真正並排（PDF 與 Word 表格排版）。
 - [x] （2026-11-01，export-layout：`DocModel.deco` 與區塊 `bg`，PDF／Word 皆已繪製；**`compile` 要把 `PageSpec` 的 background／frame／headerText／logoSrc 與文字 `bg` 填進 `deco`／`bg`**）頁面背景色、頁框、頁首、Logo、區塊底色。
 - [x] （2026-11-01，分支 output-wiring）輸出頁接「輸出用」範本與真實統計槽：`src/app/render.ts`（compile → DocModel，槽：評分表、圖表、留言、老師評語、班級總表；學生覆寫、學校變數、Logo 圖片）；輸出頁有範本縮圖與選擇（`OutputPicker`，動態載入）；班級總表、單人 PDF／Word、批次 zip 都走範本；學生版／家長版警語預覽與 missingChars 提醒不變。**未做**：進階區塊（等 export-layout 引擎，現缺引擎的區塊略過）、檔名規則、去識別化代號輸出。內建「個人回饋單」留言標題改為「同學的留言」（留言不分優缺點）。
-- [ ] 個別學生版本：目前學生名單取自已讀入的名單，沒有名單時用範例同學；覆寫的「還原」會一次清掉該區塊的隱藏與改字（要拆成逐項） 負責：無人（待派施工）
+- [x] （2026-11-01，分支 student-override-revert）個別學生版本：目前學生名單取自已讀入的名單，沒有名單時用範例同學；覆寫的「還原」已拆成隱藏、改字各自還原（`withoutBlockPart`）。沒有名單時用範例同學未處理
 - [~] 設計稿的進階區塊：輸出引擎已做（2026-11-01，export-layout：`hero`、`stats`、`callout` 區塊與 `compareTable`，建構函式 `src/export/advanced.ts`）；**編輯器的區塊種類、範本與 compile 對應未做**；頁面上拖曳區塊、預覽輸出（試印 PDF）未做
 - [x] 頁面設定的 Logo：輸出器已繪製（PDF 右上角、Word 放頁首），compile 接線同上
 
