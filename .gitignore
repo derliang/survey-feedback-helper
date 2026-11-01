@@ -21,3 +21,8 @@ Thumbs.db
 .idea/
 node_modules/
 *.log
+
+# 建置與測試產物
+dist/
+playwright-report/
+test-results/
