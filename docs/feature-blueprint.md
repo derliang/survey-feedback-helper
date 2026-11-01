@@ -21,7 +21,7 @@
 
 - **統計核心**：純函式模組，不依賴瀏覽器，可獨立測試。
 - **文件模型與輸出器**：預覽、PDF、Word 共用同一份文件模型。
-- **儲存提供者**：本機檔案、下載與上傳、系統分享、Google Drive API，依裝置自動選用。
+- **儲存提供者**：本機檔案、下載與上傳、系統分享、Google Drive／Sheets API，依裝置自動選用。
 - 技術選型見 [技術選型與發布規則](decisions/2026-10-30-技術選型與發布規則.md)。
 
 ## 三、裝置與瀏覽器
@@ -38,7 +38,7 @@
 
 ## 四、資料進來
 
-- 開啟本機 xlsx／csv；Google 表單匯出格式為主；Google 試算表經軌一轉 xlsx（v0.4）。
+- 開啟本機 xlsx／csv；Google 表單匯出格式為主；Google 試算表經軌一用 Sheets API 直讀（v0.4，2026-11-01 裁示）。
 - 欄位對應精靈：時間戳記、姓名、座號、各題類型（單選、複選、量表、開放題）。
 - 學生名單匯入與對照：誰沒填、冒名、打錯名字、重複填答。
 - 資料檢查：重複、空白、無效票、格式異常，列出讓老師決定。
@@ -92,11 +92,11 @@
 
 | | 軌一：使用者登入（v0.4） | 軌二：原生檔案管理（併入 v0.1） |
 |---|---|---|
-| 做法 | Google 登入＋Drive API＋Picker | 裝置檔案／資料夾選擇器 |
+| 做法 | Google 登入＋Drive API＋Sheets API＋Picker | 裝置檔案／資料夾選擇器 |
 | 桌機 | 所有瀏覽器 | Chrome／Edge 選「Google 雲端硬碟 for desktop」資料夾，直接讀寫並同步 |
 | 手機／平板 | 可用 | 系統選檔視窗本來就列出 Drive |
 
-- 只申請 `drive.file` 權限；Google Cloud 專案不綁帳單帳戶；API 金鑰限 Pages 網址、只開 Drive 與 Picker。
+- 只申請 `drive.file` 權限；Google Cloud 專案不綁帳單帳戶；API 金鑰限 Pages 網址、只開 Drive、Picker 與 Google Sheets API。
 - Drive for desktop 內的 Google 原生格式只是捷徑，不能直接當 xlsx 讀；軌一可自動轉換。
 - 配額用完只會被拒絕、不會收費；介面顯示友善提示並建議改用軌二。
 
