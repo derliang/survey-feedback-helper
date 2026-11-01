@@ -134,3 +134,18 @@
 .pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:stretch}
 .pair>*{display:flex;flex-direction:column;gap:10px;height:100%}
 .pair .foot{margin-top:auto;display:flex;gap:8px}
+
+/* 2026-11-01 手機與平板第二輪：數字步驟列（R-004）、單行審稿列（R-019）、同一排卡片等高（R-026） */
+.st .sl{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.st .sn{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;border:2px solid currentColor;font-size:12px;font-weight:700;flex:none;line-height:1}
+.st .sn svg.ic{width:12px;height:12px;stroke-width:3.5}
+.st.on:not(.cur) .sn{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.st.cur .sn{border-color:var(--accent-ink)}
+.rv{display:flex;align-items:center;gap:8px;min-height:60px;padding:6px 8px 6px 12px;background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r-sm)}
+.rv .tx{flex:1;min-width:0;font-size:var(--fs-sm);line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.rv .ac{display:flex;gap:2px;flex:none}
+.rv .ac button{width:44px;height:44px;border:1px solid var(--ctl);border-radius:var(--r-sm);background:var(--card);color:var(--ink2);display:grid;place-items:center;cursor:pointer;padding:0}
+.rv .ac button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink)}
+.rv.flag{border-color:var(--warn);border-width:1.5px}
+.eq{display:grid;gap:8px;align-items:stretch}
+.eq>*{display:flex;flex-direction:column}

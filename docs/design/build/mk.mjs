@@ -1,6 +1,7 @@
 // 建置：成品頁（分組）與 repo 內的各頁模擬頁
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { phoneSecs, checkUnused } from './phones.mjs';
 const sp = decodeURIComponent(new URL('.', import.meta.url).pathname).slice(1).replace(/\/$/, '');
 const repo = sp + '/../../..';
 const rd = (f) => fs.readFileSync(f, 'utf8');
@@ -19,7 +20,7 @@ for (const id of R2) { const p = pages.find((x) => x.id === id); if (p) for (con
 const inner = (p) => { const h = rd(`${sp}/${p.frag}`); if (!OLD_DESK.includes(p.id)) return h; return h.replace(/<figure class="fig"[\s\S]*?<\/figure>/g, (f) => (SUPERSEDED.has(capKey(f)) && (p.id !== 'flow-wide' || /<figcaption[^>]*><b>[^<]*桌機/.test(f)) ? '' : f)); };
 const GROUPS = { screens: { file: 'survey-pages.html', title: '問卷回饋小幫手畫面設計', kicker: '畫面設計（手機優先）' }, docs: { file: 'survey-docs.html', title: '問卷回饋小幫手輸出文件', kicker: '輸出文件設計（A4）' } };
 
-function mockup(p) {
+function mockup(p, figsHtml) {
   const html = `<!doctype html>
 <html lang="zh-Hant">
 <head>
@@ -41,7 +42,7 @@ ${sprite}
 <div class="wrap">
 <header class="pagehead"><p class="small muted">設計規範的模擬頁，使用虛構資料。規範見 docs/design/DESIGN.md。</p><h1>${p.title}</h1><p class="muted">${p.intro}</p></header>
 <div class="figs"${p.group==='docs'?' style="flex-direction:column"':''}>
-${inner(p)}
+${figsHtml ?? inner(p)}
 </div>
 </div>
 </body>
@@ -76,10 +77,16 @@ function deviceArtifact() {
     { id: 'd-set', title: '設定、教學、隱私與品牌', intro: '設定與範本、三層預設、備份與還原、關於與隱私（從簡）、忘記資料夾、教學頁（含示範資料）、Logo（定案：乙）。', keys: ['13e', 'D11', 'D29', 'D54', 'D56', 'D8', 'Logo'] },
     { id: 'd-sys', title: '狀態、提示與系統', intro: '空白、離開確認、快速鍵說明、安裝為應用程式、離線與新版本、第一次載入。', keys: ['D30', 'D32', '13g', 'D51', 'D52', 'D53', 'D55'] },
   ];
+  checkUnused();
+  const PH = phoneSecs().map((x) => ({ id: x.id, title: x.title, intro: x.intro, figs: x.entries.map((e) => e.html) }));
+  const PHONE_N = PH.reduce((a, x) => a + x.figs.length, 0);
+  const tfig = figsOf(rd(sp + '/frag-b34.html'));
+  let ti = 0;
+  const TB = JSON.parse(rd(sp + '/tablet-secs.json')).map((x) => ({ id: x.id, title: x.title, intro: x.intro, figs: tfig.slice(ti, (ti += x.n)) }));
   const DEV = [
-    { key: 'phone', label: '手機', note: '390 × 844，單手操作、一次一個步驟，底部操作列與底部彈出面板。', secs: ['core', 'flow-data', 'flow-stats', 'flow-out', 'flow-edit', 'flow-tpl', 'flow-drive', 'flow-guard', 'flow-sys'].map((id) => sec(id, by(id), figsOf(inner(by(id))))) },
-    { key: 'tablet', label: '平板', note: '820 直向／1024 橫向，左右分欄，觸控點擊區不低於 44px。', secs: [sec('t-flow', by('flow-tablet'), figsOf(inner(by('flow-tablet'))), '平板：開啟到輸出、設定、雲端硬碟、離開確認、投影唱票'), sec('t-wide', by('flow-wide'), wide.filter((f) => capOf(f).includes('平板')), '平板：統計與橫向編輯器', '直向兩欄的統計，與橫向三欄的編輯器。')] },
-    { key: 'desktop', label: '桌機', note: '1280，三欄工作台，鍵盤快速鍵，滑鼠拖曳與雙擊編輯。共 ' + DESK_N + ' 個畫面，依使用順序分組，第 2 輪（2026-11-01）已套用邊界條件、審稿意見與頁面裁示；手機與平板還沒套用。', secs: DESK_SECS.map((s) => sec(s.id, { title: s.title, intro: s.intro }, s.keys.map((k) => { const f = DESK[k]; if (!f) throw new Error('桌機缺畫面 ' + k); used.add(k); return f; }))) },
+    { key: 'phone', label: '手機', note: '390 × 844，單手操作、一次一個步驟，底部操作列與底部彈出面板。共 ' + PHONE_N + ' 個畫面，第 2 輪（2026-11-01）已套用桌機定案與全部裁示；手機沒有拖放、不能自動存資料夾，其餘與桌機一一對應。', secs: PH },
+    { key: 'tablet', label: '平板', note: '820 直向／1024 橫向，左右分欄（左清單、右內容），面板改成靠右側彈出，觸控點擊區不低於 44px。共 ' + PHONE_N + ' 個畫面，與手機一一對應（由手機畫面轉成分欄版面）。', secs: TB },
+    { key: 'desktop', label: '桌機', note: '1280，三欄工作台，鍵盤快速鍵，滑鼠拖曳與雙擊編輯。共 ' + DESK_N + ' 個畫面，依使用順序分組，第 2 輪（2026-11-01）已套用邊界條件、審稿意見與頁面裁示；手機與平板的第 2 輪另見各自分頁。', secs: DESK_SECS.map((s) => sec(s.id, { title: s.title, intro: s.intro }, s.keys.map((k) => { const f = DESK[k]; if (!f) throw new Error('桌機缺畫面 ' + k); used.add(k); return f; }))) },
   ];
   const RETIRED = ['13a', '13b', '13f', 'D7']; // 第 2 輪被取代：13a→首頁甲乙丙、13b→D19、13f→唱票A／B、D7→Google 試算表直讀（D44～D46）
   const left = Object.keys(DESK).filter((k) => !used.has(k) && !RETIRED.includes(k));
@@ -152,6 +159,19 @@ ${rounds}
 `;
   fs.writeFileSync(`${sp}/${G.file}`, html);
 }
-if (only !== 'artifact') pages.filter((p) => p.name).forEach(mockup);
+const OLD_DEVICE = ['core', 'flow-data', 'flow-stats', 'flow-out', 'flow-edit', 'flow-tpl', 'flow-drive', 'flow-guard', 'flow-sys', 'flow-tablet'];
+const MOCK = { open: '開啟與資料夾', help: '教學', prep: '準備資料', vote: '票選統計', survey: '意見調查統計與圖表', fb: '報告回饋與趨勢', out: '審稿與輸出', edit: '編輯器', tpl: '範本與設定檔', set: '設定與隱私', sys: '狀態與系統' };
+if (only !== 'artifact') {
+  pages.filter((p) => p.name && !OLD_DEVICE.includes(p.id)).forEach((p) => mockup(p));
+  checkUnused();
+  const tf = figsOf(rd(sp + '/frag-b34.html'));
+  let k = 0;
+  const tsec = JSON.parse(rd(sp + '/tablet-secs.json'));
+  phoneSecs().forEach((x, i) => {
+    const nm = MOCK[x.id.replace('p-', '')];
+    mockup({ name: '手機-' + nm, title: x.title + '（手機）', intro: x.intro + ' 390 × 844，人名與數字皆為虛構。' }, x.entries.map((e) => e.html).join(String.fromCharCode(10)));
+    mockup({ name: '平板-' + nm, title: x.title + '（平板）', intro: x.intro + ' 平板 820 直向／1024 橫向，與手機一一對應。' }, tf.slice(k, (k += tsec[i].n)).join(String.fromCharCode(10)));
+  });
+}
 if (only !== 'mockups') Object.keys(GROUPS).forEach((g) => { if (pages.some((p) => (p.group || 'screens') === g)) artifact(g); });
 console.log('ok', pages.map((p) => p.id).join(','));
