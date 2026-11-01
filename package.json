@@ -1,0 +1,35 @@
+{
+  "name": "survey-feedback-helper",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "GPL-3.0-only",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "node scripts/serve-dist.mjs",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "check:privacy": "node scripts/check-privacy.mjs",
+    "check:licenses": "node scripts/check-licenses.mjs",
+    "check:google-scopes": "node scripts/check-google-scopes.mjs",
+    "check:budget": "node scripts/check-budget.mjs",
+    "ci": "npm run typecheck && npm run lint && npm test && npm run check:privacy && npm run check:licenses && npm run check:google-scopes && npm run build && npm run check:budget && npm run test:e2e"
+  },
+  "dependencies": {
+    "preact": "^11.1.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.64.1",
+    "@preact/preset-vite": "^2.10.6",
+    "@types/node": "^26.6.6",
+    "eslint": "^10.14.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.1",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
+  }
+}

@@ -1,0 +1,103 @@
+# PR 關卡（技術選型與發布規則〈八、PR 與發布關卡〉）。全部通過才能合併；main 即上線。
+# 只在程式類變更時執行；純文件變更（*.md、docs/、.github/ 範本、LICENSE）不觸發。
+name: PR 關卡
+
+on:
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - 'LICENSE'
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/pull_request_template.md'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static:
+    name: 型別、lint 與單元測試
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: 型別檢查
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: 單元測試
+        run: npm test
+
+  policy:
+    name: 隱私、授權、Google 權限
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: 隱私掃描（擋 xlsx／csv／docx／pdf 與學生資料）
+        run: npm run check:privacy
+      - name: 授權與費用檢查（GPL-3.0 相容、已登錄）
+        run: npm run check:licenses
+      - name: Google 權限檢查（只允許 drive.file）
+        run: npm run check:google-scopes
+
+  build:
+    name: 建置與效能預算
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: 建置
+        run: npm run build
+      - name: 效能預算（首頁 gzip 150 KB）
+        run: npm run check:budget
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+          retention-days: 3
+
+  e2e:
+    name: 端對端（桌機、平板、手機觸控）
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - name: 安裝 Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Playwright
+        run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7

@@ -1,0 +1,10 @@
+/* 骨架暫用；正式 tokens 見 docs/design/tokens.css，實作畫面時匯入 */
+body {
+  margin: 0;
+  font-family: system-ui, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+}
+.shell {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 1rem;
+}

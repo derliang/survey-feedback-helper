@@ -24,7 +24,7 @@
 - [x] **存實體資料夾**（桌機稿 E1～E3、D46、D56）（硬規則 6）：設定檔、名單、審稿進度存使用者選定資料夾；設計資料夾選擇、授權失效與重選流程；其他瀏覽器退回手動；技術驗證 File System Access 重開瀏覽器後的權限
 - [x] **累積讀取與認得讀過**（桌機稿 H1 首頁、E4、E6）：Google 試算表直讀＋試算表 ID；本機 xlsx 用欄位標題比對並請老師確認；首頁「最近的問卷」與「開啟設定檔」一鍵銜接、跳過欄位對應精靈；統計全部累積、標「比上次多 N 筆」
 - [x] **Google 試算表直讀的畫面**（桌機稿 D12、D13、D44～D46）（R-044，已裁示改 Sheets API 直讀，硬規則 4 已改）：「從雲端硬碟選擇」改直讀文案（讀到目前最新內容、不改原檔、可重新讀取），連線畫面一併改；v0.4 實測 `drive.file`＋Picker 能否讀到、超額不綁帳單是否只會被擋
-- [x] **隱私從簡**（桌機稿 D54、D56；DESIGN.md 已同步。**其餘檔案由另一對話處理**）：取消「管理名單／一鍵刪除」入口與存放期限；R-005、R-031 文案重寫（**取代**10-31 的隱私兩句與審稿意見的兩句）；硬規則 5（不進 repo）保留；同步 `CONTRIBUTING.md`、`.github/pull_request_template.md`、`README.md`、`SECURITY.md`、藍圖、DESIGN.md、兩份 10-30 決定記錄；R-003「最近的專案」做法對齊
+- [x] **隱私從簡**（桌機稿 D54、D56；DESIGN.md 已同步。其餘文件已於 PR #6 同步）：取消「管理名單／一鍵刪除」入口與存放期限；R-005、R-031 文案重寫（**取代**10-31 的隱私兩句與審稿意見的兩句）；硬規則 5（不進 repo）保留；同步 `CONTRIBUTING.md`、`.github/pull_request_template.md`、`README.md`、`SECURITY.md`、藍圖、DESIGN.md、兩份 10-30 決定記錄；R-003「最近的專案」做法對齊
 - [x] **精準用字**（桌機稿 D14、D8 匯出教學已重做；仍待：有回應後的畫面、實際下載、Safari／手機介面的核對）（硬規則 10）：已實測，見[Google 介面核對紀錄](docs/design/Google介面核對紀錄.md)；**待做**：設計員重做匯出教學（R-006、R-033），所有舊文案「建立回應試算表」改成「連結至試算表」等原字；補核對有回應後的畫面、實際下載、Safari／手機介面
 - [ ] **載入速度**（硬規則 9）：訂效能預算與 CI 檢查（首頁 150 KB gzip、首屏 2 秒）；輸出與字型延遲載入、Service Worker 快取
 - [ ] **樣本對照**：用樣本結構做虛構測試資料（姓名／座號對不上、書名多種寫法、自評）；個人回饋單涵蓋「平均列」；量表 0～10 分、填寫者與被評對象雙欄的欄位對應
@@ -61,12 +61,12 @@
 - [ ] 字型發布為 WOFF2、解壓一次後重複使用，並規劃 Service Worker 快取（字型合計約 5.6 MB；與硬規則 9 一起做）
 - [ ] 平板補齊到與手機一一對應（目前 14 個，還缺約 50 個）；套用裁示後才做
 - [ ] 尚未設計：深色輸出文件預覽細節、動態與轉場
-- [ ] 專案骨架：TypeScript + Vite + Preact + Vitest + Playwright，並補專案 `CLAUDE.md` 的測試與建置指令
-- [ ] **CI 關卡**（GitHub Actions，公開 repo 免費）：型別與 lint、單元測試、Playwright 端對端（多解析度、觸控）、輸出視覺比對、隱私掃描、授權與費用檢查、Google 權限檢查（只允許 `drive.file`）、**效能預算（硬規則 9）**、建置
-- [ ] 啟用 `main` 分支保護（程式類只能經 PR 合併、必須全部通過）；須放行純文件類直接 push，且純文件變更不觸發重新部署（見 CLAUDE.md〈工作流程〉）
-- [ ] GitHub Pages 部署流程（GitHub Actions）；合併前確認授權，因 main 即上線
+- [x] （2026-11-01，PR scaffold-ci 待合併）專案骨架：TypeScript + Vite + Preact + Vitest + Playwright，並補專案 `CLAUDE.md` 的測試與建置指令
+- [x] （2026-11-01，PR scaffold-ci 待合併；**輸出視覺比對**等輸出器完成後再補）**CI 關卡**（GitHub Actions，公開 repo 免費）：型別與 lint、單元測試、Playwright 端對端（多解析度、觸控）、輸出視覺比對、隱私掃描、授權與費用檢查、Google 權限檢查（只允許 `drive.file`）、**效能預算（硬規則 9）**、建置
+- [ ] 啟用 `main` 分支保護（程式類只能經 PR 合併、必須全部通過）；須放行純文件類直接 push，且純文件變更不觸發重新部署（見 CLAUDE.md〈工作流程〉）（注意：pr-gate.yml 對純文件變更用 paths-ignore 不執行，若把它設為必要檢查，純文件 PR 會一直等待；啟用時用 ruleset 放行或改設）
+- [x] （2026-11-01，workflow 已寫好，待使用者把 Pages 來源設為 GitHub Actions 並說「發布」）GitHub Pages 部署流程（GitHub Actions）；合併前確認授權，因 main 即上線
 - [ ] **Teacher Hub 卡片轉正**：第一版上線、有 GitHub Pages 網址後，通知 `derliang/teacher-hub` 把「問卷回饋小幫手」候選卡改為可點的即開即用或 Beta 卡，並在它的 `tools.json` 加一筆。工具要有 `version.json`（版號與發布日），否則 teacher-hub 的自動同步會失敗。流程見該 repo 的 `docs/PUBLISHING.md` 3.1。背景見 [決定記錄](docs/decisions/2026-10-30-發佈到Teacher-Hub先佔位.md)
-- [ ] 引入第一個套件時，核對授權與費用並登錄 [docs/third-party.md](docs/third-party.md)
+- [x] （2026-11-01）引入第一個套件時，核對授權與費用並登錄 [docs/third-party.md](docs/third-party.md)
 
 ## v0.1 本機版核心
 
