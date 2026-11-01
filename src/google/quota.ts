@@ -33,3 +33,16 @@ export function failureMessage(kind: GoogleFailure): string {
       return "讀取 Google 試算表時發生問題。請再試一次，或改用 Excel 檔。";
   }
 }
+
+/** 存檔失敗的種類（與讀取不同：要分開「限流」與「雲端空間滿」）。 */
+export type SaveFailure = "network" | "auth" | "rate" | "storage" | "other";
+
+export function classifySaveError(err: unknown): SaveFailure {
+  if (!(err instanceof GoogleApiError))
+    return err instanceof TypeError ? "network" : "other";
+  const { status, reason } = err;
+  if (/storageQuotaExceeded/i.test(reason)) return "storage";
+  if (status === 429 || /rate|quota/i.test(reason)) return "rate";
+  if (status === 401) return "auth";
+  return "other";
+}

@@ -1,4 +1,4 @@
-import { createSheetsApi } from "./api";
+import { createDriveApi, createSheetsApi } from "./api";
 import {
   createGoogleAuth,
   createPicker,
@@ -33,6 +33,7 @@ export function createGoogleServices(
       () => w.google as GisGlobal | undefined,
     ),
     sheets: createSheetsApi(fetchFn),
+    drive: createDriveApi(fetchFn),
     picker: createPicker(cfg.config, loadScript, () =>
       w.gapi && w.google
         ? ({ gapi: w.gapi, google: w.google } as GapiGlobal)
