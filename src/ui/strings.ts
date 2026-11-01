@@ -12,6 +12,7 @@ export const strings = {
   gotIt: '知道了',
 
   privacy: ['本程式沒有伺服器，問卷結果只在這個瀏覽器處理。', '設定與名單存在你選的資料夾。', '放在雲端的檔案由該服務處理。'],
+  privacyPolicy: '隱私權政策',
   oldBrowser: '你的瀏覽器版本偏舊，部分功能可能無法使用。建議更新到近兩年的 Chrome、Edge、Safari 或 Firefox；你仍可繼續使用。',
 
   google: {

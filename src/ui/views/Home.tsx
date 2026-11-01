@@ -292,6 +292,14 @@ export function Home() {
           )}
         </span>
         <span class="privacy-line">{S.privacy.join("")}</span>
+        <a
+          class="privacy-link"
+          href={`${import.meta.env.BASE_URL}privacy.html`}
+          target="_blank"
+          rel="noopener"
+        >
+          {S.privacyPolicy}
+        </a>
       </footer>
     </main>
   );

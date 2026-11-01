@@ -448,6 +448,13 @@ select {
 .card-btn .meta {
   gap: var(--sp-3);
 }
+.privacy-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--accent-ink);
+  font-size: var(--fs-sm);
+}
 .folder-bar {
   margin-top: var(--sp-3);
   padding-top: var(--sp-3);

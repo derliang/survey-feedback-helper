@@ -19,6 +19,7 @@ const enCore: DeepPartial<Strings> = {
     'Settings and rosters are stored in the folder you choose.',
     'Files you keep in the cloud are handled by that service.',
   ],
+  privacyPolicy: 'Privacy policy',
   home: {
     title: 'Which survey are we working on today?',
     lead: 'Drop in an Excel file.',
