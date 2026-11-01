@@ -119,7 +119,7 @@
 - [x] （2026-11-01，分支 export-fonts）文件模型（JSON）與區塊定義、變數：`src/export/model.ts`
 - [x] （2026-11-01，分支 export-fonts）預設範本（班級總表、個人回饋單含平均列）：`src/export/templates.ts`（輸入是一般資料結構；**與 `src/core` 統計結果的接線留給 UI 對話**）
 - [x] （2026-11-01，分支 export-fonts）輸出器：Word（docx）、PDF（程式直接產生、字型子集化）、批次 zip（每位學生一個 PDF）：`src/export/{docx,pdf,batch}.ts`，入口 `src/export/index.ts`（全部延遲載入）
-- [ ] 桌機備用：瀏覽器列印
+- [x] （2026-11-01，分支 export-layout）桌機備用：瀏覽器列印（`src/export/print.ts`：`docToHtml` 純函式＋`printDoc` 隱藏 iframe 列印；**畫面入口由輸出頁接**）
 - [x] 老師審稿（採用／隱藏／改寫）與老師評語欄（2026-11-01，分支 app-v01b；進度存資料夾 `審稿進度-<問卷代號>.json`，沒資料夾時提示並可下載）
 - [x] 關鍵字提醒清單（可自訂；不做智慧判斷）（2026-11-01，分支 app-v01b；預設十個用詞待使用者確認）
 - [x] 統計方法說明頁（2026-11-01，分支 app-v01b：畫面頁 `MethodView`，隨目前問卷列出資料來源、排除、設定、種子；**輸出文件附錄頁（A4 一頁、可選擇附上）未做**）
@@ -140,12 +140,12 @@
 
 ## 編輯器後續（editor-v02 留下）
 
-- [ ] 多欄並排：輸出器目前不支援並排，`compile` 先把各欄由左到右上下攤平；輸出器加欄位排版後改為真正並排（PDF 與 Word 表格排版）。
-- [ ] 頁面背景色、頁框、頁首、Logo、區塊底色：範本模型與 Word 標示已有，輸出器（PDF／Word）尚未繪製。
+- [x] （2026-11-01，export-layout：輸出器已支援 `columns` 區塊，PDF 並排、Word 無框線表格；**`compile` 尚未改成輸出 columns，由 output-wiring／後續接線**）多欄並排：原說明：輸出器目前不支援並排，`compile` 先把各欄由左到右上下攤平；輸出器加欄位排版後改為真正並排（PDF 與 Word 表格排版）。
+- [x] （2026-11-01，export-layout：`DocModel.deco` 與區塊 `bg`，PDF／Word 皆已繪製；**`compile` 要把 `PageSpec` 的 background／frame／headerText／logoSrc 與文字 `bg` 填進 `deco`／`bg`**）頁面背景色、頁框、頁首、Logo、區塊底色。
 - [ ] **下一包（調度員之後派）**輸出頁接「輸出用」範本與真實統計槽：輸出時用「輸出用」範本（`settings.global.templateId`）、`compile` 套入真實統計資料槽與學生覆寫；目前編輯器預覽只有示意資料（ui-r5 改輸出頁後接）
 - [ ] 個別學生版本：目前學生名單取自已讀入的名單，沒有名單時用範例同學；覆寫的「還原」會一次清掉該區塊的隱藏與改字（要拆成逐項）
-- [ ] 設計稿的進階區塊（標題區、摘要數字列、稱讚提示、自評對照表）與頁面上拖曳區塊、預覽輸出（試印 PDF）未做
-- [ ] 頁面設定的 Logo 已存、預覽有畫，輸出器尚未繪製（同前）
+- [~] 設計稿的進階區塊：輸出引擎已做（2026-11-01，export-layout：`hero`、`stats`、`callout` 區塊與 `compareTable`，建構函式 `src/export/advanced.ts`）；**編輯器的區塊種類、範本與 compile 對應未做**；頁面上拖曳區塊、預覽輸出（試印 PDF）未做
+- [x] 頁面設定的 Logo：輸出器已繪製（PDF 右上角、Word 放頁首），compile 接線同上
 
 ## v0.4 Google 登入軌（軌一）
 
