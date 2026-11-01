@@ -1,4 +1,4 @@
-// 手機第二輪 A：首頁、開啟、讀取、資料夾（手機退回手動）、認得讀過、重新開始、Google 試算表直讀、匯出教學、學校帳號擋下（第三輪取代原共用說明）
+// 手機第二輪 A：首頁、開啟、讀取、資料夾（手機退回手動）、認得讀過、重新開始、Google 試算表直讀、匯出教學、Google 登入前提醒與視窗被擋（第七輪取代原「擋下學校帳號」）
 // 套用 2026-11-01 邊界條件、審稿意見裁示、10-31 頁面裁示；桌機定案（首頁雙欄、Logo 乙）視為沿用。
 import * as K from './m2kit.mjs';
 import { chooser } from './acctkit.mjs';
@@ -35,7 +35,7 @@ F.push(mframe('1c 讀取中（Google 試算表）｜顯示「正在讀取目前�
 // ---- 1d 讀不到檔案
 F.push(mframe('1d 讀不到檔案｜說明哪裡錯、怎麼改，並直接給「重新選擇」與匯出教學連結。錯誤提示加圖示與文字，不只靠顏色。',
   mbar('問卷回饋小幫手', { brand: true }), msteps(1, []),
-  scr(h('開啟問卷') + notice('bad', 'warn', '<b>讀不到「回覆.numbers」</b><br>目前只支援 Excel（.xlsx）與 csv。', btn('重新選擇檔案', 'primary', { sm: true })) + rowbtn('怎麼匯出成 Excel 檔？', '兩段，各三步以內', tag('教學'), false) + rowbtn('怎麼改用私人 Gmail 登入？', '學校帳號會被擋下', tag('教學'), false) + `<p class="small muted">更簡單：回到首頁用「開啟試算表」直接讀 Google 試算表，不必匯出。</p>`, 12),
+  scr(h('開啟問卷') + notice('bad', 'warn', '<b>讀不到「回覆.numbers」</b><br>目前只支援 Excel（.xlsx）與 csv。', btn('重新選擇檔案', 'primary', { sm: true })) + rowbtn('怎麼匯出成 Excel 檔？', '兩段，各三步以內', tag('教學'), false) + rowbtn('Google 登入遇到問題怎麼辦？', '視窗打不開、被關掉、找不到試算表', tag('教學'), false) + `<p class="small muted">更簡單：回到首頁用「開啟試算表」直接讀 Google 試算表，不必匯出。</p>`, 12),
   act(btn('回到首頁', 'secondary'), btn('重新選擇檔案', 'primary'))));
 
 // ---- E3 手機：不能自動存到資料夾
@@ -60,10 +60,10 @@ F.push(mframe('E5 重新開始（確認）｜頂端列固定有「重新開始�
 
 // ---- Google 試算表直讀（R-044）：D44、D45、D46
 const sheetRow = (nm, sm, on) => `<button class="opt" role="radio" aria-checked="${!!on}" type="button" style="min-height:64px"><span class="dot"></span><span style="display:flex;flex-direction:column;line-height:1.35"><b>${nm}</b><span style="font-size:var(--fs-xs);color:var(--ink2);font-weight:400">${sm}</span></span></button>`;
-F.push(mframe('Gd1 選取 Google 試算表｜登入後出現 Google 提供的選檔視窗，只看得到你點選的檔案。文案：選好後讀到「目前最新的內容」，不會修改原檔；之後有新回覆，按「重新讀取」更新。（邊界條件 4：Google 一律走私人 Gmail）',
+F.push(mframe('Gd1 選取 Google 試算表｜登入後出現 Google 提供的選檔視窗，只看得到你點選的檔案。文案：選好後讀到「目前最新的內容」，不會修改原檔；之後有新回覆，按「重新讀取」更新。（2026-11-01 起任何 Google 帳號都能用，不限私人 Gmail）',
   mbar('問卷回饋小幫手', { brand: true }), msteps(1, []), homeBody(),
   act(btn('下一步：準備資料', 'primary', { dis: true })),
-  sheet('選取 Google 試算表', '', sheetRow('讀書報告回饋 (回覆)', 'Google 試算表 · 今天 10:42', true) + sheetRow('幹部票選 (回覆)', 'Google 試算表 · 去年') + `<p class="small muted" style="margin-top:6px">選好後會直接讀取它目前最新的內容，<b>不會修改原檔</b>。之後有新回覆，按「重新讀取」就會更新。登入要用<b>私人 Gmail</b>，學校帳號會被擋下。</p>`, btn('選取並讀取', 'primary', { block: true }) + btn('取消', 'secondary', { block: true }))));
+  sheet('選取 Google 試算表', '', sheetRow('讀書報告回饋 (回覆)', 'Google 試算表 · 今天 10:42', true) + sheetRow('幹部票選 (回覆)', 'Google 試算表 · 去年') + `<p class="small muted" style="margin-top:6px">選好後會直接讀取它目前最新的內容，<b>不會修改原檔</b>。之後有新回覆，按「重新讀取」就會更新。個人帳號、學校帳號都能登入。</p>`, btn('選取並讀取', 'primary', { block: true }) + btn('取消', 'secondary', { block: true }))));
 
 F.push(mframe('Gd2 無法連線 Google｜只說現況與替代做法：不保證何時恢復、不談費用（R-027）。已存的設定檔不受影響，改用 Excel 檔也會認得這份問卷、帶入欄位對應。',
   mbar('問卷回饋小幫手', { brand: true }), msteps(1, []),
@@ -89,21 +89,33 @@ F.push(mlong(960, 'G2 教學：怎麼匯出成 Excel 檔（B）｜B. 從回應�
   scr(`<h2 style="font-size:var(--fs-lg);margin:0">B. 從回應試算表匯出 Excel 檔</h2>` + stepN(1, `在試算表上方選單點「<b>檔案</b>」，再點「<b>下載</b>」。${mini('<b>檔案</b>　編輯　查看　插入…<hr style="border:0;border-top:1px solid var(--line-soft);width:100%;margin:2px 0"><span>開啟　匯入　建立副本</span><span><b>下載 ▸</b></span><span>重新命名　移動…</span>')}`) + stepN(2, `選「<b>Microsoft Excel (.xlsx)</b>」，檔案就會下載。<span class="muted">檔名通常是「表單名稱 (回覆).xlsx」。</span>${mini('<b style="color:var(--accent-ink)">Microsoft Excel (.xlsx)</b><span>OpenDocument 檔案 (.ods)</span><span>PDF 檔案 (.pdf)</span><span>網頁 (.html)</span><span>逗號分隔值檔案 (.csv)</span><span>Tab 鍵分隔值檔案 (.tsv)</span>')}`) + stepN(3, '回到這裡，按「選擇 Excel 檔」選剛下載的檔案。') + checked, 12),
   act(btn('回到首頁', 'secondary'), btn('選擇 Excel 檔', 'primary'))));
 
-// ---- 偵測到學校帳號：擋下（第三輪，使用者 2026-11-01 裁示：一律用私人帳號，學校帳號要擋並加上說明；取代原「共用給私人 Gmail」兩張說明）
+// ---- Google 登入：登入前先看一下、準備中、視窗被擋、教學（第七輪，2026-11-01：取消「只限私人 Gmail」，任何 Google 帳號都能用；取代第三、四輪的「擋下學校帳號」S0／S1／S2）
 const bstep = (n, t) => `<div class="qcard" style="gap:4px;padding:12px 14px"><b>${n}　${t[0]}</b><span class="small" style="line-height:1.6">${t[1]}</span></div>`;
-F.push(mframe('S0 選帳號前先看一下｜在「開啟試算表」選了 Google 試算表之後、開 Google 視窗「之前」先由下往上彈出這張卡（參考 teacher-notes 的做法）：畫出 Google 選帳號視窗的樣子，標出哪一列選、哪幾列不要選，說明學校帳號與用其他信箱註冊的 Google 帳號都不能用。按「前往 Google」才開視窗。示意為自畫簡化版，「使用其他帳戶」字樣待核對。',
+const gXlsx = '<b>不想登入？</b>在試算表選「檔案」→「下載」→「Microsoft Excel (.xlsx)」，回到本程式按「選擇 Excel 檔」。這樣完全不用登入。';
+const gLead = '個人帳號、學校帳號都能用，請選放著這份試算表、或有權限開它的那一個。';
+F.push(mframe('S0 登入前先看一下｜在「開啟試算表」選了 Google 試算表之後、開 Google 視窗「之前」先由下往上彈出這張卡。取消帳號限制後它不再教老師選哪種信箱，只提醒「選放著這份試算表的帳號」與「沒看到帳號按『使用其他帳戶』」；進入這張卡時就在背景預載 Google 登入腳本（見 S0b）。示意為自畫簡化版，「使用其他帳戶」字樣待核對。',
   mbar('問卷回饋小幫手', { brand: true }), msteps(1, []), homeBody(),
   act(btn('下一步：準備資料', 'primary', { dis: true })),
-  sheet('選帳號前先看一下', '請選 @gmail.com 結尾的私人帳號；學校帳號，或用其他信箱註冊的 Google 帳號，登入後會被擋下。', chooser() + `<p class="small muted" style="margin:0;line-height:1.6">不想登入？在試算表選「檔案」→「下載」→「Microsoft Excel (.xlsx)」，再回來按「選擇 Excel 檔」。</p>`, `<div style="display:flex;gap:8px">${btn('取消', 'secondary', { block: true })}${btn('前往 Google', 'primary', { block: true })}</div>`)));
+  sheet('登入前先看一下', gLead, chooser() + `<p class="small muted" style="margin:0;line-height:1.6">${gXlsx}</p>`, `<div style="display:flex;gap:8px">${btn('取消', 'secondary', { block: true })}${btn('前往 Google', 'primary', { block: true })}</div>`)));
 
-F.push(mlong(1320, 'S1 偵測到不是 Gmail 的帳號｜剛登入的帳號不是 @gmail.com 結尾（學校的 .edu.tw，或用其他信箱註冊的個人 Google 帳號），一律擋下、不設「仍要繼續」，不讀任何檔案，並立刻中斷這次連線。用選帳號示意圖標出「你剛才選的」與該選哪一列；另給「不登入」的出口：下載 Excel 檔再用「選擇 Excel 檔」。帳號字樣只顯示網域，不顯示完整信箱。判斷方式與限制見 docs/decisions/2026-11-01-擋下學校帳號.md（Google 視窗的按鈕字樣待核對）。',
-  mbar('無法使用這個帳號', { close: true, right: null }),
-  scr(notice('bad', 'warn', '<b>這個帳號不是 Gmail，本程式不能用</b><br>你剛才登入的帳號（○○○@<b>school.edu.tw</b>）不是 Gmail。本程式只用你的<b>私人 Gmail</b>（@gmail.com 結尾）；學校帳號和用其他信箱註冊的 Google 帳號一律不能用，沒有「仍要繼續」。', '') + `<p class="small" style="margin:0;line-height:1.7">已經中斷這次連線，<b>沒有讀取你的任何檔案</b>。學校帳號常被管理員限制第三方程式，連得上也可能隨時失效；本程式只能靠信箱結尾判斷，所以用其他信箱註冊的個人帳號也會被擋。</p>` + chooser('school') + bstep('1', ['按「改用私人 Gmail 登入」', '會再開一次 Google 視窗。']) + bstep('2', ['選 @gmail.com 的帳號', '沒看到時，按視窗裡的「使用其他帳戶」登入。待核對：Google 視窗上的實際字樣。']) + bstep('3', ['開啟你要用的試算表', '試算表要在私人 Gmail 之下。學校帳號的表單，用下面的「不登入」做法。']) + notice('', 'info', '<b>不想換帳號？</b>在試算表選「檔案」→「下載」→「Microsoft Excel (.xlsx)」，回到本程式按「選擇 Excel 檔」。這樣完全不用登入。', ''), 10),
-  act(btn('改用私人 Gmail 登入', 'primary', { block: true }), btn('改用 Excel 檔', 'secondary', { block: true }))));
+F.push(mframe('S0b 準備 Google 登入…（按鈕停用）｜Google 登入腳本還沒載好時，主按鈕停用並改寫「準備 Google 登入…」，卡片裡寫明原因；載好才變回「前往 Google」。理由：登入視窗必須在按下去的同一瞬間開，腳本若等到點擊之後才下載，iOS Safari 等會擋下視窗（見決定記錄〈取消帳號限制〉預防第 1、2 點）。「取消」仍可按。',
+  mbar('問卷回饋小幫手', { brand: true }), msteps(1, []), homeBody(),
+  act(btn('下一步：準備資料', 'primary', { dis: true })),
+  sheet('登入前先看一下', gLead, chooser() + notice('', 'info', '<b>正在準備 Google 登入…</b>通常一兩秒，載好後按鈕會變成「前往 Google」。網路較慢時請稍等，不用重按。', '') + `<p class="small muted" style="margin:0;line-height:1.6">${gXlsx}</p>`, `<div style="display:flex;gap:8px">${btn('取消', 'secondary', { block: true })}${btn('準備 Google 登入…', 'primary', { block: true, dis: true })}</div>`)));
 
-F.push(mlong(1180, 'S2 教學：怎麼改用私人 Gmail 登入｜在「教學」裡的固定說明（不是擋下畫面）。三步：先確認自己登入的是哪個帳號、改成私人 Gmail、試算表放到私人帳號；附選帳號示意圖（哪一列選、哪幾列不要選，含用其他信箱註冊的個人帳號）。取代原「學校帳號的表單，怎麼給私人 Gmail」（共用／建立副本）兩張。Google 視窗與 Google 試算表的字樣只用已核對的選單，其餘標「待核對」。',
-  mbar('怎麼改用私人 Gmail 登入', {}),
-  scr(`<p class="small" style="margin:0;line-height:1.7">本程式只用你的<b>私人 Gmail</b>（@gmail.com 結尾）。登入時如果用了學校帳號，或用其他信箱註冊的 Google 帳號，會被擋下並要你換掉。</p>` + chooser() + stepN(1, '<span>登入時，在 Google 視窗選 <b>@gmail.com</b> 的帳號。<span class="muted">沒看到時按「使用其他帳戶」。待核對：實際字樣。</span></span>') + stepN(2, '<span>試算表要在<b>私人 Gmail</b> 底下。以後新做的問卷表單，直接用私人 Gmail 建立。</span>') + stepN(3, '<span>已經用學校帳號建好的表單，不用搬：在試算表選「<b>檔案</b>」→「<b>下載</b>」→「<b>Microsoft Excel (.xlsx)</b>」，回本程式按「選擇 Excel 檔」，不需要登入。</span>') + notice('', 'info', '為什麼不能用學校帳號？學校管理員常限制第三方程式，連線可能失敗或突然失效；本程式也不依賴學校資訊組協助。', ''), 12),
+F.push(mlong(800, 'S1 Google 登入視窗被瀏覽器擋下（popup_failed_to_open）｜按「前往 Google」後，瀏覽器沒讓登入視窗開出來。這不是帳號的問題，沒有讀取任何檔案。文案依決定記錄〈取消帳號限制〉預防第 3 點：請再按一次；還是不行改用 Safari 或 Chrome（LINE 等 App 內建瀏覽器常擋）；或到瀏覽器設定允許這個網站的彈出式視窗；出口「改用 Excel 檔」。各瀏覽器設定選單的實際名稱待核對。',
+  mbar('無法開啟登入視窗', { close: true, right: null }),
+  scr(notice('warn', 'warn', '<b>瀏覽器擋下了 Google 登入視窗</b><br>這不是你的帳號有問題，也<b>沒有讀取你的任何檔案</b>。<br><span class="small muted">錯誤代碼：popup_failed_to_open</span>', '') + bstep('1', ['再按一次', '按下方的「再試一次」。']) + bstep('2', ['還是不行：改用 Safari 或 Chrome', '請用 Safari 或 Chrome 開啟本網站。LINE 等 App 內建的瀏覽器常常擋彈出視窗。']) + bstep('3', ['或允許彈出式視窗', '到瀏覽器設定，允許這個網站的彈出式視窗。待核對：各瀏覽器設定選單的實際名稱。']) + notice('', 'info', gXlsx, ''), 10),
+  act(btn('再試一次', 'primary', { block: true }), btn('改用 Excel 檔', 'secondary', { block: true }))));
+
+F.push(mlong(780, 'S1b Google 登入視窗被關掉（popup_closed）｜視窗有開出來，但沒完成登入就關了：可能是老師自己關的，也可能是 Google 在視窗裡顯示了錯誤頁後關閉（例如學校管理員限制第三方應用程式，這種情況本程式攔不到、也處理不了）。與 S1 分開說明：先請再試一次，再說明學校管理員限制時改用另一個 Google 帳號或 Excel 檔。Google 錯誤頁的實際字樣待核對。',
+  mbar('登入還沒完成', { close: true, right: null }),
+  scr(notice('warn', 'warn', '<b>登入視窗被關掉了</b><br>可能是你自己關掉的，也可能是 Google 在視窗裡顯示了錯誤頁後關閉。<br><span class="small muted">錯誤代碼：popup_closed</span>', '') + bstep('1', ['想繼續：再按一次', '選好帳號後，依畫面按同意。']) + bstep('2', ['Google 視窗顯示錯誤時', '常見原因是學校管理員限制了第三方應用程式。這是學校帳號的設定，本程式處理不了：換另一個 Google 帳號（例如個人帳號）再試，或改用 Excel 檔。待核對：Google 錯誤頁的實際字樣。']) + notice('', 'info', gXlsx, ''), 10),
+  act(btn('再試一次', 'primary', { block: true }), btn('改用 Excel 檔', 'secondary', { block: true }))));
+
+F.push(mlong(1000, 'S2 教學：Google 登入遇到問題怎麼辦｜在「教學」裡的固定說明（不是錯誤畫面）。三種情況：登入視窗沒有打開（S1）、視窗開了又被關掉（S1b）、登入後找不到要開的試算表（多半是帳號選錯，附選帳號示意圖）；最後固定給「改用 Excel 檔」的出口。取代第三、四輪的「怎麼改用私人 Gmail 登入」。Google 視窗與 Google 試算表的字樣只用已核對的選單，其餘標「待核對」。',
+  mbar('Google 登入遇到問題', {}),
+  scr(`<p class="small" style="margin:0;line-height:1.7">個人帳號、學校帳號都能用。遇到下面的情況，照著做：</p>` + stepN(1, '<span><b>登入視窗沒有打開。</b>再按一次；還是不行，改用 Safari 或 Chrome（LINE 等 App 內建瀏覽器常擋），或允許這個網站的彈出式視窗。<span class="muted">待核對：各瀏覽器設定選單的名稱。</span></span>') + stepN(2, '<span><b>視窗開了又關掉。</b>再按一次，選好帳號後按同意。如果 Google 視窗顯示錯誤，可能是學校管理員限制了第三方應用程式：換另一個 Google 帳號再試。</span>') + stepN(3, '<span><b>登入了，但找不到要開的試算表。</b>多半是選到沒有放這份試算表的帳號：登出後重新登入，選放著它的那一個。沒看到帳號時按「使用其他帳戶」。<span class="muted">待核對：實際字樣。</span></span>') + chooser() + notice('', 'info', gXlsx, ''), 12),
   act(btn('回首頁', 'secondary'), btn('選擇 Excel 檔', 'primary'))));
 
 write('frag-b31.html', F);

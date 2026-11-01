@@ -1,4 +1,4 @@
-// 設計系統成品頁：第四輪（2026-11-01）新增與更新的元件（R-004、R-019、R-029、5.20、5.21、擋下非 Gmail 帳號）
+// 設計系統成品頁：第四輪（2026-11-01）新增與更新的元件（R-004、R-019、R-029、5.20、5.21）；第七輪改寫 AccountChooser（取消帳號限制）
 // 由 ds.mjs 匯入；格式同 ds.mjs 的 C 陣列：[名稱, 群組, 預覽高度, 一句說明, 使用指引, 預覽 HTML]
 import { ic, tag } from './lib.mjs';
 import { msteps } from './m2kit.mjs';
@@ -16,9 +16,9 @@ const chartRow = ([icon, name, use, on, def]) => `<div class="qrow" style="min-h
 
 export const extra = [
   ['AccountChooser', '資訊', 560,
-    '選帳號示意圖：Gmail 一列「✓ 選這個」，學校帳號與用其他信箱註冊的 Google 帳號各一列「✕ 不要選」，最後一列「使用其他帳戶」。',
-    '用在兩處：①開 Google 視窗之前的「選帳號前先看一下」；②擋下畫面與教學。擋下時用 `chooser(\'school\')` 標出「你剛才選的」。只有 @gmail.com 結尾能用，其餘一律擋下、不設「仍要繼續」。自畫示意，不是 Google 截圖；「使用其他帳戶」字樣尚未核對，圖上標「字樣待核對」。程式在 `docs/design/build/acctkit.mjs`。',
-    stack(chooser(), chooser('school'))],
+    '選帳號示意圖：兩個不同的 Google 帳號（個人、學校都能用），放著那份試算表的一列標「✓ 選這個」，最後一列「使用其他帳戶」。',
+    '用在兩處：①開 Google 視窗之前的「登入前先看一下」；②教學「Google 登入遇到問題」。任何帳號都能用，只提醒選放著那份試算表的那一個。自畫示意，不是 Google 截圖；「使用其他帳戶」字樣尚未核對，圖上標「字樣待核對」。程式在 `docs/design/build/acctkit.mjs`。',
+    stack(chooser())],
   ['ChartPicker', '選擇', 400,
     '圖表勾選清單：十一種圖，每種附縮圖與一句用途（R-017、R-018、R-029）。',
     '統計畫面的「圖表」按鈕開啟，桌機是側欄，手機與平板是面板。只列這份資料適用的圖；各統計的預設圖標「預設」。勾選存在設定、不含資料。每張圖右上另有「換圖」「隱藏」。',
