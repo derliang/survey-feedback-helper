@@ -39,7 +39,7 @@
 | v0.1 | 本機開檔（含 Google 雲端硬碟 for desktop 資料夾）、欄位對應、名單對照、三種問卷統計、xlsx 輸出、資料不落地 |
 | v0.2 | 文件模型與預設範本、Word／PDF 輸出（含批次）、老師審稿、統計方法說明頁、設計系統落地 |
 | v0.3 | 區塊編輯器（含手機）、設定匯出與還原、專案檔、進階統計、多版本輸出 |
-| v0.4 | Google 登入軌（Drive API，僅申請 `drive.file`） |
+| v0.4 | Google 登入軌（Drive／Sheets API，僅申請 `drive.file`；Google 試算表直讀） |
 | v1.0 | 測試完整、PWA、英文介面、Google 表單設計教學、文件 |
 
 ## 技術

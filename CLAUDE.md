@@ -8,7 +8,7 @@
 1. **純網頁、免安裝、無後端**；手機、平板、桌機各自設計版面與操作（mobile-first）。
 2. **main 即上線**：push／merge 到 `main` 就等於發布到 GitHub Pages 正式站。PR 階段必須測試完全通過，且使用者明確說「發布」才合併；合併前確認授權，合併後確認部署成功並回報正式站網址與 SHA。
 3. **全專案零費用**：Google API、字型、CDN、套件、部署都不得產生費用。引入任何套件、字型、服務前先核對授權（須與 GPL-3.0 相容）與費用，並登錄 [docs/third-party.md](docs/third-party.md)。
-4. **Google Cloud 專案絕不綁定帳單帳戶**，不啟用需要帳單的服務；Google 權限只用 `drive.file`；API 金鑰限 Pages 網址、只開 Drive 與 Picker。
+4. **Google Cloud 專案絕不綁定帳單帳戶**，不啟用需要帳單的服務；Google 權限只用 `drive.file`；API 金鑰限 Pages 網址、只開 Drive、Picker 與 Google Sheets API（2026-11-01 使用者裁示改為直讀 Google 試算表，見[審稿意見裁示](docs/decisions/2026-11-01-審稿意見裁示.md)）。
 5. **隱私**：絕不把學生資料（問卷結果、名單、輸出檔）commit 進 repo；`.gitignore` 已擋 xlsx／csv／docx／pdf。示範資料只用虛構資料。不蒐集任何使用數據（連匿名統計也不要）。
 6. **問卷資料不落地**：原始問卷資料與輸出檔只放記憶體，不寫入 localStorage／IndexedDB。瀏覽器可儲存設定、範本、檔案存取代號，以及**學生名單與審稿進度**（使用者 2026-11-01 裁示放寬，見[審稿意見裁示](docs/decisions/2026-11-01-審稿意見裁示.md)）；必須提供「管理名單／一鍵刪除」入口，隱私文案要如實說明。舊寫法散在其他文件，同步進度見 todo.md。
 7. **統計計算必須有自動化測試**；統計核心是不依賴瀏覽器的純函式模組。
