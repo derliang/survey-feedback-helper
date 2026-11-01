@@ -90,3 +90,19 @@ test('輸出：學生版要先預覽，班級總表與批次 PDF 可下載', asy
   const [zip] = await Promise.all([page.waitForEvent('download', { timeout: 90_000 }), batch.click()]);
   expect(zip.suggestedFilename()).toMatch(/個人回饋單 學生版\.zip$/);
 });
+
+test('圖表長條（5.26）：可聚焦，聚焦時加 2px 外框，標籤含人數', async ({ page }) => {
+  await page.goto('./');
+  await page.getByTestId('file-input').setInputFiles(surveyFile());
+  await page.locator('.rail').getByRole('button', { name: /^\d?\s*問卷類型/ }).click();
+  await page.getByRole('button', { name: '確認，下一步：欄位對應' }).click();
+  await page.getByRole('button', { name: /^台風：/ }).click();
+  await page.getByRole('radio', { name: '評分' }).click();
+  await page.getByRole('button', { name: '套用' }).click();
+  await page.getByRole('button', { name: '完成對應，下一步' }).click();
+  await page.locator('.stepper').getByRole('button', { name: /統計/ }).click();
+  const bar = page.locator('.chart .bar').first();
+  await expect(bar).toHaveAttribute('tabindex', '0');
+  await bar.focus();
+  expect(await bar.locator('rect').evaluate((el) => getComputedStyle(el).strokeWidth)).toBe('2px');
+});
