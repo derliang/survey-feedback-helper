@@ -20,6 +20,14 @@ export function Settings() {
             <li key={p}>{p}</li>
           ))}
         </ul>
+        <a
+          class="privacy-link"
+          href={`${import.meta.env.BASE_URL}privacy.html`}
+          target="_blank"
+          rel="noopener"
+        >
+          {S.privacyPolicy}
+        </a>
       </section>
 
       <section class="card">
