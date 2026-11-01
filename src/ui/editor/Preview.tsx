@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { fillVars } from '../../export/model';
 import { describeCondition } from '../../editor/condition';
+import type { DragInfo } from './drag';
 import { STAT_KEYS, PAGE_SIZES, type DataEB, type EBlock, type EditorTemplate } from '../../editor/types';
 
 export const SAMPLE_VARS: Record<string, string> = {
@@ -27,6 +28,9 @@ interface Ctx {
   images: Record<string, string>;
   onSelect: (id: string) => void;
   onText: (id: string, text: string) => void;
+  /** 頁面上拖曳排序：把手屬性與目前拖曳狀態（沒有就不顯示把手）。 */
+  grip?: (id: string) => object;
+  drag?: DragInfo | null;
 }
 
 function Placeholder({ b, s }: { b: DataEB; s: number }) {
@@ -165,9 +169,10 @@ function Block({ b, c }: { b: EBlock; c: Ctx }) {
       );
       break;
   }
+  const mark = c.drag?.target === b.id ? ` drop-${c.drag.before ? 'before' : 'after'}` : '';
   return (
     <div
-      class={`eb${sel ? ' sel' : ''}${b.when ? ' cond' : ''}`}
+      class={`eb${sel ? ' sel' : ''}${b.when ? ' cond' : ''}${c.drag?.id === b.id ? ' lift' : ''}${mark}`}
       data-bid={b.id}
       style={pad}
       onClick={(e) => {
@@ -176,6 +181,11 @@ function Block({ b, c }: { b: EBlock; c: Ctx }) {
         c.onSelect(b.id);
       }}
     >
+      {sel && c.grip && c.interactive && (
+        <span class="pv-grip" role="button" aria-label="在頁面上拖曳這個區塊" {...(c.grip(b.id) as object)}>
+          ⋮⋮
+        </span>
+      )}
       {b.when && <span class="eb-tag">{describeCondition(b.when)}</span>}
       {body}
     </div>
@@ -194,6 +204,8 @@ export function Preview(props: {
   images?: Record<string, string>;
   onSelect?: (id: string | null) => void;
   onText?: (id: string, text: string) => void;
+  grip?: (id: string) => object;
+  drag?: DragInfo | null;
   /** 縮圖：不要互動。 */
   thumb?: boolean;
 }) {
@@ -221,6 +233,8 @@ export function Preview(props: {
     images: props.images ?? {},
     onSelect: (id) => props.onSelect?.(id),
     onText: (id, t) => props.onText?.(id, t),
+    ...(props.grip ? { grip: props.grip } : {}),
+    drag: props.drag ?? null,
   };
   return (
     <div class={`pv-box${props.thumb ? ' thumb' : ''}`} ref={box} onClick={() => props.interactive && props.onSelect?.(null)}>

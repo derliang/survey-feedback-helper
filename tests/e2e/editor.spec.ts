@@ -22,7 +22,7 @@ async function openLibrary(page: Page) {
 
 test('範本庫：內建範本、不橫向捲動、按鈕夠大', async ({ page }) => {
   await openLibrary(page);
-  await expect(page.getByTestId('template-card')).toHaveCount(2);
+  await expect(page.getByTestId('template-card')).toHaveCount(3);
   await expect(page.getByText('個人回饋單', { exact: true })).toBeVisible();
   await noOverflow(page);
   expect(await smallButtons(page)).toEqual([]);

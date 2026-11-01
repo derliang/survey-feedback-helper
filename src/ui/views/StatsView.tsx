@@ -15,6 +15,7 @@ import { go, loadReview, set, setStats, updateReview, useApp } from '../../app/s
 import { barsSvg, columnsSvg, pairedBarsSvg, svgSize, svgTitle, toPrintSvg } from '../chart-svg';
 import { svgToJpg } from '../chart-png';
 import { downloadBytes } from '../../storage';
+import { TrendCard } from './TrendCard';
 import { strings as S } from '../strings';
 import { ActBar, Notice, useWide } from '../parts/parts';
 import { CommentList, Keywords, SaveNote } from './ReviewParts';
@@ -470,6 +471,7 @@ export function StatsView() {
         <WorkList title={listTitle} entries={entries} sel={sel} />
         <section class="wb-main" aria-live="polite">
           {fb && <FeedbackMain summary={fb} sel={sel} wide={wide} />}
+          {fb && sel === '' && <TrendCard current={fb} label={s.name} max={s.scale.max} wide={wide} />}
           {qs && selQ && <QuestionMain q={selQ} wide={wide} />}
           {qs && !selQ && <p class="hint">{S.stats.noData}</p>}
           {vote && <VoteMain v={vote} sel={sel} wide={wide} />}
