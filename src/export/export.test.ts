@@ -145,6 +145,15 @@ describe('PDF／Word／批次輸出', () => {
     expect(fb).toContain('平均');
   });
 
+  it('分頁與分隔線：PDF 換頁、Word 有分頁與底線段落', async () => {
+    const fonts = await loadFonts(nodeFontSource);
+    const doc = { blocks: [{ type: 'text' as const, text: '第一頁', size: 11 }, { type: 'rule' as const, after: 4 }, { type: 'pagebreak' as const }, { type: 'text' as const, text: '第二頁', size: 11 }], footerText: 'x', lineH: 18 };
+    expect((await renderPdf(doc, fonts)).pageCount).toBe(2);
+    const xml = strFromU8(unzipSync(await renderDocx(doc, { fontName: wordFontFor('windows') }))['word/document.xml']!);
+    expect(xml).toContain('w:pageBreakBefore');
+    expect(xml).toContain('w:pBdr');
+  }, 60_000);
+
   it('批次 zip：每位學生一個 PDF，檔名不重複，進度回報', async () => {
     const fonts = await loadFonts(nodeFontSource);
     const progress: number[] = [];
