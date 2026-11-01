@@ -6,7 +6,7 @@
 ## 硬規則（使用者要求，不得違反）
 
 1. **純網頁、免安裝、無後端**；手機、平板、桌機各自設計版面與操作（mobile-first）。
-2. **main 即上線**：push／merge 到 `main` 就等於發布到 GitHub Pages 正式站。PR 階段必須測試完全通過，且使用者明確說「發布」才合併；合併前確認授權，合併後確認部署成功並回報正式站網址與 SHA。
+2. **發布 = 本機執行 `npm run release -- --yes`**（2026-11-01 起；不用 GitHub Actions，避免收費）：合併到 `main` **不會**上線，`main` 只是原始碼。PR 階段必須在本機跑完 `npm run ci` 並附證據，使用者明確說「發布」才合併並發布；發布後確認 `gh-pages` 的 SHA 與正式站網址並回報。見[Pages 改本機發布](docs/decisions/2026-11-01-Pages改本機發布.md)。
 3. **全專案零費用**：Google API、字型、CDN、套件、部署都不得產生費用。引入任何套件、字型、服務前先核對授權（須與 GPL-3.0 相容）與費用，並登錄 [docs/third-party.md](docs/third-party.md)。
 4. **Google Cloud 專案絕不綁定帳單帳戶**，不啟用需要帳單的服務；Google 權限只用 `drive.file`；API 金鑰限 Pages 網址、只開 Drive、Picker 與 Google Sheets API（2026-11-01 使用者裁示改為直讀 Google 試算表，見[審稿意見裁示](docs/decisions/2026-11-01-審稿意見裁示.md)）。
 5. **不把學生資料放進 repo**（repo 公開）：絕不把學生資料（問卷結果、名單、輸出檔）commit 進 repo；`.gitignore` 已擋 xlsx／csv／docx／pdf。示範資料只用虛構資料。不蒐集任何使用數據（連匿名統計也不要）。
@@ -19,7 +19,7 @@
 
 ## 技術
 
-TypeScript + Vite + Preact + Vitest + Playwright；ExcelJS、docx、fflate；PDF 程式直接產生（字型子集化）；圖表自製 SVG；GitHub Actions 部署 GitHub Pages。細節與原因見決定記錄。
+TypeScript + Vite + Preact + Vitest + Playwright；ExcelJS、docx、fflate；PDF 程式直接產生（字型子集化）；圖表自製 SVG；本機腳本發布到 GitHub Pages（`gh-pages` 分支，Pages 設為「從分支部署」）。細節與原因見決定記錄。
 
 ## 測試與建置指令
 
@@ -35,15 +35,17 @@ TypeScript + Vite + Preact + Vitest + Playwright；ExcelJS、docx、fflate；PDF
 | 效能預算（首頁 gzip 150 KB，需先建置） | `npm run check:budget` |
 | 端對端（桌機、平板、手機觸控；需先建置，自動以 `scripts/serve-dist.mjs` 提供 `dist/`） | `npm run test:e2e` |
 | 隱私掃描／授權與費用／Google 權限 | `npm run check:privacy`、`npm run check:licenses`、`npm run check:google-scopes` |
-| 以上全部依序跑 | `npm run ci` |
+| 以上全部依序跑（型別、lint、單元、隱私、授權、Google 權限、建置、效能預算、e2e；取代原 PR 關卡 CI） | `npm run ci` |
+| 發布 dry-run（先跑 `npm run ci`，再印出將發布到 `gh-pages` 的內容，不動遠端） | `npm run release` |
+| 正式發布（只有使用者說「發布」後才加 `--yes`；要求工作樹乾淨且 HEAD = `origin/main`） | `npm run release -- --yes` |
 
-PR 關卡見 `.github/workflows/pr-gate.yml`，部署見 `deploy.yml`（純文件變更不觸發）；細節見[決定記錄〈PR 與發布關卡〉](docs/decisions/2026-10-30-技術選型與發布規則.md)。引入新套件須先登錄 `docs/third-party.md`，`check:licenses` 會擋未登錄的直接相依。
+沒有 GitHub Actions：PR 關卡就是在本機跑 `npm run ci`，結果貼在 PR 的測試證據；發布用 `scripts/release.mjs`。細節見[決定記錄〈PR 與發布關卡〉](docs/decisions/2026-10-30-技術選型與發布規則.md)與[Pages 改本機發布](docs/decisions/2026-11-01-Pages改本機發布.md)。引入新套件須先登錄 `docs/third-party.md`，`check:licenses` 會擋未登錄的直接相依。
 
 ## 工作流程
 
-- **程式修改**在分支施工、開 PR；`main` 啟用分支保護後，程式類變更只能經 PR 合併。
-- PR 全綠 → 回報測試證據 → 使用者說「發布」→ 合併。
-- **純文件類可直接 push 到 `main`**（使用者 2026-10-30 決定）：文件不是正式程式，直接進 `main` 是為了讓後續對話一 pull 就拿到最新資訊。範圍僅限 `*.md`、`docs/`、`.github/` 的範本與 `LICENSE`；只要同一次變更碰到程式、`.github/workflows/`、設定或建置檔，就走 PR。部署流程建好後，須設定成純文件變更不觸發重新部署，並讓分支保護對純文件變更放行。
+- **程式修改**在分支施工、開 PR；`main` 啟用分支保護後，程式類變更只能經 PR 合併（分支保護不能以 CI 作為必要檢查，因為沒有 CI）。
+- 本機 `npm run ci` 全綠 → PR 附測試證據 → 使用者說「發布」→ 合併 → 在 `main` 上 `npm run release -- --yes` → 回報 `gh-pages` SHA 與正式站網址。
+- **純文件類可直接 push 到 `main`**（使用者 2026-10-30 決定）：文件不是正式程式，直接進 `main` 是為了讓後續對話一 pull 就拿到最新資訊。範圍僅限 `*.md`、`docs/`、`.github/` 的範本與 `LICENSE`；只要同一次變更碰到程式、`.github/workflows/`、設定或建置檔，就走 PR。純文件變更不需要發布；`main` 不會自動上線，所以直接 push 文件不影響正式站。
 - 版本記錄：每次發布更新 `CHANGELOG.md` 並建立 GitHub Release；完成待辦要同步更新 `todo.md`。
 - 介面與輸出文件的設計走設計員流程，設計系統記錄於 `docs/design/`。
 - Commit 署名依全域規範（`Claude-<裝置簡稱>`）。

@@ -29,7 +29,6 @@
 | @eslint/js | 10.0.1 | 建置：ESLint 推薦規則 | MIT | 是 | 免費 | 2026-11-01 |
 | typescript-eslint | 8.72.1 | 建置：ESLint 的 TypeScript 支援 | MIT | 是 | 免費 | 2026-11-01 |
 | @types/node | 26.6.6 | 建置：Node 型別（設定檔與腳本用） | MIT | 是 | 免費 | 2026-11-01 |
-| GitHub Actions（actions/checkout、setup-node、upload-artifact、download-artifact、upload-pages-artifact、deploy-pages） | v3～v4 | CI／部署：PR 關卡與 GitHub Pages 部署（僅在 GitHub 執行，不隨網站發布） | MIT | 是 | 公開 repo 免費；不使用付費 runner | 2026-11-01 |
 
 ## 預計引入（尚未核對，引入時填入上表）
 

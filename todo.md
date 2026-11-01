@@ -62,9 +62,10 @@
 - [ ] 平板補齊到與手機一一對應（目前 14 個，還缺約 50 個）；套用裁示後才做
 - [ ] 尚未設計：深色輸出文件預覽細節、動態與轉場
 - [x] （2026-11-01，PR scaffold-ci 待合併）專案骨架：TypeScript + Vite + Preact + Vitest + Playwright，並補專案 `CLAUDE.md` 的測試與建置指令
-- [x] （2026-11-01，PR scaffold-ci 待合併；**輸出視覺比對**等輸出器完成後再補）**CI 關卡**（GitHub Actions，公開 repo 免費）：型別與 lint、單元測試、Playwright 端對端（多解析度、觸控）、輸出視覺比對、隱私掃描、授權與費用檢查、Google 權限檢查（只允許 `drive.file`）、**效能預算（硬規則 9）**、建置
-- [ ] 啟用 `main` 分支保護（程式類只能經 PR 合併、必須全部通過）；須放行純文件類直接 push，且純文件變更不觸發重新部署（見 CLAUDE.md〈工作流程〉）（注意：pr-gate.yml 對純文件變更用 paths-ignore 不執行，若把它設為必要檢查，純文件 PR 會一直等待；啟用時用 ruleset 放行或改設）
-- [x] （2026-11-01，workflow 已寫好，待使用者把 Pages 來源設為 GitHub Actions 並說「發布」）GitHub Pages 部署流程（GitHub Actions）；合併前確認授權，因 main 即上線
+- [x] （2026-11-01，PR scaffold-ci 待合併；**輸出視覺比對**等輸出器完成後再補）**PR 關卡**（2026-11-01 改為本機 `npm run ci`，不用 GitHub Actions）：型別與 lint、單元測試、Playwright 端對端（多解析度、觸控）、輸出視覺比對、隱私掃描、授權與費用檢查、Google 權限檢查（只允許 `drive.file`）、**效能預算（硬規則 9）**、建置
+- [ ] 啟用 `main` 分支保護（程式類只能經 PR 合併；因為沒有 CI，不設必要狀態檢查，靠 PR 附本機 `npm run ci` 證據）；須放行純文件類直接 push（見 CLAUDE.md〈工作流程〉）。需使用者在 repo 設定操作
+- [x] （2026-11-01，PR local-release 待合併）GitHub Pages 發布流程改為本機 `npm run release`（推 `gh-pages` 分支，Pages 已設為從 gh-pages 部署，站台已上線）；見[決定](docs/decisions/2026-11-01-Pages改本機發布.md)。用 `--yes` 發布前需使用者說「發布」
+- [ ] 第一次用 `npm run release -- --yes` 實際發布（本 PR 只做 dry-run 驗證）
 - [ ] **Teacher Hub 卡片轉正**：第一版上線、有 GitHub Pages 網址後，通知 `derliang/teacher-hub` 把「問卷回饋小幫手」候選卡改為可點的即開即用或 Beta 卡，並在它的 `tools.json` 加一筆。工具要有 `version.json`（版號與發布日），否則 teacher-hub 的自動同步會失敗。流程見該 repo 的 `docs/PUBLISHING.md` 3.1。背景見 [決定記錄](docs/decisions/2026-10-30-發佈到Teacher-Hub先佔位.md)
 - [x] （2026-11-01）引入第一個套件時，核對授權與費用並登錄 [docs/third-party.md](docs/third-party.md)
 

@@ -16,6 +16,7 @@
     "check:licenses": "node scripts/check-licenses.mjs",
     "check:google-scopes": "node scripts/check-google-scopes.mjs",
     "check:budget": "node scripts/check-budget.mjs",
+    "release": "node scripts/release.mjs",
     "ci": "npm run typecheck && npm run lint && npm test && npm run check:privacy && npm run check:licenses && npm run check:google-scopes && npm run build && npm run check:budget && npm run test:e2e"
   },
   "dependencies": {
