@@ -472,3 +472,51 @@
   background: var(--doc-accent-soft);
   color: var(--doc-accent);
 }
+
+/* 頁面上拖曳區塊：選取的區塊左上角出現把手；放下位置用上下橫線標示 */
+.eb {
+  position: relative;
+}
+.pv-grip {
+  position: absolute;
+  top: -14px;
+  left: -2px;
+  z-index: 2;
+  min-width: 28px;
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: var(--on-accent, #fff);
+  border-radius: var(--r-sm);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  letter-spacing: -2px;
+  font-size: 12px;
+}
+.eb.lift {
+  opacity: 0.6;
+}
+.eb.drop-before::before,
+.eb.drop-after::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--accent);
+  border-radius: 2px;
+  pointer-events: none;
+}
+.eb.drop-before::before {
+  top: -3px;
+}
+.eb.drop-after::after {
+  bottom: -3px;
+}
+/* 雙指縮放由程式處理；單指仍可捲動 */
+.pv-wrap {
+  touch-action: pan-x pan-y;
+}

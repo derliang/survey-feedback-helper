@@ -76,12 +76,32 @@ describe('輸出接線：範本 → DocModel', () => {
     expect(pickTemplates(all, 'gone').personal.id).toBe('builtin-personal');
     expect(pickTemplates([], null).personal.id).toBe('builtin-personal');
     expect(isSummaryTemplate(summary)).toBe(true);
-    expect(personalChoices(all).map((t) => t.id)).toEqual(['mine', 'builtin-personal']);
+    expect(personalChoices(all).map((t) => t.id)).toEqual(['mine', 'builtin-personal', 'builtin-personal-adv']);
   });
 
   it('資料 URL 只接受 PNG', () => {
     expect(dataUrlToPng('data:image/png;base64,AQID')).toEqual(new Uint8Array([1, 2, 3]));
     expect(dataUrlToPng('data:image/jpeg;base64,AQID')).toBeUndefined();
     expect(dataUrlToPng(undefined)).toBeUndefined();
+  });
+});
+
+describe('進階範本接線', () => {
+  const adv = builtinTemplates().find((t) => t.id === 'builtin-personal-adv')!;
+  const types = (d: { blocks: { type: string }[] }) => d.blocks.map((b) => b.type);
+  it('老師版有摘要數字列（含名次）與自評對照表', () => {
+    const inp = input({ stats: { rank: 3, count: 8, median: 4.1, sd: 0.31 }, selfCompare: [{ item: '內容', others: 4.5, self: 4 }] });
+    const d = personalDocFromTemplate(adv, inp, { version: 'teacher' });
+    expect(types(d)).toEqual(expect.arrayContaining(['hero', 'stats', 'table', 'callout']));
+    const stats = d.blocks.find((b) => b.type === 'stats');
+    expect(stats && 'cards' in stats && stats.cards.map((c) => c.label)).toEqual(['我的平均', '班級平均', '全班名次', '回收份數']);
+    const cmp = d.blocks.filter((b) => b.type === 'table').find((b) => 'header' in b && b.header[0] === '項目');
+    expect(cmp && 'rows' in cmp && cmp.rows[0]).toEqual(['內容', '4.5', '4.0', '-0.5']);
+  });
+  it('學生版隱藏名次；沒有自評資料就略過對照表', () => {
+    const d = personalDocFromTemplate(adv, input({ stats: { rank: 3, count: 8 } }), { version: 'student' });
+    const stats = d.blocks.find((b) => b.type === 'stats');
+    expect(stats && 'cards' in stats && stats.cards.map((c) => c.label)).not.toContain('全班名次');
+    expect(d.blocks.some((b) => b.type === 'table' && 'header' in b && b.header[0] === '項目')).toBe(false);
   });
 });
