@@ -42,6 +42,10 @@ export function TopBar() {
             <Icon name="restart" />
             <span class="lbl">{S.restart}</span>
           </button>
+          <button class="btn ghost small" type="button" onClick={() => go('editor')} aria-label="範本與版面">
+            <Icon name="pencil" />
+            <span class="lbl">範本</span>
+          </button>
           <button class="btn secondary small" type="button" onClick={() => go('settings')} aria-label={S.settings}>
             <Icon name="gear" />
             <span class="lbl">{S.settings}</span>

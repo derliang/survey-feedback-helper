@@ -28,7 +28,7 @@ import { type ColumnInfo, type Scale, analyzeColumns, applySavedMapping, detectS
 import { LoadError, type FileLike, surveyNameFromFile, tableFromFile } from './load';
 import { type RosterRow, isMixedClasses, rosterFromRows } from './roster-input';
 
-export type Route = 'home' | 'prepare' | 'stats' | 'output' | 'settings' | 'method';
+export type Route = 'home' | 'prepare' | 'stats' | 'output' | 'settings' | 'method' | 'editor';
 export type Sub = 'type' | 'mapping' | 'roster' | 'compare' | 'check';
 
 /** 一份正在處理的問卷。作答資料只在記憶體，關掉分頁就沒有（硬規則 6）。 */
