@@ -1399,3 +1399,10 @@ mark.pn-low {
 .sheet {
   animation: sfh-slide-up 220ms ease-out;
 }
+
+/* Google 登入前提示卡的選帳號示意圖（虛構帳號；「選這個」用文字加底色，不只靠顏色） */
+.g-chooser { display: grid; gap: 8px; margin: 12px 0; }
+.g-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
+.g-row.g-pick { border-color: var(--ok); }
+.g-row em { margin-left: auto; font-style: normal; font-weight: 600; color: var(--ok); }
+.g-row.g-other { color: var(--ink3); }
