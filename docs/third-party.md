@@ -12,7 +12,7 @@
 | subset-font | 2.9.0 | 正式候選：HarfBuzz 字型子集化（主程式需包裝才能在瀏覽器用） | BSD-3-Clause | 是 | 免費 | 2026-10-30 |
 | harfbuzzjs | （subset-font 相依） | 正式候選：HarfBuzz 的 wasm | MIT | 是 | 免費 | 2026-10-30 |
 | fontverter | 2.0.0 | 正式候選：字型格式轉換（WOFF2↔TTF） | BSD-3-Clause | 是 | 免費 | 2026-10-30 |
-| fflate | （原型安裝最新版） | 正式候選：zip 打包 | MIT | 是 | 免費 | 2026-10-30 |
+| fflate | 0.8.3 | 正式：zip 解壓（讀 xlsx，`src/core/xlsx.ts`，延遲載入）；zip 打包（批次輸出）。無間接相依 | MIT | 是 | 免費 | 2026-11-01 |
 | buffer | （原型安裝最新版） | 原型：瀏覽器的 Node `Buffer` 填補層（fontverter 需要） | MIT | 是 | 免費 | 2026-10-30 |
 | esbuild | 0.28.2 | 原型：打包瀏覽器測試 | MIT | 是 | 免費 | 2026-10-30 |
 | playwright-core | 1.64.1 | 原型／測試：驅動 Chromium | Apache-2.0 | 是（Apache-2.0 與 GPL-3.0 相容） | 免費 | 2026-10-30 |
@@ -32,4 +32,4 @@
 
 ## 預計引入（尚未核對，引入時填入上表）
 
-ExcelJS（xlsx 讀寫）、圖示字型或圖示集（優先選 OFL／MIT）。
+ExcelJS（xlsx **輸出**用；讀取已改用 fflate 自行解析。2026-11-01 評估：4.4.0 本身 MIT，但間接相依 buffers@0.1.1 沒有授權欄位、chainsaw 標示 "MIT/X11"，`check:licenses` 會擋，且體積大，故讀取不採用；輸出是否採用待輸出器工作時再決定）、圖示字型或圖示集（優先選 OFL／MIT）。
