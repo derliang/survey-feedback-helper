@@ -46,7 +46,7 @@ TypeScript + Vite + Preact + Vitest + Playwright；ExcelJS、docx、fflate；PDF
 - **程式修改**在分支施工、開 PR；`main` 啟用分支保護後，程式類變更只能經 PR 合併（分支保護不能以 CI 作為必要檢查，因為沒有 CI）。
 - 本機 `npm run ci` 全綠 → PR 附測試證據 → 調度員審核後合併 → 有意義的進展隨時（使用者已常態授權，或使用者說「發布」）在 `main` 上 `npm run release -- --yes` → 回報 `gh-pages` SHA 與正式站網址。
 - **純文件類可直接 push 到 `main`**（使用者 2026-10-30 決定）：文件不是正式程式，直接進 `main` 是為了讓後續對話一 pull 就拿到最新資訊。範圍僅限 `*.md`、`docs/`、`.github/` 的範本與 `LICENSE`；只要同一次變更碰到程式、`.github/workflows/`、設定或建置檔，就走 PR。純文件變更不需要發布；`main` 不會自動上線，所以直接 push 文件不影響正式站。
-- 版本記錄：每次發布更新 `CHANGELOG.md` 並建立 GitHub Release；完成待辦要同步更新 `todo.md`。
+- 版本記錄：每次發布更新 `CHANGELOG.md` 並建立 GitHub Release；完成待辦要同步更新 `todo.md`：完成的項目搬到 `docs/archive/todo-已完成-*.md`（逐字保留、連結加 `../../`），`todo.md` 只放未完成。
 - 介面與輸出文件的設計走設計員流程，設計系統記錄於 `docs/design/`。
 - Commit 署名依全域規範（`Claude-<裝置簡稱>`）。
 
