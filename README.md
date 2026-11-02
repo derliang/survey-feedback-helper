@@ -2,7 +2,7 @@
 
 給老師用的網頁工具：開啟 Google 表單匯出的問卷結果，自動統計，並產出精美的班級總表與學生個人回饋單。手機、平板、桌機的瀏覽器都能用，免安裝。
 
-> **狀態：規劃階段（尚未發布任何版本）。** 目前 repo 只有規劃文件，程式從 v0.1 開始。進度見 [todo.md](todo.md)，版本記錄見 [CHANGELOG.md](CHANGELOG.md)。
+> **狀態：已發布，持續開發中。** 正式站：<https://derliang.github.io/survey-feedback-helper/>（目前版本以站上 `version.json` 與 [GitHub Releases](https://github.com/derliang/survey-feedback-helper/releases) 為準）。待辦見 [todo.md](todo.md)，版本記錄見 [CHANGELOG.md](CHANGELOG.md)。下方「預計功能」與「版本路線」是規劃藍圖，實際完成度以 CHANGELOG 為準。
 
 ## 隱私與資料
 
@@ -48,7 +48,7 @@ TypeScript + Vite + Preact；ExcelJS、docx、fflate；PDF 由程式直接產生
 
 ## 發布規則
 
-本專案 **`main` 即上線**：合併到 `main` 就會發布到 GitHub Pages 正式站。因此每個 PR 都必須通過全部測試與檢查，並經維護者確認後才能合併。參與方式見 [CONTRIBUTING.md](CONTRIBUTING.md)，安全問題回報見 [SECURITY.md](SECURITY.md)。
+本專案**合併到 `main` 不會上線**（2026-11-01 起不用 GitHub Actions）：`main` 只是原始碼，正式站由維護者在本機執行 `npm run release -- --yes` 推到 `gh-pages` 分支才更新，見[Pages 改本機發布](docs/decisions/2026-11-01-Pages改本機發布.md)。每個 PR 仍須在本機通過 `npm run ci` 並附證據，經維護者確認後才能合併。參與方式見 [CONTRIBUTING.md](CONTRIBUTING.md)，安全問題回報見 [SECURITY.md](SECURITY.md)。
 
 ## 授權
 
