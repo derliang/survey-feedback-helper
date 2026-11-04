@@ -64,7 +64,47 @@ export function makeXlsx(headers: string[], rows: (string | number)[][]): Buffer
   return Buffer.from(zipSync(files));
 }
 
-export const surveyFile = (name = '讀書報告回饋  (回覆).xlsx') => ({
+/** 多個工作表的最小 xlsx（inlineStr）；每張表第一列是欄名。 */
+export function makeXlsxSheets(sheets: { name: string; headers: string[]; rows: (string | number)[][] }[]): Buffer {
+  const sheetXml = (headers: string[], rows: (string | number)[][]) =>
+    `<?xml version="1.0" encoding="UTF-8"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>${[headers, ...rows]
+      .map(
+        (r, ri) =>
+          `<row r="${ri + 1}">${r
+            .map((v, ci) => {
+              const ref = `${colName(ci)}${ri + 1}`;
+              return typeof v === 'number' ? `<c r="${ref}"><v>${v}</v></c>` : `<c r="${ref}" t="inlineStr"><is><t>${esc(v)}</t></is></c>`;
+            })
+            .join('')}</row>`,
+      )
+      .join('')}</sheetData></worksheet>`;
+  const files: Record<string, Uint8Array> = {
+    '[Content_Types].xml': strToU8(
+      `<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>${sheets
+        .map((_, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`)
+        .join('')}</Types>`,
+    ),
+    '_rels/.rels': strToU8(
+      '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>',
+    ),
+    'xl/workbook.xml': strToU8(
+      `<?xml version="1.0" encoding="UTF-8"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${sheets
+        .map((s, i) => `<sheet name="${esc(s.name)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`)
+        .join('')}</sheets></workbook>`,
+    ),
+    'xl/_rels/workbook.xml.rels': strToU8(
+      `<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets
+        .map((_, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`)
+        .join('')}</Relationships>`,
+    ),
+  };
+  sheets.forEach((s, i) => {
+    files[`xl/worksheets/sheet${i + 1}.xml`] = strToU8(sheetXml(s.headers, s.rows));
+  });
+  return Buffer.from(zipSync(files));
+}
+
+export const surveyFile = (name ='讀書報告回饋  (回覆).xlsx') => ({
   name,
   mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   buffer: makeXlsx(HEADERS, ROWS),

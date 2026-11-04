@@ -6,7 +6,7 @@ const rec = (id: number, o: Partial<CheckRecord> = {}): CheckRecord => ({ id, ..
 describe('findDuplicates', () => {
   it('同一位填寫者多份（容忍空白）', () => {
     const d = findDuplicates([rec(0, { respondent: { name: '王小明' } }), rec(1, { respondent: { name: ' 王 小明' } }), rec(2, { respondent: { name: '李小華' } })], false);
-    expect(d).toEqual([{ key: '|王小明', ids: [0, 1] }]);
+    expect(d).toEqual([{ key: '|王小明', ids: [0, 1], seatConflict: false }]);
   });
   it('報告回饋以「填寫者＋被評對象」為單位：評不同人不算重複', () => {
     const rows = [

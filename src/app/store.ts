@@ -377,7 +377,7 @@ export async function openSurveyFile(file: FileLike): Promise<void> {
 
 /** Google 試算表直讀來的表格：與開 Excel 檔同一條路（辨識已存設定、進對應欄位）。 */
 export function openSurveyTable(table: Table, name: string): void {
-  startSession(table, name, {});
+  startSession(table, name, { sourceLabel: "Google 試算表" });
 }
 
 /** 示範資料（教學頁 R-001）：不比對、不存進資料夾、不進「最近的問卷」，重新開始即清除。 */
@@ -388,7 +388,7 @@ export function openDemoTable(table: Table, rosterRows: RosterRow[]): void {
 function startSession(
   table: Table,
   fileName: string,
-  opts: { demo?: boolean; rosterRows?: RosterRow[] },
+  opts: { demo?: boolean; rosterRows?: RosterRow[]; sourceLabel?: string },
 ): void {
   const file = { name: fileName };
   const { data, pendingRecent } = opts.demo
@@ -441,7 +441,7 @@ function startSession(
   const { kind, reason } = inferKind(cols);
   const session: Session = {
     fileName: file.name,
-    sourceLabel: "Excel 檔",
+    sourceLabel: opts.sourceLabel ?? (/\.(csv|tsv|txt)$/i.test(file.name) ? "CSV／TSV 檔" : "Excel 檔"),
     name: surveyNameFromFile(file.name),
     table,
     cols,

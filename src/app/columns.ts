@@ -53,9 +53,10 @@ function columnValues(table: Table, index: number): Cell[] {
 function guessByContent(values: Cell[]): { role: Role; confirm: boolean } | null {
   if (values.length === 0) return null;
   const nums = values.map((v) => parseNumber(v));
-  // 九成以上是 0～10 的整數就當評分：偶有打錯的 11 不該讓整欄被略過（資料檢查會再標出超出範圍的那一列）
+  // 九成以上是 0～10 的整數就當評分：偶有打錯的 11 或混入一筆文字（如「五分」）不該讓整欄被當成選擇題
+  // （資料檢查會再標出超出範圍或無法讀成數字的那一列）
   const inRange = nums.filter((n) => n !== null && n >= 0 && n <= 10 && Number.isInteger(n)).length;
-  if (nums.every((n) => n !== null) && inRange / nums.length >= 0.9) {
+  if (inRange / nums.length >= 0.9) {
     return { role: 'score', confirm: true };
   }
   const texts = values.map((v) => cellText(v));
@@ -79,8 +80,9 @@ export function analyzeColumns(table: Table): ColumnInfo[] {
         role = g.role;
         confirm = g.confirm;
       } else {
+        // 有內容卻猜不出題型：標「請確認」，不默默當成不分析
         role = 'ignore';
-        confirm = false;
+        confirm = columnValues(table, index).length > 0;
       }
     }
     return { index, header, label: header, role, confirm, samples: samplesOf(table, index) };
@@ -205,21 +207,30 @@ export function countToConfirm(cols: readonly ColumnInfo[]): number {
   return cols.filter((c) => c.confirm).length;
 }
 
-/** 量表範圍：評分欄的最大值 ≤5 當 1～5，否則 0～10（樣本是 0～10）；含 0 一律 0～10。 */
+/**
+ * 量表範圍：評分欄的最大值 ≤5 當 1～5，否則 0～10（樣本是 0～10）；含 0 一律 0～10。
+ * 例外：最大值 ≤5 而 0 只有零星一兩筆（不到 5%）時，視為 1～5 的輸入異常，不因此擴成 0～10；那幾筆由資料檢查標成超出範圍。
+ */
 export function detectScale(table: Table, cols: readonly ColumnInfo[]): Scale {
   let max = 0;
   let min = Infinity;
+  let total = 0;
+  let zeros = 0;
   for (const c of cols) {
     if (c.role !== 'score') continue;
     for (const v of columnValues(table, c.index)) {
       const n = parseNumber(v);
       if (n === null) continue;
+      total++;
+      if (n === 0) zeros++;
       max = Math.max(max, n);
       min = Math.min(min, n);
     }
   }
   if (max === 0 && min === Infinity) return { min: 1, max: 5 };
-  return max <= 5 && min >= 1 ? { min: 1, max: 5 } : { min: 0, max: 10 };
+  if (max <= 5 && min >= 1) return { min: 1, max: 5 };
+  if (max <= 5 && min === 0 && zeros <= 2 && zeros / total < 0.05) return { min: 1, max: 5 };
+  return { min: 0, max: 10 };
 }
 
 function pick(row: readonly Cell[], cols: readonly ColumnInfo[], role: Role): Cell {

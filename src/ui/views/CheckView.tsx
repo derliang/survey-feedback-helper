@@ -32,8 +32,9 @@ export function CheckView() {
                 <li key={g.key} class="issue">
                   <strong>{S.check.dupDetail(who, g.ids.length)}</strong>
                   <span class="hint">第 {sorted.map(rowNo).join('、')} 列</span>
+                  {g.seatConflict && <Notice kind="warn">{S.check.dupSeatNote}</Notice>}
                   <div class="btn-row">
-                    <button class="btn primary small" type="button" onClick={() => exclude(sorted.slice(0, -1))}>
+                    <button class={`btn ${g.seatConflict ? 'secondary' : 'primary'} small`} type="button" onClick={() => exclude(sorted.slice(0, -1))}>
                       {S.check.keepLast}
                     </button>
                     <button class="btn secondary small" type="button" onClick={() => exclude(sorted.slice(1))}>

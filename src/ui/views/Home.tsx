@@ -16,7 +16,7 @@ import { GoogleConnectDialog, googleConfigured } from "./GoogleConnect";
 
 // iOS 的「檔案」選擇器遇到不認得的副檔名會把檔案灰掉：試算表加上 MIME，設定檔在觸控裝置不設限（讀進來再檢查格式）。
 const SURVEY_ACCEPT =
-  ".xlsx,.csv,.tsv,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,text/tab-separated-values,application/vnd.ms-excel";
+  ".xlsx,.csv,.tsv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,text/tab-separated-values";
 const CONFIG_ACCEPT = ".sfh,.json,application/json";
 
 export function FolderNotices() {

@@ -140,7 +140,7 @@ export function OutputView() {
 
   const nameFlags = audience !== 'teacher' ? personal.reduce((n, p) => n + p.comments.filter((c) => findPossibleNames(c, { includeLow: false }).length > 0).length, 0) : 0;
   const needPreview = audience !== 'teacher' && summary !== null;
-  const sig = JSON.stringify([audience, personal.map((p) => [p.key, p.comments])]);
+  const sig = JSON.stringify([audience, personal.map((p) => [p.key, p.comments, p.input.teacherComment ?? ''])]);
   const previewed = !needPreview || seenSig === sig;
   const sel = personal.find((p) => p.key === who) ?? personal[0];
   const allComments = summary ? summary.targets.flatMap((t) => t.comments.map((c) => ({ key: feedbackKey(c.recordId), text: c.text }))) : [];
@@ -408,9 +408,15 @@ export function OutputView() {
                 <strong>{p.fileName}</strong>
                 {(() => {
                   const gone = Object.entries(hiddenHere).filter(([k, v]) => v.who === p.key && !p.commentKeys.includes(k));
-                  if (p.comments.length === 0 && gone.length === 0) return <p class="hint">{S.output.previewEmpty}</p>;
+                  const teacher = p.input.teacherComment;
+                  if (p.comments.length === 0 && gone.length === 0 && !teacher) return <p class="hint">{S.output.previewEmpty}</p>;
                   return (
                     <ul class="plain-list">
+                      {teacher && (
+                        <li data-testid="preview-teacher">
+                          <span class="hint">{S.output.previewTeacher}</span> {teacher}
+                        </li>
+                      )}
                       {p.comments.map((c, i) => (
                         <FlaggedComment
                           key={p.commentKeys[i] ?? i}
