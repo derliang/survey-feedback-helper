@@ -4,15 +4,17 @@ import { boot, set, useApp } from '../app/store';
 import { strings as S } from './strings';
 import { Notice } from './parts/parts';
 import { TopBar } from './parts/Chrome';
+import { lazyView } from './lazy-view';
 import { Home } from './views/Home';
 import { FolderDialog, RestartDialog, Settings } from './views/Misc';
-import { MethodView } from './views/MethodView';
-import { OutputView } from './views/OutputView';
-import { StatsView } from './views/StatsView';
-import { Prepare } from './views/Prepare';
 import { EditorRoute } from './editor/Loader';
 import { GuideRoute } from './guide/Loader';
 import { CourseRoute } from './views/CourseLoader';
+
+const MethodView = lazyView(() => import('./views/MethodView').then((m) => m.MethodView));
+const OutputView = lazyView(() => import('./views/OutputView').then((m) => m.OutputView));
+const StatsView = lazyView(() => import('./views/StatsView').then((m) => m.StatsView));
+const Prepare = lazyView(() => import('./views/Prepare').then((m) => m.Prepare));
 
 export function App() {
   const st = useApp();

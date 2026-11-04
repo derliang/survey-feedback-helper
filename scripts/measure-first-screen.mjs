@@ -1,12 +1,13 @@
 // 量首屏載入時間（用法：先 npm run build，再 node scripts/measure-first-screen.mjs）。
 // 模擬中階手機：CPU 降速 4 倍、網路約 1.6 Mbps／150 ms 延遲（Chrome DevTools 的「Slow 4G」數值）；
 // 環境變數 PROFILE=fast 改用較快的 4G（約 9 Mbps／40 ms，Chrome 的「Fast 4G」數值）。
+// 預設像 GitHub Pages 一樣 gzip（GZIP=0 可關掉，量未壓縮的最壞情況）。
 // 量到「首頁主標題出現」的時間，三次取中位數。結果記在 docs/performance.md；不進 npm run ci（時間受機器影響）。
 import { spawn } from 'node:child_process';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { chromium } from '@playwright/test';
 
-const server = spawn(process.execPath, ['scripts/serve-dist.mjs'], { env: { ...process.env, PORT: '4199' }, stdio: 'ignore' });
+const server = spawn(process.execPath, ['scripts/serve-dist.mjs'], { env: { ...process.env, PORT: '4199', GZIP: process.env.GZIP ?? '1' }, stdio: 'ignore' });
 await sleep(800);
 const url = 'http://localhost:4199/survey-feedback-helper/';
 const browser = await chromium.launch();

@@ -3,8 +3,8 @@ import { strings } from './strings';
 import { en } from './strings.en';
 
 // 英文介面覆蓋率：繁中有的字串，英文都要有，除了下面「尚未翻譯」的整段（退回繁體中文）。
-// 這幾段牽涉 Google 英文介面的名稱或題目內容，要先對照真實英文介面才能翻（硬規則 10）。
-const PENDING = ['google', 'guide', 'tpl'];
+// 2026-11-04 起 google／guide／tpl 也已補上；其中 Google 英文介面名稱尚未走過真實介面，句尾標 (to be verified)（硬規則 10）。
+const PENDING: string[] = [];
 
 function missing(z: unknown, e: unknown, path: string, out: string[]): void {
   if (Array.isArray(z)) {

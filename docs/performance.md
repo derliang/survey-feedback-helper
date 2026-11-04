@@ -4,7 +4,7 @@
 
 ## 首屏載入（硬規則 9）
 
-- **首頁程式大小**：86.6 KB gzip（預算 150 KB，`npm run check:budget` 每次 CI 檢查）。
+- **首頁程式大小**：76.4 KB gzip（2026-11-04 起；之前 86.6 KB；預算 150 KB，`npm run check:budget` 每次 CI 檢查）。
 - **進入輸出頁才載入**：xlsx／docx／PDF 與字型延遲載入；輸出頁一開就呼叫 `registerAssetCache()`（`src/ui/views/OutputView.tsx`），Service Worker 把字型與 wasm 快取起來，之後離線也能輸出。
 - **首屏時間**（`node scripts/measure-first-screen.mjs`，先 `npm run build`；手機視窗 390×844、CPU 降速 4 倍、關閉 Service Worker 即第一次造訪；量到「首頁主標題出現」）：
 
@@ -13,7 +13,10 @@
 | Fast 4G（約 9 Mbps、40 ms，`PROFILE=fast`） | 1.59／1.85／1.89 秒 | 1.85 秒 |
 | Slow 4G（約 1.6 Mbps、150 ms，預設） | 2.07／2.08／2.10 秒（一次）；2.54／3.53／3.78 秒（另一次，機器忙時） | 2.1～3.5 秒 |
 
-  結論：中階手機（4× 降速）在 Fast 4G 以上達成「首屏 2 秒內」；Slow 4G 的**第一次**造訪略超過，之後有 Service Worker 與瀏覽器快取就快很多。這個腳本不進 `npm run ci`（受機器負載影響會誤報）。**調度員 2026-11-01 決定：Slow 4G 第一次造訪略超過 2 秒先接受。** **沒量到的**：真機（見 [real-device-checklist.md](real-device-checklist.md)）。
+
+  **2026-11-04 瘦身後**（PR：`perf/lazy-routes` 同批；量測腳本改為預設像 GitHub Pages 一樣 gzip，`GZIP=0` 可量未壓縮）：統計、輸出、準備資料、方法說明四個畫面改為進入時才載入（`src/ui/lazy-view.tsx`），首頁入口 `index` 從 127 KB 降到 47 KB（未壓縮）。桌機模擬 Slow 4G（4× 降速）三次：1.67／1.69／1.73 秒與 1.67／1.68／1.69 秒，**中位數約 1.68 秒（之前 2.10 秒）**；Fast 4G 中位數 0.61 秒。已低於 2 秒目標；仍是模擬，**真機未量**。
+
+  舊結論（瘦身前）：中階手機（4× 降速）在 Fast 4G 以上達成「首屏 2 秒內」；Slow 4G 的**第一次**造訪略超過，之後有 Service Worker 與瀏覽器快取就快很多。這個腳本不進 `npm run ci`（受機器負載影響會誤報）。**調度員 2026-11-01 決定：Slow 4G 第一次造訪略超過 2 秒先接受。** **沒量到的**：真機（見 [real-device-checklist.md](real-device-checklist.md)）。
 
 ## 統計計算壓力測試
 
