@@ -76,7 +76,7 @@ describe('英文介面骨架', () => {
     expect(merged.steps).toHaveLength(4);
     expect(merged.settingsPage.themes.dark).toBe('Dark');
     expect(merged.review.adopt).toBe('Adopt'); // 已翻
-    expect(merged.google.title).toBe(strings.google.title); // 尚未翻譯（google、guide、tpl 段）退回繁體中文
+    expect(merged.google.title).toBe('A quick look before you sign in'); // 2026-11-04 起 google、guide、tpl 也已翻
     expect(merged.folder.reauthTitle('x')).toBe('The browser forgot your folder "x"'); // 函式整個取代
     expect(strings.appName).toBe('問卷回饋小幫手');
   });
