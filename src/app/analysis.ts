@@ -96,11 +96,29 @@ function colCells(s: Session, col: ColumnInfo, rows: number[]): Cell[] {
   return rows.map((i) => cellAt(s, i, col.index));
 }
 
-/** 選擇題自動判斷複選：有兩成以上的作答含逗號或頓號。 */
+/**
+ * 選擇題自動判斷複選：有兩成以上的作答含逗號或頓號，而且拆開後的片段真的是「共用的選項」——
+ * 片段本身也單獨出現在別人的作答，或同一片段出現在兩種以上不同的組合裡。
+ * 只有選項名稱本身含頓號（如單選的「人文、社會」）時，片段不會單獨出現，不算複選，也不會被拆開。
+ */
 export function looksMulti(cells: readonly Cell[]): boolean {
-  const filled = cells.filter((c) => !isBlankCell(c));
+  const filled = cells.map((c) => cellText(c)).filter((t) => t !== '');
   if (filled.length === 0) return false;
-  return filled.filter((c) => /[,，、]/.test(cellText(c))).length / filled.length >= 0.2;
+  const delimited = filled.filter((t) => /[,，、]/.test(t));
+  if (delimited.length / filled.length < 0.2) return false;
+  const whole = new Set(filled.filter((t) => !/[,，、]/.test(t)));
+  const partIn = new Map<string, Set<string>>();
+  for (const t of new Set(delimited)) {
+    for (const p of t.split(/[,，、]/)) {
+      const part = p.trim();
+      if (part === '') continue;
+      if (whole.has(part)) return true;
+      const combos = partIn.get(part) ?? new Set<string>();
+      combos.add(t);
+      partIn.set(part, combos);
+    }
+  }
+  return [...partIn.values()].some((combos) => combos.size >= 2);
 }
 
 /** 複選題的選項清單：所有作答拆開後出現過的選項。 */

@@ -23,10 +23,20 @@ export function decodeCsv(bytes: Uint8Array): string {
   }
 }
 
-/** 第一行 Tab 比逗號多就當成 tsv。 */
+/** 第一筆記錄（引號內的換行不算換行）裡，引號外的 Tab 比逗號多就當成 tsv；引號內的逗號、Tab 不計。 */
 export function guessDelimiter(text: string): string {
-  const first = text.split(/\r?\n/, 1)[0] ?? '';
-  return (first.match(/\t/g) ?? []).length > (first.match(/,/g) ?? []).length ? '\t' : ',';
+  let tabs = 0;
+  let commas = 0;
+  let quoted = false;
+  for (const ch of text) {
+    if (ch === '"') quoted = !quoted;
+    else if (!quoted) {
+      if (ch === '\n' || ch === '\r') break;
+      if (ch === '\t') tabs++;
+      else if (ch === ',') commas++;
+    }
+  }
+  return tabs > commas ? '\t' : ',';
 }
 
 /** 去副檔名並去掉頭尾空白，當作問卷名稱的預設值。 */
@@ -34,7 +44,7 @@ export function surveyNameFromFile(name: string): string {
   return name.replace(/\.(xlsx|xls|csv|tsv)$/i, '').replace(/\s+/g, ' ').trim() || '未命名問卷';
 }
 
-/** 讀 xlsx 或 csv 成資料表；多個工作表時取第一個有資料的。 */
+/** 讀 xlsx 或 csv 成資料表；多個工作表時取第一個「有欄名也有資料列」的（第一張只是說明頁也讀得到後面的回覆）。 */
 export async function tableFromFile(file: FileLike): Promise<Table> {
   const lower = file.name.trim().toLowerCase();
   const bytes = new Uint8Array(await file.arrayBuffer());
@@ -45,7 +55,8 @@ export async function tableFromFile(file: FileLike): Promise<Table> {
       table = tableFromCsv(text, guessDelimiter(text));
     } else if (/\.xlsx$/.test(lower)) {
       const sheets = await xlsxSource(bytes).sheets();
-      const hit = sheets.map((s) => tableFromRows(s.rows)).find((t) => t.headers.length > 0);
+      const tables = sheets.map((s) => tableFromRows(s.rows));
+      const hit = tables.find((t) => t.headers.length > 0 && t.rows.length > 0) ?? tables.find((t) => t.headers.length > 0);
       table = hit ?? { headers: [], rows: [] };
     } else if (/\.(xls|xlsm|ods)$/.test(lower)) {
       throw new LoadError('oldExcel');
