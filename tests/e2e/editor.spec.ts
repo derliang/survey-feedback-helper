@@ -253,3 +253,22 @@ test('桌機（5.26）：圖示鈕工具提示懸停 500ms、鍵盤焦點立即�
   await page.keyboard.press('Escape');
   await expect.poll(names).toEqual(before);
 });
+
+test('設計落地 G9：手機底部操作列四顆按鈕夠大、字不被截', async ({ page }, info) => {
+  test.skip(info.project.name !== 'phone', '只有手機版有底部操作列');
+  await openLibrary(page);
+  await page.getByRole('button', { name: '編輯「個人回饋單」' }).click();
+  const btns = await page.$$eval('.ed-act button', (els) =>
+    els.map((el) => {
+      const r = el.getBoundingClientRect();
+      return { t: el.textContent?.trim(), w: r.width, h: r.height, clipped: el.scrollWidth > el.clientWidth };
+    }),
+  );
+  expect(btns.map((b) => b.t)).toEqual(['頁面', '個別學生', '加入', '編輯屬性']);
+  for (const b of btns) {
+    expect(b.w, b.t).toBeGreaterThanOrEqual(44);
+    expect(b.h, b.t).toBeGreaterThanOrEqual(44);
+    expect(b.clipped, `${b.t} 被截`).toBe(false);
+  }
+  await noOverflow(page);
+});
