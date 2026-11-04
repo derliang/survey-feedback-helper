@@ -1,4 +1,4 @@
-import { type Cell, diceSimilarity, isBlankCell, normalizeClass, normalizeName, normalizeTitle, parseNumber, parseTimestamp } from './text';
+import { type Cell, diceSimilarity, isBlankCell, normalizeClass, normalizeName, normalizeSeat, normalizeTitle, parseNumber, parseTimestamp } from './text';
 import type { PersonRef } from './roster';
 
 /** 資料檢查的輸入：每份回覆一筆，id 通常是資料列索引。 */
@@ -29,12 +29,16 @@ export function personKey(p: PersonRef | undefined): string | null {
 export interface DuplicateGroup {
   key: string;
   ids: number[];
+  /** 這幾份的座號互不相同：可能是同班同名的兩位學生，只能標「疑似重複」請老師核對，不能直接建議刪除。 */
+  seatConflict: boolean;
 }
 
 /** 重複填答：同一位填寫者（報告回饋時為「填寫者＋被評對象」）出現多份。 */
 export function findDuplicates(records: readonly CheckRecord[], withTarget: boolean): DuplicateGroup[] {
   const groups = new Map<string, number[]>();
+  const seatOf = new Map<number, number | null>();
   for (const r of records) {
+    seatOf.set(r.id, normalizeSeat(r.respondent?.seat));
     const who = personKey(r.respondent);
     if (who === null) continue;
     let key = who;
@@ -45,7 +49,14 @@ export function findDuplicates(records: readonly CheckRecord[], withTarget: bool
     }
     groups.set(key, [...(groups.get(key) ?? []), r.id]);
   }
-  return [...groups].filter(([, ids]) => ids.length > 1).map(([key, ids]) => ({ key, ids }));
+  return [...groups]
+    .filter(([, ids]) => ids.length > 1)
+    .map(([key, ids]) => {
+      const seats = ids.map((id) => seatOf.get(id) ?? null);
+      // 每份都填了座號且至少兩種 → 座號不同；有人沒填座號就無從判斷，仍照重複處理
+      const seatConflict = seats.every((s) => s !== null) && new Set(seats).size > 1;
+      return { key, ids, seatConflict };
+    });
 }
 
 export interface BlankIssue {
