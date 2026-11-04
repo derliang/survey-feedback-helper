@@ -1,0 +1,1 @@
+var e=[{name:`Microsoft JhengHei`,platform:`windows`},{name:`PingFang TC`,platform:`mac`}];function t(t=`auto`){if(t===`auto`){let e=typeof navigator>`u`?``:navigator.userAgent;t=/Mac|iPhone|iPad/.test(e)?`mac`:`windows`}return(e.find(e=>e.platform===t)??e[0]).name}var n=`Word 版使用電腦內建的中文字型（Windows：微軟正黑體；Mac：蘋方-繁），因此換行位置可能和 PDF 有一兩個字的差異；需要版面完全一致時請使用 PDF。`;export{t as n,n as t};
