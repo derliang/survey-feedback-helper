@@ -1,0 +1,88 @@
+/* 教學圖解（設計稿 5.32）：全部走 tokens，淺色深色自動成立；只隨教學頁／LazyFig 載入，不進首頁 bundle。 */
+/* ===== 圖解步驟：每一步＝一張圖＋一兩句短字；欄數跟著卡片寬度自動排（手機 1 欄、平板 2 欄、桌機前置 3 欄） ===== */
+.dsteps{list-style:none;margin:0;padding:0;display:grid;gap:var(--sp-4);grid-template-columns:repeat(auto-fill,minmax(232px,1fr));align-items:start}
+.dstep{display:grid;gap:var(--sp-2);min-width:0}
+.dtx{display:flex;gap:var(--sp-2);align-items:flex-start}
+.dtx p{min-width:0}
+.dtx .sub{color:var(--ink2);font-size:var(--fs-sm)}
+.dtx strong{display:block}
+/* ===== 圖解語彙 ===== */
+.dg{margin:0;background:var(--sunk);border-radius:var(--r-md);padding:var(--sp-3);display:grid;gap:var(--sp-2);min-width:0;font-size:var(--fs-xs);line-height:1.45;color:var(--ink)}
+.dg-cap{display:flex;flex-wrap:wrap;align-items:center;gap:6px;color:var(--ink2);font-size:var(--fs-xs)}
+.dg-w{background:var(--card);border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden;min-width:0;font-size:var(--fs-xs)}
+.dg-w.tbd{border:1.5px dashed var(--ink3)}
+.dg-wt{display:flex;align-items:center;gap:6px;padding:3px 8px;background:var(--sunk);border-bottom:1px solid var(--line-soft);color:var(--ink2);font-weight:600;min-width:0}
+.dg-w.app .dg-wt{background:var(--accent-soft);color:var(--accent-ink)}
+.dg-wn{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.dg-me{flex:none;font-size:var(--fs-xs);font-weight:700}
+.dg-dots{flex:none;width:30px;height:8px;background:radial-gradient(circle at 4px 4px,var(--ink3) 3px,transparent 3.5px) 0 0/11px 8px repeat-x;opacity:.7}
+.dg-wb{padding:8px;display:grid;gap:6px;min-width:0}
+.dg-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-width:0}
+.dg-sp{flex:1}
+.dg-t{min-width:0;overflow-wrap:anywhere}
+.dg-t.b{font-weight:700}
+.dg-t.m{color:var(--ink2)}
+.dg-b{position:relative;display:inline-flex;align-items:center;min-height:24px;padding:0 8px;border:1px solid var(--ctl);border-radius:6px;background:var(--card);color:var(--ink);font-weight:600;white-space:nowrap}
+.dg-b.pri{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.dg-b.ghostb{border-style:dashed;color:var(--ink2);font-weight:400}
+.dg .hot,.dg-tab.hot{outline:2px solid var(--accent);outline-offset:2px;position:relative}
+.dg-cur{position:absolute;right:-9px;bottom:-13px;pointer-events:none}
+.dg-ph{display:block;height:8px;border-radius:4px;background:var(--line-soft);flex:none}
+.dg-pop{border:1px solid var(--line);border-radius:6px;padding:6px;display:grid;gap:5px;background:var(--card);box-shadow:0 2px 6px var(--shadow-sm)}
+.dg-dlg{border:1px solid var(--line);border-radius:8px;background:var(--card);padding:8px;display:grid;gap:6px;box-shadow:0 2px 6px var(--shadow-sm);min-width:0}
+.dg-dlg .dh{font-size:var(--fs-xs)}
+.dg-rd{display:flex;align-items:center;gap:6px}
+.dg-rd .dot{flex:none;width:12px;height:12px;border-radius:50%;border:2px solid var(--ink3)}
+.dg-rd.on .dot{border-color:var(--accent);background:radial-gradient(circle,var(--accent) 0 3px,transparent 3.5px)}
+.dg-tabs{display:flex;gap:14px;border-bottom:1px solid var(--line-soft);padding-bottom:4px}
+.dg-tab{position:relative;font-weight:600;color:var(--ink2);padding:0 2px}
+.dg-tab.on{color:var(--ink)}
+.dg-badge{display:inline-grid;place-items:center;min-width:16px;height:16px;border-radius:8px;background:var(--ink2);color:var(--card);font-size:11px;margin-left:2px}
+.dg-flow{display:grid;gap:4px;min-width:0}
+.dg-ar{display:flex;justify-content:center;color:var(--accent-ink)}
+.dg-m{border:1px solid var(--line);border-radius:6px;background:var(--card);box-shadow:0 2px 6px var(--shadow-sm);display:grid;padding:3px 0;min-width:0}
+.dg-mi{position:relative;display:flex;align-items:center;gap:6px;padding:2px 8px;min-width:0}
+.dg-mi .mt{flex:1;min-width:0;overflow-wrap:anywhere}
+.dg-mi.sel{background:var(--accent-soft);color:var(--accent-ink);font-weight:700;box-shadow:inset 2px 0 0 var(--accent)}
+.dg-mi.no .mt{text-decoration:line-through;color:var(--ink2)}
+.dg-mi .dg-cur{right:6px;bottom:-8px}
+.dg-msep{border-top:1px solid var(--line-soft);margin:3px 0}
+.dg-sub{color:var(--ink3)}
+.dg-ok{color:var(--ok);font-weight:700;white-space:nowrap}
+.dg-no{color:var(--bad);font-weight:700;white-space:nowrap}
+.dg-cas{display:grid;gap:6px;grid-template-columns:minmax(0,1fr)}
+.dg-grid{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line-soft);gap:0}
+.dg-grid>*{border:1px solid var(--line-soft);padding:3px 6px;min-height:22px}
+.dg-grid .dg-ph{height:8px;margin:6px;border:0;padding:0;min-height:0}
+.dg-grid .h{font-weight:700;background:var(--sunk)}
+.dg-sheettab{display:inline-block;padding:2px 8px;border:1px solid var(--line);border-top:0;background:var(--card);font-weight:700}
+.dg .mark,.dg-grid .mark{outline:2px dashed var(--accent);outline-offset:1px}
+.dg-acct{position:relative;display:flex;align-items:center;gap:6px;padding:4px 6px;border:1px solid var(--line-soft);border-radius:6px;min-width:0;overflow-wrap:anywhere}
+.dg-acct>.dg-t{flex:none;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:var(--sunk);font-weight:700}
+.dg-acct.hot{background:var(--accent-soft)}
+.dg-acct .dg-cur{right:6px;bottom:-8px}
+.dg-file{display:inline-flex;align-items:center;gap:4px;font-weight:600;min-width:0;overflow-wrap:anywhere}
+.dg-file .ic{flex:none;color:var(--ink2)}
+.dg-prog{display:block;height:6px;border-radius:3px;background:var(--sunk);overflow:hidden}
+.dg-prog span{display:block;width:60%;height:100%;background:var(--accent)}
+.dg-step4{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;text-align:center;color:var(--ink2)}
+.dg-step4 span{border-top:3px solid var(--line);padding-top:2px}
+.dg-step4 .on{border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.dg-drop{border:1.5px dashed var(--ink3);border-radius:6px;padding:6px;display:grid;gap:4px;justify-items:center;text-align:center}
+.dg-v{display:grid;gap:4px;border-radius:6px;padding:6px;background:var(--card);border:1px solid var(--line-soft)}
+.dg-v.ok{border-color:var(--ok)}
+.dg-v.no{border-color:var(--bad)}
+.dg-q{display:grid;gap:4px;border:1px solid var(--line-soft);border-radius:6px;padding:4px 6px;background:var(--card);min-width:0}
+.dg-type{flex:none;border:1px solid var(--ctl);border-radius:4px;padding:0 6px;color:var(--ink2);white-space:nowrap}
+.dg-scale{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+.dg-scale b{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--ink3);display:grid;place-items:center;font-size:11px}
+.dg-scale span{color:var(--ink2)}
+.dg-cards{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.dg-card{position:relative;border:1px solid var(--ctl);border-radius:6px;padding:6px;font-weight:700;background:var(--card)}
+.dg-card.hot{background:var(--accent-soft);color:var(--accent-ink);border-color:var(--accent)}
+.dsteps .num{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent-ink);font-weight:700;font-size:var(--fs-sm);font-variant-numeric:tabular-nums}
+.dg-cap .tag.sm{height:20px;padding:0 6px}
+@media (prefers-reduced-motion:reduce){.dg *{transition:none!important}}
+.typewrap{display:grid;gap:var(--sp-3);grid-template-columns:minmax(0,1fr);min-width:0}
+.typewrap>*{min-width:0}
+@media (min-width:600px){.typewrap{grid-template-columns:minmax(0,1fr) 220px;align-items:start}}

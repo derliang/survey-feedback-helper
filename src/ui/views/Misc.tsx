@@ -2,6 +2,8 @@ import { choosePickFolder, downloadSettings, forgetThisFolder, go, restart, set,
 import { type Lang, type Theme, isTouchDevice } from '../../storage';
 import { strings as S } from '../strings';
 import { ActBar, Sheet } from '../parts/parts';
+import { LazySteps } from '../parts/LazyDiagram';
+import { rich } from '../parts/rich';
 import { CloudCard } from './CloudBackup';
 import { BackupCard, DefaultsCard } from './SettingsExtra';
 
@@ -57,7 +59,13 @@ export function Settings() {
         {f.state === 'unsupported' && (
           <>
             <p class="hint">{S.folder.unsupportedBody}</p>
-            <p class="hint">{touch ? S.folder.touchManualBody : S.folder.manualBody}</p>
+            <strong>{S.folder.howManual}</strong>
+            <LazySteps
+              steps={(touch ? S.folder.touchManualSteps : S.folder.manualSteps).map((t, i) => ({
+                fig: (touch ? (['fdT1', 'fdT2', 'fdT3'] as const) : (['fdD1', 'fdD2'] as const))[i],
+                text: rich(t),
+              }))}
+            />
           </>
         )}
       </section>

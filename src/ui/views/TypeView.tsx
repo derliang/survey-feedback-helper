@@ -3,6 +3,8 @@ import { go, setSession, useApp } from '../../app/store';
 import type { SurveyKind } from '../../storage';
 import { strings as S } from '../strings';
 import { ActBar } from '../parts/parts';
+import { LazySteps } from '../parts/LazyDiagram';
+import { rich } from '../parts/rich';
 
 const KINDS: SurveyKind[] = ['course', 'feedback', 'vote', 'opinion'];
 
@@ -43,7 +45,7 @@ export function TypeView() {
           <summary>
             {S.type.courseHow} {S.type.toVerify && <span class="tag warn">{S.type.toVerify}</span>}
           </summary>
-          <p>{S.type.courseHowBody}</p>
+          <LazySteps steps={S.type.courseHowSteps.map((t, i) => ({ fig: (['cs1', 'cs2'] as const)[i], text: rich(t) }))} />
         </details>
       )}
       <details class="howto" open={suggested.kind === s.kind}>

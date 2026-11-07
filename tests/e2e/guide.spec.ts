@@ -43,8 +43,8 @@ test('教學頁：標題、六個區段與兩個做法的內容', async ({ page 
   await expect(page.locator('#g3 .mp').first()).toContainText('檔案');
   await expect(page.locator('#g3 .mp').first()).toContainText('Microsoft Excel (.xlsx)');
   // 每張做法卡的編號都從 1 開始
-  await expect(page.locator('#g2 .steps .num').first()).toHaveText('1');
-  await expect(page.locator('#g3 .steps .num').first()).toHaveText('1');
+  await expect(page.locator('#g2 .dsteps .num').first()).toHaveText('1');
+  await expect(page.locator('#g3 .dsteps .num').first()).toHaveText('1');
   // 舊的獨立卡與舊標題都不見了
   await expect(page.getByRole('heading', { name: '連接 Google 帳號' })).toHaveCount(0);
   await expect(page.getByRole('heading', { name: '怎麼匯出成 Excel 檔' })).toHaveCount(0);

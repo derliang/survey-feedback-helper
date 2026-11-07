@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
-import type { ComponentChildren } from 'preact';
 import { TEMPLATE_FORM_URL } from '../../app/guide-config';
 import { QUICK_TEMPLATES, questionsAsText } from '../../app/quick-templates';
 import { localizeTemplate, questionHintL, questionsAsTextL } from '../../app/quick-templates.en';
@@ -7,52 +6,13 @@ import { currentLang } from '../locale';
 import { go, openDemoTable, set, useApp } from '../../app/store';
 import { strings as S } from '../strings';
 import { AccountChooser, Icon, Notice } from '../parts/parts';
+import { rich as r } from '../parts/rich';
+import { Diagram, DSteps, type FigId } from './diagrams';
 
 /** 教學頁（route=guide）與快速範本（route=templates）：同一個動態載入的 chunk。 */
 export default function GuideView() {
   const route = useApp().route;
   return route === 'templates' ? <Templates /> : <Guide />;
-}
-
-/**
- * 教學字串的標記：**…** ＝ Google 畫面上的按鈕或選單名稱（粗體）；{{甲>乙>丙}} ＝ 選單路徑（每層一個小標）；
- * [[v]] ＝ 「待核對」標籤（文字取自 verifyTag）。字串集中在 strings，標記只在這裡解析。
- */
-function rich(text: string, verifyTag: string): ComponentChildren {
-  return text.split(/(\*\*[^*]+\*\*|\{\{[^}]+\}\}|\[\[v\]\])/g).map((part, i) => {
-    if (part.startsWith('**')) {
-      return (
-        <b class="u" key={i}>
-          {part.slice(2, -2)}
-        </b>
-      );
-    }
-    if (part.startsWith('{{')) {
-      const items = part.slice(2, -2).split('>');
-      return (
-        <span class="mp" key={i}>
-          {items.map((m, j) => (
-            <span key={j} class="mp-part">
-              {j > 0 && (
-                <span class="mps" aria-hidden="true">
-                  ›
-                </span>
-              )}
-              <span class="mpi">{m}</span>
-            </span>
-          ))}
-        </span>
-      );
-    }
-    if (part === '[[v]]') {
-      return (
-        <span class="tag warn" key={i}>
-          {verifyTag}
-        </span>
-      );
-    }
-    return part;
-  });
 }
 
 const SECTION_IDS = ['g1', 'g2', 'g3', 'g4', 'g5', 'g6'];
@@ -129,19 +89,7 @@ function Guide() {
       setLoading(false);
     }
   };
-  const r = (t: string) => rich(t, G.verifyTag);
-  const steps = (list: string[]) => (
-    <ol class="steps">
-      {list.map((t, i) => (
-        <li key={t}>
-          <span class="num" aria-hidden="true">
-            {i + 1}
-          </span>
-          <div>{r(t)}</div>
-        </li>
-      ))}
-    </ol>
-  );
+  const steps = (list: string[], figs: FigId[]) => <DSteps steps={list.map((t, i) => ({ fig: figs[i], text: r(t) }))} />;
   return (
     <main class="page guide" id="main">
       <button class="btn ghost small" type="button" onClick={() => go('home')}>
@@ -173,7 +121,8 @@ function Guide() {
           <section class="card" id="g1" aria-labelledby="g1h">
             <h2 id="g1h">{G.prepTitle}</h2>
             <p>{G.prepLead}</p>
-            {steps(G.prepSteps)}
+            {steps(G.prepSteps, ['pre1', 'pre2', 'pre3', 'pre4', 'pre5'])}
+            <p class="hint">{r(G.prepAfter)}</p>
             <p class="hint">{G.prepChecked}</p>
           </section>
 
@@ -188,7 +137,7 @@ function Guide() {
                 <b>{G.whoLabel}</b>
                 {G.m1Who}
               </p>
-              {steps(G.m1Steps)}
+              {steps(G.m1Steps, ['m1a', 'm1b', 'm1c', 'm1d', 'm1e'])}
               <p>{r(G.m1Later)}</p>
               <p class="hint">{G.m1Scope}</p>
               <details class="fold">
@@ -201,10 +150,11 @@ function Guide() {
                 </summary>
                 <div class="fb">
                   <ol class="cases">
-                    {G.troubleCases.map(([h, b]) => (
+                    {G.troubleCases.map(([h, b], i) => (
                       <li key={h}>
                         <strong>{h}</strong>
                         <span>{r(b ?? '')}</span>
+                        {i === 0 && <Diagram id="case1" />}
                       </li>
                     ))}
                   </ol>
@@ -232,45 +182,59 @@ function Guide() {
                 <b>{G.whoLabel}</b>
                 {G.m2Who}
               </p>
-              {steps(G.m2Steps)}
-              <p class="hint">{r(G.m2Csv)}</p>
+              {steps(G.m2Steps, ['m2a', 'm2b'])}
+              <p>{G.m2Later}</p>
+              <ul class="dsteps alt">
+                <li class="dstep">
+                  <Diagram id="m2alt" />
+                  <div class="dtx">
+                    <p class="hint">{r(G.m2Csv)}</p>
+                  </div>
+                </li>
+              </ul>
             </section>
           </div>
 
           <section class="card" id="g4" aria-labelledby="g4h">
             <h2 id="g4h">{G.tipsTitle}</h2>
-            <ol class="tips">
+            <ol class="dsteps">
               {G.tips.map((t, i) => (
-                <li key={t.h}>
-                  <span class="num" aria-hidden="true">
-                    {i + 1}
-                  </span>
-                  <div>
-                    <strong>{t.h}</strong>
-                    <p>{t.p}</p>
+                <li class="dstep" key={t.h}>
+                  {t.fig && <Diagram id={t.fig as FigId} />}
+                  <div class="dtx">
+                    <span class="num" aria-hidden="true">
+                      {i + 1}
+                    </span>
+                    <div>
+                      <strong>{t.h}</strong>
+                      <p class="sub">{t.p}</p>
+                    </div>
                   </div>
                 </li>
               ))}
             </ol>
             <h3>{G.typesTitle}</h3>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    {G.typesHead.map((h) => (
-                      <th key={h}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {G.types.map((row) => (
-                    <tr key={row[0]}>
-                      <td>{row[0]}</td>
-                      <td>{row[1]}</td>
+            <div class="typewrap">
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      {G.typesHead.map((h) => (
+                        <th key={h}>{h}</th>
+                      ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {G.types.map((row) => (
+                      <tr key={row[0]}>
+                        <td>{row[0]}</td>
+                        <td>{row[1]}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <Diagram id="types" />
             </div>
             <p class="hint">{G.typesNote}</p>
           </section>
@@ -334,6 +298,9 @@ function Templates() {
       </button>
       <h1>{T.title}</h1>
       <p class="lead">{T.lead}</p>
+      <DSteps
+        steps={T.leadSteps.map((t, i) => ({ fig: (['tq1', 'tq2', 'tq3'] as const)[i], text: r(t) }))}
+      />
       <div class="tpl-split">
         <div class="tpl-grid" role="radiogroup" aria-label={T.pickLabel}>
           {tplList.map((t) => (
