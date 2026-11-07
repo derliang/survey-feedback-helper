@@ -24,7 +24,7 @@ const DISCLOSE = [
   `存的是「${FNAME}」：裡面有你的設定、範本，以及<b>匯入的學生名單</b>。問卷作答結果不會上傳。`,
   '<b>只存這一個檔</b>，放在你自己的 Google 雲端硬碟。本程式只能看到自己存的這個檔，看不到你雲端硬碟裡的其他檔案。',
   '本程式沒有伺服器，<b>我們看不到這個檔</b>。',
-  '如果登入的是學校帳號，學校管理員可能看得到這個檔；名單要保密時，請用個人帳號，或不要開啟。',
+  '如果登入的是學校帳號，學校管理員可能看得到這個檔；名單要保密時，可不要開啟。',
 ];
 const disclose = (o = {}) => `<div class="qcard" style="padding:12px 14px;gap:8px"><b>${o.title || '會存什麼、存到哪裡'}</b><ul style="margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px;line-height:1.6">${DISCLOSE.map((x) => `<li class="small">${x}</li>`).join('')}</ul></div>`;
 const swt = (label, sub, on, o = {}) => `<button class="tgl" role="switch" aria-checked="${on}" type="button"${o.dis ? ' disabled' : ''}><span style="text-align:left"><b style="display:block">${label}</b>${sub ? `<span class="small muted">${sub}</span>` : ''}</span><span class="sw2"></span></button>`;

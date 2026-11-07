@@ -126,3 +126,55 @@ describe('Google 表單樣本：2026-11-07 真實匯出的 CSV（虛構資料）
     expect(new Date(t1!).getUTCHours()).toBe(13);
   });
 });
+
+describe('Google 表單樣本：單選題（選擇題）、下拉式選單、簡答、詳答', () => {
+  // 標題寫法為「只有題目文字」：這是依線性刻度、核取方塊的實測推得的預期，單選題／簡答／詳答本身尚未用真實表單實測
+  // （docs/design/Google介面核對紀錄.md「尚未核對」第 6 項）；實測後若不同，要回頭改這裡。內容為虛構。
+  const headers = ['時間戳記', '你最常用哪種交通工具上學？', '你住在哪一區？', '你最喜歡哪一科？為什麼？', '對學校有什麼建議？請詳細說明'];
+  const rows = [
+    ['2026-10-05 08:00:00', '公車', '北區', '數學，因為解題很有成就感', '希望增加午休時間，因為下午上課常常想睡，也希望福利社可以賣更多種類的東西。'],
+    ['2026-10-05 08:01:00', '腳踏車', '東區', '體育', ''],
+    ['2026-10-05 08:02:00', '公車', '北區', '國文，老師很會講故事', '操場的排水可以改善，下雨後常常積水。'],
+    ['2026-10-05 08:03:00', '步行', '南區', '', '圖書館可以開放到晚上。'],
+    ['2026-10-05 08:04:00', '公車', '東區', '美術', ''],
+    ['2026-10-05 08:05:00', '步行', '北區', '英文，喜歡看原文故事書', '希望多辦英語戲劇活動，讓大家有機會上台。'],
+  ];
+
+  it('單選題與下拉式選單：整欄是少數幾種固定答案，判為單選並計次', async () => {
+    const s = await sessionOf('通學.xlsx', headers, rows, 'opinion');
+    const choices = opinionQuestions(s, defaultStatsOpts()).filter((x) => x.kind === 'choice');
+    const byLabel = Object.fromEntries(choices.map((c) => [(c as { col: { header: string } }).col.header, c]));
+    const tool = byLabel['你最常用哪種交通工具上學？'] as { multi: boolean; stat: { counts: { option: string; count: number }[] } };
+    expect(tool.multi).toBe(false);
+    expect(Object.fromEntries(tool.stat.counts.map((c) => [c.option, c.count]))).toEqual({ 公車: 3, 步行: 2, 腳踏車: 1 });
+    const area = byLabel['你住在哪一區？'] as { multi: boolean; stat: { counts: { option: string; count: number }[] } };
+    expect(area.multi).toBe(false);
+    expect(Object.fromEntries(area.stat.counts.map((c) => [c.option, c.count]))).toEqual({ 北區: 3, 東區: 2, 南區: 1 });
+  });
+
+  it('詳答：文字夠長判為開放意見（要老師確認），空白不算一則意見', async () => {
+    const s = await sessionOf('通學.xlsx', headers, rows, 'opinion');
+    const open = s.cols.find((c) => c.header === '對學校有什麼建議？請詳細說明')!;
+    expect(open.role).toBe('comment');
+    expect(open.confirm).toBe(true);
+    const q = opinionQuestions(s, defaultStatsOpts()).find((x) => x.kind === 'comment' && x.col.header === open.header);
+    expect((q as { stat: { answers: unknown[] } }).stat.answers).toHaveLength(4);
+  });
+
+  it('簡答：每人答案不同的短文字不會被猜成選項，列入待確認', async () => {
+    const short = ['時間戳記', '你最喜歡哪一科？為什麼？'];
+    const ans = ['數學，解題有成就感', '體育', '國文老師很會講故事', '英文，喜歡原文書', '美術', '自然實驗好玩', '社會課很有趣', '音樂', '電腦課', '生活科技'];
+    const s = await sessionOf('簡答.xlsx', short, ans.map((a, i) => [`2026-10-05 08:0${i}:00`, a]), 'opinion');
+    const col = s.cols[1]!;
+    expect(col.header).toBe('你最喜歡哪一科？為什麼？');
+    expect(col.role === 'comment' || col.unsorted === true).toBe(true);
+    expect(col.confirm).toBe(true);
+  });
+
+  it('這四種題型的欄位標題原樣保留，且整份不會被判成報告回饋或票選', async () => {
+    const s = await sessionOf('通學.xlsx', headers, rows, 'opinion');
+    expect(s.table.headers).toEqual(headers);
+    expect(inferKind(s.cols).kind).toBe('opinion');
+    expect(mappingProblems('opinion', s.cols)).toEqual([]);
+  });
+});
