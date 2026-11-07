@@ -1,6 +1,6 @@
 import { TEMPLATE_ID_PREFIX } from '../../app/quick-templates';
 import { type PrepItem, canGoStats, doneCount, prepItems } from '../../app/progress';
-import { type Sub, acceptRecognition, go, rejectRecognition, useApp } from '../../app/store';
+import { type Sub, acceptRecognition, go, rejectRecognition, requestSheetChange, useApp } from '../../app/store';
 import { strings as S } from '../strings';
 import { ActBar, Icon, Notice, Sheet, useWide } from '../parts/parts';
 import { CheckView } from './CheckView';
@@ -32,6 +32,19 @@ export function Prepare() {
   const tplHit = s.recognition?.survey.id.startsWith(TEMPLATE_ID_PREFIX) ?? false;
   const ready = canGoStats(s);
   const more = s.previousRows !== null ? s.table.rows.length - s.previousRows : null;
+  // 這個檔有 2 張以上有資料的工作表：顯示用哪一張，並可更換（桌機放在左欄四件事上方，其餘在頁頭）
+  const pool = s.sheetPool;
+  const sheetLine = pool && (
+    <div class="sheet-line" data-testid="sheet-line">
+      <p class="sl-text">
+        <strong>{S.sheet.currentLine(pool.sheets[pool.index]?.name || S.sheet.unnamed)}</strong>
+        <span class="hint">{S.sheet.count(pool.sheets.length)}</span>
+      </p>
+      <button class="btn secondary small" type="button" onClick={requestSheetChange} data-testid="sheet-change">
+        {S.sheet.change}
+      </button>
+    </div>
+  );
 
   return (
     <main class={`page prep${active ? ' has-sub' : ''}`} id="main">
@@ -41,10 +54,12 @@ export function Prepare() {
           {S.prep.sourceInfo(s.sourceLabel, s.table.rows.length, s.table.headers.length)}
           {more !== null && more > 0 && <span class="tag accent">{S.prep.moreRows(more)}</span>}
         </p>
+        {!wide && sheetLine}
       </header>
 
       <div class="prep-grid">
         <nav class="rail" aria-label={S.prep.title}>
+          {wide && sheetLine}
           <p class="rail-top">
             <strong data-testid="done-count">{S.prep.done(doneCount(items))}</strong> · {S.prep.leadIn}
           </p>

@@ -39,7 +39,7 @@ function session(extra: Partial<Session> = {}): Session {
   const cols = analyzeColumns(table);
   return {
     fileName: 't.csv', sourceLabel: 'Excel 檔', name: '選課', table, cols, kind: 'course', kindReason: '', kindConfirmed: true,
-    scale: detectScale(table, cols), mappingConfirmed: true, recognition: null, surveyId: 's1', previousRows: null,
+    scale: detectScale(table, cols), scaleConfirmed: true, sheetPool: null, mappingConfirmed: true, recognition: null, surveyId: 's1', previousRows: null,
     rosterRows: null, rosterMixed: false, rosterSkipped: false, rosterName: '', resolutions: {}, excluded: [], titleMerges: {}, checkHandled: [], course: emptyCourseState(),
     demo: false, ...extra,
   };

@@ -96,6 +96,19 @@ describe("直讀", () => {
     });
     if (r.status === "ok") expect(r.table.headers).toEqual(["姓名", "回饋"]);
   });
+  it("2 個以上分頁有資料：全部列出讓老師選；沒資料的略過", async () => {
+    const { svc } = fakeServices();
+    svc.sheets.info = async () => ({ title: "問卷", sheets: ["說明", "回覆", "空白"] });
+    svc.sheets.values = async (_t, _id, title) =>
+      title === "空白" ? [] : title === "說明" ? [["說明"], ["請填"]] : [["姓名", "回饋"], ["小明", "好"], ["小華", "棒"]];
+    const r = await readSpreadsheet(svc, "tok", "sid");
+    expect(r.status).toBe("ok");
+    if (r.status === "ok") {
+      expect(r.sheets.map((s) => s.name)).toEqual(["說明", "回覆"]);
+      expect(r.skipped).toEqual(["空白"]);
+      expect(r.sheetTitle).toBe("說明");
+    }
+  });
   it("全是空白工作表", async () => {
     const { svc } = fakeServices({ rows: [] });
     expect(await readSpreadsheet(svc, "tok", "sid")).toEqual({

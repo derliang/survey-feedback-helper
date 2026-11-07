@@ -1,9 +1,25 @@
 import { useState } from 'preact/hooks';
-import { type ColumnInfo, type Role, countToConfirm, detectScale, gridGroup, mappingProblems, movePref, prefColumns, withRank, withRole } from '../../app/columns';
+import {
+  type ColumnInfo,
+  type Role,
+  countToConfirm,
+  detectScale,
+  gridGroup,
+  isPending,
+  mappingProblems,
+  movePref,
+  pendingCols,
+  prefColumns,
+  scaleDoubt,
+  scoreSignature,
+  withRank,
+  withRole,
+} from '../../app/columns';
 import { go, saveSurvey, setSession, useApp } from '../../app/store';
 import { strings as S } from '../strings';
 import { ActBar, Icon, Notice, Sheet } from '../parts/parts';
 import { extra } from '../strings-extra';
+import { PendingCard, ScaleCard } from './MappingParts';
 
 function rolesFor(kind: string): Role[] {
   const base: Role[] = ['timestamp', 'respondentClass', 'respondentSeat', 'respondentName'];
@@ -22,16 +38,46 @@ export function MappingView() {
 
   const update = (index: number, patch: Partial<ColumnInfo>) =>
     setSession((cur) => ({ cols: cur.cols.map((c) => (c.index === index ? { ...c, ...patch } : c)) }));
-  const setCols = (f: (cols: ColumnInfo[]) => ColumnInfo[]) => setSession((cur) => ({ cols: f(cur.cols) }));
+  // 改了評分欄的組合就重新判斷量表（老師確認過的上下限只有在這時才作廢）
+  const setCols = (f: (cols: ColumnInfo[]) => ColumnInfo[]) =>
+    setSession((cur) => {
+      const cols = f(cur.cols);
+      if (scoreSignature(cols) === scoreSignature(cur.cols)) return { cols };
+      return { cols, scaleConfirmed: false, scale: detectScale(cur.table, cols) };
+    });
   const isCourse = s.kind === 'course';
   const prefs = prefColumns(s.cols);
   const grid = isCourse ? gridGroup(s.cols) : null;
   const used = s.cols.filter((c) => c.role !== 'ignore');
-  const unused = s.cols.filter((c) => c.role === 'ignore');
+  const pending = pendingCols(s.cols);
+  const unused = s.cols.filter((c) => c.role === 'ignore' && !isPending(c));
   const ordered = [...used.filter((c) => c.confirm), ...used.filter((c) => !c.confirm)];
   const problems = mappingProblems(s.kind, s.cols);
   const toConfirm = countToConfirm(s.cols);
   const hasScore = s.cols.some((c) => c.role === 'score');
+  const doubt = hasScore ? scaleDoubt(s.table, s.cols) : null;
+  const scaleOpen = doubt !== null && !s.scaleConfirmed;
+  const gate = pending.length > 0 ? S.mapping.pendBlock(pending.length) : scaleOpen ? S.mapping.scaleBlock : '';
+
+  const renameCtl = (c: ColumnInfo) =>
+    renaming === c.index ? (
+      <input
+        class="input rename"
+        aria-label={S.mapping.rename}
+        autoFocus
+        value={c.label}
+        onInput={(e) => update(c.index, { label: e.currentTarget.value })}
+        onBlur={() => {
+          if (c.label.trim() === '') update(c.index, { label: c.header });
+          setRenaming(null);
+        }}
+        onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+      />
+    ) : (
+      <button type="button" class="icbtn" aria-label={`${S.mapping.rename}：${c.label}`} onClick={() => setRenaming(c.index)}>
+        <Icon name="pencil" />
+      </button>
+    );
 
   const row = (c: ColumnInfo) => (
     <li key={c.index} class="map-row">
@@ -45,31 +91,15 @@ export function MappingView() {
           <span class="tag">{c.role === 'preference' ? S.mapping.rankTag(c.rank ?? 1) : S.mapping.roles[c.role ?? 'ignore']}</span>
         </span>
       </button>
-      {renaming === c.index ? (
-        <input
-          class="input rename"
-          aria-label={S.mapping.rename}
-          autoFocus
-          value={c.label}
-          onInput={(e) => update(c.index, { label: e.currentTarget.value })}
-          onBlur={() => {
-            if (c.label.trim() === '') update(c.index, { label: c.header });
-            setRenaming(null);
-          }}
-          onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
-        />
-      ) : (
-        <button type="button" class="icbtn" aria-label={`${S.mapping.rename}：${c.label}`} onClick={() => setRenaming(c.index)}>
-          <Icon name="pencil" />
-        </button>
-      )}
+      {renameCtl(c)}
     </li>
   );
 
   const finish = () => {
     setSession((cur) => ({
       cols: cur.cols.map((c) => ({ ...c, confirm: false })),
-      scale: detectScale(cur.table, cur.cols),
+      // 老師確認或手動選過的量表不重算
+      scale: cur.scaleConfirmed ? cur.scale : detectScale(cur.table, cur.cols),
       mappingConfirmed: true,
     }));
     void saveSurvey();
@@ -80,7 +110,9 @@ export function MappingView() {
     <div class="view">
       <h2>{S.mapping.title}</h2>
       <p class="hint">{S.mapping.lead}</p>
-      {toConfirm > 0 ? <Notice kind="warn">{S.mapping.toConfirm(toConfirm)}</Notice> : <Notice kind="ok">{S.mapping.allGood}</Notice>}
+      <PendingCard s={s} setCols={setCols} rename={renameCtl} onMore={setEditing} />
+      {doubt && <ScaleCard s={s} doubt={doubt} />}
+      {toConfirm > 0 ? <Notice kind="warn">{S.mapping.toConfirm(toConfirm)}</Notice> : pending.length === 0 && <Notice kind="ok">{S.mapping.allGood}</Notice>}
       <ul class="map-list">{ordered.map(row)}</ul>
       {isCourse && (
         <button type="button" class="btn secondary" onClick={() => setAdding(true)} data-testid="add-pref">
@@ -149,7 +181,7 @@ export function MappingView() {
           </span>
         </Notice>
       )}
-      {hasScore && (
+      {hasScore && !doubt && (
         <div class="field">
           <span class="label" id="scale-l">
             {S.mapping.scale}
@@ -159,7 +191,7 @@ export function MappingView() {
               const [min, max] = k.split('-').map(Number) as [number, number];
               const on = s.scale.min === min && s.scale.max === max;
               return (
-                <button key={k} type="button" role="radio" aria-checked={on} class={on ? 'on' : ''} onClick={() => setSession({ scale: { min, max } })}>
+                <button key={k} type="button" role="radio" aria-checked={on} class={on ? 'on' : ''} onClick={() => setSession({ scale: { min, max }, scaleConfirmed: true })}>
                   {S.mapping.scaleOptions[k]}
                 </button>
               );
@@ -179,10 +211,16 @@ export function MappingView() {
         </Notice>
       )}
       <ActBar>
+        {gate && (
+          <p class="gate-why" role="status" data-testid="gate-why">
+            <Icon name="lock" />
+            <span>{gate}</span>
+          </p>
+        )}
         <button class="btn secondary" type="button" onClick={() => go('prepare', 'type')}>
           {S.back}
         </button>
-        <button class="btn primary grow" type="button" disabled={problems.length > 0} onClick={finish}>
+        <button class="btn primary grow" type="button" disabled={problems.length > 0 || gate !== ''} onClick={finish}>
           {S.mapping.done}
         </button>
       </ActBar>

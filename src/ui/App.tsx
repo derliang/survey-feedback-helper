@@ -6,6 +6,7 @@ import { Notice } from './parts/parts';
 import { TopBar } from './parts/Chrome';
 import { lazyView } from './lazy-view';
 import { Home } from './views/Home';
+import { SheetPick } from './views/SheetPick';
 import { FolderDialog, RestartDialog, Settings } from './views/Misc';
 import { EditorRoute } from './editor/Loader';
 import { GuideRoute } from './guide/Loader';
@@ -56,10 +57,11 @@ export function App() {
           </Notice>
         </div>
       )}
-      {st.route === 'home' && <Home />}
-      {st.route === 'prepare' && (st.session ? <Prepare /> : <Home />)}
-      {st.route === 'stats' && (st.session?.kind === 'course' ? <CourseRoute part="stats" /> : <StatsView />)}
-      {st.route === 'output' && (st.session?.kind === 'course' ? <CourseRoute part="output" /> : <OutputView />)}
+      {st.sheetPick && <SheetPick />}
+      {!st.sheetPick && st.route === 'home' && <Home />}
+      {!st.sheetPick && st.route === 'prepare' && (st.session ? <Prepare /> : <Home />)}
+      {!st.sheetPick && st.route === 'stats' && (st.session?.kind === 'course' ? <CourseRoute part="stats" /> : <StatsView />)}
+      {!st.sheetPick && st.route === 'output' && (st.session?.kind === 'course' ? <CourseRoute part="output" /> : <OutputView />)}
       {st.route === 'method' && <MethodView />}
       {st.route === 'editor' && <EditorRoute />}
       {(st.route === 'guide' || st.route === 'templates') && <GuideRoute />}

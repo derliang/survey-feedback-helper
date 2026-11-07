@@ -29,6 +29,8 @@ export interface ColumnInfo {
   samples: string[];
   /** 志願欄才有：第幾志願（1 起算）。 */
   rank?: number;
+  /** 系統看不出題型但有內容的欄（「待分類」）。老師還沒決定前 `confirm` 為 true；決定後 `confirm` 變 false，這個旗標留著，用來列「已處理」。 */
+  unsorted?: boolean;
 }
 
 export interface Scale {
@@ -75,6 +77,7 @@ export function analyzeColumns(table: Table): ColumnInfo[] {
     const s = sug[index];
     let role: Role | null = s?.role ?? null;
     let confirm = s?.confidence === 'low' && role !== null;
+    let unsorted = false;
     if (role === null) {
       const g = guessByContent(columnValues(table, index));
       if (g) {
@@ -84,9 +87,12 @@ export function analyzeColumns(table: Table): ColumnInfo[] {
         // 有內容卻猜不出題型：標「請確認」，不默默當成不分析
         role = 'ignore';
         confirm = columnValues(table, index).length > 0;
+        unsorted = confirm;
       }
     }
-    return { index, header, label: header, role, confirm, samples: samplesOf(table, index) };
+    const col: ColumnInfo = { index, header, label: header, role, confirm, samples: samplesOf(table, index) };
+    if (unsorted) col.unsorted = true;
+    return col;
   });
   return assignRanks(cols);
 }
@@ -136,6 +142,7 @@ export function applySavedMapping(table: Table, saved: SavedMapping, labels: Rec
       if (col) {
         col.role = role as Role;
         col.confirm = false;
+        delete col.unsorted;
         // 志願欄存檔時依第幾志願排序，順序即志願
         if (role === 'preference') col.rank = n + 1;
         else delete col.rank;
@@ -204,8 +211,39 @@ export function mappingProblems(kind: SurveyKind, cols: readonly ColumnInfo[]): 
   return out;
 }
 
+/** 還在「待分類」的欄：猜不出題型、老師還沒決定。 */
+export function isPending(c: ColumnInfo): boolean {
+  return c.unsorted === true && c.confirm && c.role === 'ignore';
+}
+
+export function pendingCols(cols: readonly ColumnInfo[]): ColumnInfo[] {
+  return cols.filter(isPending);
+}
+
+/** 老師已處理過的待分類欄（分到某個類型或選了「不使用」）。 */
+export function sortedCols(cols: readonly ColumnInfo[]): ColumnInfo[] {
+  return cols.filter((c) => c.unsorted === true && !c.confirm);
+}
+
+/** 「N 欄請確認」：待分類欄另列，不算在內。 */
 export function countToConfirm(cols: readonly ColumnInfo[]): number {
-  return cols.filter((c) => c.confirm).length;
+  return cols.filter((c) => c.confirm && !isPending(c)).length;
+}
+
+/** 待分類欄的判斷依據：幾人有填、幾種答案。 */
+export function pendingFacts(table: Table, index: number): { filled: number; distinct: number } {
+  const texts = columnValues(table, index).map((v) => cellText(v));
+  return { filled: texts.length, distinct: new Set(texts).size };
+}
+
+/** 改回「待分類」：角色回到不使用、標待確認。 */
+export function withPending(cols: readonly ColumnInfo[], index: number): ColumnInfo[] {
+  return compactRanks(cols.map((c) => (c.index === index ? { ...c, role: 'ignore' as Role, confirm: true, unsorted: true } : c)));
+}
+
+/** 其餘待分類欄一次設成「不使用」（老師明確按下，算已處理）。 */
+export function ignoreAllPending(cols: readonly ColumnInfo[]): ColumnInfo[] {
+  return cols.map((c) => (isPending(c) ? { ...c, role: 'ignore' as Role, confirm: false } : c));
 }
 
 /**
@@ -213,25 +251,86 @@ export function countToConfirm(cols: readonly ColumnInfo[]): number {
  * 例外：最大值 ≤5 而 0 只有零星一兩筆（不到 5%）時，視為 1～5 的輸入異常，不因此擴成 0～10；那幾筆由資料檢查標成超出範圍。
  */
 export function detectScale(table: Table, cols: readonly ColumnInfo[]): Scale {
-  let max = 0;
-  let min = Infinity;
-  let total = 0;
-  let zeros = 0;
+  return judgeScale(scoreStats(table, cols)).scale;
+}
+
+export interface ScoreStats {
+  max: number;
+  min: number;
+  total: number;
+  zeros: number;
+  /** 各分數出現幾筆（只算讀得成數字的）。 */
+  counts: Map<number, number>;
+  /** 每個評分欄各有幾筆 0 分。 */
+  zeroByCol: { index: number; n: number }[];
+  /** 評分欄的數量。 */
+  scoreCols: number;
+}
+
+export function scoreStats(table: Table, cols: readonly ColumnInfo[]): ScoreStats {
+  const st: ScoreStats = { max: 0, min: Infinity, total: 0, zeros: 0, counts: new Map(), zeroByCol: [], scoreCols: 0 };
   for (const c of cols) {
     if (c.role !== 'score') continue;
+    st.scoreCols++;
+    let zeros = 0;
     for (const v of columnValues(table, c.index)) {
       const n = parseNumber(v);
       if (n === null) continue;
-      total++;
+      st.total++;
       if (n === 0) zeros++;
-      max = Math.max(max, n);
-      min = Math.min(min, n);
+      st.max = Math.max(st.max, n);
+      st.min = Math.min(st.min, n);
+      st.counts.set(n, (st.counts.get(n) ?? 0) + 1);
     }
+    st.zeros += zeros;
+    if (zeros > 0) st.zeroByCol.push({ index: c.index, n: zeros });
   }
-  if (max === 0 && min === Infinity) return { min: 1, max: 5 };
-  if (max <= 5 && min >= 1) return { min: 1, max: 5 };
-  if (max <= 5 && min === 0 && zeros <= 2 && zeros / total < 0.05) return { min: 1, max: 5 };
-  return { min: 0, max: 10 };
+  return st;
+}
+
+/** 判定量表；有疑慮時 `doubt` 寫出為什麼（'sporadic'＝判 1～5 但有零星 0 分；'many'＝最大值 ≤5、0 分不零星而判成 0～10）。 */
+export function judgeScale(st: ScoreStats): { scale: Scale; doubt: 'sporadic' | 'many' | null } {
+  const { max, min, total, zeros } = st;
+  if (max === 0 && min === Infinity) return { scale: { min: 1, max: 5 }, doubt: null };
+  if (max <= 5 && min >= 1) return { scale: { min: 1, max: 5 }, doubt: null };
+  if (max <= 5 && min === 0) {
+    if (zeros <= 2 && zeros / total < 0.05) return { scale: { min: 1, max: 5 }, doubt: 'sporadic' };
+    return { scale: { min: 0, max: 10 }, doubt: 'many' };
+  }
+  return { scale: { min: 0, max: 10 }, doubt: null };
+}
+
+export interface ScaleDoubt {
+  kind: 'sporadic' | 'many';
+  /** 系統的判斷（只標「建議」，不預選）。 */
+  suggested: Scale;
+  cols: number;
+  total: number;
+  zeros: number;
+  /** 各分數筆數，分數由大到小。 */
+  hist: { score: number; n: number; pct: number }[];
+  /** 0 分出現在哪幾欄。 */
+  where: { col: string; n: number }[];
+}
+
+/** 量表有沒有需要老師確認的疑慮；沒有就回 null（維持現狀的分段選擇）。 */
+export function scaleDoubt(table: Table, cols: readonly ColumnInfo[]): ScaleDoubt | null {
+  const st = scoreStats(table, cols);
+  const j = judgeScale(st);
+  if (!j.doubt) return null;
+  const hist = [...st.counts]
+    .sort((a, b) => b[0] - a[0])
+    .map(([score, n]) => ({ score, n, pct: Math.round((n / st.total) * 100) }));
+  const where = st.zeroByCol.map((z) => ({ col: cols.find((c) => c.index === z.index)?.label ?? '', n: z.n }));
+  return { kind: j.doubt, suggested: j.scale, cols: st.scoreCols, total: st.total, zeros: st.zeros, hist, where };
+}
+
+/** 評分欄的組合（改了評分欄就要重新判斷量表）。 */
+export function scoreSignature(cols: readonly ColumnInfo[]): string {
+  return cols
+    .filter((c) => c.role === 'score')
+    .map((c) => c.index)
+    .join(',');
 }
 
 function pick(row: readonly Cell[], cols: readonly ColumnInfo[], role: Role): Cell {

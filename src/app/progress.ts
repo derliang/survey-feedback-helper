@@ -1,5 +1,5 @@
 import { type CheckReport, type RosterComparison, type Student, compareRoster, runChecks } from '../core';
-import { buildCheckRecords, countToConfirm, mappingProblems, personRefs } from './columns';
+import { buildCheckRecords, countToConfirm, mappingProblems, pendingCols, personRefs, scaleDoubt } from './columns';
 import { rosterFromRows } from './roster-input';
 import type { Session } from './store';
 import { extra } from '../ui/strings-extra';
@@ -74,8 +74,13 @@ export function rosterToConfirm(s: Session): number {
   return c ? c.unknown.length + c.seatMismatches.length + c.ambiguous.length : 0;
 }
 
+/** 量表有疑慮、老師還沒確認。 */
+export function scaleUnconfirmed(s: Session): boolean {
+  return !s.scaleConfirmed && scaleDoubt(s.table, s.cols) !== null;
+}
+
 export function mappingReady(s: Session): boolean {
-  return s.mappingConfirmed && mappingProblems(s.kind, s.cols).length === 0;
+  return s.mappingConfirmed && mappingProblems(s.kind, s.cols).length === 0 && pendingCols(s.cols).length === 0 && !scaleUnconfirmed(s);
 }
 
 export function prepItems(s: Session): PrepItem[] {
@@ -85,6 +90,7 @@ export function prepItems(s: Session): PrepItem[] {
   const locked = X.locked;
   const toConfirm = countToConfirm(s.cols);
   const problems = mappingProblems(s.kind, s.cols);
+  const pend = pendingCols(s.cols).length;
   const students = rosterStudents(s);
   const rosterDone = students.length > 0 || s.rosterSkipped;
   const pending = pendingChecks(s).length;
@@ -101,7 +107,11 @@ export function prepItems(s: Session): PrepItem[] {
         ? X.mappingKind
         : problems.length > 0
           ? problems[0]!
-          : mappingOk
+          : pend > 0
+            ? X.mappingPending(s.cols.length, pend)
+            : scaleUnconfirmed(s)
+              ? X.mappingScale
+              : mappingOk
             ? X.mappingOk(s.cols.length)
             : X.mappingSome(s.cols.length, toConfirm),
     },
