@@ -18,7 +18,8 @@ import { go, loadReview, useApp } from '../../app/store';
 import { WORD_FONT_NOTE, loadDocx, loadPdf, loadPrint, loadXlsx, registerAssetCache } from '../../export';
 import type { ClassSummaryInput, DocModel, PersonalFeedbackInput } from '../../export';
 import { downloadBytes, isTouchDevice } from '../../storage';
-import { feedbackKey } from '../../app/output';
+import { allPeople, feedbackKey } from '../../app/output';
+import { docSignature, overrideTexts, teacherCommentHits } from '../../app/output-check';
 import { resolveSettings } from '../../editor/settings';
 import { PreviewActions } from './ReviewParts';
 import { findPossibleNames, type PossibleName } from '../../core/possible-names';
@@ -38,8 +39,11 @@ async function docTools() {
   const school = resolveSettings({ global: data.settings.global, byKind: data.settings.byKind, run: {} }, 'feedback').school;
   const overrides = ed.currentOverrides();
   return {
-    personal: (inp: PersonalFeedbackInput, audience: Audience): DocModel =>
-      r.personalDocFromTemplate(picks.personal, inp, { version: audience, school, images: data.images, ...(overrides[`${inp.className}-${inp.student.seat}`] ? { override: overrides[`${inp.className}-${inp.student.seat}`]! } : {}) }),
+    /** plain：不套這位學生的個別版本（預覽用來找出個別版本多出的文字）。 */
+    personal: (inp: PersonalFeedbackInput, audience: Audience, plain = false): DocModel => {
+      const ov = plain ? undefined : overrides[`${inp.className}-${inp.student.seat}`];
+      return r.personalDocFromTemplate(picks.personal, inp, { version: audience, school, images: data.images, ...(ov ? { override: ov } : {}) });
+    },
     summary: (inp: ClassSummaryInput): DocModel => r.classDocFromTemplate(picks.summary, inp, { version: 'teacher', school, images: data.images }),
   };
 }
@@ -61,18 +65,8 @@ const MIME: Record<Fmt | 'zip', string> = {
   zip: 'application/zip',
 };
 
-/** 逐則預覽的留言：可能含名單外人名的用警示底標出（只是提醒，沒標出不代表沒有）。 */
-function FlaggedComment({ text, itemKey, hiddenHere, onHide }: { text: string; itemKey: string; hiddenHere: boolean; onHide: () => void }) {
-  const hits: PossibleName[] = useMemo(() => findPossibleNames(text, { includeLow: true }), [text]);
-  if (hits.length === 0) {
-    return (
-      <li class={hiddenHere ? 'cm-text hidden' : undefined} data-testid="preview-comment">
-        <PreviewActions itemKey={itemKey} text={text} hidden={hiddenHere} onHide={onHide}>
-          <span>{text}</span>
-        </PreviewActions>
-      </li>
-    );
-  }
+/** 把提醒的人名用警示底標出。 */
+function markParts(text: string, hits: PossibleName[]): preact.ComponentChildren[] {
   const parts: preact.ComponentChildren[] = [];
   let at = 0;
   hits.forEach((h, i) => {
@@ -85,6 +79,34 @@ function FlaggedComment({ text, itemKey, hiddenHere, onHide }: { text: string; i
     at = h.end;
   });
   if (at < text.length) parts.push(text.slice(at));
+  return parts;
+}
+
+/** 老師的話、個別版本的文字：不會自動遮蔽姓名，名單上其他人的姓名與可能的人名都標出。 */
+function UnmaskedText({ text, hits }: { text: string; hits: PossibleName[] }) {
+  if (hits.length === 0) return <span>{text}</span>;
+  return (
+    <span>
+      {markParts(text, hits)} <span class="tag warn">{S.output.unmaskedNameTag}</span>
+    </span>
+  );
+}
+
+class PreviewStale extends Error {}
+
+/** 逐則預覽的留言：可能含名單外人名的用警示底標出（只是提醒，沒標出不代表沒有）。 */
+function FlaggedComment({ text, itemKey, hiddenHere, onHide }: { text: string; itemKey: string; hiddenHere: boolean; onHide: () => void }) {
+  const hits: PossibleName[] = useMemo(() => findPossibleNames(text, { includeLow: true }), [text]);
+  if (hits.length === 0) {
+    return (
+      <li class={hiddenHere ? 'cm-text hidden' : undefined} data-testid="preview-comment">
+        <PreviewActions itemKey={itemKey} text={text} hidden={hiddenHere} onHide={onHide}>
+          <span>{text}</span>
+        </PreviewActions>
+      </li>
+    );
+  }
+  const parts = markParts(text, hits);
   const high = hits.some((h) => h.level === 'high');
   return (
     <li class={'flagged-comment ' + (high ? 'high' : 'low')} data-testid="flagged-comment">
@@ -107,7 +129,10 @@ export function OutputView() {
   const [msg, setMsg] = useState<{ kind: 'ok' | 'bad' | 'warn'; text: string } | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
-  const [seenSig, setSeenSig] = useState<string | null>(null);
+  /** 確認過的預覽：fast＝留言與老師的話（決定按鈕能不能按）；docs＝每位學生文件的全部文字（產生檔案前逐份比對）。 */
+  const [seen, setSeen] = useState<{ fast: string; docs: Record<string, string> } | null>(null);
+  /** 預覽中整理好的實際文件：每位學生的簽章與個別版本多出的文字。 */
+  const [prep, setPrep] = useState<{ fast: string; docs: Record<string, { sig: string; extra: string[] }> } | 'fail' | null>(null);
   /** 這次預覽中按了「隱藏這則」的留言（留在清單上以便還原）：審稿鍵 → 被評對象鍵與顯示文字 */
   const [hiddenHere, setHiddenHere] = useState<Record<string, { who: string; text: string }>>({});
 
@@ -123,6 +148,31 @@ export function OutputView() {
   const personal = useMemo(() => (ok && summary ? personalInputs(s, summary, review, audience, raters) : []), [ok, s, summary, review, audience, raters]);
   const qs = useMemo(() => (ok && s.kind === 'opinion' ? opinionQuestions(s, st.stats) : null), [ok, s, st.stats]);
   const vote = useMemo(() => (ok && s.kind === 'vote' ? runVote(s, st.stats) : null), [ok, s, st.stats]);
+  const people = useMemo(() => (ok && summary ? allPeople(s, summary, raters) : []), [ok, s, summary, raters]);
+  const needPreview = audience !== 'teacher' && summary !== null;
+  const sig = JSON.stringify([audience, personal.map((p) => [p.key, p.comments, p.input.teacherComment ?? ''])]);
+
+  // 預覽打開時，用和下載同一條路徑編出每位學生的文件：找出個別版本多出的文字，並記下全部文字當簽章
+  useEffect(() => {
+    if (!previewOpen || !needPreview) return;
+    let alive = true;
+    setPrep(null);
+    docTools()
+      .then((tools) => {
+        if (!alive) return;
+        const docs: Record<string, { sig: string; extra: string[] }> = {};
+        for (const p of personal) {
+          const doc = tools.personal(p.input, audience);
+          docs[p.key] = { sig: docSignature(doc), extra: overrideTexts(doc, tools.personal(p.input, audience, true)) };
+        }
+        setPrep({ fast: sig, docs });
+      })
+      .catch(() => alive && setPrep('fail'));
+    return () => {
+      alive = false;
+    };
+    // personal、audience 都已反映在 sig 裡
+  }, [previewOpen, needPreview, sig]);
 
   if (!ok) {
     return (
@@ -139,9 +189,18 @@ export function OutputView() {
   }
 
   const nameFlags = audience !== 'teacher' ? personal.reduce((n, p) => n + p.comments.filter((c) => findPossibleNames(c, { includeLow: false }).length > 0).length, 0) : 0;
-  const needPreview = audience !== 'teacher' && summary !== null;
-  const sig = JSON.stringify([audience, personal.map((p) => [p.key, p.comments, p.input.teacherComment ?? ''])]);
-  const previewed = !needPreview || seenSig === sig;
+  const previewed = !needPreview || seen?.fast === sig;
+  const ready = prep !== null && prep !== 'fail' && prep.fast === sig ? prep : null;
+  /** 產生學生版、家長版檔案前：這份文件的全部文字必須和確認過的預覽一模一樣，否則要求重新預覽。 */
+  const guard = (key: string, doc: DocModel) => {
+    if (needPreview && seen?.docs[key] !== docSignature(doc)) throw new PreviewStale();
+  };
+  const staleOrFail = (e: unknown, fallback: string) => {
+    if (e instanceof PreviewStale) {
+      setSeen(null);
+      setMsg({ kind: 'bad', text: S.output.previewStale });
+    } else setMsg({ kind: 'bad', text: fallback });
+  };
   const sel = personal.find((p) => p.key === who) ?? personal[0];
   const allComments = summary ? summary.targets.flatMap((t) => t.comments.map((c) => ({ key: feedbackKey(c.recordId), text: c.text }))) : [];
   const counts = reviewCounts(review, allComments);
@@ -154,8 +213,8 @@ export function OutputView() {
       downloadBytes(out.name, out.bytes, out.mime);
       const missing = out.missing ?? [];
       setMsg({ kind: missing.length > 0 ? 'warn' : 'ok', text: S.output.done(out.name) + (missing.length > 0 ? ` ${S.output.missingChars(missing.join(''))}` : '') });
-    } catch {
-      setMsg({ kind: 'bad', text: S.output.failed });
+    } catch (e) {
+      staleOrFail(e, S.output.failed);
     } finally {
       setBusy(null);
     }
@@ -202,6 +261,7 @@ export function OutputView() {
       const list = await withCharts();
       const pick = list.find((p) => p.key === (sel?.key ?? '')) ?? list[0]!;
       const doc = (await docTools()).personal(pick.input, audience);
+      guard(pick.key, doc);
       const name = `${pick.fileName} ${AUDIENCE_NAMES[audience]}.${fmt}`;
       if (fmt === 'docx') return { name, bytes: await (await loadDocx()).renderDocx(doc), mime: MIME.docx };
       const { renderPdf, loadFonts } = await loadPdf();
@@ -218,9 +278,10 @@ export function OutputView() {
       const list = await withCharts();
       const pick = list.find((p) => p.key === (sel?.key ?? '')) ?? list[0]!;
       const doc = (await docTools()).personal(pick.input, audience);
+      guard(pick.key, doc);
       await (await loadPrint()).printDoc(doc);
-    } catch {
-      setMsg({ kind: 'bad', text: S.output.printFail });
+    } catch (e) {
+      staleOrFail(e, S.output.printFail);
     } finally {
       setBusy(null);
     }
@@ -231,7 +292,11 @@ export function OutputView() {
       const list = await withCharts();
       const tools = await docTools();
       const { renderBatchZip, loadFonts } = await loadPdf();
-      const items = list.map((p) => ({ name: `${p.fileName} ${AUDIENCE_NAMES[audience]}`, doc: tools.personal(p.input, audience) }));
+      const items = list.map((p) => {
+        const doc = tools.personal(p.input, audience);
+        guard(p.key, doc);
+        return { name: `${p.fileName} ${AUDIENCE_NAMES[audience]}`, doc };
+      });
       const missing = new Set<string>();
       const bytes = await renderBatchZip(items, await loadFonts(), (d, t) => setBusy(S.output.progress(d, t)), (cs) => cs.forEach((c) => missing.add(c)));
       return { name: `${base} 個人回饋單 ${AUDIENCE_NAMES[audience]}.zip`, bytes, mime: MIME.zip, missing: [...missing] };
@@ -389,9 +454,11 @@ export function OutputView() {
               <button
                 class="btn primary grow"
                 type="button"
-                disabled={!confirmed}
+                disabled={!confirmed || ready === null}
                 onClick={() => {
-                  setSeenSig(sig);
+                  if (!ready) return;
+                  setSeen({ fast: sig, docs: Object.fromEntries(Object.entries(ready.docs).map(([k, v]) => [k, v.sig])) });
+                  setMsg(null);
                   setPreviewOpen(false);
                 }}
               >
@@ -402,6 +469,15 @@ export function OutputView() {
         >
           <Notice kind="warn">{S.output.warnBody}</Notice>
           <p class="hint">{S.output.possibleNameNote}</p>
+          {prep === 'fail' ? (
+            <Notice kind="bad">{S.output.previewLoadFail}</Notice>
+          ) : (
+            ready === null && (
+              <Notice kind="info" role="status">
+                {S.output.previewLoading}
+              </Notice>
+            )
+          )}
           <ul class="plain-ul preview-list" data-testid="preview">
             {personal.map((p) => (
               <li key={p.key}>
@@ -409,12 +485,26 @@ export function OutputView() {
                 {(() => {
                   const gone = Object.entries(hiddenHere).filter(([k, v]) => v.who === p.key && !p.commentKeys.includes(k));
                   const teacher = p.input.teacherComment;
-                  if (p.comments.length === 0 && gone.length === 0 && !teacher) return <p class="hint">{S.output.previewEmpty}</p>;
+                  const extra = ready?.docs[p.key]?.extra ?? [];
+                  const self = p.input.student.name;
+                  if (p.comments.length === 0 && gone.length === 0 && !teacher && extra.length === 0) return <p class="hint">{S.output.previewEmpty}</p>;
                   return (
                     <ul class="plain-list">
                       {teacher && (
                         <li data-testid="preview-teacher">
-                          <span class="hint">{S.output.previewTeacher}</span> {teacher}
+                          <span class="hint">{S.output.previewTeacher}</span> <UnmaskedText text={teacher} hits={teacherCommentHits(teacher, people, self)} />
+                        </li>
+                      )}
+                      {extra.length > 0 && (
+                        <li data-testid="preview-override">
+                          <span class="hint">{S.output.previewOverride}</span>
+                          <ul class="plain-list">
+                            {extra.map((t, i) => (
+                              <li key={i}>
+                                <UnmaskedText text={t} hits={teacherCommentHits(t, people, self)} />
+                              </li>
+                            ))}
+                          </ul>
                         </li>
                       )}
                       {p.comments.map((c, i) => (
