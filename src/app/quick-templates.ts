@@ -1,6 +1,6 @@
 // 快速範本（R-009）：題目清單草稿 + 匯出後的預設值（問卷類型、欄位用途、量表範圍）。
 // 題目全文見 docs/design/快速範本草稿.md（使用者 2026-11-01 裁示照草稿定稿；班規議題票選歸「票選幹部」類型）。
-// 題型名稱（簡答、選擇題、核取方塊、線性刻度、段落）是 Google 表單的介面字樣，尚未實際核對（待核對），畫面上一律標「待核對」。
+// 題型名稱（簡答、選擇題、核取方塊、線性刻度、詳答）是 Google 表單的介面字樣，2026-11-07 已在繁中介面核對（docs/design/Google介面核對紀錄.md；原寫「段落」，實際是「詳答」）；畫面上的「待核對」標籤暫時保留，是否撤掉由設計員決定。
 // 範本不含任何學生資料；老師照題目在 Google 表單建好、匯出 Excel 後，開啟時標題相符就自動帶入欄位對應。
 import type { SavedSurvey, SurveyKind } from '../storage';
 
@@ -156,7 +156,7 @@ export const QTYPE_LABEL: Record<QType, string> = {
   choice: '選擇題',
   checkbox: '核取方塊',
   scale: '線性刻度',
-  paragraph: '段落',
+  paragraph: '詳答',
 };
 
 export function quickTemplate(id: string): QuickTemplate | undefined {

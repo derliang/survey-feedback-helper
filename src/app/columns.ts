@@ -331,7 +331,7 @@ export interface GridGroup {
 
 const GRID = /^(.*?)\s*[[［]\s*(.+?)\s*[\]］]\s*$/;
 
-/** 「選擇題方格」匯出的志願：欄名都是「題目 [列名]」且至少兩欄是志願，就合併成一組。欄名格式待核對真實匯出。 */
+/** 「單選方格」匯出的志願：欄名都是「題目 [列名]」且至少兩欄是志願，就合併成一組。欄名格式已於 2026-11-07 對照真實匯出（docs/design/Google介面核對紀錄.md）。 */
 export function gridGroup(cols: readonly ColumnInfo[]): GridGroup | null {
   const prefs = prefColumns(cols);
   const byQ = new Map<string, ColumnInfo[]>();
