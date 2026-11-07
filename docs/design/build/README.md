@@ -19,3 +19,4 @@
 - 第六輪：`batch51.mjs`（`node batch51.mjs` 直接寫入 `mockups/{手機,平板,桌機}-第六輪.html`；用 `m2kit`、`deskkit`，深色頁用 tokens.css 深色區塊改成 `.dk` 範圍）。
 - 選課分組志願（2026-11-01）：`node batch71.mjs` 直接寫入 `mockups/{手機,平板,桌機}-選課分組志願.html`（用 `m2kit`、`deskkit`；第 3 步改名「名額與分配」是改 `K.NAMES`／`DK.W.STEP_NAMES`，只在這支程式內生效）。規範見 DESIGN.md 5.27。
 - 雲端自動備份（2026-11-01）：`node batch81.mjs` 直接寫入 `mockups/{手機,平板,桌機}-雲端自動備份.html`（用 `m2kit`、`deskkit`、`acctkit` 的 `chooser`；toast 樣式 `.toast2` 只在這支程式的頁面 CSS 內）。規範見 DESIGN.md 5.28。
+- 教學頁兩條流程（2026-11-07）：`node guide-flows.mjs` 直接寫入 `mockups/{手機,平板,桌機}-Google教學兩條流程.html`（獨立程式，不用 `m2kit`／`deskkit`；讀 `tokens.css` 原樣放入淺色與深色，同一份頁面用容器查詢跟畫面寬度重排）。規範見 DESIGN.md 5.31。
