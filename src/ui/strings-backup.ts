@@ -8,7 +8,7 @@ export const defaultsStrings = {
   sources: { default: '內建預設', global: '全域預設', kind: '問卷類型範本', run: '這次輸出' },
   kinds: { feedback: '報告回饋', opinion: '意見調查', vote: '票選' },
   runNote: '這一層只對這一次輸出有效，不會存檔。',
-  revert: '還原到上一層的值',
+  revert: '改回上一層的設定值',
   current: '目前的值',
   fields: {
     school: '學校名稱',
@@ -29,14 +29,14 @@ export const defaultsStrings = {
 
 export const backupStrings = {
   title: '備份與還原',
-  hasTitle: '備份裡有',
+  hasTitle: '備份檔包含以下資料',
   has: '問卷設定、名單對照、審稿進度、各層設定、我的範本、個別學生版本、圖片。',
-  notTitle: '備份裡沒有',
+  notTitle: '備份檔不包含以下資料',
   not: '內建範本、原始作答的 Excel 檔；需要保留原始問卷時，請另行備份。',
   warn: '備份可能含學生姓名與名單，請依學校個資規範保管、傳送與刪除，避免上傳到未核准的公開空間。',
   make: '下載全部設定與範本備份',
   makeTouch: '儲存整包備份到檔案',
-  pick: '選擇備份檔來還原',
+  pick: '匯入備份檔並選擇還原方式',
   summaryTitle: '這份備份的內容（還沒改任何資料）',
   summary: (b: { surveys: number; rosters: number; templates: number; overrides: number; settingLayers: number; images: number }) =>
     `問卷設定 ${b.surveys} 份、名單 ${b.rosters} 份、我的範本 ${b.templates} 份、個別學生版本 ${b.overrides} 筆、設定欄位 ${b.settingLayers} 項、圖片 ${b.images} 張。`,
@@ -51,7 +51,7 @@ export const backupStrings = {
   cancel: '取消',
   done: '已還原。',
   doneReplace: '已還原，並先下載了目前資料的備份。',
-  bad: '這不是備份檔，或檔案壞了。',
+  bad: '無法讀取備份檔。請確認檔案由本程式產生，或重新下載備份。',
 } as const;
 
 // 依目前介面語言取字串（呼叫時才取值）。

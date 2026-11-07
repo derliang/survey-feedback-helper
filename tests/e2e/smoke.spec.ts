@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 test('首頁可開啟並顯示標題', async ({ page }) => {
   await page.goto('./');
   await expect(page.getByRole('button', { name: '問卷回饋小幫手' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: '今天要處理哪一份問卷？' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '選擇要整理的問卷' })).toBeVisible();
 });
 
 test('版面不會橫向捲動', async ({ page }) => {

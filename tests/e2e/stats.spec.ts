@@ -25,7 +25,7 @@ test('統計：全班總覽、個人結果、自評對他評與審稿', async ({
   await prepared(page);
   await step(page, '統計').click();
   await expect(page.getByRole('heading', { name: '統計', level: 1 })).toBeVisible();
-  await expect(page.getByText('全班總覽').first()).toBeVisible();
+  await expect(page.getByText('全班統計總覽').first()).toBeVisible();
   await expect(page.locator('.chart svg').first()).toBeVisible();
   await noOverflow(page);
 
@@ -46,8 +46,8 @@ test('統計：全班總覽、個人結果、自評對他評與審稿', async ({
   await expect(page.getByRole('textbox', { name: '老師評語' })).toHaveValue('報告很有條理，繼續加油。');
 
   // 去極端值設定
-  await page.getByRole('radio', { name: /各去 1 個最高、最低/ }).click();
-  await expect(page.getByRole('radio', { name: /各去 1 個最高、最低/ })).toHaveAttribute('aria-checked', 'true');
+  await page.getByRole('radio', { name: /每題各排除 1 個最高分和最低分/ }).click();
+  await expect(page.getByRole('radio', { name: /每題各排除 1 個最高分和最低分/ })).toHaveAttribute('aria-checked', 'true');
 
   // 統計方法說明
   await page.getByRole('button', { name: '統計方法說明' }).click();
@@ -112,7 +112,7 @@ test('歷次趨勢：加入之前的問卷後並排成表與折線，可移除',
   await step(page, '統計').click();
   const card = page.getByTestId('trend');
   await expect(card).toBeVisible();
-  await expect(card.getByText('至少要有兩次問卷')).toBeVisible();
+  await expect(card.getByText('請至少加入一份先前的問卷')).toBeVisible();
   await noOverflow(page);
 
   await page.getByTestId('trend-input').setInputFiles(surveyFile('上一次期中.xlsx'));
@@ -123,7 +123,7 @@ test('歷次趨勢：加入之前的問卷後並排成表與折線，可移除',
   await noOverflow(page);
 
   await card.getByRole('button', { name: '移除' }).click();
-  await expect(card.getByText('至少要有兩次問卷')).toBeVisible();
+  await expect(card.getByText('請至少加入一份先前的問卷')).toBeVisible();
 });
 
 test('去識別化預覽：每則留言可留著、隱藏（可還原）、改寫，勾選開關照舊', async ({ page }) => {

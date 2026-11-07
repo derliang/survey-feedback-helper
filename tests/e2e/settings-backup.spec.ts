@@ -26,7 +26,7 @@ test('三層設定：切層、標出來源、還原到上一層、不橫向捲�
   await card.getByRole('radio', { name: '這次輸出' }).click();
   await expect(card.getByText('只對這一次輸出有效')).toBeVisible();
   await card.getByRole('radio', { name: '全域預設' }).click();
-  await card.getByRole('button', { name: '還原到上一層的值' }).first().click();
+  await card.getByRole('button', { name: '改回上一層的設定值' }).first().click();
   await expect(card.getByLabel('學校名稱')).toHaveValue('');
 });
 
@@ -46,7 +46,7 @@ test('備份與還原：下載整包備份，選回後先看摘要、預設合�
   await panel.getByRole('button', { name: '取消' }).click();
   await expect(page.getByTestId('restore-panel')).toHaveCount(0);
   await card.locator('input[type=file]').setInputFiles({ name: 'x.json', mimeType: 'application/json', buffer: Buffer.from('{}') });
-  await expect(card.getByText('這不是備份檔')).toBeVisible();
+  await expect(card.getByText('無法讀取備份檔')).toBeVisible();
 });
 
 test('編輯器：加入面板有進階區塊，加入標題區與摘要數字列', async ({ page }) => {

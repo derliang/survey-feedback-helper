@@ -181,7 +181,7 @@ test('異常檔案：空檔、只有標題、不支援的格式，都有說明�
   await input.setInputFiles(csvFile('空.csv', ''));
   await expect(page.getByTestId('error')).toBeVisible();
   await input.setInputFiles(csvFile('只有標題.csv', '標題\n'));
-  await expect(page.getByTestId('error')).toContainText('沒有資料');
+  await expect(page.getByTestId('error')).toContainText('沒有可用的問卷回覆');
   await input.setInputFiles({ name: '成績.xls', mimeType: 'application/vnd.ms-excel', buffer: Buffer.from('x') });
   await expect(page.getByTestId('error')).toContainText('讀不了');
   // 錯誤之後再選正常檔案可以繼續
@@ -224,7 +224,7 @@ test('異常檔案：評分題混入一筆文字，資料檢查列出該列，�
   await expect(page.getByRole('button', { name: /^課程滿意度：/ })).toContainText('評分');
   await page.getByRole('button', { name: '完成對應，下一步' }).click();
   await gotoPrep(page, '資料檢查');
-  await page.getByRole('button', { name: /^格式異常/ }).click();
+  await page.getByRole('button', { name: /^評分格式異常/ }).click();
   await expect(page.getByText(/第 5 列：五分（不是數字）/)).toBeVisible();
   await noOverflow(page);
 });
@@ -241,19 +241,19 @@ test('重複回覆：同班同名但座號不同要提醒，不預設刪除；�
   await gotoPrep(page, '資料檢查');
   await page.getByRole('button', { name: /^重複填答/ }).click();
   await expect(page.getByText(/座號不同，可能是同班同名的不同人/)).toBeVisible();
-  // 保留最後一份降為次要按鈕，避免順手按下而刪掉另一個人
-  await expect(page.getByRole('button', { name: '保留最後一份' })).toHaveClass(/secondary/);
+  // 採用最後提交的回覆降為次要按鈕，避免順手按下而刪掉另一個人
+  await expect(page.getByRole('button', { name: '採用最後提交的回覆' })).toHaveClass(/secondary/);
   await noOverflow(page);
 
   // 排除一份後，重新開始要先確認（取消則留在原處）；確認後回首頁
-  await page.getByRole('button', { name: '保留最後一份' }).click();
+  await page.getByRole('button', { name: '採用最後提交的回覆' }).click();
   await expect(page.getByText('已排除 1 筆回覆')).toBeVisible();
   await page.getByRole('button', { name: '重新開始' }).click();
   await page.getByRole('button', { name: '取消' }).click();
   await expect(page.getByText('已排除 1 筆回覆')).toBeVisible();
   await page.getByRole('button', { name: '重新開始' }).click();
   await page.getByRole('button', { name: '確定重新開始' }).click();
-  await expect(page.getByRole('heading', { name: '今天要處理哪一份問卷？' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '選擇要整理的問卷' })).toBeVisible();
   // 再開同一份檔案：排除的紀錄不殘留，重複填答又回到待處理
   await openFeedback(page, { name: '報告回饋 (回覆).xlsx', mimeType: 'application/octet-stream', buffer: makeXlsx(FB_HEAD, rows) });
   await gotoPrep(page, '資料檢查');

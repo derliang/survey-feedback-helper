@@ -65,8 +65,8 @@ function CondEditor({ b, disabled }: { b: EBlock; disabled: boolean }) {
   const set = (c: Condition | undefined) => patchBlock(b.id, { when: c });
   return (
     <div class="field">
-      <span class="label">條件顯示</span>
-      <div class="seg" role="group" aria-label="條件顯示">
+      <span class="label">區塊顯示條件</span>
+      <div class="seg" role="group" aria-label="區塊顯示條件">
         {(
           [
             ['always', '一律'],
@@ -156,7 +156,7 @@ export function BlockProps(props: { t: EditorTemplate; b: EBlock; student: strin
             <textarea id="pp-text" ref={area} class="input area" rows={4} value={text} onInput={(e) => setP({ text: (e.currentTarget as HTMLTextAreaElement).value }, `text:${b.id}`)} />
           </div>
           <div class="field">
-            <span class="label">插入變數</span>
+            <span class="label">插入自動帶入的資料</span>
             <div class="chips">
               {VAR_NAMES.map((n) => (
                 <button key={n} type="button" class="chip" onClick={() => insertVar(n)}>{`{${n}}`}</button>
@@ -164,7 +164,7 @@ export function BlockProps(props: { t: EditorTemplate; b: EBlock; student: strin
             </div>
           </div>
           <Seg
-            label="字級"
+            label="文字大小"
             value={nearest((ov?.patch?.size as number | undefined) ?? b.size, b.kind === 'heading' ? [12, 14, 18] : [10, 11, 13])}
             opts={b.kind === 'heading' ? [[12, '小'], [14, '中'], [18, '大']] : [[10, '小'], [11, '中'], [13, '大']]}
             onPick={(v) => setP({ size: v })}
@@ -218,7 +218,7 @@ export function BlockProps(props: { t: EditorTemplate; b: EBlock; student: strin
               })}
             </div>
           </div>
-          <Toggle label="顯示班級平均線" on={((ov?.patch?.compareLine as boolean | undefined) ?? b.compareLine) ?? false} onChange={(v) => setP({ compareLine: v })} />
+          <Toggle label="在圖表顯示班級平均參考線" on={((ov?.patch?.compareLine as boolean | undefined) ?? b.compareLine) ?? false} onChange={(v) => setP({ compareLine: v })} />
         </>
       )}
       {b.kind === 'hero' && (
@@ -259,7 +259,7 @@ export function BlockProps(props: { t: EditorTemplate; b: EBlock; student: strin
           )}
         </>
       )}
-      {b.kind === 'compare' && <p class="hint">同學給的分與自己給的分並排，並標出落差。沒有自評資料時不會出現。</p>}
+      {b.kind === 'compare' && <p class="hint">這個區塊比較同學給分與學生自評，並顯示分數差；如果沒有自評資料，該區塊不會出現。</p>}
       {b.kind === 'data' && b.dataKind !== 'chart' && <p class="hint">這個區塊的數字或內容會依問卷統計自動帶入；可調整位置、複製或設定顯示條件，但不能在這裡直接修改原始分數。</p>}
       {b.kind === 'image' && !student && <ImageProps b={b} images={props.images} />}
       {b.kind === 'columns' && !student && (
@@ -466,7 +466,7 @@ export function PagePanel({ t, images }: { t: EditorTemplate; images: Record<str
       {p.frame && (
         <>
           <Seg label="頁框顏色" value={p.frame.color} opts={FRAME_COLORS} onPick={(color) => patchPage({ frame: { ...p.frame!, color } })} />
-          <Seg label="頁框粗細" value={nearest(p.frame.width, [0.75, 1.5, 3])} opts={FRAME_WIDTHS} onPick={(width) => patchPage({ frame: { ...p.frame!, width } })} />
+          <Seg label="頁框線條粗細" value={nearest(p.frame.width, [0.75, 1.5, 3])} opts={FRAME_WIDTHS} onPick={(width) => patchPage({ frame: { ...p.frame!, width } })} />
           <Toggle label="頁框圓角" on={p.frame.rounded} onChange={(rounded) => patchPage({ frame: { ...p.frame!, rounded } })} />
         </>
       )}
