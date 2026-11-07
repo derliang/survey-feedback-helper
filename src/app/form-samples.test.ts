@@ -3,11 +3,14 @@ import { makeXlsx } from '../../tests/e2e/fixtures';
 import { defaultStatsOpts, looksMulti, opinionQuestions } from './analysis';
 import { analyzeColumns, detectScale, inferKind, mappingProblems } from './columns';
 import { tableFromFile } from './load';
+import { parseTimestamp } from '../core/text';
 import type { Session } from './store';
 import { emptyCourseState } from './course-app';
 
-// 多種 Google 表單匯出的虛構樣本（核取方塊、格狀題、線性量表、票選）。
-// xlsx 在測試時才產生、不 commit 資料檔；欄位標題的寫法是依公開文件描述自編的近似，尚未對照真實匯出檔（待核對）。
+// 多種 Google 表單匯出的虛構樣本（核取方塊、單選方格、線性刻度、核取方塊格、票選）。
+// xlsx 在測試時才產生、不 commit 資料檔。欄位標題寫法已於 2026-11-07 對照真實 Google 表單的回應試算表核對
+// （見 docs/design/Google介面核對紀錄.md）：線性刻度只有題目文字；單選方格與核取方塊格每列一欄，「題目 [列名]」；
+// 核取方塊與核取方塊格的儲存格以半形逗號加空格連接；時間戳記在 CSV 是「2026/11/7 下午 1:28:09」。
 
 const xlsxFile = (name: string, headers: string[], rows: (string | number)[][]) => {
   const b = makeXlsx(headers, rows);
@@ -46,9 +49,9 @@ describe('Google 表單樣本：核取方塊（複選）', () => {
   });
 });
 
-describe('Google 表單樣本：格狀題與線性量表', () => {
-  // 格狀題：每一列題目匯出成一欄，標題為「題目 [列名]」
-  const headers = ['時間戳記', '對課程的看法 [內容充實]', '對課程的看法 [進度適中]', '對課程的看法 [作業份量]', '整體滿意度（1＝非常不滿意，5＝非常滿意）'];
+describe('Google 表單樣本：單選方格與線性刻度', () => {
+  // 單選方格：每一列題目匯出成一欄，標題為「題目 [列名]」；線性刻度只有題目文字（兩端標籤不進標題）
+  const headers = ['時間戳記', '對課程的看法 [內容充實]', '對課程的看法 [進度適中]', '對課程的看法 [作業份量]', '整體滿意度'];
   const rows = [
     ['2026-10-02 09:00:00', 5, 4, 3, 5],
     ['2026-10-02 09:01:00', 4, 4, 2, 4],
@@ -71,7 +74,7 @@ describe('Google 表單樣本：格狀題與線性量表', () => {
   });
 });
 
-describe('Google 表單樣本：核取方塊格狀（每列可複選）', () => {
+describe('Google 表單樣本：核取方塊格（每列可複選）', () => {
   const headers = ['時間戳記', '每天使用的裝置 [週間]', '每天使用的裝置 [週末]'];
   const rows = [
     ['2026-10-03 08:00:00', '手機, 平板', '手機, 電腦, 平板'],
@@ -98,5 +101,28 @@ describe('Google 表單樣本：票選幹部與空白、缺漏', () => {
     const s = await sessionOf('選幹部.xlsx', headers, rows, 'vote');
     expect(inferKind(s.cols).kind).toBe('vote');
     expect(s.cols.find((c) => c.header === '備註')?.role).toBe('ignore');
+  });
+});
+
+describe('Google 表單樣本：2026-11-07 真實匯出的 CSV（虛構資料）', () => {
+  // 逐字取自真實 Google 表單的回應試算表（gviz CSV），內容為虛構；時間戳記是「2026/11/7 下午 1:28:09」的寫法。
+  const csv = [
+    '"時間戳記","整體滿意度","你參加哪些社團活動？","對課程的看法 [內容充實]","對課程的看法 [進度適中]","每天使用的裝置 [週間]","每天使用的裝置 [週末]"',
+    '"2026/11/7 下午 1:28:09","5","籃球, 閱讀","同意","普通","手機, 平板","手機, 電腦"',
+    '"2026/11/7 下午 1:28:45","3","手作","不同意","同意","手機",""',
+  ].join('\n');
+  const file = { name: '回覆.csv', arrayBuffer: async () => new TextEncoder().encode(csv).buffer as ArrayBuffer };
+
+  it('欄位標題原樣讀進來，時間戳記的「下午」寫法解析得出來', async () => {
+    const table = await tableFromFile(file);
+    expect(table.headers).toEqual([
+      '時間戳記', '整體滿意度', '你參加哪些社團活動？', '對課程的看法 [內容充實]', '對課程的看法 [進度適中]', '每天使用的裝置 [週間]', '每天使用的裝置 [週末]',
+    ]);
+    expect(table.rows).toHaveLength(2);
+    const t1 = parseTimestamp(table.rows[0]![0]);
+    const t2 = parseTimestamp(table.rows[1]![0]);
+    expect(t1).not.toBeNull();
+    expect(t2! - t1!).toBe(36 * 1000);
+    expect(new Date(t1!).getUTCHours()).toBe(13);
   });
 });
