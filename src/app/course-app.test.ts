@@ -89,7 +89,7 @@ describe('志願欄對應', () => {
     expect(prefColumns(cols).map((c) => c.rank)).toEqual([1, 2]);
   });
 
-  it('選擇題方格：同一題的志願欄合併成一組，同題但沒當志願的欄列為對不上', () => {
+  it('單選方格：同一題的志願欄合併成一組，同題但沒當志願的欄列為對不上', () => {
     const table = tableFromCsv('姓名,志願選課 [第一志願],志願選課 [第二志願],志願選課 [備註]\n甲,a,b,c');
     const cols = analyzeColumns(table).map((c) => (c.header.includes('備註') ? { ...c, role: 'ignore' as const } : c));
     const g = gridGroup(cols);
