@@ -45,7 +45,7 @@ const assigned = async (page: Page) => Number(/(\d+)／12/.exec(await page.getBy
 
 /** 填名額：微積分 3、生物實驗 3、地球探索 2、攝影社 2（最少開班 2）。 */
 async function fillRules(page: Page) {
-  await expect(page.getByRole('heading', { name: '每個課程收幾人？' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '設定各課程的招生名額' })).toBeVisible();
   await page.getByTestId('merge-row').getByRole('button', { name: '合併', exact: true }).click();
   await expect(page.getByTestId('merge-row')).toHaveCount(0);
   const caps = ['3', '3', '2', '2'];
@@ -103,7 +103,7 @@ test('名額與分配：合併、分配、手動移人、復原、輸出', async
   // 沒填名額：主按鈕停用並寫原因
   await expect(page.getByTestId('course-start')).toBeDisabled();
   await expect(page.getByTestId('course-why')).toContainText('名額');
-  await expect(page.getByText('有 1 個課程名和表單選項對不上')).toBeVisible();
+  await expect(page.getByText('有 1 個課程名稱與問卷選項不一致')).toBeVisible();
   await fillRules(page);
   await page.getByTestId('min-2').fill('5'); // 最少開班 5 > 名額 2
   await expect(page.getByText('最少不能大於名額 2')).toBeVisible();

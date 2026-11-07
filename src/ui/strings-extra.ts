@@ -11,8 +11,8 @@ export const extraZh = {
   compare: {
     label: (cls: string, seat: string | number, name: string) => `${cls ? `${cls} ` : ''}${seat} 號 ${name}`,
     noName: '（沒填姓名）',
-    copyFail: '這個瀏覽器不讓程式寫入剪貼簿，請手動選取名單複製。',
-    keepWhich: '要保留哪一份，到「資料檢查」處理。',
+    copyFail: '無法自動複製名單，請選取畫面上的名單後手動複製。',
+    keepWhich: '如需決定保留哪筆重複回覆，請前往「資料檢查」處理。',
   },
   google: { offline: '連不上 Google，請檢查網路後再試，或改用 Excel 檔。' },
   mapping: { noData: '（沒有資料）', sep: '、' },
@@ -26,7 +26,7 @@ export const extraZh = {
     rowSeat: (n: number) => `第 ${n} 列座號`,
     rowName: (n: number) => `第 ${n} 列姓名`,
   },
-  stats: { targets: '被評對象', rank: '名次', seat: '座號', name: '姓名', rating: '評分', question: '題目', self: '自評', others: '他評', gap: '落差', valid: '有效', answered: '作答', ballots: '計入票數', classOverview: '全班總覽' },
+  stats: { targets: '被評對象', rank: '名次', seat: '座號', name: '姓名', rating: '評分', question: '題目', self: '自評', others: '他評', gap: '落差', valid: '有效', answered: '作答', ballots: '計入票數', classOverview: '全班統計總覽' },
   editorState: {
     skipped: (n: number) => `有 ${n} 份範本無法讀取，已略過。`,
     unreadable: '範本檔讀不出來，先用空白的。原檔沒有被改動。',
@@ -75,7 +75,7 @@ export const extraZh = {
     mappingSome: (n: number, c: number) => `${n} 欄中 ${c} 欄請確認`,
     mappingPending: (n: number, p: number) => `${n} 欄 · ${p} 欄待分類`,
     mappingScale: '量表上下限還沒確認',
-    rosterLocked: '可跳過：不比對名單也能統計',
+    rosterLocked: '可以略過學生名單並查看統計，但無法核對未填答或重複名單。',
     rosterCount: (n: number, c: number) => `${n} 人${c > 0 ? `，${c} 筆要確認` : ''}`,
     rosterSkipped: '已跳過',
     rosterOptional: '選用：貼上或開啟名單，就能知道誰沒填',
@@ -85,9 +85,9 @@ export const extraZh = {
   },
   course: {
     noPref: '還沒指定哪些欄位是志願。',
-    missing: (n: number) => `還有 ${n} 個課程沒填名額。`,
+    missing: (n: number) => `尚有 ${n} 個課程未設定名額；請補齊後再開始分配。`,
     allZero: '名額都是 0，請先填名額。',
-    minOver: '最少開班人數不能大於名額。',
+    minOver: '最少開班人數不能高於該課程名額，請修正後再分配。',
   },
 };
 
@@ -106,8 +106,8 @@ export const extraEn: Extra = {
   compare: {
     label: (cls, seat, name) => `${cls ? `${cls} ` : ''}No. ${seat} ${name}`,
     noName: '(no name entered)',
-    copyFail: 'This browser does not let the app write to the clipboard. Please select and copy the list yourself.',
-    keepWhich: 'To decide which one to keep, go to “Data check”.',
+    copyFail: 'The list could not be copied automatically. Please select the list on screen and copy it yourself.',
+    keepWhich: 'To decide which duplicate response to keep, go to “Data check”.',
   },
   google: { offline: 'Cannot reach Google. Check your network and try again, or use an Excel file instead.' },
   mapping: { noData: '(no data)', sep: ', ' },
@@ -121,7 +121,7 @@ export const extraEn: Extra = {
     rowSeat: (n) => `Seat number, row ${n}`,
     rowName: (n) => `Name, row ${n}`,
   },
-  stats: { targets: 'People rated', rank: 'Rank', seat: 'Seat', name: 'Name', rating: 'Rating', question: 'Question', self: 'Self', others: 'Others', gap: 'Gap', valid: 'Valid', answered: 'Answered', ballots: 'Ballots counted', classOverview: 'Whole class' },
+  stats: { targets: 'People rated', rank: 'Rank', seat: 'Seat', name: 'Name', rating: 'Rating', question: 'Question', self: 'Self', others: 'Others', gap: 'Gap', valid: 'Valid', answered: 'Answered', ballots: 'Ballots counted', classOverview: 'Whole-class overview' },
   editorState: {
     skipped: (n) => `${n} template(s) could not be read and were skipped.`,
     unreadable: 'The template file could not be read, so a blank one is used. The original file was not changed.',
@@ -170,7 +170,7 @@ export const extraEn: Extra = {
     mappingSome: (n, c) => `${c} of ${n} column(s) need confirming`,
     mappingPending: (n, p) => `${n} column(s) · ${p} to sort`,
     mappingScale: 'Scale range not confirmed yet',
-    rosterLocked: 'Can be skipped: statistics work without a roster',
+    rosterLocked: 'You can skip the roster and view the statistics, but absent or duplicate students cannot be checked.',
     rosterCount: (n, c) => `${n} student(s)${c > 0 ? `, ${c} to confirm` : ''}`,
     rosterSkipped: 'Skipped',
     rosterOptional: 'Optional: paste or open a roster to see who has not answered',
@@ -180,9 +180,9 @@ export const extraEn: Extra = {
   },
   course: {
     noPref: 'No columns have been chosen as preferences yet.',
-    missing: (n) => `${n} course(s) still have no capacity.`,
+    missing: (n) => `${n} course(s) have no capacity set; please fill them in before allocating.`,
     allZero: 'All capacities are 0. Please fill in the capacities first.',
-    minOver: 'The minimum class size cannot be larger than the capacity.',
+    minOver: 'The minimum class size cannot be higher than the course capacity; please fix it before allocating.',
   },
 };
 

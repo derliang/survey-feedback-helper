@@ -126,7 +126,7 @@ describe('名額與分配的資料接線', () => {
   it('提示：名額沒填、全 0、最少大於名額、總名額不足', () => {
     const s = session();
     const c = { ...emptyCourseState(), merges: { '丙 課': '丙課' } };
-    expect(cannotRun(courseIssues(s, c))).toContain('沒填名額');
+    expect(cannotRun(courseIssues(s, c))).toContain('未設定名額');
     expect(cannotRun(courseIssues(s, withCaps(c, { 甲課: '0', 乙課: '0', 丙課: '0' })))).toContain('都是 0');
     expect(cannotRun(courseIssues(s, withCaps(c, { 甲課: '2', 乙課: '2', 丙課: '1' }, { 丙課: '3' })))).toContain('最少開班');
     const ok = courseIssues(s, withCaps(c, { 甲課: '2', 乙課: '2', 丙課: '1' }));

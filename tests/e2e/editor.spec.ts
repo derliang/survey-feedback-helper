@@ -124,7 +124,7 @@ test('範本匯出、匯入與選單', async ({ page }) => {
   await openLibrary(page);
   await page.getByRole('button', { name: '「班級總表」的選單' }).click();
   const dl = page.waitForEvent('download');
-  await page.getByRole('dialog').getByRole('button', { name: /匯出分享/ }).click();
+  await page.getByRole('dialog').getByRole('button', { name: /下載範本檔供分享/ }).click();
   const file = await dl;
   const path = await file.path();
   expect(path).toBeTruthy();
@@ -151,7 +151,7 @@ test('沒有資料夾時提示下載備份；有資料夾時重開後範本還�
   await page.getByRole('button', { name: '「班級總表」的選單' }).click();
   await page.getByRole('dialog').getByRole('button', { name: '複製' }).click();
   await expect(page.getByText('尚未選擇資料夾，請下載備份，避免關閉後遺失範本修改。')).toBeVisible();
-  await expect(page.getByRole('button', { name: '下載範本備份' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '下載目前的範本備份檔' })).toBeVisible();
 
   // 以瀏覽器內建資料夾模擬
   await page.addInitScript(() => {
@@ -160,14 +160,14 @@ test('沒有資料夾時提示下載備份；有資料夾時重開後範本還�
   await page.goto('./');
   await page.getByRole('button', { name: '選擇資料夾' }).click();
   await page.getByRole('dialog').getByRole('button', { name: '選擇資料夾' }).click();
-  await expect(page.getByText('已連線')).toBeVisible();
+  await expect(page.getByText('已取得資料夾存取權')).toBeVisible();
   await page.getByRole('button', { name: '範本與版面' }).click();
   await page.getByRole('button', { name: '「班級總表」的選單' }).click();
   await page.getByRole('dialog').getByRole('button', { name: '複製' }).click();
   await expect(page.getByText('尚未選擇資料夾')).toBeHidden();
   await page.waitForTimeout(800);
   await page.reload();
-  await expect(page.getByText('已連線')).toBeVisible();
+  await expect(page.getByText('已取得資料夾存取權')).toBeVisible();
   await page.getByRole('button', { name: '範本與版面' }).click();
   await page.getByRole('button', { name: '我的', exact: true }).click();
   await expect(page.getByTestId('template-card')).toHaveCount(1);

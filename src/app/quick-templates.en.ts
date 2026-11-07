@@ -89,7 +89,7 @@ export const TEMPLATES_EN: Record<string, TplEn> = {
     audience: 'Students or parents',
     scaleLabels: 'No scale',
     questions: [...WHO, { text: 'Will you join?', options: ['Yes', 'No'] }, { text: 'Notes (for example dietary restrictions)' }],
-    defaults: 'The roster comparison shows “people who have not replied yet”; statistics only count people and notes, with no averages.',
+    defaults: 'Use the roster comparison to see who has not replied, and count participants; this template has no scale, so no average scores are calculated.',
   },
   classrule: {
     name: 'Class rule vote',
