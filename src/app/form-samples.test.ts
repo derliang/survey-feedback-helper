@@ -22,7 +22,7 @@ async function sessionOf(name: string, headers: string[], rows: (string | number
   const cols = analyzeColumns(table);
   return {
     fileName: name, sourceLabel: 'Excel 檔', name, table, cols, kind, kindReason: '', kindConfirmed: true,
-    scale: detectScale(table, cols), mappingConfirmed: true, recognition: null, surveyId: 's', previousRows: null,
+    scale: detectScale(table, cols), scaleConfirmed: true, sheetPool: null, mappingConfirmed: true, recognition: null, surveyId: 's', previousRows: null,
     rosterRows: null, rosterMixed: false, rosterSkipped: false, rosterName: '', resolutions: {}, excluded: [], titleMerges: {}, checkHandled: [], course: emptyCourseState(),
     demo: false,
   };

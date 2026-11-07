@@ -87,7 +87,7 @@ export function GoogleConnectDialog(props: {
     if (r.status === "cancelled") return setPhase("intro");
     if (r.status === "ok") {
       props.onClose();
-      return openSurveyTable(r.table, r.name);
+      return openSurveyTable(r.table, r.name, { sheets: r.sheets, skipped: r.skipped });
     }
     if (r.status === "empty") {
       setMessage(S.google.emptySheet(r.name));

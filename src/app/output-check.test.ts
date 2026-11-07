@@ -25,7 +25,7 @@ function session(csv: string, roles: Record<string, string>): Session {
   const cols = analyzeColumns(table).map((c) => ({ ...c, role: (roles[c.header] ?? 'ignore') as never, confirm: false }));
   return {
     fileName: 't.csv', sourceLabel: 'Excel 檔', name: '專題報告', table, cols, kind: 'feedback', kindReason: '', kindConfirmed: true,
-    scale: detectScale(table, cols), mappingConfirmed: true, recognition: null, surveyId: 's1', previousRows: null,
+    scale: detectScale(table, cols), scaleConfirmed: true, sheetPool: null, mappingConfirmed: true, recognition: null, surveyId: 's1', previousRows: null,
     rosterRows: null, rosterMixed: false, rosterSkipped: false, rosterName: '', resolutions: {}, excluded: [], titleMerges: {}, checkHandled: [], course: emptyCourseState(),
     demo: false,
   };

@@ -53,14 +53,18 @@ export type ReadResult =
       status: "ok";
       spreadsheetId: string;
       name: string;
+      /** 第一個有資料的分頁（只有一個分頁有資料時就是它）。 */
       sheetTitle: string;
       table: Table;
+      /** 全部有資料的分頁（2 個以上時讓老師選）與完全沒資料而略過的分頁名稱。 */
+      sheets: { name: string; table: Table }[];
+      skipped: string[];
     }
   | { status: "cancelled" }
   | { status: "empty"; name: string }
   | { status: "failed"; failure: GoogleFailure; message: string };
 
-/** 用 Picker 選一份試算表並直讀第一個有資料的工作表。 */
+/** 用 Picker 選一份試算表並直讀有資料的分頁（2 個以上由畫面讓老師選）。 */
 export async function pickAndRead(
   svc: GoogleServices,
   token: string,
@@ -84,14 +88,25 @@ export async function readSpreadsheet(
   try {
     const info = await svc.sheets.info(token, spreadsheetId);
     const label = name ?? info.title;
+    const sheets: { name: string; table: Table }[] = [];
+    const skipped: string[] = [];
     for (const sheetTitle of info.sheets) {
       const rows = await svc.sheets.values(token, spreadsheetId, sheetTitle);
       const table = tableFromRows(rows);
-      if (table.headers.length > 0 && table.rows.length > 0) {
-        return { status: "ok", spreadsheetId, name: label, sheetTitle, table };
-      }
+      if (table.headers.length > 0 && table.rows.length > 0) sheets.push({ name: sheetTitle, table });
+      else skipped.push(sheetTitle);
     }
-    return { status: "empty", name: label };
+    const first = sheets[0];
+    if (!first) return { status: "empty", name: label };
+    return {
+      status: "ok",
+      spreadsheetId,
+      name: label,
+      sheetTitle: first.name,
+      table: first.table,
+      sheets,
+      skipped,
+    };
   } catch (err) {
     return fail(err);
   }

@@ -54,8 +54,10 @@ import {
 import {
   LoadError,
   type FileLike,
+  type SheetCandidate,
+  recommendedSheet,
+  sheetsFromFile,
   surveyNameFromFile,
-  tableFromFile,
 } from "./load";
 import { type RosterRow, isMixedClasses, rosterFromRows } from "./roster-input";
 import {
@@ -90,7 +92,11 @@ export interface Session {
   kindReason: string;
   kindConfirmed: boolean;
   scale: Scale;
+  /** 老師確認過（或手動選過）量表上下限；之後不再被自動判斷覆蓋。 */
+  scaleConfirmed: boolean;
   mappingConfirmed: boolean;
+  /** 這個檔有 2 張以上有資料的工作表時：全部候選、略過的空表與目前用哪一張；只有一張時是 null。 */
+  sheetPool: SheetPool | null;
   /** 之前存過、欄位標題相似的設定，等老師回答「是不是之前的」。 */
   recognition: { survey: SavedSurvey; similarity: number } | null;
   surveyId: string;
@@ -112,8 +118,28 @@ export interface Session {
   demo: boolean;
 }
 
+/** 檔案裡有資料的工作表（2 張以上）。 */
+export interface SheetPool {
+  sheets: SheetCandidate[];
+  skipped: string[];
+  /** 目前使用第幾張。 */
+  index: number;
+}
+
+/** 「選擇工作表」頁的狀態：開檔後先選（open），或在準備資料頁更換（change）。 */
+export interface SheetPick {
+  mode: "open" | "change";
+  fileName: string;
+  sourceLabel: string;
+  pool: SheetPool;
+  /** 目前點選的那張。 */
+  selected: number;
+}
+
 export interface AppState {
   ready: boolean;
+  /** 選擇工作表頁；有值時取代目前的畫面。 */
+  sheetPick: SheetPick | null;
   route: Route;
   sub: Sub | null;
   session: Session | null;
@@ -146,6 +172,7 @@ export interface AppState {
 
 const initial: AppState = {
   ready: false,
+  sheetPick: null,
   route: "home",
   sub: null,
   session: null,
@@ -367,19 +394,95 @@ function newId(): string {
 
 /** 開啟問卷檔。找得到相似的已存設定就先問老師「是不是之前的」。 */
 export async function openSurveyFile(file: FileLike): Promise<void> {
-  let table: Table;
+  let loaded;
   try {
-    table = await tableFromFile(file);
+    loaded = await sheetsFromFile(file);
   } catch (e) {
     set({ error: e instanceof LoadError ? e.reason : "unreadable" });
     return;
   }
-  startSession(table, file.name, {});
+  offerSheets(file.name, loaded.sheets, loaded.skipped, undefined);
 }
 
-/** Google 試算表直讀來的表格：與開 Excel 檔同一條路（辨識已存設定、進對應欄位）。 */
-export function openSurveyTable(table: Table, name: string): void {
-  startSession(table, name, { sourceLabel: "Google 試算表" });
+/** Google 試算表直讀來的表格：與開 Excel 檔同一條路（辨識已存設定、進對應欄位）。多個分頁有資料時沿用「選擇工作表」頁。 */
+export function openSurveyTable(
+  table: Table,
+  name: string,
+  pool?: { sheets: SheetCandidate[]; skipped: string[] },
+): void {
+  const label = "Google 試算表";
+  if (pool && pool.sheets.length >= 2) return offerSheets(name, pool.sheets, pool.skipped, label);
+  startSession(table, name, { sourceLabel: label });
+}
+
+/** 只有一張有資料就直接開始；2 張以上先讓老師選（預選資料列最多的那張）。 */
+function offerSheets(
+  fileName: string,
+  sheets: SheetCandidate[],
+  skipped: string[],
+  sourceLabel: string | undefined,
+): void {
+  const first = sheets[0];
+  if (!first) return;
+  if (sheets.length === 1) {
+    startSession(first.table, fileName, sourceLabel ? { sourceLabel } : {});
+    return;
+  }
+  const best = recommendedSheet(sheets);
+  set({
+    sheetPick: {
+      mode: "open",
+      fileName,
+      sourceLabel: sourceLabel ?? "Excel 檔",
+      pool: { sheets, skipped, index: best },
+      selected: best,
+    },
+    error: null,
+  });
+}
+
+export function pickSheet(index: number): void {
+  set((s) => (s.sheetPick ? { sheetPick: { ...s.sheetPick, selected: index } } : {}));
+}
+
+export function cancelSheetPick(): void {
+  set({ sheetPick: null });
+}
+
+/** 準備資料頁的「更換工作表」：回到選擇頁，預選目前這張。 */
+export function requestSheetChange(): void {
+  const s = getState().session;
+  if (!s?.sheetPool) return;
+  set({
+    sheetPick: {
+      mode: "change",
+      fileName: s.fileName,
+      sourceLabel: s.sourceLabel,
+      pool: s.sheetPool,
+      selected: s.sheetPool.index,
+    },
+  });
+}
+
+/** 「用這張工作表」／「更換」：開始（或重新開始）這份問卷的準備流程。 */
+export function confirmSheet(): void {
+  const pick = getState().sheetPick;
+  if (!pick) return;
+  const chosen = pick.pool.sheets[pick.selected];
+  if (!chosen) return;
+  const pool: SheetPool = { ...pick.pool, index: pick.selected };
+  if (pick.mode === "change") {
+    const old = getState().session;
+    // 同一張就不動；換了才重新判斷欄位（學生名單、問卷名稱與編號保留）
+    if (old && old.sheetPool?.index === pick.selected) return set({ sheetPick: null });
+    startSession(chosen.table, pick.fileName, {
+      sourceLabel: pick.sourceLabel,
+      pool,
+      keep: old ?? undefined,
+    });
+    return;
+  }
+  startSession(chosen.table, pick.fileName, { sourceLabel: pick.sourceLabel, pool });
 }
 
 /** 示範資料（教學頁 R-001）：不比對、不存進資料夾、不進「最近的問卷」，重新開始即清除。 */
@@ -390,7 +493,14 @@ export function openDemoTable(table: Table, rosterRows: RosterRow[]): void {
 function startSession(
   table: Table,
   fileName: string,
-  opts: { demo?: boolean; rosterRows?: RosterRow[]; sourceLabel?: string },
+  opts: {
+    demo?: boolean;
+    rosterRows?: RosterRow[];
+    sourceLabel?: string;
+    pool?: SheetPool;
+    /** 更換工作表時帶著走的舊工作階段：名稱、編號與學生名單保留，其餘重來。 */
+    keep?: Session;
+  },
 ): void {
   const file = { name: fileName };
   const { data, pendingRecent } = opts.demo
@@ -439,27 +549,30 @@ function startSession(
     const tplHit = hit;
     saved = tplHit ? tpls.find((t) => t.id === tplHit.config.id) : undefined;
   }
+  const keep = opts.keep;
   const cols = analyzeColumns(table);
   const { kind, reason } = inferKind(cols);
   const session: Session = {
     fileName: file.name,
     sourceLabel: opts.sourceLabel ?? (/\.(csv|tsv|txt)$/i.test(file.name) ? "CSV／TSV 檔" : "Excel 檔"),
-    name: surveyNameFromFile(file.name),
+    name: keep?.name ?? surveyNameFromFile(file.name),
     table,
     cols,
     kind,
     kindReason: reason,
     kindConfirmed: false,
     scale: detectScale(table, cols),
+    scaleConfirmed: false,
     mappingConfirmed: false,
+    sheetPool: opts.pool && opts.pool.sheets.length >= 2 ? opts.pool : null,
     recognition:
       saved && hit ? { survey: saved, similarity: hit.similarity } : null,
-    surveyId: newId(),
+    surveyId: keep?.surveyId ?? newId(),
     previousRows: null,
-    rosterRows: opts.rosterRows ?? null,
-    rosterMixed: false,
-    rosterSkipped: false,
-    rosterName: opts.demo ? "示範名單" : "",
+    rosterRows: keep ? keep.rosterRows : (opts.rosterRows ?? null),
+    rosterMixed: keep?.rosterMixed ?? false,
+    rosterSkipped: keep?.rosterSkipped ?? false,
+    rosterName: keep ? keep.rosterName : opts.demo ? "示範名單" : "",
     demo: opts.demo === true,
     resolutions: {},
     excluded: [],
@@ -470,6 +583,7 @@ function startSession(
   courseLoadedFor = null;
   set({
     session,
+    sheetPick: null,
     route: "prepare",
     sub: null,
     error: null,
@@ -501,6 +615,7 @@ export function acceptRecognition(): void {
     kindReason: extra().store.kindReasonSaved,
     cols,
     scale: saved.scale,
+    scaleConfirmed: true,
     mappingConfirmed: true,
     previousRows: saved.rowCount,
     rosterRows: roster
