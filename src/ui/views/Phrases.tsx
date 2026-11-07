@@ -3,6 +3,7 @@ import { addCategory, addPhrase, fillName, insertAt, movePhrase, phraseLibrary, 
 import { savePhrases, useApp } from '../../app/store';
 import { strings as S } from '../strings';
 import { Notice } from '../parts/parts';
+import { extra } from '../strings-extra';
 
 /** 老師評語欄 + 常用評語籌碼（R-021、R-022）：點籌碼插在游標處，{姓名} 換成這位同學。 */
 export function TeacherComment(props: { value: string; onChange: (v: string) => void; studentName: string; allNames: string[] }) {
@@ -114,7 +115,7 @@ export function TeacherComment(props: { value: string; onChange: (v: string) => 
             <ul class="phrase-edit">
               {cat.phrases.map((p, i) => (
                 <li key={`${cat.id}-${i}`}>
-                  <input class="input" type="text" value={p.title} aria-label="短標題" onInput={(e) => void savePhrases(updatePhrase(lib, cat.id, i, { title: (e.target as HTMLInputElement).value }))} />
+                  <input class="input" type="text" value={p.title} aria-label={extra().phrases.shortTitle} onInput={(e) => void savePhrases(updatePhrase(lib, cat.id, i, { title: (e.target as HTMLInputElement).value }))} />
                   <textarea class="input area" rows={2} value={p.text} aria-label={P.edit} onInput={(e) => void savePhrases(updatePhrase(lib, cat.id, i, { text: (e.target as HTMLTextAreaElement).value }))} />
                   <div class="btn-row">
                     <button class="btn ghost small" type="button" disabled={i === 0} onClick={() => void savePhrases(movePhrase(lib, cat.id, i, -1))}>

@@ -3,6 +3,7 @@ import { type CheckKey, canGoStats, checkCounts, checkReport } from '../../app/p
 import { go, setSession, useApp } from '../../app/store';
 import { strings as S } from '../strings';
 import { ActBar, Notice } from '../parts/parts';
+import { extra } from '../strings-extra';
 
 const KEYS: CheckKey[] = ['duplicates', 'timestamps', 'scores', 'blanks', 'titles'];
 
@@ -31,7 +32,7 @@ export function CheckView() {
               return (
                 <li key={g.key} class="issue">
                   <strong>{S.check.dupDetail(who, g.ids.length)}</strong>
-                  <span class="hint">第 {sorted.map(rowNo).join('、')} 列</span>
+                  <span class="hint">{extra().check.rows(sorted.map(rowNo).join(extra().check.sep))}</span>
                   {g.seatConflict && <Notice kind="warn">{S.check.dupSeatNote}</Notice>}
                   <div class="btn-row">
                     <button class={`btn ${g.seatConflict ? 'secondary' : 'primary'} small`} type="button" onClick={() => exclude(sorted.slice(0, -1))}>
@@ -83,7 +84,7 @@ export function CheckView() {
           {lines.slice(0, 50).map((l) => (
             <li key={l}>{l}</li>
           ))}
-          {lines.length > 50 && <li>…還有 {lines.length - 50} 筆</li>}
+          {lines.length > 50 && <li>{extra().check.more(lines.length - 50)}</li>}
         </ul>
         <button class="btn secondary small" type="button" onClick={() => mark(k)}>
           {S.check.markHandled}

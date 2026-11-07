@@ -12,6 +12,7 @@ import { pickTemplates, type TemplatePick } from '../../app/render';
 import { EDITOR_FILE, type EditorData, emptyEditorData, parseEditorData, serializeEditorData } from '../../editor/project';
 import type { EBlock, EBlockKind, EditorTemplate, PageSpec } from '../../editor/types';
 import { type Layer, type ReportSettings, emptyLayers } from '../../editor/settings';
+import { extra } from '../strings-extra';
 
 export type Screen = 'library' | 'edit';
 export type Panel = 'props' | 'add' | 'page' | 'student' | 'menu' | null;
@@ -94,11 +95,11 @@ export async function load(): Promise<void> {
       if (text !== null) {
         const r = parseEditorData(text);
         data = r.data;
-        if (r.skipped) toast(`有 ${r.skipped} 份範本無法讀取，已略過。`);
+        if (r.skipped) toast(extra().editorState.skipped(r.skipped));
       }
       unsaved = false;
     } catch {
-      toast('範本檔讀不出來，先用空白的。原檔沒有被改動。');
+      toast(extra().editorState.unreadable);
       unsaved = true;
     }
   }
@@ -114,7 +115,7 @@ async function write(): Promise<void> {
     put({ unsaved: false });
   } catch {
     put({ unsaved: true });
-    toast('範本寫入資料夾失敗，請下載備份。');
+    toast(extra().editorState.saveFail);
   }
 }
 function save(data: EditorData): void {
@@ -149,7 +150,7 @@ export function useTemplate(id: string): void {
   const data = { ...st.data, settings: { ...st.data.settings, global: { ...st.data.settings.global, templateId: id } } };
   put({ useId: id, menuFor: null });
   save(data);
-  toast('之後輸出會用這份範本。');
+  toast(extra().editorState.willUse);
 }
 /** 輸出頁選範本：和範本庫的「用這份輸出」同一個設定（`settings.global.templateId`），不跳提示。 */
 export function setOutputTemplate(id: string): void {
@@ -160,14 +161,14 @@ export function duplicate(id: string): void {
   const t = allTemplates().find((x) => x.id === id);
   if (!t) return;
   const copy = ensureEditable({ ...t, builtin: true }, st.data.templates);
-  const named = { ...copy, name: uniqueName(`${t.name.replace('（我的）', '')} 副本`, st.data.templates), basedOn: t.builtin ? t.id : t.basedOn };
+  const named = { ...copy, name: uniqueName(`${t.name.replace(extra().editorState.mine, '')}${extra().editorState.copySuffix}`, st.data.templates), basedOn: t.builtin ? t.id : t.basedOn };
   upsertMine(named);
   put({ menuFor: null });
-  toast(`已複製為「${named.name}」。`);
+  toast(extra().editorState.copied(named.name));
 }
 export function newTemplate(): void {
   const base = builtinTemplates()[0]!;
-  const t = { ...ensureEditable(base, st.data.templates), name: '新的範本', blocks: [] as EBlock[] };
+  const t = { ...ensureEditable(base, st.data.templates), name: extra().editorState.newName, blocks: [] as EBlock[] };
   upsertMine(t);
   openEditor(t.id);
 }
@@ -181,7 +182,7 @@ export function resetTemplate(id: string): void {
   if (!mine || !orig) return;
   upsertMine({ ...orig, id: mine.id, name: mine.name, builtin: false, basedOn: orig.id });
   put({ confirm: null, menuFor: null });
-  toast('已恢復成內建版面。');
+  toast(extra().editorState.restored);
 }
 export function exportOne(id: string): void {
   const t = allTemplates().find((x) => x.id === id);
@@ -193,9 +194,9 @@ export async function importFile(file: File): Promise<void> {
   try {
     const t = importTemplate(await file.text(), st.data.templates);
     upsertMine(t);
-    toast(`已匯入「${t.name}」。`);
+    toast(extra().editorState.imported(t.name));
   } catch (e) {
-    toast(e instanceof TemplateImportError ? e.message : '讀不出這個檔案。');
+    toast(e instanceof TemplateImportError ? e.message : extra().editorState.importFail);
   }
 }
 
@@ -210,7 +211,7 @@ function apply(fn: (t: EditorTemplate) => EditorTemplate, key?: string): void {
   if (base.builtin) {
     base = ensureEditable(base, st.data.templates);
     hist = { ...h, present: base };
-    toast(`內建範本不能直接改，已複製成「${base.name}」。`);
+    toast(extra().editorState.builtinCopied(base.name));
   }
   const next = fn(base);
   const nh = next === base && hist === h ? h : commit(hist, next, key);
@@ -268,11 +269,11 @@ export const setConfirm = (confirm: ES['confirm']): void => put({ confirm, menuF
 
 export async function addImage(file: File): Promise<string | null> {
   if (!file.type.startsWith('image/')) {
-    toast('請選圖片檔。');
+    toast(extra().editorState.pickImage);
     return null;
   }
   if (file.size > 300 * 1024) {
-    toast('圖片請小於 300 KB（Logo 不需要太大）。');
+    toast(extra().editorState.imageTooBig);
     return null;
   }
   const url = await new Promise<string>((res, rej) => {

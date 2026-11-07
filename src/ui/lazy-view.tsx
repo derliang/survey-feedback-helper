@@ -1,6 +1,7 @@
 // 路由畫面延遲載入：首頁 bundle 只含首頁，其餘畫面進入時才載入（硬規則 9）。
 import type { ComponentType } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
+import { extra } from './strings-extra';
 
 export function lazyView(load: () => Promise<ComponentType>): ComponentType {
   let loaded: ComponentType | null = null;
@@ -14,7 +15,7 @@ export function lazyView(load: () => Promise<ComponentType>): ComponentType {
     if (failed)
       return (
         <main class="page" id="main">
-          <p role="alert">畫面載入失敗，請檢查網路後重新整理。</p>
+          <p role="alert">{extra().loadFail.view}</p>
         </main>
       );
     if (!View) return <main class="page" id="main" aria-busy="true" />;

@@ -20,6 +20,7 @@ import { strings as S } from '../strings';
 import { ActBar, Notice, useWide } from '../parts/parts';
 import { CommentList, Keywords, SaveNote } from './ReviewParts';
 import { TeacherComment } from './Phrases';
+import { extra } from '../strings-extra';
 
 const f1 = (n: number | null | undefined): string => (n === null || n === undefined ? '—' : n.toFixed(1));
 const pct = (x: number): string => `${Math.round(x * 100)}%`;
@@ -96,7 +97,7 @@ function FeedbackMain({ summary, sel, wide }: { summary: FeedbackSummary; sel: s
       <>
         <div class="tiles">
           <Tile label={S.stats.classMean} value={f1(summary.classMean.value)} note={summary.classMean.label} />
-          <Tile label="被評對象" value={S.stats.people(summary.targets.length)} />
+          <Tile label={extra().stats.targets} value={S.stats.people(summary.targets.length)} />
         </div>
         {summary.problems.length > 0 && <Notice kind="warn">{S.stats.problems(summary.problems.length)}</Notice>}
         {summary.rankMayChange && <Notice kind="info">{S.stats.rankMayChange}</Notice>}
@@ -110,9 +111,9 @@ function FeedbackMain({ summary, sel, wide }: { summary: FeedbackSummary; sel: s
           <table class="roster-table">
             <thead>
               <tr>
-                <th>名次</th>
-                <th>座號</th>
-                <th>姓名</th>
+                <th>{extra().stats.rank}</th>
+                <th>{extra().stats.seat}</th>
+                <th>{extra().stats.name}</th>
                 {summary.items.map((i) => (
                   <th key={i.id}>{i.label}</th>
                 ))}
@@ -156,8 +157,8 @@ function FeedbackMain({ summary, sel, wide }: { summary: FeedbackSummary; sel: s
       <div class="tiles">
         <Tile label={S.stats.total} value={f1(t.total)} />
         <Tile label={S.stats.classMean} value={f1(summary.classMean.value)} note={S.stats.classMeanNote(summary.classMean.included)} />
-        <Tile label="名次" value={S.stats.rank(t.rank)} />
-        <Tile label="評分" value={S.stats.raters(t.raters)} />
+        <Tile label={extra().stats.rank} value={S.stats.rank(t.rank)} />
+        <Tile label={extra().stats.rating} value={S.stats.raters(t.raters)} />
       </div>
       <section class="card">
         <h3>{S.stats.itemsTitle}</h3>
@@ -177,10 +178,10 @@ function FeedbackMain({ summary, sel, wide }: { summary: FeedbackSummary; sel: s
             <table class="roster-table">
               <thead>
                 <tr>
-                  <th>題目</th>
-                  <th>自評</th>
-                  <th>他評</th>
-                  <th>落差</th>
+                  <th>{extra().stats.question}</th>
+                  <th>{extra().stats.self}</th>
+                  <th>{extra().stats.others}</th>
+                  <th>{extra().stats.gap}</th>
                   <th />
                 </tr>
               </thead>
@@ -234,7 +235,7 @@ function QuestionMain({ q, wide }: { q: Question; wide: boolean }) {
           <Tile label={S.stats.mean} value={f1(x.mean)} />
           <Tile label={S.stats.median} value={f1(x.median)} />
           <Tile label={S.stats.sd} value={f1(x.sd)} />
-          <Tile label="有效" value={S.stats.people(x.n)} note={S.stats.blank(x.blank)} />
+          <Tile label={extra().stats.valid} value={S.stats.people(x.n)} note={S.stats.blank(x.blank)} />
         </div>
         {x.invalid > 0 && <Notice kind="warn">{S.stats.invalid(x.invalid)}</Notice>}
         <Chart svg={columnsSvg(x.distribution, x.distribution.map((_, i) => String(scale.min + i)), { title: q.col.label, w, h: 220 })} />
@@ -246,7 +247,7 @@ function QuestionMain({ q, wide }: { q: Question; wide: boolean }) {
     return (
       <>
         <div class="tiles">
-          <Tile label="作答" value={S.stats.people(x.answered)} note={S.stats.blank(x.blank)} />
+          <Tile label={extra().stats.answered} value={S.stats.people(x.answered)} note={S.stats.blank(x.blank)} />
         </div>
         <label class="check">
           <input type="checkbox" checked={q.multi} onChange={(e) => setStats({ multi: { ...st.stats.multi, [q.col.index]: (e.target as HTMLInputElement).checked } })} />
@@ -305,7 +306,7 @@ function VoteMain({ v, sel, wide }: { v: VoteResult; sel: string; wide: boolean 
         )}
       </section>
       <div class="tiles">
-        <Tile label="計入票數" value={String(p.tally.validBallots)} />
+        <Tile label={extra().stats.ballots} value={String(p.tally.validBallots)} />
         <Tile label={S.stats.elected} value={p.election.elected.join('、') || '—'} />
       </div>
       <label class="field">
@@ -433,7 +434,7 @@ export function StatsView() {
   if (fb) {
     listTitle = S.stats.listTitle.feedback;
     const sorted = [...fb.targets].sort((a, b) => (a.rank ?? 999) - (b.rank ?? 999));
-    entries = [{ key: '', name: '全班總覽', note: S.stats.people(fb.targets.length) }, ...sorted.map((t) => ({ key: t.key, name: `${seatOf(t)} ${personName(t)}`.trim(), note: `${f1(t.total)}・${S.stats.rank(t.rank)}` }))];
+    entries = [{ key: '', name: extra().stats.classOverview, note: S.stats.people(fb.targets.length) }, ...sorted.map((t) => ({ key: t.key, name: `${seatOf(t)} ${personName(t)}`.trim(), note: `${f1(t.total)}・${S.stats.rank(t.rank)}` }))];
     if (!entries.some((e) => e.key === sel)) sel = '';
     commentItems = fb.targets.flatMap((t) => t.comments.map((c) => ({ key: feedbackKey(c.recordId), text: c.text })));
   } else if (qs) {

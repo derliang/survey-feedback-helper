@@ -8,13 +8,14 @@ import { CompareView } from './CompareView';
 import { MappingView } from './MappingView';
 import { RosterView } from './RosterView';
 import { TypeView } from './TypeView';
+import { extra } from '../strings-extra';
 
 const SUB_OF: Record<PrepItem['key'], Sub> = { type: 'type', mapping: 'mapping', roster: 'roster', check: 'check' };
 const ITEM_OF: Record<Sub, PrepItem['key']> = { type: 'type', mapping: 'mapping', roster: 'roster', compare: 'roster', check: 'check' };
 
 function nextAction(items: PrepItem[]): { sub: Sub; label: string } | null {
   const open = items.find((i) => i.state === 'todo' || i.state === 'attention');
-  if (open) return { sub: SUB_OF[open.key], label: `${S.prep.next}：${S.prep.items[open.key].replace('（選用）', '')}` };
+  if (open) return { sub: SUB_OF[open.key], label: `${S.prep.next}：${S.prep.items[open.key].replace(extra().prep.optional, '')}` };
   return null;
 }
 
