@@ -1236,18 +1236,23 @@ button.tile {
 }
 
 /* 教學頁與快速範本 */
-.guide-nav,
 .tpl-grid {
   display: grid;
   gap: var(--sp-3);
 }
-.guide-nav {
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  margin-bottom: var(--sp-4);
-}
-.guide-nav button[aria-current='page'] {
-  background: var(--accent);
-  color: var(--on-accent);
+.tips .num,
+.steps .num {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
 }
 .tips {
   list-style: none;
@@ -1260,16 +1265,225 @@ button.tile {
   gap: var(--sp-3);
   align-items: flex-start;
 }
-.tips .num {
-  flex: none;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
+
+/* 教學頁改版（設計稿 5.31）：共同前置＋兩條並列流程；手機折疊目錄、平板以上左欄、桌機兩個做法並排 */
+.gwrap {
   display: grid;
-  place-items: center;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-4);
+  min-width: 0;
+}
+.gmain {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  min-width: 0;
+}
+.gmain > .card,
+.methods > .card {
+  min-width: 0;
+  scroll-margin-top: 80px;
+}
+.gpick {
+  margin: 0;
+  font-weight: 600;
+  color: var(--ink2);
+}
+.methods {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-4);
+  min-width: 0;
+}
+.mh {
+  display: flex;
+}
+.who {
+  margin: 0;
+  background: var(--sunk);
+  border-radius: var(--r-sm);
+  padding: var(--sp-2) var(--sp-3);
+  color: var(--ink);
+}
+.steps,
+.cases {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--sp-3);
+}
+.steps li {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: var(--sp-3);
+  align-items: start;
+}
+.u {
+  font-weight: 600;
+}
+.mp {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-1);
+  vertical-align: middle;
+}
+.mp-part {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+}
+.mpi {
+  padding: 0 var(--sp-2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--sunk);
+  font-weight: 600;
+  font-size: 15px;
+}
+.mps {
+  color: var(--ink3);
+}
+.cases li {
+  display: grid;
+  gap: 2px;
+}
+.cases li span {
+  color: var(--ink2);
+}
+/* 折疊「遇到問題」：整列可點、高 ≥ 48、箭頭展開時轉 180° */
+.fold {
+  border: 1px solid var(--ctl);
+  border-radius: var(--r-sm);
+  background: var(--card);
+}
+.fold > summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  min-height: var(--tap);
+  padding: var(--sp-2) var(--sp-3);
+  cursor: pointer;
+  border-radius: var(--r-sm);
+}
+.fold > summary::-webkit-details-marker,
+.toc > summary::-webkit-details-marker {
+  display: none;
+}
+.fold .fs {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+}
+.fold .fs .hint {
+  color: var(--ink2);
+}
+.fold .ic,
+.toc-s .ic {
+  flex: none;
+  transition: transform var(--dur);
+}
+.fold[open] > summary .ic {
+  transform: rotate(180deg);
+}
+.fold[open] > summary {
+  border-bottom: 1px solid var(--line-soft);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.fb {
+  display: grid;
+  gap: var(--sp-3);
+  padding: var(--sp-3);
+}
+/* 目錄：手機是折疊鈕，平板以上是左欄；同一份連結（.nvr） */
+.toc-s {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  list-style: none;
+  cursor: pointer;
+  gap: var(--sp-3);
+}
+.toc-s span {
+  flex: 1;
+  text-align: left;
+}
+.toc[open] .toc-s .ic:last-child {
+  transform: rotate(180deg);
+}
+.toc-n {
+  display: grid;
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
+  background: var(--card);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-md);
+  padding: var(--sp-2);
+}
+.nvr {
+  display: flex;
+  align-items: center;
+  min-height: var(--tap);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-sm);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.4;
+}
+.guide a.nvr {
+  color: var(--ink2);
+}
+.guide a.nvr[aria-current] {
   background: var(--accent-soft);
   color: var(--accent-ink);
   font-weight: 700;
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+.grail {
+  display: none;
+}
+.grail-n {
+  display: grid;
+  gap: var(--sp-2);
+}
+@media (hover: hover) and (pointer: fine) {
+  .fold > summary:hover,
+  .guide a.nvr:hover {
+    background: var(--sunk);
+  }
+}
+@media (min-width: 600px) {
+  .gmain > .card,
+  .methods > .card {
+    padding: var(--sp-5);
+  }
+  .toc {
+    display: none;
+  }
+  .grail {
+    display: block;
+    position: sticky;
+    top: 80px;
+    align-self: start;
+  }
+  .gwrap {
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: var(--sp-5);
+  }
+}
+@media (min-width: 1024px) {
+  .gwrap {
+    grid-template-columns: 240px minmax(0, 1fr);
+  }
+  .methods {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
 }
 .tpl-grid {
   grid-template-columns: 1fr;

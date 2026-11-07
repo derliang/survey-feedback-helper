@@ -41,7 +41,7 @@ export function TypeView() {
       {s.kind === 'course' && (
         <details class="howto" data-testid="course-howto">
           <summary>
-            {S.type.courseHow} <span class="tag warn">{S.type.toVerify}</span>
+            {S.type.courseHow} {S.type.toVerify && <span class="tag warn">{S.type.toVerify}</span>}
           </summary>
           <p>{S.type.courseHowBody}</p>
         </details>

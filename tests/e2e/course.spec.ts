@@ -68,7 +68,8 @@ test('入口：第五種類型、志願欄順序與新增志願欄', async ({ pa
   const card = page.getByRole('radio', { name: /選課分組志願/ });
   await expect(card).toContainText('建議');
   await expect(card).toHaveAttribute('aria-checked', 'true');
-  await expect(page.getByTestId('course-howto')).toContainText('待核對');
+  // 繁中題型名稱與「每欄僅限一則回應」已於 2026-11-07 核對：標籤撤除
+  await expect(page.getByTestId('course-howto')).not.toContainText('待核對');
   await page.getByRole('button', { name: '確認，下一步：欄位對應' }).click();
   await expect(page.getByRole('button', { name: /^第一志願：/ })).toContainText('志願 1');
   await expect(page.getByRole('button', { name: /^第三志願：/ })).toContainText('志願 3');
