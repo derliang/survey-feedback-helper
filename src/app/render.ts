@@ -114,7 +114,8 @@ export function personalDocFromTemplate(t: EditorTemplate, inp: PersonalFeedback
     班級平均: fmt1(inp.average.classMean),
     滿分: inp.scaleMax,
     老師評語: inp.teacherComment ?? '',
-    全班名次: inp.stats?.rank ?? '',
+    // 回饋單對外不顯示名次：學生版、家長版的 {全班名次} 一律空白（摘要數字列的名次卡在 compile 裡同樣只給教師版）
+    全班名次: ctx.version === 'teacher' ? (inp.stats?.rank ?? '') : '',
     回收份數: inp.stats?.count ?? '',
     中位數: inp.stats?.median != null ? fmt1(inp.stats.median) : '',
     標準差: inp.stats?.sd != null ? inp.stats.sd.toFixed(2) : '',

@@ -14,6 +14,7 @@ import {
   suggestRoles,
 } from '../core';
 import type { SurveyKind } from '../storage';
+import { extra } from '../ui/strings-extra';
 
 export type Role = FieldRole;
 
@@ -172,16 +173,16 @@ export function inferKind(cols: readonly ColumnInfo[]): { kind: SurveyKind; reas
   const names = cols.filter((c) => c.role === 'respondentName' || c.role === 'targetName').length;
   const scores = cols.filter((c) => c.role === 'score').length;
   if (has(cols, 'targetName') && names >= 2 && scores >= 1) {
-    return { kind: 'feedback', reason: `有「填寫者」與「被評對象」兩種姓名欄，並有 ${scores} 題評分，所以判斷是報告回饋。` };
+    return { kind: 'feedback', reason: extra().columns.feedback(scores) };
   }
   if (has(cols, 'preference')) {
-    return { kind: 'course', reason: '欄名有「第一志願」「第二志願」等字樣，所以判斷是選課分組志願。' };
+    return { kind: 'course', reason: extra().columns.course };
   }
   const titles = cols.map((c) => c.header).join(' ');
   if (/班長|幹部|票選|投票|推薦|當選/.test(titles)) {
-    return { kind: 'vote', reason: '欄位標題有「班長、幹部、票選」等字樣，所以判斷是票選幹部。' };
+    return { kind: 'vote', reason: extra().columns.vote };
   }
-  return { kind: 'opinion', reason: '沒有被評對象欄，也不像票選，所以判斷是意見調查。' };
+  return { kind: 'opinion', reason: extra().columns.opinion };
 }
 
 /** 欄位對應還缺什麼；空陣列代表可以往下。 */
@@ -189,16 +190,16 @@ export function mappingProblems(kind: SurveyKind, cols: readonly ColumnInfo[]): 
   const out: string[] = [];
   const content = cols.filter((c) => c.role === 'score' || c.role === 'choice' || c.role === 'comment').length;
   if (kind === 'course') {
-    if (!has(cols, 'preference')) out.push('選課分組志願需要至少一欄「志願」。');
-    if (!has(cols, 'respondentName') && !has(cols, 'respondentSeat')) out.push('選課分組志願需要「填寫者姓名」或「填寫者座號」，才分得出是誰。');
+    if (!has(cols, 'preference')) out.push(extra().columns.needPref);
+    if (!has(cols, 'respondentName') && !has(cols, 'respondentSeat')) out.push(extra().columns.needWho);
   } else if (kind === 'vote') {
-    if (!has(cols, 'choice')) out.push('票選幹部需要至少一欄「選擇題」（例如班長、副班長）。');
+    if (!has(cols, 'choice')) out.push(extra().columns.needChoice);
   } else if (kind === 'feedback') {
-    if (!has(cols, 'respondentName')) out.push('報告回饋需要一欄「填寫者姓名」。');
-    if (!has(cols, 'targetName')) out.push('報告回饋需要一欄「被評對象姓名」。');
-    if (!has(cols, 'score')) out.push('報告回饋需要至少一欄「評分」。');
+    if (!has(cols, 'respondentName')) out.push(extra().columns.needRespondent);
+    if (!has(cols, 'targetName')) out.push(extra().columns.needTarget);
+    if (!has(cols, 'score')) out.push(extra().columns.needScore);
   } else if (content === 0) {
-    out.push('意見調查需要至少一欄「評分」「選擇題」或「開放意見」。');
+    out.push(extra().columns.needContent);
   }
   return out;
 }

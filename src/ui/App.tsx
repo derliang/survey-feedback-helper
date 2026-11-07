@@ -10,6 +10,7 @@ import { FolderDialog, RestartDialog, Settings } from './views/Misc';
 import { EditorRoute } from './editor/Loader';
 import { GuideRoute } from './guide/Loader';
 import { CourseRoute } from './views/CourseLoader';
+import { extra } from './strings-extra';
 
 const MethodView = lazyView(() => import('./views/MethodView').then((m) => m.MethodView));
 const OutputView = lazyView(() => import('./views/OutputView').then((m) => m.OutputView));
@@ -33,7 +34,7 @@ export function App() {
   return (
     <>
       <a class="skip" href="#main">
-        跳到主要內容
+        {extra().skip}
       </a>
       <TopBar />
       {st.oldBrowser && (

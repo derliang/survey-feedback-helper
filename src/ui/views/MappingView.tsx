@@ -3,6 +3,7 @@ import { type ColumnInfo, type Role, countToConfirm, detectScale, gridGroup, map
 import { go, saveSurvey, setSession, useApp } from '../../app/store';
 import { strings as S } from '../strings';
 import { ActBar, Icon, Notice, Sheet } from '../parts/parts';
+import { extra } from '../strings-extra';
 
 function rolesFor(kind: string): Role[] {
   const base: Role[] = ['timestamp', 'respondentClass', 'respondentSeat', 'respondentName'];
@@ -37,7 +38,7 @@ export function MappingView() {
       <button type="button" class={`rowbtn${c.confirm ? ' needs' : ''}`} onClick={() => setEditing(c)} aria-label={`${c.label}：${S.mapping.roles[c.role ?? 'ignore']}`}>
         <span class="rb-main">
           <strong>{c.label}</strong>
-          <span class="rb-note">{c.samples.slice(0, 3).join('、') || '（沒有資料）'}</span>
+          <span class="rb-note">{c.samples.slice(0, 3).join(extra().mapping.sep) || extra().mapping.noData}</span>
         </span>
         <span class="rb-tags">
           {c.confirm && <span class="tag warn">{S.mapping.confirmTag}</span>}
@@ -196,7 +197,7 @@ export function MappingView() {
             </button>
           }
         >
-          <p class="hint">{S.mapping.samples(editing.samples.join('、') || '（沒有資料）')}</p>
+          <p class="hint">{S.mapping.samples(editing.samples.join(extra().mapping.sep) || extra().mapping.noData)}</p>
           <div role="radiogroup" aria-label={S.mapping.pickTitle(editing.label)} class="opt-list">
             {rolesFor(s.kind).map((r) => {
               const cur = s.cols.find((c) => c.index === editing.index)?.role === r;
@@ -271,7 +272,7 @@ export function MappingView() {
                   >
                     <span class="rb-main">
                       <strong>{c.label}</strong>
-                      <span class="rb-note">{c.samples.slice(0, 3).join('、') || '（沒有資料）'}</span>
+                      <span class="rb-note">{c.samples.slice(0, 3).join(extra().mapping.sep) || extra().mapping.noData}</span>
                     </span>
                   </button>
                 </li>

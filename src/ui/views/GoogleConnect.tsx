@@ -12,6 +12,7 @@ import type { GoogleServices } from "../../google/types";
 import { strings as S } from "../strings";
 import { AccountChooser, Icon, Notice, Sheet, useWide } from "../parts/parts";
 import { CloudExplain, CloudSwitch } from "./CloudParts";
+import { extra } from "../strings-extra";
 
 const env = () => import.meta.env as Record<string, string | undefined>;
 
@@ -69,7 +70,7 @@ export function GoogleConnectDialog(props: {
       } catch {
         if (mounted.current) {
           setPhase("failed");
-          setMessage("連不上 Google，請檢查網路後再試，或改用 Excel 檔。");
+          setMessage(extra().google.offline);
         }
       }
     });

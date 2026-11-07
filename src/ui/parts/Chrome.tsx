@@ -2,6 +2,7 @@ import { canGoStats } from '../../app/progress';
 import { type Route, getState, go, requestRestart, useApp } from '../../app/store';
 import { strings as S } from '../strings';
 import { Icon } from './parts';
+import { extra } from '../strings-extra';
 
 interface StepDef {
   route: Route;
@@ -40,7 +41,7 @@ export function TopBar() {
             {S.guide.demoTag}
           </span>
         )}
-        <nav class="stepper" aria-label="步驟">
+        <nav class="stepper" aria-label={extra().chrome.steps}>
           <StepList steps={steps} />
         </nav>
         <div class="bar-actions">
@@ -48,9 +49,9 @@ export function TopBar() {
             <Icon name="restart" />
             <span class="lbl">{S.restart}</span>
           </button>
-          <button class="btn ghost small" type="button" onClick={() => go('editor')} aria-label="範本與版面">
+          <button class="btn ghost small" type="button" onClick={() => go('editor')} aria-label={extra().chrome.templateAria}>
             <Icon name="pencil" />
-            <span class="lbl">範本</span>
+            <span class="lbl">{extra().chrome.templateLabel}</span>
           </button>
           <button class="btn secondary small" type="button" onClick={() => go('settings')} aria-label={unsaved ? S.settingsUnsaved : S.settings}>
             <Icon name="gear" />
