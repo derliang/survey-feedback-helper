@@ -2,7 +2,7 @@ import { strings } from '../strings';
 import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 
-type IconName = 'restart' | 'gear' | 'check' | 'pencil' | 'back' | 'upload' | 'folder' | 'info' | 'warn' | 'alert' | 'lock';
+type IconName = 'restart' | 'gear' | 'check' | 'pencil' | 'back' | 'upload' | 'folder' | 'info' | 'warn' | 'alert' | 'lock' | 'list' | 'chevron';
 
 const PATHS: Record<IconName, string> = {
   restart: 'M4 12a8 8 0 1 0 3-6.2M4 4v4h4',
@@ -16,6 +16,8 @@ const PATHS: Record<IconName, string> = {
   warn: 'M12 9v5M12 17v.01M10.3 4l-8 14a2 2 0 0 0 1.7 3h16a2 2 0 0 0 1.7-3l-8-14a2 2 0 0 0-3.4 0z',
   alert: 'M12 8v5M12 16v.01M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z',
   lock: 'M6 11h12v9H6zM8 11V8a4 4 0 0 1 8 0v3',
+  list: 'M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01',
+  chevron: 'M6 9l6 6 6-6',
 };
 
 export function Icon({ name }: { name: IconName }) {
