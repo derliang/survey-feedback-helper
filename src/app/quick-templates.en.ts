@@ -32,7 +32,7 @@ export const TEMPLATES_EN: Record<string, TplEn> = {
       { text: 'I would join a similar activity again' },
       { text: 'What I liked best, and what could be better' },
     ],
-    defaults: 'Stacked bars for the scale questions; open-ended comments grouped by topic. Anonymous, no name question.',
+    defaults: 'Charts show the scale distribution of each question; open-ended comments are listed one by one. Anonymous, no name question.',
   },
   parent: {
     name: 'Parent feedback',

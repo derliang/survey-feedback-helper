@@ -110,7 +110,7 @@ test('名額與分配：合併、分配、手動移人、復原、輸出', async
   await expect(page.getByTestId('course-start')).toBeDisabled();
   await page.getByTestId('min-2').fill('2');
   await noOverflow(page);
-  await expect(page.getByText(/名額合計 10，填答 12 人，至少 2 人會進待安排/)).toBeVisible();
+  await expect(page.getByText(/課程總名額 10 人，填答者 12 人；至少 2 人將列入待安排/)).toBeVisible();
   await page.getByTestId('course-start').click();
 
   // 結果：三塊數字磚（攝影社最多 1 人，所以 8 或 9 人分到名額）
@@ -120,8 +120,8 @@ test('名額與分配：合併、分配、手動移人、復原、輸出', async
   await expect(page.getByTestId('tile-pending')).toContainText(String(12 - a0));
   await expect(page.getByTestId('record')).toContainText('名額 10');
   await expect(page.getByTestId('close-note')).toContainText('攝影社');
-  await expect(page.getByTestId('close-note')).toContainText('不會自動重分');
-  await expect(page.getByTestId('crow').filter({ hasText: '攝影社' })).toContainText('建議停開');
+  await expect(page.getByTestId('close-note')).toContainText('不會自動停開或重分');
+  await expect(page.getByTestId('crow').filter({ hasText: '攝影社' })).toContainText('建議人工評估是否開班');
   await noOverflow(page);
   const seed = await page.getByTestId('seed-value').innerText();
 
@@ -228,7 +228,7 @@ test('名單外填答者：預設不進分配，按「納入」後算進去，�
   await page.getByRole('textbox', { name: '貼上名單' }).fill(roster);
   await page.getByRole('button', { name: '加入名單' }).click();
   await step(page, '名額與分配').click();
-  await expect(page.getByText(/1 位填答者不在名單上/)).toBeVisible();
+  await expect(page.getByText(/有 1 位填答者不在匯入的學生名單中/)).toBeVisible();
   await expect(page.getByTestId('include-outside')).toBeVisible();
   await page.getByTestId('include-outside').click();
   await expect(page.getByTestId('undo-include')).toBeVisible();

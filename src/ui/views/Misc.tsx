@@ -157,7 +157,7 @@ export function RestartDialog() {
   if (!st.confirmRestart) return null;
   return (
     <Sheet
-      title={S.restart}
+      title={S.settingsPage.restartTitle}
       onClose={() => set({ confirmRestart: false })}
       footer={
         <>

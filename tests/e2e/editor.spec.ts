@@ -104,7 +104,7 @@ test('個別學生版本：改一位學生的文字，範本不變，可逐項�
   const wide = info.project.name === 'desktop';
   await openLibrary(page);
   await page.getByRole('button', { name: '編輯「個人回饋單」' }).click();
-  await page.getByRole('button', { name: wide ? /^個別學生版本/ : '個別學生', exact: false }).first().click();
+  await page.getByRole('button', { name: wide ? /^單一學生的專屬版面/ : '單一學生', exact: false }).first().click();
   await page.getByRole('dialog').getByRole('button', { name: /林小宇/ }).click();
   await expect(page.getByText('個別版本', { exact: true }).first()).toBeVisible();
   if (!wide) await page.getByRole('button', { name: '區塊清單' }).click();
@@ -112,7 +112,7 @@ test('個別學生版本：改一位學生的文字，範本不變，可逐項�
   if (!wide) await page.getByRole('button', { name: '編輯屬性' }).click();
   await page.getByLabel('內容', { exact: true }).fill('只給這位同學的話');
   if (!wide) await page.getByRole('button', { name: '完成' }).click();
-  await page.getByRole('button', { name: wide ? /^個別學生版本/ : '個別學生' }).first().click();
+  await page.getByRole('button', { name: wide ? /^單一學生的專屬版面/ : '單一學生' }).first().click();
   await expect(page.getByRole('dialog')).toContainText('開場白：改了 text');
   await page.getByRole('dialog').getByRole('button', { name: '還原' }).click();
   await expect(page.getByRole('dialog')).toContainText('還沒有');
@@ -150,7 +150,7 @@ test('沒有資料夾時提示下載備份；有資料夾時重開後範本還�
   await openLibrary(page);
   await page.getByRole('button', { name: '「班級總表」的選單' }).click();
   await page.getByRole('dialog').getByRole('button', { name: '複製' }).click();
-  await expect(page.getByText('還沒選資料夾，範本只在這次使用')).toBeVisible();
+  await expect(page.getByText('尚未選擇資料夾，請下載備份，避免關閉後遺失範本修改。')).toBeVisible();
   await expect(page.getByRole('button', { name: '下載範本備份' })).toBeVisible();
 
   // 以瀏覽器內建資料夾模擬
@@ -164,7 +164,7 @@ test('沒有資料夾時提示下載備份；有資料夾時重開後範本還�
   await page.getByRole('button', { name: '範本與版面' }).click();
   await page.getByRole('button', { name: '「班級總表」的選單' }).click();
   await page.getByRole('dialog').getByRole('button', { name: '複製' }).click();
-  await expect(page.getByText('還沒選資料夾')).toBeHidden();
+  await expect(page.getByText('尚未選擇資料夾')).toBeHidden();
   await page.waitForTimeout(800);
   await page.reload();
   await expect(page.getByText('已連線')).toBeVisible();
@@ -264,7 +264,7 @@ test('設計落地 G9：手機底部操作列四顆按鈕夠大、字不被截',
       return { t: el.textContent?.trim(), w: r.width, h: r.height, clipped: el.scrollWidth > el.clientWidth };
     }),
   );
-  expect(btns.map((b) => b.t)).toEqual(['頁面', '個別學生', '加入', '編輯屬性']);
+  expect(btns.map((b) => b.t)).toEqual(['頁面', '單一學生', '加入', '編輯屬性']);
   for (const b of btns) {
     expect(b.w, b.t).toBeGreaterThanOrEqual(44);
     expect(b.h, b.t).toBeGreaterThanOrEqual(44);

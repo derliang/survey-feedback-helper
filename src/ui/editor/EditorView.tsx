@@ -200,7 +200,7 @@ function SaveNote({ e, hasFolder }: { e: ES; hasFolder: boolean }) {
   return (
     <Notice
       kind="warn"
-      title={hasFolder ? '範本還沒存進資料夾' : '還沒選資料夾，範本只在這次使用'}
+      title={hasFolder ? '範本還沒存進資料夾' : '尚未選擇資料夾，請下載備份，避免關閉後遺失範本修改。'}
       actions={
         <>
           <button type="button" class="btn secondary small" onClick={downloadBackup}>
@@ -464,7 +464,7 @@ function Edit({ e }: { e: ES }) {
         </Sheet>
       )}
       {e.panel === 'student' && (
-        <Sheet title="個別學生版本" onClose={() => setPanel(null)} footer={<button type="button" class="btn grow" onClick={() => setPanel(null)}>完成</button>}>
+        <Sheet title="單一學生的專屬版面" onClose={() => setPanel(null)} footer={<button type="button" class="btn grow" onClick={() => setPanel(null)}>完成</button>}>
           <StudentPanel t={t0} students={students()} student={e.student} />
         </Sheet>
       )}
@@ -487,7 +487,7 @@ function Edit({ e }: { e: ES }) {
             頁面設定
           </button>
           <button type="button" class="btn secondary small" onClick={() => setPanel('student')}>
-            {e.student ? '個別學生版本（使用中）' : '個別學生版本'}
+            {e.student ? '單一學生的專屬版面（使用中）' : '單一學生的專屬版面'}
           </button>
           <Zoom e={e} pages={pageCount(t0)} />
           <span class="kbd-hint">Ctrl+Z 復原 · Delete 刪除 · ↑↓ 移動 · 雙擊文字直接改</span>
@@ -509,7 +509,7 @@ function Edit({ e }: { e: ES }) {
             {propsPanel}
           </aside>
         </div>
-        {wnotes.length > 0 && <p class="hint">Word 輸出時有 {wnotes.length} 處效果會改變（選取區塊可看說明）。</p>}
+        {wnotes.length > 0 && <p class="hint">部分版面效果在 Word 可能與預覽不同（共 {wnotes.length} 處），請選取提示的區塊查看差異；正式發給學生前，建議先輸出測試檔檢查。</p>}
         {sheets}
       </main>
     );
@@ -553,7 +553,7 @@ function Edit({ e }: { e: ES }) {
           頁面
         </button>
         <button type="button" class="btn secondary" onClick={() => setPanel('student')}>
-          個別學生
+          單一學生
         </button>
         {!e.student && (
           <button type="button" class="btn secondary" onClick={() => setPanel('add')}>

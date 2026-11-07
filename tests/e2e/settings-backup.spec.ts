@@ -33,14 +33,14 @@ test('三層設定：切層、標出來源、還原到上一層、不橫向捲�
 test('備份與還原：下載整包備份，選回後先看摘要、預設合併', async ({ page }) => {
   await openSettings(page);
   const card = page.getByTestId('backup-card');
-  await expect(card.getByText('備份檔含學生姓名')).toBeVisible();
-  const [download] = await Promise.all([page.waitForEvent('download'), card.getByRole('button', { name: /^(下載整包備份|儲存整包備份到檔案)$/ }).click()]);
+  await expect(card.getByText('備份可能含學生姓名與名單')).toBeVisible();
+  const [download] = await Promise.all([page.waitForEvent('download'), card.getByRole('button', { name: /^(下載全部設定與範本備份|儲存整包備份到檔案)$/ }).click()]);
   const path = await download.path();
   await card.locator('input[type=file]').setInputFiles(path);
   const panel = page.getByTestId('restore-panel');
   await expect(panel.getByText('還沒改任何資料')).toBeVisible();
-  await expect(panel.getByRole('radio', { name: /合併進目前的資料/ })).toHaveAttribute('aria-checked', 'true');
-  await panel.getByRole('radio', { name: /取代目前的資料/ }).click();
+  await expect(panel.getByRole('radio', { name: /只補上目前缺少的資料/ })).toHaveAttribute('aria-checked', 'true');
+  await panel.getByRole('radio', { name: /用備份內容取代目前資料/ }).click();
   await expect(panel.getByText('先自動下載')).toBeVisible();
   await noOverflow(page);
   await panel.getByRole('button', { name: '取消' }).click();
@@ -59,5 +59,5 @@ test('編輯器：加入面板有進階區塊，加入標題區與摘要數字�
   await expect(page.getByText('進階區塊')).toBeVisible();
   await page.getByRole('button', { name: '摘要數字列' }).click();
   await expect(page.getByText('顯示哪些數字')).toBeVisible();
-  await expect(page.getByText('全班名次在學生版與家長版會自動隱藏')).toBeVisible();
+  await expect(page.getByText('學生版與家長版不顯示全班名次')).toBeVisible();
 });

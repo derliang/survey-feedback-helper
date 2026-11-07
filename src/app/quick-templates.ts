@@ -62,7 +62,7 @@ export const QUICK_TEMPLATES: readonly QuickTemplate[] = [
       S('我願意再參加類似的活動'),
       P('最喜歡的部分與可以更好的地方'),
     ],
-    defaults: '量表堆疊橫條；開放題留言依主題分組。匿名，不放姓名題。',
+    defaults: '以圖表看各題量表分布；開放題留言逐則列出。匿名，不放姓名題。',
   },
   {
     id: 'parent',
