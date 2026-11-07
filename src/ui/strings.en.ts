@@ -56,7 +56,7 @@ const enCore: DeepPartial<Strings> = {
     theme: 'Appearance',
     themes: { auto: 'Follow system', light: 'Light', dark: 'Dark' },
     folderTitle: 'Folder',
-    forget: 'Forget this folder',
+    forget: 'Stop remembering this folder',
     language: 'Language',
     offlineTitle: 'Offline use',
     offlineBody:

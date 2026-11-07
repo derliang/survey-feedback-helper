@@ -21,9 +21,9 @@ const fg = (t) => `${t} ${tag('待核對')}`;
 // ---------- 共用文案 ----------
 // 說明卡四句（登入前卡、開啟確認卡共用，一字不差）
 const DISCLOSE = [
-  `存的是「${FNAME}」：裡面有你的設定、範本，以及<b>匯入的學生名單</b>。問卷作答結果不會上傳。`,
-  '<b>只存這一個檔</b>，放在你自己的 Google 雲端硬碟。本程式只能看到自己存的這個檔，看不到你雲端硬碟裡的其他檔案。',
-  '本程式沒有伺服器，<b>我們看不到這個檔</b>。',
+  `備份檔「${FNAME}」包含問卷設定、範本及已匯入的<b>學生名單</b>，不包含學生填答結果。`,
+  '<b>備份檔只此一份</b>；讀問卷時你另外選的試算表也會被讀取。',
+  '本程式沒有自營後端資料庫；設定檔直接存到你的 Google 雲端硬碟，<b>不會另外傳給網站開發者</b>。',
   '如果登入的是學校帳號，學校管理員可能看得到這個檔；名單要保密時，可不要開啟。',
 ];
 const disclose = (o = {}) => `<div class="qcard" style="padding:12px 14px;gap:8px"><b>${o.title || '會存什麼、存到哪裡'}</b><ul style="margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px;line-height:1.6">${DISCLOSE.map((x) => `<li class="small">${x}</li>`).join('')}</ul></div>`;
@@ -86,7 +86,7 @@ const pl = (H, cap, ...r) => P.push(K.mlong(H, cap, ...r));
 const loginSheet = (on, dis) => sheet('登入前先看一下', lead,
   `${chooserRow}${disclose({ title: '另外：要順便備份設定檔嗎？（選填）' })}${swt('登入後自動存到我的雲端硬碟', on ? '登入成功後會立刻存第一次。' : '預設關閉，不打開也能照常讀試算表。', on)}<p class="small muted" style="margin:0;line-height:1.6">${xlsxExit}</p>`,
   `<div style="display:flex;gap:8px">${btn('取消', 'secondary', { block: true })}${btn('前往 Google', 'primary', { block: true })}</div>`);
-pl(1180, 'Y1 登入前先看一下（加上雲端備份說明，開關預設關）｜取代 S0 的內容：原有「選帳號」示意圖收成一列（點開才展開，內容不變，見 S0），騰出空間放雲端備份說明與開關。說明四句白話：存什麼（設定、範本、匯入的學生名單，不含作答結果）、只存這一個檔、我們看不到、學校帳號管理員可能看得到。<b>開關預設關</b>：不打開，登入後只讀試算表，不會寫任何東西到雲端硬碟。「不想登入？」出口保留，並補一句「也不會備份到雲端」。Google 視窗字樣沿用 S0，仍標待核對。', phoneHome(), act(btn('下一步：準備資料', 'primary', { dis: true })), loginSheet(false));
+pl(1180, 'Y1 登入前先看一下（加上雲端備份說明，開關預設關）｜取代 S0 的內容：原有「選帳號」示意圖收成一列（點開才展開，內容不變，見 S0），騰出空間放雲端備份說明與開關。說明四句白話：存什麼（設定、範本、匯入的學生名單，不含作答結果）、備份檔只此一份、沒有自營後端資料庫、學校帳號管理員可能看得到。<b>開關預設關</b>：不打開，登入後只讀試算表，不會寫任何東西到雲端硬碟。「不想登入？」出口保留，並補一句「也不會備份到雲端」。Google 視窗字樣沿用 S0，仍標待核對。', phoneHome(), act(btn('下一步：準備資料', 'primary', { dis: true })), loginSheet(false));
 pl(1180, 'Y1b 同上，開關已打開｜老師主動打開開關後：副標改成「登入成功後會立刻存第一次」，按鈕仍是「前往 Google」。打開開關就是同意：同意只在這個畫面或 Y4（設定頁）做一次。這個偏好存在瀏覽器（介面偏好，硬規則 6 允許）；被清掉就回到預設關，是安全的方向。', phoneHome(), act(btn('下一步：準備資料', 'primary', { dis: true })), loginSheet(true));
 
 // 設定頁

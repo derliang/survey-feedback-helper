@@ -197,7 +197,7 @@ test('教學頁與示範資料：六個區段，載入示範資料進準備資�
   await expect(page.getByRole('heading', { name: '做法二：下載檔案再匯入' })).toBeVisible();
   await expect(page.getByText('Microsoft Excel (.xlsx)').first()).toBeVisible();
   await expect(page.getByRole('heading', { name: /五個技巧/ })).toBeVisible();
-  await expect(page.getByText(/還在準備中/)).toBeVisible();
+  await expect(page.getByText(/尚未提供可直接建立副本/)).toBeVisible();
   await noOverflow(page);
   await page.getByRole('button', { name: '載入示範資料' }).click();
   await expect(page.getByTestId('demo-tag')).toBeVisible();

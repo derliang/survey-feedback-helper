@@ -144,7 +144,7 @@ export function BlockProps(props: { t: EditorTemplate; b: EBlock; student: strin
       <h3 class="props-h">{b.label ?? KIND_NAMES[b.kind]}</h3>
       {student && (
         <p class="hint warn-text">
-          目前改的是「{student}」的個別版本，不會動到全班範本。
+          目前只修改「{student}」的個人版面；不會改動全班範本，也不影響其他學生。
         </p>
       )}
       {(b.kind === 'heading' || b.kind === 'text') && (
@@ -242,7 +242,7 @@ export function BlockProps(props: { t: EditorTemplate; b: EBlock; student: strin
                 );
               })}
             </div>
-            <p class="hint">全班名次在學生版與家長版會自動隱藏；統計沒有帶入的數字不會顯示。</p>
+            <p class="hint">學生版與家長版不顯示全班名次；某項統計若沒有資料，該數字也不顯示。</p>
           </div>
           <Seg label="每列幾格" value={b.perRow} opts={[[2, '2'], [3, '3'], [4, '4']]} onPick={(perRow) => patchBlock(b.id, { perRow })} />
           <Swatches label="底色" value={b.fill ?? ''} opts={STAT_FILLS} onPick={(fill) => patchBlock(b.id, { fill: fill || undefined })} />
@@ -260,7 +260,7 @@ export function BlockProps(props: { t: EditorTemplate; b: EBlock; student: strin
         </>
       )}
       {b.kind === 'compare' && <p class="hint">同學給的分與自己給的分並排，並標出落差。沒有自評資料時不會出現。</p>}
-      {b.kind === 'data' && b.dataKind !== 'chart' && <p class="hint">這一區的內容由統計結果自動填入，這裡可以移動、複製或設定條件。</p>}
+      {b.kind === 'data' && b.dataKind !== 'chart' && <p class="hint">這個區塊的數字或內容會依問卷統計自動帶入；可調整位置、複製或設定顯示條件，但不能在這裡直接修改原始分數。</p>}
       {b.kind === 'image' && !student && <ImageProps b={b} images={props.images} />}
       {b.kind === 'columns' && !student && (
         <Seg label="欄數" value={b.cols.length} opts={[[2, '2 欄'], [3, '3 欄'], [4, '4 欄']]} onPick={(n) => columnCount(b.id, n)} />
@@ -275,7 +275,7 @@ export function BlockProps(props: { t: EditorTemplate; b: EBlock; student: strin
       {student ? (
         <div class="field">
           <button type="button" class={`btn secondary${ov?.hidden ? ' on' : ''}`} onClick={() => overrideBlock(b.id, { ...ov, hidden: !ov?.hidden })}>
-            {ov?.hidden ? '這位學生：恢復顯示此區塊' : '這位學生：隱藏此區塊'}
+            {ov?.hidden ? '這位學生：恢復顯示此區塊' : '只在這位學生的版本隱藏此區塊'}
           </button>
         </div>
       ) : (
