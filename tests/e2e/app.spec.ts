@@ -74,7 +74,7 @@ test('名單對照、資料檢查完整流程', async ({ page }) => {
 
   await page.getByRole('tab', { name: /需要確認/ }).click();
   await expect(page.getByText('王小明')).toBeVisible();
-  await expect(page.getByText(/名單裡最接近：/)).toContainText('王大明');
+  await expect(page.getByText(/名單中可能對應的學生：/)).toContainText('王大明');
   await page.getByRole('button', { name: '是同一人' }).click();
   await expect(page.getByText('已處理')).toBeVisible();
   await noOverflow(page);
