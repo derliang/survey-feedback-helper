@@ -11,7 +11,7 @@ export const enMore: DeepPartial<Strings> = {
     s1: 'It saves the settings file (.sfh) with your settings, templates and imported student rosters. Survey responses are not uploaded.',
     s2: 'Only this one file, in your own Google Drive. This app can only see the file it saved itself.',
     s3: 'This app has no server, so we cannot see the file.',
-    s4: 'If you sign in with a school account, the school administrator may be able to see it. For a confidential roster, use a personal account or leave this off.',
+    s4: 'If you sign in with a school account, the school administrator may be able to see it. For a confidential roster, you can leave this off.',
     switchLabel: 'Save to my Drive automatically after sign-in',
     switchOff: 'Off by default. When on, every settings change is saved.',
     switchOn: 'It will save once right after you sign in.',
