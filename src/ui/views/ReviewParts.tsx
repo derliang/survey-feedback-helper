@@ -5,6 +5,7 @@ import { isTouchDevice } from '../../storage';
 import { downloadReview, updateReview, useApp } from '../../app/store';
 import { strings as S } from '../strings';
 import { Notice } from '../parts/parts';
+import { extra } from '../strings-extra';
 
 export interface CommentItem {
   key: string;
@@ -46,7 +47,7 @@ function CommentRow({ item, review }: { item: CommentItem; review: Review }) {
       ) : (
         <>
           <p class={st === 'hide' ? 'cm-text hidden' : 'cm-text'}>{shown}</p>
-          {st === 'rewrite' && <p class="hint">原文：{item.text}</p>}
+          {st === 'rewrite' && <p class="hint">{extra().review.original}{item.text}</p>}
           <div class="btn-row">
             <button class="btn secondary small" type="button" disabled={st === 'adopt'} onClick={() => updateReview((r) => setComment(r, item.key, 'adopt'))}>
               {R.adopt}

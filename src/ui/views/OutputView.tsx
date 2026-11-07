@@ -26,6 +26,7 @@ import { PRINT, pairedBarsSvg } from '../chart-svg';
 import { svgToPng } from '../chart-png';
 import { strings as S } from '../strings';
 import { ActBar, Icon, Notice, Sheet } from '../parts/parts';
+import { extra } from '../strings-extra';
 
 type Fmt = 'xlsx' | 'docx' | 'pdf';
 
@@ -291,7 +292,7 @@ export function OutputView() {
                 title={S.output.warnTitle}
                 actions={
                   <button class="btn secondary small" type="button" onClick={() => { setConfirmed(false); setPreviewOpen(true); }}>
-                    {previewed ? S.output.previewDone : `先預覽${AUDIENCE_NAMES[audience]}`}
+                    {previewed ? S.output.previewDone : extra().output.previewFirst(AUDIENCE_NAMES[audience])}
                   </button>
                 }
               >

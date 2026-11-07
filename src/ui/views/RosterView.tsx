@@ -6,6 +6,7 @@ import { decodeCsv, guessDelimiter } from '../../app/load';
 import { go, saveSurvey, setSession, useApp } from '../../app/store';
 import { strings as S } from '../strings';
 import { ActBar, Notice } from '../parts/parts';
+import { extra } from '../strings-extra';
 
 async function rowsFromFile(file: File): Promise<RosterRow[] | null> {
   const bytes = new Uint8Array(await file.arrayBuffer());
@@ -155,7 +156,7 @@ export function RosterView() {
                     </th>
                   ))}
                   <th scope="col" class="sr">
-                    狀態
+                    {extra().roster.status}
                   </th>
                 </tr>
               </thead>
@@ -163,13 +164,13 @@ export function RosterView() {
                 {rows.map((r, i) => (
                   <tr key={i} class={flagged.has(i) ? 'flag' : ''}>
                     <td>
-                      <input class={`cell${s.rosterMixed ? '' : ' faint'}`} aria-label={`第 ${i + 1} 列班級`} value={r.class} onInput={(e) => edit(i, { class: e.currentTarget.value })} />
+                      <input class={`cell${s.rosterMixed ? '' : ' faint'}`} aria-label={extra().roster.rowClass(i + 1)} value={r.class} onInput={(e) => edit(i, { class: e.currentTarget.value })} />
                     </td>
                     <td>
-                      <input class="cell narrow" inputMode="numeric" aria-label={`第 ${i + 1} 列座號`} value={r.seat} onInput={(e) => edit(i, { seat: e.currentTarget.value })} />
+                      <input class="cell narrow" inputMode="numeric" aria-label={extra().roster.rowSeat(i + 1)} value={r.seat} onInput={(e) => edit(i, { seat: e.currentTarget.value })} />
                     </td>
                     <td>
-                      <input class="cell" aria-label={`第 ${i + 1} 列姓名`} value={r.name} onInput={(e) => edit(i, { name: e.currentTarget.value })} />
+                      <input class="cell" aria-label={extra().roster.rowName(i + 1)} value={r.name} onInput={(e) => edit(i, { name: e.currentTarget.value })} />
                     </td>
                     <td>{flagged.has(i) && <span class="tag warn">{flagged.get(i)}</span>}</td>
                   </tr>

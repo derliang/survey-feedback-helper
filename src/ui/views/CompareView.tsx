@@ -5,10 +5,11 @@ import { go, set, setSession, useApp } from '../../app/store';
 import { type PersonMatch, type Student, cellText } from '../../core';
 import { strings as S } from '../strings';
 import { ActBar, Notice } from '../parts/parts';
+import { extra } from '../strings-extra';
 
 type Tab = 'missing' | 'confirm' | 'duplicate';
 
-const label = (st: Student) => `${st.class ? `${st.class} ` : ''}${st.seat} 號 ${st.name}`;
+const label = (st: Student) => extra().compare.label(st.class, st.seat, st.name);
 
 export function CompareView() {
   const app = useApp();
@@ -32,7 +33,7 @@ export function CompareView() {
   }
 
   const refs = personRefs(s.table, s.cols, 'respondent');
-  const nameOf = (id: number | string) => cellText(refs[id as number]?.name) || '（沒填姓名）';
+  const nameOf = (id: number | string) => cellText(refs[id as number]?.name) || extra().compare.noName;
   const confirmItems = [...c.unknown, ...c.seatMismatches, ...c.ambiguous.map((id) => ({ id, match: { status: 'ambiguous', student: null, suggestion: null } as PersonMatch }))];
   const accepted = Object.entries(s.resolutions).filter(([, v]) => v === 'accept').map(([k]) => Number(k));
   const filled = students.length - c.missing.length;
@@ -61,7 +62,7 @@ export function CompareView() {
       await navigator.clipboard.writeText(text);
       set({ toast: S.compare.copied });
     } catch {
-      set({ toast: '這個瀏覽器不讓程式寫入剪貼簿，請手動選取名單複製。' });
+      set({ toast: extra().compare.copyFail });
     }
   };
 
@@ -163,12 +164,12 @@ export function CompareView() {
                   <strong>
                     {label(d.student)} · {S.compare.dupLine(d.ids.length)}
                   </strong>
-                  <span class="hint">第 {d.ids.map((i) => Number(i) + 2).join('、')} 列</span>
+                  <span class="hint">{extra().check.rows(d.ids.map((i) => Number(i) + 2).join(extra().check.sep))}</span>
                 </li>
               ))}
             </ul>
           )}
-          <p class="hint">要保留哪一份，到「資料檢查」處理。</p>
+          <p class="hint">{extra().compare.keepWhich}</p>
         </section>
       )}
 

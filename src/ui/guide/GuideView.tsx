@@ -1,6 +1,8 @@
 import { useState } from 'preact/hooks';
 import { TEMPLATE_FORM_URL } from '../../app/guide-config';
-import { QUICK_TEMPLATES, questionHint, questionsAsText } from '../../app/quick-templates';
+import { QUICK_TEMPLATES, questionsAsText } from '../../app/quick-templates';
+import { localizeTemplate, questionHintL, questionsAsTextL } from '../../app/quick-templates.en';
+import { currentLang } from '../locale';
 import { go, openDemoTable, set, useApp } from '../../app/store';
 import { strings as S } from '../strings';
 import { AccountChooser, Icon, Notice } from '../parts/parts';
@@ -146,9 +148,11 @@ function Templates() {
   const T = S.tpl;
   const [sel, setSel] = useState(QUICK_TEMPLATES[0]?.id ?? '');
   const [copyMsg, setCopyMsg] = useState<{ kind: 'ok' | 'warn'; text: string } | null>(null);
-  const tpl = QUICK_TEMPLATES.find((t) => t.id === sel) ?? QUICK_TEMPLATES[0];
+  const lang = currentLang();
+  const tplList = QUICK_TEMPLATES.map((t) => localizeTemplate(t, lang));
+  const tpl = tplList.find((t) => t.id === sel) ?? tplList[0];
   if (!tpl) return null;
-  const text = questionsAsText(tpl);
+  const text = lang === 'en' ? questionsAsTextL(tpl, 'en') : questionsAsText(tpl);
 
   const copy = async () => {
     try {
@@ -169,7 +173,7 @@ function Templates() {
       <p class="lead">{T.lead}</p>
       <div class="tpl-split">
         <div class="tpl-grid" role="radiogroup" aria-label={T.pickLabel}>
-          {QUICK_TEMPLATES.map((t) => (
+          {tplList.map((t) => (
             <button
               key={t.id}
               type="button"
@@ -200,7 +204,7 @@ function Templates() {
             {tpl.questions.map((q) => (
               <li key={q.text}>
                 {q.text}
-                <span class="hint"> — {questionHint(q, tpl.scale)}</span> <span class="todo-check">（{T.todoCheck}）</span>
+                <span class="hint"> — {questionHintL(q, tpl.scale, lang)}</span> <span class="todo-check">（{T.todoCheck}）</span>
               </li>
             ))}
           </ol>

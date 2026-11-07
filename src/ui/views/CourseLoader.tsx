@@ -1,6 +1,7 @@
 // 選課分組志願的畫面：進入時才動態載入，首頁 bundle 不受影響（硬規則 9）。
 import type { ComponentType } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
+import { extra } from '../strings-extra';
 
 export function CourseRoute({ part }: { part: 'stats' | 'output' }) {
   const [View, setView] = useState<ComponentType | null>(null);
@@ -15,7 +16,7 @@ export function CourseRoute({ part }: { part: 'stats' | 'output' }) {
   if (failed)
     return (
       <main class="page" id="main">
-        <p role="alert">畫面載入失敗，請檢查網路後重新整理。</p>
+        <p role="alert">{extra().loadFail.view}</p>
       </main>
     );
   if (!View) return <main class="page" id="main" aria-busy="true" />;
