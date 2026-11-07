@@ -2,6 +2,7 @@ import { type CheckReport, type RosterComparison, type Student, compareRoster, r
 import { buildCheckRecords, countToConfirm, mappingProblems, personRefs } from './columns';
 import { rosterFromRows } from './roster-input';
 import type { Session } from './store';
+import { extra } from '../ui/strings-extra';
 
 export type ItemState = 'done' | 'todo' | 'attention' | 'locked' | 'optional';
 
@@ -80,7 +81,8 @@ export function mappingReady(s: Session): boolean {
 export function prepItems(s: Session): PrepItem[] {
   const mappingOk = mappingReady(s);
   const front = s.kindConfirmed && mappingOk;
-  const locked = '先完成欄位對應。';
+  const X = extra().progress;
+  const locked = X.locked;
   const toConfirm = countToConfirm(s.cols);
   const problems = mappingProblems(s.kind, s.cols);
   const students = rosterStudents(s);
@@ -90,34 +92,34 @@ export function prepItems(s: Session): PrepItem[] {
     {
       key: 'type',
       state: s.kindConfirmed ? 'done' : 'todo',
-      note: s.kindConfirmed ? '已確認' : '系統已智慧判斷，請你確認',
+      note: s.kindConfirmed ? X.kindDone : X.kindTodo,
     },
     {
       key: 'mapping',
       state: mappingOk ? 'done' : !s.kindConfirmed ? 'locked' : 'attention',
       note: !s.kindConfirmed
-        ? '先確認問卷類型。'
+        ? X.mappingKind
         : problems.length > 0
           ? problems[0]!
           : mappingOk
-            ? `${s.cols.length} 欄已對應`
-            : `${s.cols.length} 欄中 ${toConfirm} 欄請確認`,
+            ? X.mappingOk(s.cols.length)
+            : X.mappingSome(s.cols.length, toConfirm),
     },
     {
       key: 'roster',
       state: !front ? 'locked' : rosterDone ? 'done' : 'optional',
       note: !front
-        ? `${locked}可跳過：不比對名單也能統計`
+        ? `${locked}${X.rosterLocked}`
         : students.length > 0
-          ? `${students.length} 人${rosterToConfirm(s) > 0 ? `，${rosterToConfirm(s)} 筆要確認` : ''}`
+          ? X.rosterCount(students.length, rosterToConfirm(s))
           : s.rosterSkipped
-            ? '已跳過'
-            : '選用：貼上或開啟名單，就能知道誰沒填',
+            ? X.rosterSkipped
+            : X.rosterOptional,
     },
     {
       key: 'check',
       state: !front ? 'locked' : pending === 0 ? 'done' : 'attention',
-      note: !front ? `${locked}重複、空白、同一人書名多種寫法` : pending === 0 ? '沒有待處理的項目' : `${pending} 類待處理`,
+      note: !front ? `${locked}${X.checkLocked}` : pending === 0 ? X.checkNone : X.checkPending(pending),
     },
   ];
 }

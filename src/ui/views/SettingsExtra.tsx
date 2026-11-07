@@ -9,13 +9,14 @@ import { type Layer, type ReportSettings, resolveSettings, settingSources } from
 import type { ReportVersion } from '../../editor/types';
 import { applyEditorData, es, layers, load, setLayerValue, useEditor } from '../editor/state';
 import { Notice } from '../parts/parts';
-import { backupStrings as B, defaultsStrings as D } from '../strings-backup';
+import { backupText, defaultsText } from '../strings-backup';
 
 type Kind = 'feedback' | 'opinion' | 'vote';
 const KINDS: Kind[] = ['feedback', 'opinion', 'vote'];
 const VERSIONS: ReportVersion[] = ['teacher', 'student', 'parent'];
 
 export function DefaultsCard() {
+  const D = defaultsText();
   const st = useEditor();
   const [layer, setLayer] = useState<Layer>('global');
   const [kind, setKind] = useState<Kind>('feedback');
@@ -138,6 +139,7 @@ interface Parsed {
 }
 
 export function BackupCard() {
+  const B = backupText();
   useEffect(() => void load(), []);
   const [parsed, setParsed] = useState<Parsed | null>(null);
   const [mode, setMode] = useState<'merge' | 'replace'>('merge');

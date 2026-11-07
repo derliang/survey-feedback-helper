@@ -1,4 +1,6 @@
 // 預設值（三層設定）與備份還原畫面的文字；依設計第六輪 A1～A3。
+import { currentLang } from './locale';
+import { backupStringsEn, defaultsStringsEn } from './strings-backup.en';
 export const defaultsStrings = {
   title: '預設值',
   intro: '輸出時用的設定分三層，後面的層蓋過前面的：全域預設 → 問卷類型 → 這次輸出。',
@@ -51,3 +53,7 @@ export const backupStrings = {
   doneReplace: '已還原，並先下載了目前資料的備份。',
   bad: '這不是備份檔，或檔案壞了。',
 } as const;
+
+// 依目前介面語言取字串（呼叫時才取值）。
+export const defaultsText = (): typeof defaultsStrings => (currentLang() === 'en' ? (defaultsStringsEn as unknown as typeof defaultsStrings) : defaultsStrings);
+export const backupText = (): typeof backupStrings => (currentLang() === 'en' ? (backupStringsEn as unknown as typeof backupStrings) : backupStrings);

@@ -15,6 +15,7 @@ import { prefColumns } from './columns';
 import { newSeed } from './analysis';
 import { rosterComparison } from './progress';
 import type { Session } from './store';
+import { extra } from '../ui/strings-extra';
 
 /** 名額頁與結果的狀態；只屬於目前這份問卷，存在使用者選的資料夾（不進 repo）。 */
 export interface CourseState {
@@ -226,10 +227,10 @@ export function courseIssues(s: Session, c: CourseState): CourseIssues {
 
 /** 能不能按「開始分配」，不能的話一句原因。 */
 export function cannotRun(i: CourseIssues): string | null {
-  if (i.noPrefCols) return '還沒指定哪些欄位是志願。';
-  if (i.missing.length > 0) return `還有 ${i.missing.length} 個課程沒填名額。`;
-  if (i.allZero) return '名額都是 0，請先填名額。';
-  if (i.minOverCap.length > 0) return '最少開班人數不能大於名額。';
+  if (i.noPrefCols) return extra().course.noPref;
+  if (i.missing.length > 0) return extra().course.missing(i.missing.length);
+  if (i.allZero) return extra().course.allZero;
+  if (i.minOverCap.length > 0) return extra().course.minOver;
   return null;
 }
 

@@ -32,6 +32,7 @@ import {
   TEMPLATE_ID_PREFIX,
   templateAsSurvey,
 } from "./quick-templates";
+import { templateAsSurveyEn } from "./quick-templates.en";
 import { type StatsOpts, defaultStatsOpts } from "./analysis";
 import {
   type Review,
@@ -64,6 +65,7 @@ import {
   parseCourse,
   serializeCourse,
 } from "./course-app";
+import { extra } from "../ui/strings-extra";
 
 export type Route =
   | "home"
@@ -261,7 +263,7 @@ export async function persist(data: FolderData): Promise<void> {
       await f.store.write(SETTINGS_FILE, serializeFolderData(data));
       set({ dirty: false });
     } catch {
-      set({ dirty: true, toast: "寫入資料夾失敗，請改按「下載設定檔」保存。" });
+      set({ dirty: true, toast: extra().store.folderWriteFail });
     }
   } else {
     set({ dirty: true });
@@ -330,7 +332,7 @@ export async function choosePickFolder(): Promise<void> {
     }
     await persist(getState().data);
   } catch {
-    set({ toast: "無法使用這個資料夾，請換一個資料夾試試。" });
+    set({ toast: extra().store.folderUnusable });
   }
 }
 
@@ -353,7 +355,7 @@ export async function importSettings(
   try {
     const incoming = parseFolderData(await file.text());
     await persist(mergeFolderData(getState().data, incoming));
-    set({ toast: `已載入設定檔，共 ${incoming.surveys.length} 份問卷設定。` });
+    set({ toast: extra().store.configLoaded(incoming.surveys.length) });
   } catch {
     set({ error: "settings" });
   }
@@ -424,7 +426,7 @@ function startSession(
     : undefined;
   if (!hit) {
     // 沒有之前存過的：看看是不是用快速範本的題目建的表單（標題相符就自動帶入）
-    const tpls = QUICK_TEMPLATES.map(templateAsSurvey);
+    const tpls = [...QUICK_TEMPLATES.map(templateAsSurvey), ...QUICK_TEMPLATES.map(templateAsSurveyEn)];
     hit = recognizeConfig(
       table.headers,
       tpls.map((t) => ({
@@ -496,7 +498,7 @@ export function acceptRecognition(): void {
     name: saved.name,
     kind: saved.kind,
     kindConfirmed: true,
-    kindReason: "沿用之前存的設定。",
+    kindReason: extra().store.kindReasonSaved,
     cols,
     scale: saved.scale,
     mappingConfirmed: true,
@@ -592,7 +594,7 @@ export async function loadReview(): Promise<void> {
       const text = await folder.store.read(reviewFileName(session.surveyId));
       if (text !== null) loaded = parseReview(text, session.surveyId);
     } catch {
-      set({ toast: "審稿進度檔讀不了，已從空白開始。" });
+      set({ toast: extra().store.reviewUnreadable });
     }
   }
   set({ review: loaded, reviewUnsaved: folder.state !== "ready" });
@@ -614,7 +616,7 @@ async function writeReview(): Promise<void> {
     );
     set({ reviewUnsaved: false });
   } catch {
-    set({ reviewUnsaved: true, toast: "審稿進度寫入資料夾失敗。" });
+    set({ reviewUnsaved: true, toast: extra().store.reviewWriteFail });
   }
 }
 
@@ -652,7 +654,7 @@ export async function loadCourse(): Promise<void> {
       const text = await folder.store.read(courseFileName(session.surveyId));
       if (text !== null) setSession({ course: parseCourse(text) });
     } catch {
-      set({ toast: "選課分組的存檔讀不了，已從空白開始。" });
+      set({ toast: extra().store.courseUnreadable });
     }
   }
   set({ courseUnsaved: getState().folder.state !== "ready" });
@@ -671,7 +673,7 @@ async function writeCourse(): Promise<void> {
     await folder.store.write(courseFileName(session.surveyId), serializeCourse(session.course));
     set({ courseUnsaved: false });
   } catch {
-    set({ courseUnsaved: true, toast: "選課分組結果寫入資料夾失敗。" });
+    set({ courseUnsaved: true, toast: extra().store.courseWriteFail });
   }
 }
 

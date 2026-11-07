@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { strings } from './strings';
 import { en } from './strings.en';
+import { backupStrings, defaultsStrings } from './strings-backup';
+import { backupStringsEn, defaultsStringsEn } from './strings-backup.en';
+import { extraEn, extraZh } from './strings-extra';
+import { QUICK_TEMPLATES, templateAsSurvey } from '../app/quick-templates';
+import { TEMPLATES_EN, localizeTemplate, questionsAsTextL, templateAsSurveyEn, templateHeadersEn } from '../app/quick-templates.en';
+import { recognizeConfig } from '../core';
 
 // 英文介面覆蓋率：繁中有的字串，英文都要有，除了下面「尚未翻譯」的整段（退回繁體中文）。
 // 2026-11-04 起 google／guide／tpl 也已補上；其中 Google 英文介面名稱尚未走過真實介面，句尾標 (to be verified)（硬規則 10）。
@@ -56,5 +62,68 @@ describe('英文介面字串', () => {
     };
     walk(en, '');
     expect(bad).toEqual([]);
+  });
+});
+
+const CJK = /[一-鿿]/;
+function shape(v: unknown): unknown {
+  if (typeof v === 'function') return 'fn';
+  if (typeof v === 'string') return 's';
+  if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, shape(x)]));
+  return typeof v;
+}
+function cjkPaths(v: unknown, path: string, out: string[]): void {
+  if (typeof v === 'string') {
+    if (CJK.test(v)) out.push(`${path}: ${v.slice(0, 40)}`);
+  } else if (typeof v === 'function') {
+    // 函式型字串用固定參數產一次文字，確認也沒有中文
+    try {
+      const r = (v as (...a: unknown[]) => unknown)('A', 2, 3);
+      if (typeof r === 'string' && CJK.test(r)) out.push(`${path}()`);
+    } catch {
+      /* 參數型別不同就略過 */
+    }
+  } else if (v && typeof v === 'object') for (const [k, x] of Object.entries(v)) cjkPaths(x, `${path}.${k}`, out);
+}
+
+describe('英文：備份與三層設定、寫死提示、快速範本', () => {
+  it('strings-backup 的英文鍵與繁中完全一致、沒有中文', () => {
+    expect(shape(defaultsStringsEn)).toEqual(shape(defaultsStrings));
+    expect(shape(backupStringsEn)).toEqual(shape(backupStrings));
+    const bad: string[] = [];
+    cjkPaths(defaultsStringsEn, 'defaults', bad);
+    cjkPaths(backupStringsEn, 'backup', bad);
+    expect(bad).toEqual([]);
+    expect(backupStringsEn.summary({ surveys: 1, rosters: 2, templates: 3, overrides: 4, settingLayers: 5, images: 6 })).toContain('6 image');
+  });
+  it('strings-extra（原寫死在 tsx／store 的提示）英文鍵與繁中一致、沒有中文', () => {
+    expect(shape(extraEn)).toEqual(shape(extraZh));
+    const bad: string[] = [];
+    cjkPaths(extraEn, 'extra', bad);
+    expect(bad).toEqual([]);
+    expect(extraZh.check.rows('3、4')).toBe('第 3、4 列');
+    expect(extraEn.check.rows('3, 4')).toBe('Row 3, 4');
+  });
+  it('每份快速範本都有英文版，題數與選項數與繁中一致、沒有中文', () => {
+    expect(Object.keys(TEMPLATES_EN).sort()).toEqual(QUICK_TEMPLATES.map((t) => t.id).sort());
+    for (const t of QUICK_TEMPLATES) {
+      const e = TEMPLATES_EN[t.id]!;
+      expect(e.questions.length).toBe(t.questions.length);
+      t.questions.forEach((q, i) => expect(e.questions[i]!.options?.length).toBe(q.options?.length));
+      const loc = localizeTemplate(t, 'en');
+      expect(loc.name).toBe(e.name);
+      const bad: string[] = [];
+      cjkPaths(loc, t.id, bad);
+      expect(bad).toEqual([]);
+      expect(questionsAsTextL(loc, 'en')).not.toMatch(CJK);
+    }
+  });
+  it('繁中版不受影響，英文表單匯出檔的標題也能認出是哪份範本', () => {
+    expect(localizeTemplate(QUICK_TEMPLATES[0]!, 'zh')).toBe(QUICK_TEMPLATES[0]);
+    const cfgs = [...QUICK_TEMPLATES.map(templateAsSurvey), ...QUICK_TEMPLATES.map(templateAsSurveyEn)].map((t) => ({ id: t.id, name: t.name, headers: t.headers, mapping: t.mapping }));
+    for (const t of QUICK_TEMPLATES) {
+      const hit = recognizeConfig(templateHeadersEn(t), cfgs);
+      expect(hit?.config.id).toBe(`tpl-${t.id}`);
+    }
   });
 });
