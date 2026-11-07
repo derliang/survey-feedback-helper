@@ -10,7 +10,7 @@ export const defaultsStringsEn: Widen<typeof defaultsStrings> = {
   sources: { default: 'Built-in default', global: 'Global defaults', kind: 'Survey-type template', run: 'This output' },
   kinds: { feedback: 'Presentation feedback', opinion: 'Opinion survey', vote: 'Election' },
   runNote: 'This layer only applies to this one output and is not saved.',
-  revert: 'Revert to the previous layer’s value',
+  revert: 'Change back to the previous layer’s value',
   current: 'Current value',
   fields: {
     school: 'School name',
@@ -31,14 +31,14 @@ export const defaultsStringsEn: Widen<typeof defaultsStrings> = {
 
 export const backupStringsEn: Widen<typeof backupStrings> = {
   title: 'Backup and restore',
-  hasTitle: 'The backup contains: ',
+  hasTitle: 'The backup file contains: ',
   has: 'survey settings, roster matches, review progress, settings of every layer, my templates, individual student versions, images.',
-  notTitle: 'The backup does not contain: ',
+  notTitle: 'The backup file does not contain: ',
   not: 'built-in templates and the original Excel files with the answers; back up the original survey separately if you need to keep it.',
   warn: 'The backup may contain student names and rosters. Keep, send and delete it according to your school’s privacy rules, and do not upload it to unapproved public places.',
   make: 'Download all settings and templates backup',
   makeTouch: 'Save full backup to a file',
-  pick: 'Choose a backup file to restore',
+  pick: 'Import a backup file and choose how to restore it',
   summaryTitle: 'What is in this backup (nothing has been changed yet)',
   summary: (b) => `${b.surveys} survey setting(s), ${b.rosters} roster(s), ${b.templates} of my templates, ${b.overrides} individual student version(s), ${b.settingLayers} setting field(s), ${b.images} image(s).`,
   migrated: 'This is an old (version 1) backup. It will be converted to the new format when restored, and the converted data may not open in older versions of the app. Keep the original backup file first.',
@@ -52,5 +52,5 @@ export const backupStringsEn: Widen<typeof backupStrings> = {
   cancel: 'Cancel',
   done: 'Restored.',
   doneReplace: 'Restored, and a backup of the previous data was downloaded first.',
-  bad: 'This is not a backup file, or the file is damaged.',
+  bad: 'The backup file cannot be read. Check that it was made by this app, or download the backup again.',
 };

@@ -135,7 +135,7 @@ function Block({ b, c }: { b: EBlock; c: Ctx }) {
           {shown.map((k) => (
             <div key={k} class="eb-stat" style={{ background: b.fill ?? 'var(--doc-blue-soft)', padding: px(8, c.s) }}>
               <strong style={{ fontSize: px(20, c.s) }}>{c.vars[STAT_KEYS[k].varName] || '—'}</strong>
-              <span style={{ fontSize: px(10, c.s) }}>{STAT_KEYS[k].label}{k === 'rank' ? '（學生版隱藏）' : ''}</span>
+              <span style={{ fontSize: px(10, c.s) }}>{STAT_KEYS[k].label}{k === 'rank' ? '（學生版不顯示）' : ''}</span>
             </div>
           ))}
         </div>

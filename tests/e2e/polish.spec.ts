@@ -56,7 +56,7 @@ test('PWA：有 manifest，安裝 Service Worker 後離線重新整理仍能開'
   await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller), { timeout: 15_000 }).toBe(true);
   await context.setOffline(true);
   await page.reload();
-  await expect(page.getByRole('heading', { name: '今天要處理哪一份問卷？' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '選擇要整理的問卷' })).toBeVisible();
   // 離線也能進需要動態載入的頁面
   await page.getByRole('button', { name: '用快速範本' }).click();
   await expect(page.getByRole('heading', { name: '快速範本', level: 1 })).toBeVisible();
@@ -80,7 +80,7 @@ test('PWA 快取只放程式本身，不放問卷資料', async ({ page }) => {
 test('鍵盤：Tab 先到「跳到主要內容」；面板內 Tab 循環、Esc 關閉並還原焦點', async ({ page }, info) => {
   test.skip(info.project.name !== 'desktop', '鍵盤操作以桌機驗證');
   await page.goto('./');
-  await expect(page.getByRole('heading', { name: '今天要處理哪一份問卷？' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '選擇要整理的問卷' })).toBeVisible();
   await page.keyboard.press('Tab');
   await expect(page.getByRole('link', { name: '跳到主要內容' })).toBeFocused();
   const open = page.locator('.folder-bar').getByRole('button', { name: /選擇資料夾/ });
@@ -116,7 +116,7 @@ test('動態：彈出面板有進場動畫（≤220ms），減少動態時關閉
 test('圖表另存圖片（JPG）', async ({ page }) => {
   await statsPerson(page);
   await page.locator('.stepper').getByRole('button', { name: /統計/ }).click();
-  const [dl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: '另存圖片（JPG）' }).first().click()]);
+  const [dl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: '下載這張圖表（JPG）' }).first().click()]);
   expect(dl.suggestedFilename()).toMatch(/\.jpg$/);
   const stream = await dl.createReadStream();
   const chunks: Buffer[] = [];
@@ -208,7 +208,7 @@ test('教學頁與示範資料：六個區段，載入示範資料進準備資�
   await page.getByRole('button', { name: '重新開始' }).click();
   await page.getByRole('button', { name: '確定重新開始' }).click();
   await expect(page.getByTestId('demo-tag')).toHaveCount(0);
-  await expect(page.getByText('選好資料夾後，處理過的問卷會出現在這裡。')).toBeVisible();
+  await expect(page.getByText('目前沒有選擇設定資料夾；選好或重新授權後，才能查看先前儲存的問卷設定。')).toBeVisible();
 });
 
 test('英文介面：切換後主要畫面變英文，沒翻到的字退回中文，換回來恢復', async ({ page }) => {
@@ -219,11 +219,11 @@ test('英文介面：切換後主要畫面變英文，沒翻到的字退回中�
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   await expect(page.getByRole('radio', { name: 'Dark' })).toBeVisible();
   await page.getByRole('button', { name: 'Back', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Which survey are we working on today?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Choose the survey to work on' })).toBeVisible();
   await noOverflow(page);
   // 重新整理後仍是英文
   await page.reload();
-  await expect(page.getByRole('heading', { name: 'Which survey are we working on today?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Choose the survey to work on' })).toBeVisible();
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await page.getByRole('radio', { name: '繁體中文' }).click();
   await expect(page.getByRole('heading', { name: '設定', level: 1 })).toBeVisible();

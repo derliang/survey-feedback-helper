@@ -22,14 +22,14 @@ async function enter(page: Page, item: string) {
 
 async function confirmType(page: Page) {
   await enter(page, '問卷類型');
-  await expect(page.getByText('這是哪一種問卷？')).toBeVisible();
+  await expect(page.getByText('這份問卷要怎麼統計？')).toBeVisible();
   await expect(page.getByRole('radio', { name: /報告回饋/ })).toHaveAttribute('aria-checked', 'true');
   await page.getByRole('button', { name: '確認，下一步：欄位對應' }).click();
 }
 
 async function confirmMapping(page: Page, label = '台風') {
   await expect(page.getByRole('heading', { name: '欄位對應' })).toBeVisible();
-  await expect(page.getByText(/已智慧判斷，\d 欄請確認/)).toBeVisible();
+  await expect(page.getByText(/系統已初步判斷欄位用途，還有 \d 欄需要確認/)).toBeVisible();
   // 換一欄的類型（開底部／側邊面板）
   await page.getByRole('button', { name: new RegExp(`^${label}：`) }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
@@ -75,7 +75,7 @@ test('名單對照、資料檢查完整流程', async ({ page }) => {
   await page.getByRole('tab', { name: /需要確認/ }).click();
   await expect(page.getByText('王小明')).toBeVisible();
   await expect(page.getByText(/名單中可能對應的學生：/)).toContainText('王大明');
-  await page.getByRole('button', { name: '是同一人' }).click();
+  await page.getByRole('button', { name: '確認為同一位學生' }).click();
   await expect(page.getByText('已處理')).toBeVisible();
   await noOverflow(page);
 
@@ -84,9 +84,9 @@ test('名單對照、資料檢查完整流程', async ({ page }) => {
   const pending = page.getByTestId('check-pending');
   await expect(pending).not.toHaveText('0');
   await page.getByRole('button', { name: /^重複填答/ }).click();
-  await page.getByRole('button', { name: '保留最後一份' }).click();
+  await page.getByRole('button', { name: '採用最後提交的回覆' }).click();
   await expect(page.getByText('已排除 1 筆回覆')).toBeVisible();
-  await page.getByRole('button', { name: /^書名多種寫法/ }).click();
+  await page.getByRole('button', { name: /^同一本書有不同名稱/ }).click();
   await page.getByRole('button', { name: /^合併成/ }).click();
   await noOverflow(page);
   // 欄位對應完成後可前往統計
@@ -123,9 +123,9 @@ test('作答資料不寫入瀏覽器儲存（硬規則 6）', async ({ page }) =
 test('錯誤：不支援的檔案與空檔案都有說明', async ({ page }) => {
   await page.goto('./');
   await page.getByTestId('file-input').setInputFiles({ name: '成績.pdf', mimeType: 'application/pdf', buffer: Buffer.from('x') });
-  await expect(page.getByTestId('error')).toContainText('讀不了');
+  await expect(page.getByTestId('error')).toContainText('不支援這個檔案格式');
   await page.getByTestId('file-input').setInputFiles({ name: 'a.csv', mimeType: 'text/csv', buffer: Buffer.from('標題\n') });
-  await expect(page.getByTestId('error')).toContainText('沒有資料');
+  await expect(page.getByTestId('error')).toContainText('沒有可用的問卷回覆');
 });
 
 test('重新開始會先確認，設定頁有隱私三句與忘記資料夾', async ({ page }) => {
@@ -139,7 +139,7 @@ test('重新開始會先確認，設定頁有隱私三句與忘記資料夾', as
   await expect(page.getByText('放在雲端的檔案由該服務處理。')).toBeVisible();
   await page.getByRole('button', { name: '重新開始' }).click();
   await page.getByRole('button', { name: '確定重新開始' }).click();
-  await expect(page.getByRole('heading', { name: '今天要處理哪一份問卷？' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '選擇要整理的問卷' })).toBeVisible();
 });
 
 test('不支援資料夾的瀏覽器：退回下載與上傳，認得讀過', async ({ page }) => {
@@ -149,7 +149,7 @@ test('不支援資料夾的瀏覽器：退回下載與上傳，認得讀過', as
   });
   await page.goto('./');
   await expect(page.getByTestId('unsupported-line')).toBeVisible();
-  await expect(page.getByTestId('unsupported-line')).toContainText(/無法自動存到資料夾|儲存到檔案/);
+  await expect(page.getByTestId('unsupported-line')).toContainText(/不支援自動儲存到資料夾|儲存到檔案/);
   await page.getByTestId('file-input').setInputFiles(surveyFile());
   await confirmType(page);
   await confirmMapping(page);
@@ -223,10 +223,10 @@ test('資料夾：選擇、重開後仍記得（以瀏覽器內建資料夾模�
   });
   await page.goto('./');
   await page.getByRole('button', { name: '選擇資料夾' }).click();
-  await expect(page.getByRole('dialog')).toContainText('選一個資料夾來存你的設定');
+  await expect(page.getByRole('dialog')).toContainText('選擇儲存設定與學生名單的資料夾');
   await page.getByRole('dialog').getByRole('button', { name: '選擇資料夾' }).click();
-  await expect(page.getByTestId('folder-name')).not.toHaveText('尚未選擇');
-  await expect(page.getByText('已連線')).toBeVisible();
+  await expect(page.getByTestId('folder-name')).not.toHaveText('尚未選擇資料夾');
+  await expect(page.getByText('已取得資料夾存取權')).toBeVisible();
 
   await page.getByTestId('file-input').setInputFiles(surveyFile());
   await confirmType(page);
@@ -247,7 +247,7 @@ test('資料夾：選擇、重開後仍記得（以瀏覽器內建資料夾模�
     )
     .toContain('讀書報告回饋');
   await page.reload();
-  await expect(page.getByText('已連線')).toBeVisible();
+  await expect(page.getByText('已取得資料夾存取權')).toBeVisible();
   await expect(page.getByRole('button', { name: /讀書報告回饋 \(回覆\)/ })).toBeVisible();
   await noOverflow(page);
   info.annotations.push({ type: 'note', description: '資料夾代號存在 IndexedDB，內容存在資料夾內的 .sfh' });

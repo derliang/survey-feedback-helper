@@ -135,7 +135,7 @@ export const QUICK_TEMPLATES: readonly QuickTemplate[] = [
     scale: { min: 1, max: 5 },
     scaleLabels: '沒有量表',
     questions: [...WHO, C('是否參加', ['參加', '不參加']), P('備註（例如飲食禁忌）')],
-    defaults: '名單對照直接顯示「還沒回覆的人」；統計只看人數與備註，沒有平均。',
+    defaults: '可使用名單對照查看未回覆人員，並統計參與人數；這份範本沒有量表，不會計算平均分數。',
   },
   {
     id: 'classrule',

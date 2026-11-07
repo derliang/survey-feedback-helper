@@ -75,9 +75,9 @@ describe('英文介面骨架', () => {
     expect(merged.appName).toBe('Survey Feedback Helper');
     expect(merged.steps).toHaveLength(4);
     expect(merged.settingsPage.themes.dark).toBe('Dark');
-    expect(merged.review.adopt).toBe('Adopt'); // 已翻
+    expect(merged.review.adopt).toBe('Adopt this comment'); // 已翻
     expect(merged.google.title).toBe('A quick look before you sign in'); // 2026-11-04 起 google、guide、tpl 也已翻
-    expect(merged.folder.reauthTitle('x')).toBe('The browser forgot your folder "x"'); // 函式整個取代
+    expect(merged.folder.reauthTitle('x')).toBe('Access to the folder "x" needs to be granted again'); // 函式整個取代
     expect(strings.appName).toBe('問卷回饋小幫手');
   });
   it('英文沒有多出中文版沒有的鍵', () => {

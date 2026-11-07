@@ -73,7 +73,7 @@ function Library({ e }: { e: ES }) {
     <main class="page editor-lib" id="main">
       <div class="prep-head">
         <h1>範本與版面</h1>
-        <p class="lead">內建範本不能直接改；第一次修改時會複製成「我的範本」。</p>
+        <p class="lead">內建範本保留原樣；第一次編輯時會先複製到「我的範本」，不會修改原版。</p>
       </div>
       <SaveNote e={e} hasFolder={st.folder.state === 'ready'} />
       <div class="seg" role="group" aria-label="篩選範本">
@@ -128,7 +128,7 @@ function Library({ e }: { e: ES }) {
       </div>
       <div class="btn-row">
         <label class="btn secondary">
-          匯入範本檔
+          從檔案匯入範本
           <input
             type="file"
             accept=".json,application/json"
@@ -142,7 +142,7 @@ function Library({ e }: { e: ES }) {
           />
         </label>
         <button type="button" class="btn" onClick={newTemplate}>
-          新增範本
+          建立新範本
         </button>
       </div>
       {menu && (
@@ -158,11 +158,11 @@ function Library({ e }: { e: ES }) {
               複製
             </button>
             <button type="button" class="opt" onClick={() => exportOne(menu.id)}>
-              匯出分享（範本檔）
+              下載範本檔供分享
             </button>
             {!menu.builtin && menu.basedOn && (
               <button type="button" class="opt" onClick={() => setConfirm({ kind: 'reset', id: menu.id })}>
-                恢復預設版面
+                還原為內建版面
               </button>
             )}
             {!menu.builtin && (
@@ -175,7 +175,7 @@ function Library({ e }: { e: ES }) {
       )}
       {e.confirm && (
         <Sheet
-          title={e.confirm.kind === 'delete' ? '刪除這份範本？' : '恢復成內建版面？'}
+          title={e.confirm.kind === 'delete' ? '確定刪除這份範本？' : '恢復成內建版面？'}
           onClose={() => setConfirm(null)}
           footer={
             <>
@@ -204,7 +204,7 @@ function SaveNote({ e, hasFolder }: { e: ES; hasFolder: boolean }) {
       actions={
         <>
           <button type="button" class="btn secondary small" onClick={downloadBackup}>
-            下載範本備份
+            下載目前的範本備份檔
           </button>
           {!hasFolder && (
             <button type="button" class="btn ghost small" onClick={() => go('settings')}>
@@ -214,7 +214,7 @@ function SaveNote({ e, hasFolder }: { e: ES; hasFolder: boolean }) {
         </>
       }
     >
-      下載的檔案之後可在這裡用「匯入範本檔」或開啟設定檔還原。
+      請先保存下載的範本檔；之後可用「從檔案匯入範本」或開啟設定檔還原。
     </Notice>
   );
 }
@@ -404,7 +404,7 @@ function Edit({ e }: { e: ES }) {
           </li>
         );
       })}
-      {names.length === 0 && <li class="empty">還沒有區塊，按「加入區塊」開始。</li>}
+      {names.length === 0 && <li class="empty">目前沒有版面區塊，請按「加入區塊」建立內容。</li>}
     </ul>
   );
 
@@ -443,7 +443,7 @@ function Edit({ e }: { e: ES }) {
       title="個別版本"
       actions={
         <button type="button" class="btn secondary small" onClick={() => setPanel('student')}>
-          看改了哪些
+          查看這位學生的個別修改
         </button>
       }
     >
