@@ -164,7 +164,9 @@ test('快速範本：選範本看題目、複製清單，六個都在', async ({
   await page.getByRole('radio', { name: /班規議題票選/ }).click();
   await expect(page.getByText('議題一的立場').first()).toBeVisible();
   await expect(page.getByText('票選幹部').first()).toBeVisible();
-  await expect(page.getByText(/待核對/).first()).toBeVisible();
+  // 題型名稱已於 2026-11-07 核對：畫面上不再標「待核對」，卡底改寫核對日期
+  await expect(page.getByText(/待核對/)).toHaveCount(0);
+  await expect(page.getByText(/2026-11-07 核對/).first()).toBeVisible();
   await noOverflow(page);
   await page.getByRole('radio', { name: /家長意見/ }).click();
   await expect(page.getByRole('textbox', { name: '複製題目清單' })).toHaveValue(/1\. 我清楚了解孩子在班上的學習狀況/);
@@ -188,11 +190,11 @@ test('快速範本：用範本題目建的表單匯出後開啟，會問「是�
   await noOverflow(page);
 });
 
-test('教學頁與示範資料：五個區段，載入示範資料進準備資料並標「示範資料」，重新開始即清除', async ({ page }) => {
+test('教學頁與示範資料：六個區段，載入示範資料進準備資料並標「示範資料」，重新開始即清除', async ({ page }) => {
   await page.goto('./');
   await page.getByRole('button', { name: 'Google 表單怎麼設計' }).click();
-  await expect(page.getByRole('heading', { name: 'Google 表單設計教學', level: 1 })).toBeVisible();
-  await expect(page.getByRole('heading', { name: '怎麼匯出成 Excel 檔' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Google 表單教學', level: 1 })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '做法二：下載檔案再匯入' })).toBeVisible();
   await expect(page.getByText('Microsoft Excel (.xlsx)').first()).toBeVisible();
   await expect(page.getByRole('heading', { name: /五個技巧/ })).toBeVisible();
   await expect(page.getByText(/還在準備中/)).toBeVisible();
