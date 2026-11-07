@@ -40,6 +40,13 @@ describe('SUR-02 TSV 標題含逗號', () => {
     expect(t.headers).toEqual(['姓名', '你最喜歡的活動,原因,建議']);
     expect(t.rows[0]?.[1]).toBe('課程,時間安排好');
   });
+  it('.tsv 檔題目含逗號但沒加引號（Google 試算表匯出）：逗號數不少於 Tab 也照 Tab 分欄', async () => {
+    const raw = '時間戳記\t你最喜歡的活動,原因,建議\t滿意度\n2026-10-10 10:00:00\t課程,時間安排好\t5';
+    expect(guessDelimiter(raw)).toBe(','); // 單看第一列分不出來，副檔名才是依據
+    const t = await tableFromFile(textFile('活動.tsv', raw));
+    expect(t.headers).toEqual(['時間戳記', '你最喜歡的活動,原因,建議', '滿意度']);
+    expect(t.rows[0]?.[1]).toBe('課程,時間安排好');
+  });
   it('一般 csv 與 tsv 判斷不變', () => {
     expect(guessDelimiter('a,b,c\n1,2,3')).toBe(',');
     expect(guessDelimiter('a\tb\tc\n1\t2\t3')).toBe('\t');

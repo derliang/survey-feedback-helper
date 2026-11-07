@@ -13,7 +13,7 @@
 | 儲存與 Google | `src/storage/*.test.ts`、`src/google/google.test.ts` | 設定檔存取、備份還原、Google 連線邏輯（不連真的 Google） |
 | 介面字串 | `src/ui/strings.en.test.ts` | 英文介面覆蓋率（繁中有的鍵英文都有，除了待核對的段落） |
 | 發布 | `scripts/release-meta.test.mjs` | 版本資訊 |
-| 端對端（Playwright，桌機／平板／手機觸控） | `tests/e2e/*.spec.ts` | 開檔到輸出的主流程（app、smoke）、統計畫面（stats）、輸出（export）、編輯器（editor）、介面細節（polish）、設定備份（settings-backup） |
+| 端對端（Playwright，桌機／平板／手機觸控） | `tests/e2e/*.spec.ts` | 開檔到輸出的主流程（app、smoke）、統計畫面（stats）、輸出（export）、編輯器（editor）、介面細節（polish）、設定備份（settings-backup）、**問卷主流程驗收（survey-flow：意見調查到三種輸出並核對檔案內容、報告回饋 Word、異常檔案、同名不同座號、復原）** |
 | 靜態檢查 | `npm run typecheck`、`lint`、`check:privacy`、`check:licenses`、`check:google-scopes`、`check:budget` | 型別、程式風格與核心不碰瀏覽器 API、不含學生資料、授權與費用、Google 權限範圍、首頁大小 |
 
 測試資料一律虛構；xlsx 在測試時才用 `tests/e2e/fixtures.ts` 的 `makeXlsx` 產生，repo 內不放任何 xlsx／csv。
@@ -23,4 +23,4 @@
 - 真機測試（iOS Safari、Android Chrome）：見 [real-device-checklist.md](real-device-checklist.md)，需要人拿真的裝置。
 - Google 表單的**真實匯出檔**：`form-samples.test.ts` 的欄位標題是依描述自編的近似（例如格狀題的「題目 [列名]」寫法），尚未對照真實匯出，待核對。
 - 英文介面：`google`（登入面板）、`guide`（Google 表單教學）、`tpl`（快速範本題目）三段仍是繁體中文，要先對照真實 Google 英文介面才能翻（硬規則 10）。
-- 首屏 2 秒在 Slow 4G 第一次造訪略超過，見 [performance.md](performance.md)。
+- 首屏 2 秒：2026-11-07 重測在機器忙碌時模擬 Slow 4G 仍有 1.8～2.4 秒，真機未量，見 [performance.md](performance.md)。

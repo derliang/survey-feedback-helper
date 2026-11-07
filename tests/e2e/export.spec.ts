@@ -64,9 +64,10 @@ test('瀏覽器內完整輸出流程，字型與 wasm 由 Service Worker 快取'
 
   // 等 Service Worker 控制頁面並確認快取內容
   await page.evaluate(() => navigator.serviceWorker.ready);
-  const cached = await page.evaluate(async () => (await (await caches.open('sfh-assets-v1')).keys()).map((k) => new URL(k.url).pathname));
-  expect(cached.some((p) => p.endsWith('NotoSansTC-VF.woff2'))).toBe(true);
-  expect(cached.some((p) => p.endsWith('.wasm'))).toBe(true);
+  // Service Worker 是在 ready 之後才非同步把字型與 wasm 寫進快取；機器吃重時會晚一點，所以輪詢而不是只看一次
+  const cachedPaths = () => page.evaluate(async () => (await (await caches.open('sfh-assets-v1')).keys()).map((k) => new URL(k.url).pathname));
+  await expect.poll(async () => (await cachedPaths()).some((p) => p.endsWith('NotoSansTC-VF.woff2')), { timeout: 15_000 }).toBe(true);
+  await expect.poll(async () => (await cachedPaths()).some((p) => p.endsWith('.wasm')), { timeout: 15_000 }).toBe(true);
 
   // 第二次載入：字型與 wasm 不再打到伺服器
   requests.length = 0;
