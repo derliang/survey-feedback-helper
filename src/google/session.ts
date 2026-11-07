@@ -18,7 +18,7 @@ export const POPUP_BLOCKED_MESSAGE =
   "沒能開啟 Google 登入視窗。請再按一次「前往 Google」；還是不行，請改用 Safari 或 Chrome（LINE 等 App 內建的瀏覽器常會擋），或到瀏覽器設定允許這個網站的彈出式視窗。也可以改用 Excel 檔：在 Google 試算表選「檔案」→「下載」→「Microsoft Excel (.xlsx)」，再把檔案拖進來。";
 
 export const POPUP_CLOSED_MESSAGE =
-  "登入視窗已關閉，沒有連接 Google。如果 Google 顯示「無法使用」或管理員限制的訊息（例如學校帳號被管理員限制第三方應用），請改用別的 Google 帳號，或改用 Excel 檔。";
+  "登入視窗已關閉，沒有連接 Google。想繼續請再按一次「前往 Google」，選好帳號後按同意；也可以改用 Excel 檔。";
 
 /** 登入（任何 Google 帳號皆可，不限 Gmail）。呼叫前要先 preload 並確認 isReady，才能在點擊內開彈窗。 */
 export async function connectGoogle(
