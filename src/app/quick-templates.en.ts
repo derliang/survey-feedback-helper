@@ -143,7 +143,7 @@ export function questionHintL(q: TplQuestion, scale: { min: number; max: number 
   if (q.options) return `${L[q.type]}${lang === 'en' ? ': ' : '：'}${q.options.join(lang === 'en' ? ' / ' : '／')}`;
   return L[q.type];
 }
-const ZH_LABEL: Record<QType, string> = { short: '簡答', choice: '選擇題', checkbox: '核取方塊', scale: '線性刻度', paragraph: '段落' };
+const ZH_LABEL: Record<QType, string> = { short: '簡答', choice: '選擇題', checkbox: '核取方塊', scale: '線性刻度', paragraph: '詳答' };
 
 /** 語系版的純文字題目清單（t 要先經 localizeTemplate）。 */
 export function questionsAsTextL(t: QuickTemplate, lang: Lang): string {

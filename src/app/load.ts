@@ -74,7 +74,8 @@ export async function sheetsFromFile(file: FileLike): Promise<LoadedSheets> {
   try {
     if (/\.(csv|tsv|txt)$/.test(lower)) {
       const text = decodeCsv(bytes);
-      out = { sheets: [{ name: '', table: tableFromCsv(text, guessDelimiter(text)) }], skipped: [] };
+      // .tsv 一定是 Tab 分隔（Google 試算表匯出的 tsv 不會把含逗號的欄位加引號，用逗號數猜會猜錯）
+      out = { sheets: [{ name: '', table: tableFromCsv(text, /\.tsv$/.test(lower) ? '\t' : guessDelimiter(text)) }], skipped: [] };
     } else if (/\.xlsx$/.test(lower)) {
       const raw = await xlsxSource(bytes).sheets();
       const all = raw.map((s) => ({ name: s.name, table: tableFromRows(s.rows) }));
