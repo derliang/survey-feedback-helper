@@ -731,7 +731,7 @@ const FIGS: Record<FigId, () => ComponentChildren> = {
               {D.copyList}
             </B>
           </Row>
-          <T m>{D.copied}</T>
+          <Ph w={50} />
         </Win>
       </Fig>
     );
