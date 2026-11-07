@@ -4,6 +4,7 @@ import { en } from './strings.en';
 import { backupStrings, defaultsStrings } from './strings-backup';
 import { backupStringsEn, defaultsStringsEn } from './strings-backup.en';
 import { extraEn, extraZh } from './strings-extra';
+import { dgEn, dgZh } from './strings-guide';
 import { QUICK_TEMPLATES, templateAsSurvey } from '../app/quick-templates';
 import { TEMPLATES_EN, localizeTemplate, questionsAsTextL, templateAsSurveyEn, templateHeadersEn } from '../app/quick-templates.en';
 import { recognizeConfig } from '../core';
@@ -103,6 +104,17 @@ describe('英文：備份與三層設定、寫死提示、快速範本', () => {
     expect(bad).toEqual([]);
     expect(extraZh.check.rows('3、4')).toBe('第 3、4 列');
     expect(extraEn.check.rows('3, 4')).toBe('Row 3, 4');
+  });
+  it('strings-guide（教學圖內的字）英文鍵與繁中一致、沒有中文，圖的替代文字都帶「自畫示意」註記', () => {
+    expect(shape(dgEn)).toEqual(shape(dgZh));
+    const bad: string[] = [];
+    cjkPaths(dgEn, 'dg', bad);
+    expect(bad).toEqual([]);
+    for (const k of Object.keys(dgZh.a)) {
+      expect(dgZh.alt((dgZh.a as Record<string, string>)[k]!, false)).toContain('自畫示意，不是截圖');
+      expect(dgEn.alt((dgEn.a as Record<string, string>)[k]!, true)).toContain('not a screenshot');
+    }
+    expect(Object.keys(dgZh.a)).toHaveLength(29);
   });
   it('每份快速範本都有英文版，題數與選項數與繁中一致、沒有中文', () => {
     expect(Object.keys(TEMPLATES_EN).sort()).toEqual(QUICK_TEMPLATES.map((t) => t.id).sort());

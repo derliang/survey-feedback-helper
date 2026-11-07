@@ -2233,3 +2233,10 @@ details[open] > :not(summary) {
     grid-template-columns: 380px minmax(0, 1fr);
   }
 }
+
+/* 教學圖解載入前的佔位（圖本身與樣式在教學頁的延遲載入 chunk：guide/diagrams.css） */
+.dg-skel {
+  min-height: 120px;
+  border-radius: var(--r-md);
+  background: var(--sunk);
+}

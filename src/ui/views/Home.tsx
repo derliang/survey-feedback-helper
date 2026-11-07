@@ -12,6 +12,8 @@ import {
 import { isTouchDevice, recentSurveys } from "../../storage";
 import { strings as S } from "../strings";
 import { Icon, Notice } from "../parts/parts";
+import { LazyFig } from "../parts/LazyDiagram";
+import { rich } from "../parts/rich";
 import { GoogleConnectDialog, googleConfigured } from "./GoogleConnect";
 
 // iOS 的「檔案」選擇器遇到不認得的副檔名會把檔案灰掉：試算表加上 MIME，設定檔在觸控裝置不設限（讀進來再檢查格式）。
@@ -209,7 +211,11 @@ export function Home() {
           </p>
           <details class="howto">
             <summary>{S.load.howExport}</summary>
-            <p>{S.load.howExportBody}</p>
+            <LazyFig id="m2a" />
+            <p>{rich(S.load.howExportBody)}</p>
+            <button class="btn ghost small" type="button" onClick={() => go("guide")}>
+              {S.load.howExportFull}
+            </button>
           </details>
         </section>
 

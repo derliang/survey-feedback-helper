@@ -11,6 +11,7 @@ import type { ConnectResult } from "../../google/session";
 import type { GoogleServices } from "../../google/types";
 import { strings as S } from "../strings";
 import { AccountChooser, Icon, Notice, Sheet, useWide } from "../parts/parts";
+import { LazyFig } from "../parts/LazyDiagram";
 import { CloudExplain, CloudSwitch } from "./CloudParts";
 import { extra } from "../strings-extra";
 
@@ -199,6 +200,7 @@ export function GoogleConnectDialog(props: {
             <p>{isBlocked ? S.google.blockedLead : S.google.closedLead}</p>
             <p>{isBlocked ? S.google.blockedCode : S.google.closedCode}</p>
           </Notice>
+          {isBlocked && <LazyFig id="case1" />}
           {steps(isBlocked ? S.google.blockedSteps : S.google.closedSteps)}
           {noLogin}
         </>
