@@ -748,13 +748,13 @@ export const enMore: DeepPartial<Strings> = {
     troubleSub: 'The sign-in window did not open, closed again, or the spreadsheet is not there',
     troubleCases: [
       ['The sign-in window did not open.', 'Press again; if that fails, use Safari or Chrome (browsers built into apps such as LINE often block it), or allow pop-ups for this site. [[v]] The menu names in each browser.'],
-      ['The window opened and then closed.', 'Press again, choose an account, then allow. If the Google window shows an error, a school administrator may have restricted third-party apps: try another Google account, or use Way 2.'],
+      ['The window opened and then closed.', 'Press again, choose an account, then allow. If it still fails, use Way 2.'],
       ['Signed in, but the spreadsheet is not there.', 'Usually you picked an account that does not have this spreadsheet: sign in again and pick the one that does. If the account is not listed press "Use another account". [[v]] The exact wording.'],
     ] as string[][],
     troubleAlt: 'If none of that works, use Way 2: just download a file and pick it, with no sign-in at all.',
     troubleSwitch: 'Use Way 2 instead',
     m2Title: 'Way 2: download a file, then import',
-    m2Who: 'Phone, tablet, Safari or Firefox users, anyone who prefers not to sign in, or whose school account is blocked.',
+    m2Who: 'Phone, tablet, Safari or Firefox users, or anyone who prefers not to sign in.',
     m2Steps: [
       'In the Google spreadsheet (the tab opened by the last shared step), press {{File>Download>Microsoft Excel (.xlsx)}} in the menu bar at the top left, and the download starts. For CSV, choose **"Comma Separated Values (.csv)"** instead. (to be verified)',
       'Choose only .xlsx or .csv. This app cannot read **"OpenDocument Format (.ods)"**, **"PDF Document (.pdf)"** or **"Web Page (.html)"**. (to be verified)',
