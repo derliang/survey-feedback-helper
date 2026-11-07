@@ -62,7 +62,7 @@ describe("connectGoogle", () => {
     expect(await connectGoogle(svc)).toEqual({ status: "ok", token: "tok" });
     expect(revoke).not.toHaveBeenCalled();
   });
-  it("使用者關掉登入視窗：cancelled，說明可能是管理員限制", async () => {
+  it("使用者關掉登入視窗：cancelled，說明可再試或改用 Excel", async () => {
     const { svc } = fakeServices({
       signIn: async () => Promise.reject(new SignInCancelled()),
     });
