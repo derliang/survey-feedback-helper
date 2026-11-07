@@ -98,8 +98,7 @@
 ## v1.0
 
 > 2026-11-01 分支 `polish-v10`（PR #30 已併，見[決定記錄](docs/decisions/2026-11-01-v1.0打磨.md)）已做打勾項目；未打勾的是明確沒做的部分。
-- [~] Google 表單設計教學頁、示範資料入口（R-001）已做；**範本表單**待使用者用私人 Gmail 建立並把連結填入 `src/app/guide-config.ts`；**題型名稱與「發布」字樣 2026-11-07 已在繁中介面核對**（「段落」實為「詳答」，程式已改；畫面上的「待核對」標籤暫保留，撤掉要走設計員並同步改 e2e）
-（待查：[Google 教學改版設計](docs/decisions/2026-11-07-Google教學改版設計.md) 使用者已裁示撤除「待核對」標籤，但 `strings.ts` 的 `toVerify` 與 `GuideView.tsx` 的標籤仍在程式中，未確認是否已隨 #77 處理）
+- [~] Google 表單設計教學頁、示範資料入口（R-001）已做；**範本表單**待使用者用私人 Gmail 建立並把連結填入 `src/app/guide-config.ts`；**題型名稱與「發布」字樣 2026-11-07 已在繁中介面核對**（「段落」實為「詳答」，程式已改；畫面上的「待核對」標籤暫保留，撤掉要走設計員並同步改 e2e）（待查：[Google 教學改版設計](docs/decisions/2026-11-07-Google教學改版設計.md) 使用者已裁示撤除「待核對」標籤，但 `strings.ts` 的 `toVerify` 與 `GuideView.tsx` 的標籤仍在程式中，未確認是否已隨 #77 處理）
 - [~] 英文介面：主要畫面字串已補齊（`src/ui/strings.en.more.ts`，覆蓋率測試 `strings.en.test.ts`，2026-11-01）；（2026-11-04 `google`、`guide`、`tpl` 三段畫面文字已補英文，覆蓋率測試不再有「尚未翻譯」例外）**待做**：①（2026-11-07 嘗試核對：`?hl=en` 不會切換表單編輯畫面語言，要改 Google 帳號語言才看得到英文介面，待使用者同意；見[核對紀錄](docs/design/Google介面核對紀錄.md)）英文版裡的 Google 介面名稱（Responses、Link to Sheets、Download responses (.csv)、Linear scale 等）**尚未走過真實英文介面**，句尾都標 (to be verified)，需登入後核對；②（2026-11-07 已補：`src/app/quick-templates.en.ts`，題目本文英文版，表單匯出檔標題也能認出英文版範本）；③（2026-11-07 已補：`strings-backup.en.ts`；寫死在 views／store／app 的提示已集中到 `src/ui/strings-extra.ts` 並補英文）；**仍待做**：範本編輯器（`src/ui/editor/EditorView.tsx`、`Panels.tsx`、`Preview.tsx`，約 230 行寫死中文）與輸出文件文字（`render.ts`、`output.ts`、`phrases.ts`、`course-out.ts`、`trial.ts`、`method.ts` 欄位名）尚未進英文
 - [~] 文件完整、完整測試：新功能都有單元與 e2e；測試總覽已整理於 [docs/testing.md](docs/testing.md)（2026-11-01）；**待做**：真機測試
 - [ ] 實機驗證：iPhone／Android 手機與平板（特別是 iOS Safari 的拖曳、鍵盤彈出、捲動、PWA 加入主畫面與離線） 負責：使用者（需實機）（2026-11-02 治理合併：原「等使用者」第 17 行與本項重複，已併入此處；具體步驟見 [real-device-checklist](docs/real-device-checklist.md)，另有 133、214 行各自的實機項。）
