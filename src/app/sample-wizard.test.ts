@@ -15,7 +15,7 @@ function sessionOf(): Session {
   const cols = analyzeColumns(table).map((c) => (c.role === 'score' ? { ...c, confirm: false } : c));
   return {
     fileName: 's.xlsx', sourceLabel: 'Excel 檔', name: '樣本問卷', table, cols, kind: 'feedback', kindReason: '', kindConfirmed: true,
-    scale: detectScale(table, cols), mappingConfirmed: true, recognition: null, surveyId: 's1', previousRows: null,
+    scale: detectScale(table, cols), scaleConfirmed: true, sheetPool: null, mappingConfirmed: true, recognition: null, surveyId: 's1', previousRows: null,
     rosterRows: null, rosterMixed: false, rosterSkipped: false, rosterName: '', resolutions: {}, excluded: [], titleMerges: {}, checkHandled: [], course: emptyCourseState(),
     demo: false,
   };
