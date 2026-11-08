@@ -135,7 +135,7 @@ describe('名額與分配的資料接線', () => {
     expect(courseList(s, withCaps(c, { 甲課: '2', 乙課: '2', 丙課: '1' }, { 乙課: '2' })).find((x) => x.name === '乙課')?.minSize).toBe(2);
   });
 
-  it('分配：同資料同種子結果相同；名額限制；手動移動不改原結果', () => {
+  it('分配：同資料同抽籤編號結果相同；名額限制；手動移動不改原結果', () => {
     const s = session();
     const c = runAllocation(s, withCaps({ ...emptyCourseState(), seed: 'seed-1', merges: { '丙 課': '丙課' } }, { 甲課: '2', 乙課: '2', 丙課: '1' }));
     const again = runAllocation(s, c);
@@ -176,7 +176,7 @@ describe('選課分組輸出', () => {
     const sheets = listSheets(s2);
     expect(sheets.map((x) => x.name).sort()).toEqual(['總表', '甲課', '乙課', '丙課', '分配紀錄'].sort());
     expect(sheets[0]!.rows).toHaveLength(1 + 6);
-    const seed = sheets.at(-1)!.rows.find((r) => r[0] === '抽籤種子');
+    const seed = sheets.at(-1)!.rows.find((r) => r[0] === '抽籤編號');
     expect(seed?.[1]).toBe('s9');
   });
 

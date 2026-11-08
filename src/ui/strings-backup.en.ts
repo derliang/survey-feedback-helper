@@ -4,7 +4,7 @@ import type { backupStrings, defaultsStrings } from './strings-backup';
 type Widen<T> = T extends string ? string : T extends (...a: infer A) => infer R ? (...a: A) => R : { [K in keyof T]: Widen<T[K]> };
 
 export const defaultsStringsEn: Widen<typeof defaultsStrings> = {
-  title: 'Defaults',
+  title: 'Default output settings',
   intro: 'Output settings are applied in the order "global defaults → survey type → this output"; when a field is set in a later layer, the later layer\'s value is used. Changes made for this output apply only once and are not saved.',
   layers: { global: 'Global defaults', kind: 'Survey type', run: 'This output' },
   sources: { default: 'Built-in default', global: 'Global defaults', kind: 'Survey-type template', run: 'This output' },

@@ -2,7 +2,7 @@
 import { currentLang } from './locale';
 import { backupStringsEn, defaultsStringsEn } from './strings-backup.en';
 export const defaultsStrings = {
-  title: '預設值',
+  title: '預設輸出設定',
   intro: '輸出設定依序採用「全域預設 → 問卷類型 → 這次輸出」；同一欄位在較後一層有設定時，會採用較後一層的值，這次輸出的調整只對這一次有效、不會存檔。',
   layers: { global: '全域預設', kind: '問卷類型', run: '這次輸出' },
   sources: { default: '內建預設', global: '全域預設', kind: '問卷類型範本', run: '這次輸出' },

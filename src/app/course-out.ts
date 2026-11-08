@@ -18,8 +18,8 @@ export function recordSheet(s: Session): XSheet {
     colWidths: [16, 60],
     rows: [
       [H('項目'), H('內容')],
-      ['抽籤種子', c.seed],
-      ['規則', '逐志願輪；同課超額時優先名單先取、其餘以種子可重現抽籤；沒分到的進下一志願'],
+      ['抽籤編號', c.seed],
+      ['規則', '逐志願輪；同課超額時優先分配名單先取、其餘以抽籤編號可重現抽籤；沒分到的進下一志願'],
       ['名額合計', cap],
       ['填答人數', courseApplicants(s, c).list.length],
       ['分配時間（台北時間）', stampTaipei(c.ranAt)],
