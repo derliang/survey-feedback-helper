@@ -42,7 +42,7 @@ describe('報告回饋接線', () => {
     const sum2 = runFeedback({ ...s, excluded: [1] }, o);
     expect(sum2.targets.find((t) => t.person.name === '林雅婷')!.raters).toBe(1);
   });
-  it('反向題換算', () => {
+  it('反向計分題換算', () => {
     const idx = s.cols.find((c) => c.header === '內容')!.index;
     const sum = runFeedback(s, { ...o, reversed: [idx] } as StatsOpts);
     const lin = sum.targets.find((t) => t.person.name === '林雅婷')!;

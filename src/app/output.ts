@@ -147,7 +147,7 @@ export function voteSheets(v: VoteResult): XSheet[] {
   const sheets: XSheet[] = [];
   const sum: XSheet = { name: '當選結果', rows: [[{ v: '職位', s: 'header' }, { v: '當選', s: 'header' }, { v: '抽籤', s: 'header' }]], colWidths: [24, 40, 50] };
   for (const p of v.positions) {
-    const draw = p.election.draw ? `同票抽籤，種子「${p.election.draw.seed}」，順序：${p.election.draw.order.join('、')}` : '';
+    const draw = p.election.draw ? `同票抽籤，抽籤編號「${p.election.draw.seed}」，順序：${p.election.draw.order.join('、')}` : '';
     sum.rows.push([p.col.label, p.election.elected.join('、') || '（無人）', draw]);
   }
   sheets.push(sum);
@@ -197,7 +197,7 @@ export function voteReport(s: Session, v: VoteResult): DocModel {
     `${s.name} 票選結果`,
     v.positions.map((p) => ({
       heading: `${p.col.label}（名額 ${p.seats}）`,
-      lines: [`當選：${p.election.elected.join('、') || '（無人）'}`, ...(p.election.draw ? [`同票抽籤，種子「${p.election.draw.seed}」。`] : [])],
+      lines: [`當選：${p.election.elected.join('、') || '（無人）'}`, ...(p.election.draw ? [`同票抽籤，抽籤編號「${p.election.draw.seed}」。`] : [])],
       table: { header: ['姓名', '票數'], rows: p.tally.rows.map((r) => [r.name, String(r.votes)]) },
     })),
   );

@@ -28,18 +28,18 @@ describe('allocate', () => {
     expect(r.assignments.filter((x) => x.rank === 2)).toHaveLength(2);
     expect(r.assignments.filter((x) => x.rank === 3)).toHaveLength(2);
   });
-  it('同種子同結果，且與輸入順序無關', () => {
+  it('同抽籤編號同結果，且與輸入順序無關', () => {
     const a = allocate(crowd, courses, 'x');
     const b = allocate([...crowd].reverse(), courses, 'x');
     const key = (res: typeof a) => res.assignments.map((s) => `${s.id}:${s.course}`).sort();
     expect(key(a)).toEqual(key(b));
     expect(allocate(crowd, courses, 'x')).toEqual(a);
   });
-  it('不同種子可能不同結果', () => {
+  it('不同抽籤編號可能不同結果', () => {
     const wins = new Set(['s1', 's2', 's3', 's4', 's5', 's6'].map((s) => allocate(crowd, courses, s).assignments.filter((x) => x.rank === 1).map((x) => x.id).join()));
     expect(wins.size).toBeGreaterThan(1);
   });
-  it('優先名單超額時先取得名額', () => {
+  it('優先分配名單超額時先取得名額', () => {
     for (const seed of ['1', '2', '3', '4', '5']) {
       const list = crowd.map((a) => (a.id === 'e' || a.id === 'f' ? { ...a, priority: true } : a));
       const r = allocate(list, courses, seed);

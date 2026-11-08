@@ -87,7 +87,7 @@ describe('summarizeFeedback（報告回饋）', () => {
     const s = summarizeFeedback([rec(0, 'a', 'x', [0, 10, 0, 10, 0])], items);
     expect(s.targets[0]?.items.map((i) => i.mean)).toEqual([0, 10, 0, 10, 0]);
   });
-  it('加權總分；某題全空時權重在其餘題間重新正規化', () => {
+  it('總分（依題目權重計算）；某題全空時權重在其餘題間重新正規化', () => {
     const w: FeedbackItem[] = [{ id: 'q0', label: 'a', weight: 1 }, { id: 'q1', label: 'b', weight: 3 }, { id: 'q2', label: 'c', weight: 6 }];
     expect(summarizeFeedback([rec(0, 'a', 'x', [10, 0, 0])], w).targets[0]?.total).toBeCloseTo(1);
     expect(summarizeFeedback([rec(0, 'a', 'x', [10, 0, null])], w).targets[0]?.total).toBeCloseTo(2.5);

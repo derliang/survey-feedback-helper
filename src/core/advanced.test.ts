@@ -38,21 +38,21 @@ describe('trimExtremes／median（虛構數字）', () => {
   });
 });
 
-describe('summarizeFeedback：反向題與去極端值', () => {
-  it('反向題以 min+max−分數 換算（0～10 量表 3 → 7），自評同樣換算', () => {
+describe('summarizeFeedback：反向計分題與最高最低分處理', () => {
+  it('反向計分題以 min+max−分數 換算（0～10 量表 3 → 7），自評同樣換算', () => {
     const rev: FeedbackItem[] = [{ id: 'q0', label: '內容' }, { id: 'q1', label: '太吵', reversed: true }];
     const s = summarizeFeedback([rec(0, 'a', 'x', [8, 3]), rec(1, 'x', 'x', [9, 2])], rev);
     const x = s.targets[0]!;
     expect(x.items.map((i) => i.mean)).toEqual([8, 7]);
     expect(x.selfScores).toEqual({ q0: 9, q1: 8 });
   });
-  it('反向題的壞分數仍先判範圍：11 不會被換成 −1', () => {
+  it('反向計分題的壞分數仍先判範圍：11 不會被換成 −1', () => {
     const rev: FeedbackItem[] = [{ id: 'q0', label: 'a', reversed: true }];
     const s = summarizeFeedback([rec(0, 'a', 'x', [11])], rev);
     expect(s.problems).toEqual([{ recordId: 0, itemId: 'q0', kind: 'outOfRange' }]);
     expect(s.targets[0]?.items[0]?.mean).toBeNull();
   });
-  it('自訂量表 1～5 的反向題：2 → 4', () => {
+  it('自訂量表 1～5 的反向計分題：2 → 4', () => {
     const rev: FeedbackItem[] = [{ id: 'q0', label: 'a', reversed: true }];
     expect(summarizeFeedback([rec(0, 'a', 'x', [2])], rev, { scale: { min: 1, max: 5 } }).targets[0]?.items[0]?.mean).toBe(4);
   });
@@ -71,7 +71,7 @@ describe('summarizeFeedback：反向題與去極端值', () => {
     expect(summarizeFeedback(same, items, { trim: 1 }).targets[0]?.items[0]?.mean).toBe(6);
     expect(summarizeFeedback(same, items).targets[0]?.items[0]?.trimmed).toBe(false);
   });
-  it('去極端值後加權總分跟著變', () => {
+  it('最高最低分處理後總分（依題目權重計算）跟著變', () => {
     const w: FeedbackItem[] = [{ id: 'q0', label: 'a', weight: 1 }];
     const rows = [0, 5, 5, 10].map((v, i) => rec(i, `r${i}`, 'x', [v]));
     expect(summarizeFeedback(rows, w).targets[0]?.total).toBe(5);
@@ -80,7 +80,7 @@ describe('summarizeFeedback：反向題與去極端值', () => {
 });
 
 describe('recordScore', () => {
-  it('加權、略過空白與壞分數、權重重新正規化、反向題換算', () => {
+  it('加權、略過空白與壞分數、權重重新正規化、反向計分題換算', () => {
     const w: FeedbackItem[] = [{ id: 'q0', label: 'a', weight: 1 }, { id: 'q1', label: 'b', weight: 3 }];
     expect(recordScore(rec(0, 'a', 'x', [4, 8]), w)).toBe(7);
     expect(recordScore(rec(0, 'a', 'x', [4, null]), w)).toBe(4);
@@ -90,7 +90,7 @@ describe('recordScore', () => {
   });
 });
 
-describe('selfVsOthers（自評對他評）', () => {
+describe('selfVsOthers（自評與同學評分比較）', () => {
   it('每題與總分的落差、偏高偏低與接近', () => {
     const s = summarizeFeedback([rec(0, 'x', 'x', [9, 4]), rec(1, 'a', 'x', [6, 5]), rec(2, 'b', 'x', [6, 5])], items);
     const r = selfVsOthers(s)[0]!;
@@ -156,7 +156,7 @@ describe('peerContribution（小組互評貢獻度）', () => {
     expect(g.members.every((x) => x.share === null && x.index === null)).toBe(true);
     expect(g.members.every((x) => x.received === 0)).toBe(true);
   });
-  it('trim 去極端值；沒有分組對應的人略過；空資料', () => {
+  it('trim 最高最低分處理；沒有分組對應的人略過；空資料', () => {
     const many = [rec(0, '甲', '乙', [0, 0]), rec(1, '丙', '乙', [6, 6]), rec(2, '乙', '乙', [9, 9])];
     expect(peerContribution(many, items, groupOf)[0]?.members.find((x) => x.person.name === '乙')?.received).toBe(3);
     const t = peerContribution([...many, rec(3, '甲', '乙', [10, 10])], items, groupOf, { trim: 1 })[0]!;

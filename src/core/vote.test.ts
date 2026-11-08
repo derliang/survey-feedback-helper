@@ -130,7 +130,7 @@ describe('elect 與可重現抽籤', () => {
     const e = elect(tallyOf([['甲', 5], ['乙', 3], ['丙', 1]]), 2, 'seed');
     expect(e).toMatchObject({ elected: ['甲', '乙'], draw: null, tied: [] });
   });
-  it('邊界同票：同一種子永遠同一結果；記錄種子與依據', () => {
+  it('邊界同票：同一抽籤編號永遠同一結果；記錄抽籤編號與依據', () => {
     const tl = tallyOf([['甲', 5], ['乙', 3], ['丙', 3], ['丁', 3], ['戊', 1]]);
     const a = elect(tl, 2, 'abc12345');
     const b = elect(tl, 2, 'abc12345');
@@ -142,12 +142,12 @@ describe('elect 與可重現抽籤', () => {
     expect(a.draw?.order.slice().sort()).toEqual(['丁', '丙', '乙']);
     expect(a.draw?.basis).toContain('3|');
   });
-  it('輸入順序不同、種子相同 → 結果相同（可重現）', () => {
+  it('輸入順序不同、抽籤編號相同 → 結果相同（可重現）', () => {
     const a = elect(tallyOf([['乙', 3], ['丙', 3], ['丁', 3]]), 1, 's');
     const b = elect(tallyOf([['丁', 3], ['乙', 3], ['丙', 3]]), 1, 's');
     expect(a.elected).toEqual(b.elected);
   });
-  it('不同種子可得不同順序（至少有一個種子不同）', () => {
+  it('不同抽籤編號可得不同順序（至少有一個抽籤編號不同）', () => {
     const names = ['a', 'b', 'c', 'd', 'e', 'f'];
     const orders = new Set(['s1', 's2', 's3', 's4', 's5'].map((s) => seededShuffle(names, s).join('')));
     expect(orders.size).toBeGreaterThan(1);

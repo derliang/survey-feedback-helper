@@ -125,7 +125,7 @@ test('名額與分配：合併、分配、手動移人、復原、輸出', async
   await noOverflow(page);
   const seed = await page.getByTestId('seed-value').innerText();
 
-  // 重新抽籤換種子，復原後回到原本的種子與結果
+  // 重新抽籤換抽籤編號，復原後回到原本的抽籤編號與結果
   await page.getByTestId('redraw').click();
   await expect(page.getByTestId('seed-value')).not.toHaveText(seed);
   await page.getByTestId('undo').click();
@@ -157,16 +157,16 @@ test('名額與分配：合併、分配、手動移人、復原、輸出', async
   expect(downloads.map((d) => d.suggestedFilename()).sort()).toEqual(['選課志願 (回覆) 分組名單.xlsx', '選課志願 (回覆) 志願命中統計.xlsx', '選課志願 (回覆) 待安排名單.xlsx'].sort());
 });
 
-test('優先名單與建議停開', async ({ page }) => {
+test('優先分配名單與建議停開', async ({ page }) => {
   await mapped(page);
   await step(page, '名額與分配').click();
   await fillRules(page);
   // 微積分名額縮成 1、5 人搶：優先的王一（第 1 志願微積分）一定拿到；地球探索最少 4 人，一定低於
   await page.getByTestId('cap-0').fill('1');
   await page.getByTestId('prio-open').click();
-  await expect(page.getByRole('dialog')).toContainText('優先名單 · 已選 0 人');
+  await expect(page.getByRole('dialog')).toContainText('優先分配名單 · 已選 0 人');
   await page.getByRole('dialog').getByRole('checkbox', { name: /王三/ }).check();
-  await expect(page.getByRole('dialog')).toContainText('優先名單 · 已選 1 人');
+  await expect(page.getByRole('dialog')).toContainText('優先分配名單 · 已選 1 人');
   await page.getByRole('dialog').getByRole('button', { name: '完成' }).click();
   await page.getByTestId('course-start').click();
   await expect(page.getByTestId('tile-assigned')).toBeVisible();
