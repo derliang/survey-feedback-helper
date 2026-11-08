@@ -21,7 +21,7 @@ async function prepared(page: Page) {
 
 const step = (page: Page, name: string) => page.locator('.stepper').getByRole('button', { name: new RegExp(name) });
 
-test('統計：全班總覽、個人結果、自評對他評與審稿', async ({ page }) => {
+test('統計：全班總覽、個人結果、自評與同學評分比較與審稿', async ({ page }) => {
   await prepared(page);
   await step(page, '統計').click();
   await expect(page.getByRole('heading', { name: '統計', level: 1 })).toBeVisible();
@@ -30,7 +30,7 @@ test('統計：全班總覽、個人結果、自評對他評與審稿', async ({
   await noOverflow(page);
 
   await page.locator('.wb-list').getByRole('button', { name: /林雅婷/ }).click();
-  await expect(page.getByRole('heading', { name: '自評對他評' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '自評與同學評分比較' })).toBeVisible();
   await expect(page.getByTestId('comment').first()).toBeVisible();
   await noOverflow(page);
 
@@ -45,7 +45,7 @@ test('統計：全班總覽、個人結果、自評對他評與審稿', async ({
   await page.getByRole('textbox', { name: '老師評語' }).fill('報告很有條理，繼續加油。');
   await expect(page.getByRole('textbox', { name: '老師評語' })).toHaveValue('報告很有條理，繼續加油。');
 
-  // 去極端值設定
+  // 最高最低分處理設定
   await page.getByRole('radio', { name: /每題各排除 1 個最高分和最低分/ }).click();
   await expect(page.getByRole('radio', { name: /每題各排除 1 個最高分和最低分/ })).toHaveAttribute('aria-checked', 'true');
 
