@@ -1,10 +1,11 @@
 // 屬性面板：依區塊類型顯示；分段控制、籌碼與開關為主，不需要輸入數字（手機友善）。
+import { blockNameUi, ed, statLabelUi } from '../strings-editor';
 import { useRef } from 'preact/hooks';
 import { describeCondition } from '../../editor/condition';
 import { listOverrides, withoutBlockPart } from '../../editor/overrides';
 import { wordNotes } from '../../editor/word';
 import type { Condition, EBlock, EBlockKind, EditorTemplate, ReportVersion } from '../../editor/types';
-import { KIND_NAMES, STAT_KEYS, type StatKey } from '../../editor/types';
+import { STAT_KEYS, type StatKey } from '../../editor/types';
 import { addBlock, addImage, columnCount, currentOverrides, deleteBlock, dupBlock, moveSel, overrideBlock, overrideVar, patchBlock, patchPage, pickStudent } from './state';
 import { VAR_NAMES } from './Preview';
 
@@ -35,28 +36,28 @@ function Toggle(props: { label: string; on: boolean; onChange: (v: boolean) => v
 }
 
 const nearest = (v: number, opts: number[]) => opts.reduce((a, b) => (Math.abs(b - v) < Math.abs(a - v) ? b : a));
-const VERSIONS: [ReportVersion, string][] = [
-  ['teacher', '教師版'],
-  ['student', '學生版'],
-  ['parent', '家長版'],
+const VERSIONS = (): [ReportVersion, string][] => [
+  ['teacher', ed().verTeacher],
+  ['student', ed().verStudent],
+  ['parent', ed().verParent],
 ];
-const PALETTES: [string, string, string[]][] = [
-  ['default', '預設', []],
-  ['warm', '暖色', ['#cf5f12', '#eaa06a', '#b3367a']],
-  ['blue', '藍系', ['#2554d8', '#7f9be3', '#1b3fa6']],
-  ['gray', '黑白列印', ['#222222', '#7b8494', '#c9ced8']],
+const PALETTES = (): [string, string, string[]][] => [
+  ['default', ed().dflt, []],
+  ['warm', ed().palWarm, ['#cf5f12', '#eaa06a', '#b3367a']],
+  ['blue', ed().palBlue, ['#2554d8', '#7f9be3', '#1b3fa6']],
+  ['gray', ed().palGray, ['#222222', '#7b8494', '#c9ced8']],
 ];
-const BGS: [string, string][] = [
-  ['', '無'],
-  ['#fff6d6', '淡黃'],
-  ['#e7edff', '淡藍'],
-  ['#dcf1e3', '淡綠'],
+const BGS = (): [string, string][] => [
+  ['', ed().none],
+  ['#fff6d6', ed().lightYellow],
+  ['#e7edff', ed().lightBlue],
+  ['#dcf1e3', ed().lightGreen],
 ];
-const CHARTS: [string, string][] = [
-  ['bar', '長條'],
-  ['compare', '對照條'],
-  ['dist', '分布'],
-  ['stacked', '堆疊'],
+const CHARTS = (): [string, string][] => [
+  ['bar', ed().chBar],
+  ['compare', ed().chCompare],
+  ['dist', ed().chDist],
+  ['stacked', ed().chStacked],
 ];
 
 function CondEditor({ b, disabled }: { b: EBlock; disabled: boolean }) {
@@ -65,13 +66,13 @@ function CondEditor({ b, disabled }: { b: EBlock; disabled: boolean }) {
   const set = (c: Condition | undefined) => patchBlock(b.id, { when: c });
   return (
     <div class="field">
-      <span class="label">區塊顯示條件</span>
-      <div class="seg" role="group" aria-label="區塊顯示條件">
+      <span class="label">{ed().condLabel}</span>
+      <div class="seg" role="group" aria-label={ed().condLabel}>
         {(
           [
-            ['always', '一律'],
-            ['version', '依版本'],
-            ['var', '依內容'],
+            ['always', ed().condAlways],
+            ['version', ed().condVersion],
+            ['var', ed().condVar],
           ] as const
         ).map(([m, n]) => (
           <button
@@ -88,7 +89,7 @@ function CondEditor({ b, disabled }: { b: EBlock; disabled: boolean }) {
       </div>
       {w?.kind === 'version' && (
         <div class="chips">
-          {VERSIONS.map(([v, n]) => {
+          {VERSIONS().map(([v, n]) => {
             const on = w.is.includes(v);
             return (
               <button
@@ -110,14 +111,14 @@ function CondEditor({ b, disabled }: { b: EBlock; disabled: boolean }) {
       )}
       {w?.kind === 'var' && (
         <div class="chips">
-          <select class="input" aria-label="哪個內容" disabled={disabled} value={w.name} onChange={(e) => set({ ...w, name: (e.currentTarget as HTMLSelectElement).value })}>
+          <select class="input" aria-label={ed().condWhich} disabled={disabled} value={w.name} onChange={(e) => set({ ...w, name: (e.currentTarget as HTMLSelectElement).value })}>
             {VAR_NAMES.map((n) => (
               <option key={n} value={n}>{`{${n}}`}</option>
             ))}
           </select>
-          <select class="input" aria-label="條件" disabled={disabled} value={w.op} onChange={(e) => set({ ...w, op: (e.currentTarget as HTMLSelectElement).value as 'nonEmpty' | 'empty' })}>
-            <option value="nonEmpty">有內容時</option>
-            <option value="empty">沒有內容時</option>
+          <select class="input" aria-label={ed().condCond} disabled={disabled} value={w.op} onChange={(e) => set({ ...w, op: (e.currentTarget as HTMLSelectElement).value as 'nonEmpty' | 'empty' })}>
+            <option value="nonEmpty">{ed().condNonEmpty}</option>
+            <option value="empty">{ed().condEmpty}</option>
           </select>
         </div>
       )}
@@ -141,22 +142,22 @@ export function BlockProps(props: { t: EditorTemplate; b: EBlock; student: strin
   };
   return (
     <div class="props">
-      <h3 class="props-h">{b.label ?? KIND_NAMES[b.kind]}</h3>
+      <h3 class="props-h">{blockNameUi(b)}</h3>
       {student && (
         <p class="hint warn-text">
-          目前只修改「{student}」的個人版面；不會改動全班範本，也不影響其他學生。
+          {ed().studentOnly(student)}
         </p>
       )}
       {(b.kind === 'heading' || b.kind === 'text') && (
         <>
           <div class="field">
             <label class="label" for="pp-text">
-              內容
+              {ed().content}
             </label>
             <textarea id="pp-text" ref={area} class="input area" rows={4} value={text} onInput={(e) => setP({ text: (e.currentTarget as HTMLTextAreaElement).value }, `text:${b.id}`)} />
           </div>
           <div class="field">
-            <span class="label">插入自動帶入的資料</span>
+            <span class="label">{ed().insertVars}</span>
             <div class="chips">
               {VAR_NAMES.map((n) => (
                 <button key={n} type="button" class="chip" onClick={() => insertVar(n)}>{`{${n}}`}</button>
@@ -164,16 +165,16 @@ export function BlockProps(props: { t: EditorTemplate; b: EBlock; student: strin
             </div>
           </div>
           <Seg
-            label="文字大小"
+            label={ed().textSize}
             value={nearest((ov?.patch?.size as number | undefined) ?? b.size, b.kind === 'heading' ? [12, 14, 18] : [10, 11, 13])}
-            opts={b.kind === 'heading' ? [[12, '小'], [14, '中'], [18, '大']] : [[10, '小'], [11, '中'], [13, '大']]}
+            opts={b.kind === 'heading' ? [[12, ed().small], [14, ed().medium], [18, ed().large]] : [[10, ed().small], [11, ed().medium], [13, ed().large]]}
             onPick={(v) => setP({ size: v })}
           />
           {b.kind === 'text' && (
             <div class="field">
-              <span class="label">底色</span>
+              <span class="label">{ed().bg}</span>
               <div class="chips">
-                {BGS.map(([c, n]) => {
+                {BGS().map(([c, n]) => {
                   const cur = ((ov?.patch?.bg as string | undefined) ?? b.bg ?? '') === c;
                   return (
                     <button key={n} type="button" class={`chip${cur ? ' on' : ''}`} aria-pressed={cur} onClick={() => setP({ bg: c || undefined })}>
@@ -190,10 +191,10 @@ export function BlockProps(props: { t: EditorTemplate; b: EBlock; student: strin
       {b.kind === 'bullets' && (
         <div class="field">
           <label class="label" for="pp-items">
-            條列項目（一行一項）
+            {ed().bulletItems}
           </label>
           {b.slot ? (
-            <p class="hint">這一區的項目由統計結果自動填入。</p>
+            <p class="hint">{ed().bulletAuto}</p>
           ) : (
             <textarea id="pp-items" class="input area" rows={5} value={((ov?.patch?.items as string[] | undefined) ?? b.items).join('\n')} onInput={(e) => setP({ items: (e.currentTarget as HTMLTextAreaElement).value.split('\n') }, `items:${b.id}`)} />
           )}
@@ -201,11 +202,11 @@ export function BlockProps(props: { t: EditorTemplate; b: EBlock; student: strin
       )}
       {b.kind === 'data' && b.dataKind === 'chart' && (
         <>
-          <Seg label="圖表類型" value={(((ov?.patch?.chartType as string | undefined) ?? b.chartType) ?? 'bar')} opts={CHARTS} onPick={(v) => setP({ chartType: v })} />
+          <Seg label={ed().chartType} value={(((ov?.patch?.chartType as string | undefined) ?? b.chartType) ?? 'bar')} opts={CHARTS()} onPick={(v) => setP({ chartType: v })} />
           <div class="field">
-            <span class="label">顏色</span>
+            <span class="label">{ed().color}</span>
             <div class="chips">
-              {PALETTES.map(([k, n, cols]) => {
+              {PALETTES().map(([k, n, cols]) => {
                 const cur = JSON.stringify((ov?.patch?.colors as string[] | undefined) ?? b.colors ?? []) === JSON.stringify(cols);
                 return (
                   <button key={k} type="button" class={`chip${cur ? ' on' : ''}`} aria-pressed={cur} onClick={() => setP({ colors: cols.length ? cols : undefined })}>
@@ -218,54 +219,54 @@ export function BlockProps(props: { t: EditorTemplate; b: EBlock; student: strin
               })}
             </div>
           </div>
-          <Toggle label="在圖表顯示班級平均參考線" on={((ov?.patch?.compareLine as boolean | undefined) ?? b.compareLine) ?? false} onChange={(v) => setP({ compareLine: v })} />
+          <Toggle label={ed().compareLine} on={((ov?.patch?.compareLine as boolean | undefined) ?? b.compareLine) ?? false} onChange={(v) => setP({ compareLine: v })} />
         </>
       )}
       {b.kind === 'hero' && (
         <>
-          <TextField id="pp-hero-t" label="大標" value={b.title} onInput={(v) => patchBlock(b.id, { title: v }, `title:${b.id}`)} />
-          <TextField id="pp-hero-s" label="副標" value={b.subtitle} onInput={(v) => patchBlock(b.id, { subtitle: v }, `sub:${b.id}`)} />
-          <Swatches label="色塊底色" value={b.fill ?? ''} opts={HERO_FILLS} onPick={(fill) => patchBlock(b.id, { fill: fill || undefined })} />
+          <TextField id="pp-hero-t" label={ed().heroTitle} value={b.title} onInput={(v) => patchBlock(b.id, { title: v }, `title:${b.id}`)} />
+          <TextField id="pp-hero-s" label={ed().heroSub} value={b.subtitle} onInput={(v) => patchBlock(b.id, { subtitle: v }, `sub:${b.id}`)} />
+          <Swatches label={ed().heroFill} value={b.fill ?? ''} opts={HERO_FILLS()} onPick={(fill) => patchBlock(b.id, { fill: fill || undefined })} />
         </>
       )}
       {b.kind === 'stats' && (
         <>
           <div class="field">
-            <span class="label">顯示哪些數字</span>
+            <span class="label">{ed().statsShow}</span>
             <div class="chips">
               {(Object.keys(STAT_KEYS) as StatKey[]).map((k) => {
                 const on = b.items.includes(k);
                 return (
                   <button key={k} type="button" class={`chip${on ? ' on' : ''}`} aria-pressed={on} onClick={() => patchBlock(b.id, { items: on ? b.items.filter((x) => x !== k) : [...b.items, k] })}>
-                    {STAT_KEYS[k].label}
+                    {statLabelUi(k)}
                   </button>
                 );
               })}
             </div>
-            <p class="hint">學生版與家長版不顯示全班名次；某項統計若沒有資料，該數字也不顯示。</p>
+            <p class="hint">{ed().statsHint}</p>
           </div>
-          <Seg label="每列幾格" value={b.perRow} opts={[[2, '2'], [3, '3'], [4, '4']]} onPick={(perRow) => patchBlock(b.id, { perRow })} />
-          <Swatches label="底色" value={b.fill ?? ''} opts={STAT_FILLS} onPick={(fill) => patchBlock(b.id, { fill: fill || undefined })} />
+          <Seg label={ed().perRow} value={b.perRow} opts={[[2, '2'], [3, '3'], [4, '4']]} onPick={(perRow) => patchBlock(b.id, { perRow })} />
+          <Swatches label={ed().bg} value={b.fill ?? ''} opts={STAT_FILLS()} onPick={(fill) => patchBlock(b.id, { fill: fill || undefined })} />
         </>
       )}
       {b.kind === 'callout' && (
         <>
-          <Seg label="種類" value={b.tone} opts={[['praise', '稱讚'], ['hint', '提示']]} onPick={(tone) => patchBlock(b.id, { tone })} />
-          <TextField id="pp-co-t" label="小標題" value={b.title} onInput={(v) => patchBlock(b.id, { title: v }, `ctitle:${b.id}`)} />
+          <Seg label={ed().tone} value={b.tone} opts={[['praise', ed().praise], ['hint', ed().hint]]} onPick={(tone) => patchBlock(b.id, { tone })} />
+          <TextField id="pp-co-t" label={ed().smallTitle} value={b.title} onInput={(v) => patchBlock(b.id, { title: v }, `ctitle:${b.id}`)} />
           {b.slot ? (
-            <p class="hint">內容由統計結果自動填入（同學的優點留言）。</p>
+            <p class="hint">{ed().calloutAuto}</p>
           ) : (
-            <TextField id="pp-co-x" label="內容" value={b.text} onInput={(v) => patchBlock(b.id, { text: v }, `ctext:${b.id}`)} />
+            <TextField id="pp-co-x" label={ed().content} value={b.text} onInput={(v) => patchBlock(b.id, { text: v }, `ctext:${b.id}`)} />
           )}
         </>
       )}
-      {b.kind === 'compare' && <p class="hint">這個區塊比較同學給分與學生自評，並顯示分數差；如果沒有自評資料，該區塊不會出現。</p>}
-      {b.kind === 'data' && b.dataKind !== 'chart' && <p class="hint">這個區塊的數字或內容會依問卷統計自動帶入；可調整位置、複製或設定顯示條件，但不能在這裡直接修改原始分數。</p>}
+      {b.kind === 'compare' && <p class="hint">{ed().compareHint}</p>}
+      {b.kind === 'data' && b.dataKind !== 'chart' && <p class="hint">{ed().dataHint}</p>}
       {b.kind === 'image' && !student && <ImageProps b={b} images={props.images} />}
       {b.kind === 'columns' && !student && (
-        <Seg label="欄數" value={b.cols.length} opts={[[2, '2 欄'], [3, '3 欄'], [4, '4 欄']]} onPick={(n) => columnCount(b.id, n)} />
+        <Seg label={ed().cols} value={b.cols.length} opts={[[2, ed().cols2], [3, ed().cols3], [4, ed().cols4]]} onPick={(n) => columnCount(b.id, n)} />
       )}
-      {!student && <Seg label="下方空白" value={nearest(b.after ?? 0, [0, 6, 12, 20])} opts={[[0, '無'], [6, '小'], [12, '中'], [20, '大']]} onPick={(v) => patchBlock(b.id, { after: v })} />}
+      {!student && <Seg label={ed().spaceBelow} value={nearest(b.after ?? 0, [0, 6, 12, 20])} opts={[[0, ed().none], [6, ed().small], [12, ed().medium], [20, ed().large]]} onPick={(v) => patchBlock(b.id, { after: v })} />}
       <CondEditor b={b} disabled={student !== null} />
       {notes.map((n) => (
         <p key={n.note} class="word-note">
@@ -275,22 +276,22 @@ export function BlockProps(props: { t: EditorTemplate; b: EBlock; student: strin
       {student ? (
         <div class="field">
           <button type="button" class={`btn secondary${ov?.hidden ? ' on' : ''}`} onClick={() => overrideBlock(b.id, { ...ov, hidden: !ov?.hidden })}>
-            {ov?.hidden ? '這位學生：恢復顯示此區塊' : '只在這位學生的版本隱藏此區塊'}
+            {ov?.hidden ? ed().studentShow : ed().studentHide}
           </button>
         </div>
       ) : (
         <div class="btn-row">
           <button type="button" class="btn secondary" onClick={() => moveSel(b.id, -1)}>
-            上移
+            {ed().up}
           </button>
           <button type="button" class="btn secondary" onClick={() => moveSel(b.id, 1)}>
-            下移
+            {ed().down}
           </button>
           <button type="button" class="btn secondary" onClick={() => dupBlock(b.id)}>
-            複製
+            {ed().dup}
           </button>
           <button type="button" class="btn danger" onClick={() => deleteBlock(b.id)}>
-            刪除
+            {ed().del}
           </button>
         </div>
       )}
@@ -302,9 +303,9 @@ function ImageProps({ b, images }: { b: Extract<EBlock, { kind: 'image' }>; imag
   return (
     <>
       <div class="field">
-        <span class="label">圖片</span>
+        <span class="label">{ed().image}</span>
         <label class="btn secondary">
-          {images[b.src] ? '換一張圖片' : '選擇圖片'}
+          {images[b.src] ? ed().changeImage : ed().chooseImage}
           <input
             type="file"
             accept="image/png,image/jpeg"
@@ -319,21 +320,21 @@ function ImageProps({ b, images }: { b: Extract<EBlock, { kind: 'image' }>; imag
           />
         </label>
       </div>
-      <Seg label="大小" value={nearest(b.w, [60, 120, 200])} opts={[[60, '小'], [120, '中'], [200, '大']]} onPick={(w) => patchBlock(b.id, { w, h: Math.round((w * b.h) / b.w) })} />
-      <Toggle label="這是學校 Logo" on={b.isLogo ?? false} onChange={(v) => patchBlock(b.id, { isLogo: v })} />
+      <Seg label={ed().sizeLabel} value={nearest(b.w, [60, 120, 200])} opts={[[60, ed().small], [120, ed().medium], [200, ed().large]]} onPick={(w) => patchBlock(b.id, { w, h: Math.round((w * b.h) / b.w) })} />
+      <Toggle label={ed().isLogo} on={b.isLogo ?? false} onChange={(v) => patchBlock(b.id, { isLogo: v })} />
     </>
   );
 }
 
-const HERO_FILLS: [string, string][] = [
-  ['', '暖橘'],
-  ['#1f4e79', '鈷藍'],
-  ['#2f6f55', '森綠'],
+const HERO_FILLS = (): [string, string][] => [
+  ['', ed().heroOrange],
+  ['#1f4e79', ed().cobalt],
+  ['#2f6f55', ed().heroGreen],
 ];
-const STAT_FILLS: [string, string][] = [
-  ['', '預設'],
-  ['#eef3fa', '淡藍'],
-  ['#fff1d6', '淡黃'],
+const STAT_FILLS = (): [string, string][] => [
+  ['', ed().dflt],
+  ['#eef3fa', ed().lightBlue],
+  ['#fff1d6', ed().lightYellow],
 ];
 
 function TextField(props: { id: string; label: string; value: string; onInput: (v: string) => void }) {
@@ -362,32 +363,32 @@ function Swatches(props: { label: string; value: string; opts: [string, string][
   );
 }
 
-const ADDABLE: { name: string; kind: EBlockKind; preset?: Partial<EBlock> }[] = [
-  { name: '標題', kind: 'heading' },
-  { name: '文字', kind: 'text' },
-  { name: '條列', kind: 'bullets' },
-  { name: '統計表', kind: 'data', preset: { slot: 'scoreTable', dataKind: 'table', label: '評分表' } as Partial<EBlock> },
-  { name: '圖表', kind: 'data', preset: { slot: 'chart', dataKind: 'chart', chartType: 'compare', label: '圖表' } as Partial<EBlock> },
-  { name: '同學的話', kind: 'bullets', preset: { slot: 'praise', items: [], label: '同學的話' } as Partial<EBlock> },
-  { name: '老師的話', kind: 'text', preset: { text: '{老師評語}', label: '老師評語', when: { kind: 'var', name: '老師評語', op: 'nonEmpty' } } as Partial<EBlock> },
-  { name: '圖片', kind: 'image' },
-  { name: '分隔線', kind: 'divider' },
-  { name: '分頁線', kind: 'pageBreak' },
-  { name: '多欄', kind: 'columns' },
+const ADDABLE = (): { name: string; kind: EBlockKind; preset?: Partial<EBlock> }[] => [
+  { name: ed().nHeading, kind: 'heading' },
+  { name: ed().nText, kind: 'text' },
+  { name: ed().nBullets, kind: 'bullets' },
+  { name: ed().nTable, kind: 'data', preset: { slot: 'scoreTable', dataKind: 'table', label: '評分表' } as Partial<EBlock> },
+  { name: ed().nChart, kind: 'data', preset: { slot: 'chart', dataKind: 'chart', chartType: 'compare', label: '圖表' } as Partial<EBlock> },
+  { name: ed().nPraiseList, kind: 'bullets', preset: { slot: 'praise', items: [], label: '同學的話' } as Partial<EBlock> },
+  { name: ed().nTeacher, kind: 'text', preset: { text: '{老師評語}', label: '老師評語', when: { kind: 'var', name: '老師評語', op: 'nonEmpty' } } as Partial<EBlock> },
+  { name: ed().image, kind: 'image' },
+  { name: ed().nDivider, kind: 'divider' },
+  { name: ed().nPageBreak, kind: 'pageBreak' },
+  { name: ed().nColumns, kind: 'columns' },
 ];
-const ADVANCED: { name: string; kind: EBlockKind }[] = [
-  { name: '標題區', kind: 'hero' },
-  { name: '摘要數字列', kind: 'stats' },
-  { name: '稱讚提示', kind: 'callout' },
-  { name: '自評對照表', kind: 'compare' },
+const ADVANCED = (): { name: string; kind: EBlockKind }[] => [
+  { name: ed().nHero, kind: 'hero' },
+  { name: ed().nStats, kind: 'stats' },
+  { name: ed().nCallout, kind: 'callout' },
+  { name: ed().nCompare, kind: 'compare' },
 ];
 
 export function AddPanel(props: { selName: string | null; onDone: () => void }) {
   return (
     <div class="props">
-      <h3 class="props-h">基本區塊</h3>
+      <h3 class="props-h">{ed().basicBlocks}</h3>
       <div class="add-grid">
-        {ADDABLE.map((a) => (
+        {ADDABLE().map((a) => (
           <button
             key={a.name}
             type="button"
@@ -401,9 +402,9 @@ export function AddPanel(props: { selName: string | null; onDone: () => void }) 
           </button>
         ))}
       </div>
-      <h3 class="props-h">進階區塊</h3>
+      <h3 class="props-h">{ed().advBlocks}</h3>
       <div class="add-grid">
-        {ADVANCED.map((a) => (
+        {ADVANCED().map((a) => (
           <button
             key={a.name}
             type="button"
@@ -417,30 +418,30 @@ export function AddPanel(props: { selName: string | null; onDone: () => void }) 
           </button>
         ))}
       </div>
-      <p class="hint">{props.selName ? `會加在「${props.selName}」的下方。` : '會加在最後面。'}</p>
+      <p class="hint">{props.selName ? ed().addedBelow(props.selName) : ed().addedEnd}</p>
     </div>
   );
 }
 
-const MARGINS: [number, string][] = [
-  [28, '窄'],
-  [56.7, '中'],
-  [72, '寬'],
+const MARGINS = (): [number, string][] => [
+  [28, ed().mNarrow],
+  [56.7, ed().medium],
+  [72, ed().mWide],
 ];
-const FRAME_COLORS: [string, string][] = [
-  ['#1f4e79', '鈷藍'],
-  ['#3d4450', '石墨灰'],
-  ['#7a5230', '暖棕'],
+const FRAME_COLORS = (): [string, string][] => [
+  ['#1f4e79', ed().cobalt],
+  ['#3d4450', ed().graphite],
+  ['#7a5230', ed().brown],
 ];
-const FRAME_WIDTHS: [number, string][] = [
-  [0.75, '細'],
-  [1.5, '中'],
-  [3, '粗'],
+const FRAME_WIDTHS = (): [number, string][] => [
+  [0.75, ed().thin],
+  [1.5, ed().medium],
+  [3, ed().thick],
 ];
-const PAGE_BGS: [string, string][] = [
-  ['', '白'],
-  ['#fffaf0', '暖白'],
-  ['#f2f6ff', '淡藍'],
+const PAGE_BGS = (): [string, string][] => [
+  ['', ed().white],
+  ['#fffaf0', ed().warmWhite],
+  ['#f2f6ff', ed().lightBlue],
 ];
 
 export function PagePanel({ t, images }: { t: EditorTemplate; images: Record<string, string> }) {
@@ -448,13 +449,13 @@ export function PagePanel({ t, images }: { t: EditorTemplate; images: Record<str
   const notes = wordNotes(t).filter((n) => n.target === 'page');
   return (
     <div class="props">
-      <Seg label="紙張" value={p.size} opts={[['A4', 'A4'], ['A5', 'A5'], ['Letter', 'Letter']]} onPick={(size) => patchPage({ size })} />
-      <Seg label="方向" value={p.orientation} opts={[['portrait', '直式'], ['landscape', '橫式']]} onPick={(orientation) => patchPage({ orientation })} />
-      <Seg label="邊界" value={nearest(p.mx, [28, 56.7, 72])} opts={MARGINS} onPick={(m) => patchPage({ mx: m, mt: m, mb: m + 14 })} />
+      <Seg label={ed().paper} value={p.size} opts={[['A4', 'A4'], ['A5', 'A5'], ['Letter', 'Letter']]} onPick={(size) => patchPage({ size })} />
+      <Seg label={ed().orient} value={p.orientation} opts={[['portrait', ed().portrait], ['landscape', ed().landscape]]} onPick={(orientation) => patchPage({ orientation })} />
+      <Seg label={ed().margins} value={nearest(p.mx, [28, 56.7, 72])} opts={MARGINS()} onPick={(m) => patchPage({ mx: m, mt: m, mb: m + 14 })} />
       <div class="field">
-        <span class="label">頁面背景</span>
+        <span class="label">{ed().pageBg}</span>
         <div class="chips">
-          {PAGE_BGS.map(([c, n]) => (
+          {PAGE_BGS().map(([c, n]) => (
             <button key={n} type="button" class={`chip${(p.background ?? '') === c ? ' on' : ''}`} aria-pressed={(p.background ?? '') === c} onClick={() => patchPage({ background: c || undefined })}>
               {c && <i class="sw" style={{ background: c }} />}
               {n}
@@ -462,25 +463,25 @@ export function PagePanel({ t, images }: { t: EditorTemplate; images: Record<str
           ))}
         </div>
       </div>
-      <Toggle label="頁框" on={!!p.frame} onChange={(v) => patchPage({ frame: v ? { color: '#1f4e79', width: 1.5, rounded: false } : undefined })} />
+      <Toggle label={ed().frame} on={!!p.frame} onChange={(v) => patchPage({ frame: v ? { color: '#1f4e79', width: 1.5, rounded: false } : undefined })} />
       {p.frame && (
         <>
-          <Seg label="頁框顏色" value={p.frame.color} opts={FRAME_COLORS} onPick={(color) => patchPage({ frame: { ...p.frame!, color } })} />
-          <Seg label="頁框線條粗細" value={nearest(p.frame.width, [0.75, 1.5, 3])} opts={FRAME_WIDTHS} onPick={(width) => patchPage({ frame: { ...p.frame!, width } })} />
-          <Toggle label="頁框圓角" on={p.frame.rounded} onChange={(rounded) => patchPage({ frame: { ...p.frame!, rounded } })} />
+          <Seg label={ed().frameColor} value={p.frame.color} opts={FRAME_COLORS()} onPick={(color) => patchPage({ frame: { ...p.frame!, color } })} />
+          <Seg label={ed().frameWidth} value={nearest(p.frame.width, [0.75, 1.5, 3])} opts={FRAME_WIDTHS()} onPick={(width) => patchPage({ frame: { ...p.frame!, width } })} />
+          <Toggle label={ed().frameRound} on={p.frame.rounded} onChange={(rounded) => patchPage({ frame: { ...p.frame!, rounded } })} />
         </>
       )}
       <div class="field">
         <label class="label" for="pg-foot">
-          頁尾文字
+          {ed().footerText}
         </label>
         <input id="pg-foot" class="input" value={p.footerText} onInput={(e) => patchPage({ footerText: (e.currentTarget as HTMLInputElement).value })} />
       </div>
       <div class="field">
-        <span class="label">學校 Logo</span>
+        <span class="label">{ed().schoolLogo}</span>
         <div class="btn-row">
           <label class="btn secondary">
-            {p.logoSrc && images[p.logoSrc] ? '換一張' : '選擇圖片'}
+            {p.logoSrc && images[p.logoSrc] ? ed().changeShort : ed().chooseImage}
             <input
               type="file"
               accept="image/png,image/jpeg"
@@ -496,7 +497,7 @@ export function PagePanel({ t, images }: { t: EditorTemplate; images: Record<str
           </label>
           {p.logoSrc && (
             <button type="button" class="btn ghost" onClick={() => patchPage({ logoSrc: undefined })}>
-              移除
+              {ed().remove}
             </button>
           )}
         </div>
@@ -515,22 +516,22 @@ export function StudentPanel(props: { t: EditorTemplate; students: { key: string
   const items = listOverrides(props.t, props.student ? m[props.student] : undefined);
   return (
     <div class="props">
-      <p class="hint">選一位學生，只改這位學生的版本；其他同學與全班範本不受影響。</p>
+      <p class="hint">{ed().pickStudentHint}</p>
       <div class="opt-list">
         <button type="button" class={`opt${props.student === null ? ' on' : ''}`} onClick={() => pickStudent(null)}>
-          全班範本
+          {ed().classTemplate}
         </button>
         {props.students.map((s) => (
           <button key={s.key} type="button" class={`opt${props.student === s.key ? ' on' : ''}`} onClick={() => pickStudent(s.key)}>
             {s.name}
-            {m[s.key] && <span class="tag">個別版本</span>}
+            {m[s.key] && <span class="tag">{ed().indivVer}</span>}
           </button>
         ))}
       </div>
       {props.student && (
         <div class="field">
-          <span class="label">被改過的項目</span>
-          {items.length === 0 && <p class="hint">還沒有。選取區塊後修改，會記在這位學生身上。</p>}
+          <span class="label">{ed().changedItems}</span>
+          {items.length === 0 && <p class="hint">{ed().noChanges}</p>}
           <ul class="plain-ul">
             {items.map((it, i) => (
               <li key={i} class="ov-row">
@@ -538,7 +539,7 @@ export function StudentPanel(props: { t: EditorTemplate; students: { key: string
                   {it.label}：{it.what}
                 </span>
                 <button type="button" class="btn ghost small" onClick={() => (it.kind === 'block' && it.part ? overrideBlock(it.id, withoutBlockPart(m[props.student!]?.blocks[it.id], it.part)) : overrideVar(it.id, undefined))}>
-                  還原
+                  {ed().restore}
                 </button>
               </li>
             ))}

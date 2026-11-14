@@ -1,9 +1,10 @@
 // 編輯器畫面：範本庫、區塊編輯器（桌機三欄；手機與直向平板為「預覽／區塊清單」＋底部彈出屬性面板）。
 // 這個檔案連同它引入的模組只在進入編輯器時才下載（動態載入），不進首頁 bundle。
+import { blockNameUi as blockName, ed } from '../strings-editor';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { getState, go, useApp } from '../../app/store';
 import { applyOverrides, countOverrides } from '../../editor/overrides';
-import { blockName, findBlock, walk } from '../../editor/ops';
+import { findBlock, walk } from '../../editor/ops';
 import type { EBlock, EditorTemplate } from '../../editor/types';
 import { pinchZoom } from '../../editor/pinch';
 import { wordNotes } from '../../editor/word';
@@ -72,16 +73,16 @@ function Library({ e }: { e: ES }) {
   return (
     <main class="page editor-lib" id="main">
       <div class="prep-head">
-        <h1>範本與版面</h1>
-        <p class="lead">內建範本保留原樣；第一次編輯時會先複製到「我的範本」，不會修改原版。</p>
+        <h1>{ed().libTitle}</h1>
+        <p class="lead">{ed().libLead}</p>
       </div>
       <SaveNote e={e} hasFolder={st.folder.state === 'ready'} />
-      <div class="seg" role="group" aria-label="篩選範本">
+      <div class="seg" role="group" aria-label={ed().libFilter}>
         {(
           [
-            ['all', '全部'],
-            ['builtin', '內建'],
-            ['mine', '我的'],
+            ['all', ed().all],
+            ['builtin', ed().builtin],
+            ['mine', ed().mine],
           ] as const
         ).map(([k, n]) => (
           <button
@@ -98,29 +99,29 @@ function Library({ e }: { e: ES }) {
       <div class="lib-grid">
         {list.map((t) => (
           <div key={t.id} class="lib-card" data-testid="template-card">
-            <button type="button" class="lib-thumb" aria-label={`編輯「${t.name}」`} onClick={() => openEditor(t.id)}>
+            <button type="button" class="lib-thumb" aria-label={ed().editNamed(t.name)} onClick={() => openEditor(t.id)}>
               <Preview t={t} scale={0.14} thumb />
             </button>
             <div class="lib-meta">
               <strong>{t.name}</strong>
               <span class="tags">
-                <span class="tag">{t.builtin ? '內建' : '我的'}</span>
-                {e.useId === t.id && <span class="tag ok">輸出用</span>}
+                <span class="tag">{t.builtin ? ed().builtin : ed().mine}</span>
+                {e.useId === t.id && <span class="tag ok">{ed().usedForOutput}</span>}
               </span>
             </div>
             <div class="lib-acts">
               {desk && (
                 <>
-                  <button type="button" class="btn secondary small" onClick={() => openEditor(t.id)} aria-label={`編輯版面「${t.name}」`}>
-                    編輯
+                  <button type="button" class="btn secondary small" onClick={() => openEditor(t.id)} aria-label={ed().editLayoutNamed(t.name)}>
+                    {ed().edit}
                   </button>
-                  <button type="button" class="btn secondary small" onClick={() => useTemplate(t.id)} aria-label={`用「${t.name}」輸出`}>
-                    用這份輸出
+                  <button type="button" class="btn secondary small" onClick={() => useTemplate(t.id)} aria-label={ed().useNamed(t.name)}>
+                    {ed().useForOutput}
                   </button>
                 </>
               )}
-              <button type="button" class="btn secondary small" onClick={() => setMenuFor(t.id)} aria-label={`「${t.name}」的選單`}>
-                選單
+              <button type="button" class="btn secondary small" onClick={() => setMenuFor(t.id)} aria-label={ed().menuOf(t.name)}>
+                {ed().menu}
               </button>
             </div>
           </div>
@@ -128,7 +129,7 @@ function Library({ e }: { e: ES }) {
       </div>
       <div class="btn-row">
         <label class="btn secondary">
-          從檔案匯入範本
+          {ed().importFile}
           <input
             type="file"
             accept=".json,application/json"
@@ -142,32 +143,32 @@ function Library({ e }: { e: ES }) {
           />
         </label>
         <button type="button" class="btn" onClick={newTemplate}>
-          建立新範本
+          {ed().createNew}
         </button>
       </div>
       {menu && (
         <Sheet title={menu.name} onClose={() => setMenuFor(null)}>
           <div class="opt-list">
             <button type="button" class="opt" onClick={() => useTemplate(menu.id)}>
-              用這份範本輸出
+              {ed().useThis}
             </button>
             <button type="button" class="opt" onClick={() => openEditor(menu.id)}>
-              編輯版面
+              {ed().editLayout}
             </button>
             <button type="button" class="opt" onClick={() => duplicate(menu.id)}>
-              複製
+              {ed().dup}
             </button>
             <button type="button" class="opt" onClick={() => exportOne(menu.id)}>
-              下載範本檔供分享
+              {ed().download}
             </button>
             {!menu.builtin && menu.basedOn && (
               <button type="button" class="opt" onClick={() => setConfirm({ kind: 'reset', id: menu.id })}>
-                還原為內建版面
+                {ed().restoreBuiltin}
               </button>
             )}
             {!menu.builtin && (
               <button type="button" class="opt danger-text" onClick={() => setConfirm({ kind: 'delete', id: menu.id })}>
-                刪除
+                {ed().del}
               </button>
             )}
           </div>
@@ -175,20 +176,20 @@ function Library({ e }: { e: ES }) {
       )}
       {e.confirm && (
         <Sheet
-          title={e.confirm.kind === 'delete' ? '確定刪除這份範本？' : '恢復成內建版面？'}
+          title={e.confirm.kind === 'delete' ? ed().confDelTitle : ed().confRestTitle}
           onClose={() => setConfirm(null)}
           footer={
             <>
               <button type="button" class="btn secondary grow" onClick={() => setConfirm(null)}>
-                取消
+                {ed().cancel}
               </button>
               <button type="button" class="btn danger grow" onClick={() => (e.confirm!.kind === 'delete' ? removeTemplate(e.confirm!.id) : resetTemplate(e.confirm!.id))}>
-                {e.confirm.kind === 'delete' ? '刪除' : '恢復預設'}
+                {e.confirm.kind === 'delete' ? ed().del : ed().restoreDefault}
               </button>
             </>
           }
         >
-          <p>{e.confirm.kind === 'delete' ? '刪除後無法復原。已輸出的檔案不受影響。' : '你對這份範本做的修改會被內建版面取代，無法復原。'}</p>
+          <p>{e.confirm.kind === 'delete' ? ed().confDelBody : ed().confRestBody}</p>
         </Sheet>
       )}
     </main>
@@ -200,21 +201,21 @@ function SaveNote({ e, hasFolder }: { e: ES; hasFolder: boolean }) {
   return (
     <Notice
       kind="warn"
-      title={hasFolder ? '範本還沒存進資料夾' : '尚未選擇資料夾，請下載備份，避免關閉後遺失範本修改。'}
+      title={hasFolder ? ed().notSaved : ed().noFolder}
       actions={
         <>
           <button type="button" class="btn secondary small" onClick={downloadBackup}>
-            下載目前的範本備份檔
+            {ed().dlBackup}
           </button>
           {!hasFolder && (
             <button type="button" class="btn ghost small" onClick={() => go('settings')}>
-              去設定選資料夾
+              {ed().goSettings}
             </button>
           )}
         </>
       }
     >
-      請先保存下載的範本檔；之後可用「從檔案匯入範本」或開啟設定檔還原。
+      {ed().keepFile}
     </Notice>
   );
 }
@@ -265,7 +266,7 @@ function Edit({ e }: { e: ES }) {
   // 試印 PDF：用虛構示範資料把目前範本實際輸出，開新分頁看；開不了就改下載
   const [trial, setTrial] = useState<{ busy: boolean; msg: string }>({ busy: false, msg: '' });
   const doTrial = async () => {
-    setTrial({ busy: true, msg: '正在產生試印 PDF…' });
+    setTrial({ busy: true, msg: ed().trialBusy });
     try {
       const { trialPdf } = await import('../../app/trial');
       const r = await trialPdf(t0, { version: 'teacher', images: e.data.images, ...(ov ? { override: ov } : {}) });
@@ -277,9 +278,9 @@ function Edit({ e }: { e: ES }) {
         a.click();
       }
       setTimeout(() => URL.revokeObjectURL(url), 60_000);
-      setTrial({ busy: false, msg: r.missingChars.length ? `試印完成。字型缺少：${r.missingChars.join('')}` : '試印完成（用虛構示範資料）。' });
+      setTrial({ busy: false, msg: r.missingChars.length ? ed().trialMissing(r.missingChars.join('')) : ed().trialOk });
     } catch (err) {
-      setTrial({ busy: false, msg: `試印失敗：${err instanceof Error ? err.message : String(err)}` });
+      setTrial({ busy: false, msg: ed().trialFail(err instanceof Error ? err.message : String(err)) });
     }
   };
   // 鍵盤拖曳（5.26）：Space 拿起、↑↓ 移動、Space 放下、Esc 取消（復原已移動的步數）
@@ -288,13 +289,13 @@ function Edit({ e }: { e: ES }) {
   const kbKey = (id: string, ev: KeyboardEvent) => {
     const total = t0.blocks.length;
     const pos = (bid: string) => t0.blocks.findIndex((x) => x.id === bid);
-    const say = (i: number) => setKbMsg(`第 ${i + 1} 個，共 ${total} 個`);
+    const say = (i: number) => setKbMsg(ed().kbPos(i + 1, total));
     const refocus = () => requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-bid="${id}"] .grip`)?.focus());
     if (ev.key === ' ') {
       ev.preventDefault();
       if (kb) {
         setKb(null);
-        setKbMsg(`已放下，第 ${pos(id) + 1} 個`);
+        setKbMsg(ed().kbDropped(pos(id) + 1));
       } else {
         setKb({ id, moves: 0 });
         say(pos(id));
@@ -314,7 +315,7 @@ function Edit({ e }: { e: ES }) {
       ev.stopPropagation();
       for (let n = 0; n < kb.moves; n++) doUndo();
       setKb(null);
-      setKbMsg('已取消');
+      setKbMsg(ed().cancelled);
       refocus();
     }
   };
@@ -364,7 +365,7 @@ function Edit({ e }: { e: ES }) {
   collect(t0.blocks, 0);
 
   const blockList = (
-    <ul class="blk-list" aria-label="區塊清單">
+    <ul class="blk-list" aria-label={ed().blockListAria}>
       <li class="sr" role="status" aria-live="polite">
         {kbMsg}
       </li>
@@ -379,7 +380,7 @@ function Edit({ e }: { e: ES }) {
                 role="button"
                 tabIndex={depth === 0 ? 0 : -1}
                 aria-pressed={kb?.id === id}
-                aria-label="拖曳把手：滑鼠或長按拖曳；鍵盤按空白鍵拿起，上下鍵移動，空白鍵放下，Esc 取消"
+                aria-label={ed().dragHandle}
                 onKeyDown={depth === 0 ? (ev) => kbKey(id, ev as unknown as KeyboardEvent) : undefined}
                 onBlur={() => kb?.id === id && setKb(null)}
                 {...(handleProps(id) as object)}
@@ -389,14 +390,14 @@ function Edit({ e }: { e: ES }) {
             )}
             <button type="button" class="blk-name" onClick={() => select(id)} aria-pressed={sel === id}>
               {blockName(b)}
-              {b.when && <span class="tag">條件</span>}
+              {b.when && <span class="tag">{ed().condCond}</span>}
             </button>
             {!e.student && depth === 0 && (
               <span class="blk-mv">
-                <button type="button" class="icbtn" aria-label={`上移「${blockName(b)}」`} disabled={top === 0} onClick={() => moveSel(id, -1)}>
+                <button type="button" class="icbtn" aria-label={ed().upNamed(blockName(b))} disabled={top === 0} onClick={() => moveSel(id, -1)}>
                   ↑
                 </button>
-                <button type="button" class="icbtn" aria-label={`下移「${blockName(b)}」`} disabled={top === t0.blocks.length - 1} onClick={() => moveSel(id, 1)}>
+                <button type="button" class="icbtn" aria-label={ed().downNamed(blockName(b))} disabled={top === t0.blocks.length - 1} onClick={() => moveSel(id, 1)}>
                   ↓
                 </button>
               </span>
@@ -404,7 +405,7 @@ function Edit({ e }: { e: ES }) {
           </li>
         );
       })}
-      {names.length === 0 && <li class="empty">目前沒有版面區塊，請按「加入區塊」建立內容。</li>}
+      {names.length === 0 && <li class="empty">{ed().noBlocks}</li>}
     </ul>
   );
 
@@ -417,19 +418,19 @@ function Edit({ e }: { e: ES }) {
   const wnotes = wordNotes(t0);
   const header = (
     <div class="ed-bar">
-      <button type="button" class="btn ghost small" aria-label="回範本庫" onClick={backToLibrary}>
+      <button type="button" class="btn ghost small" aria-label={ed().backLib} onClick={backToLibrary}>
         <Icon name="back" />
-        <span class="lbl">範本庫</span>
+        <span class="lbl">{ed().libShort}</span>
       </button>
-      <input class="input ed-name" aria-label="範本名稱" value={t0.name} disabled={t0.builtin} onInput={(ev) => renameTemplate((ev.currentTarget as HTMLInputElement).value)} />
+      <input class="input ed-name" aria-label={ed().tplName} value={t0.name} disabled={t0.builtin} onInput={(ev) => renameTemplate((ev.currentTarget as HTMLInputElement).value)} />
       <button type="button" class="btn secondary small" disabled={!canUndo(e.hist!)} onClick={doUndo}>
-        復原
+        {ed().undo}
       </button>
       <button type="button" class="btn secondary small" disabled={!canRedo(e.hist!)} onClick={doRedo}>
-        重做
+        {ed().redo}
       </button>
       <button type="button" class="btn secondary small" disabled={trial.busy} onClick={doTrial}>
-        試印 PDF
+        {ed().trialPdf}
       </button>
       <span class="sr" role="status" data-testid="trial-msg">
         {trial.msg}
@@ -440,36 +441,36 @@ function Edit({ e }: { e: ES }) {
   const banner = e.student && (
     <Notice
       kind="warn"
-      title="個別版本"
+      title={ed().indivVer}
       actions={
         <button type="button" class="btn secondary small" onClick={() => setPanel('student')}>
-          查看這位學生的個別修改
+          {ed().viewStudent}
         </button>
       }
     >
-      {stu?.name}：{countOverrides(ov)} 項覆寫。回到全班範本不受影響。
+      {ed().indivNote(stu?.name ?? '', countOverrides(ov))}
     </Notice>
   );
 
   const sheets = (
     <>
       {e.panel === 'add' && (
-        <Sheet title="加入區塊" onClose={() => setPanel(null)}>
+        <Sheet title={ed().addBlock} onClose={() => setPanel(null)}>
           <AddPanel selName={selBlock ? blockName(selBlock) : null} onDone={() => (wide ? setPanel(null) : setPanel('props'))} />
         </Sheet>
       )}
       {e.panel === 'page' && (
-        <Sheet title="頁面設定" onClose={() => setPanel(null)} footer={<button type="button" class="btn grow" onClick={() => setPanel(null)}>完成</button>}>
+        <Sheet title={ed().pageSetup} onClose={() => setPanel(null)} footer={<button type="button" class="btn grow" onClick={() => setPanel(null)}>{ed().done}</button>}>
           <PagePanel t={t0} images={images} />
         </Sheet>
       )}
       {e.panel === 'student' && (
-        <Sheet title="單一學生的專屬版面" onClose={() => setPanel(null)} footer={<button type="button" class="btn grow" onClick={() => setPanel(null)}>完成</button>}>
+        <Sheet title={ed().singleLayout} onClose={() => setPanel(null)} footer={<button type="button" class="btn grow" onClick={() => setPanel(null)}>{ed().done}</button>}>
           <StudentPanel t={t0} students={students()} student={e.student} />
         </Sheet>
       )}
       {!wide && e.panel === 'props' && selBlock && (
-        <Sheet title={blockName(selBlock)} onClose={() => setPanel(null)} footer={<button type="button" class="btn grow" onClick={() => setPanel(null)}>完成</button>}>
+        <Sheet title={blockName(selBlock)} onClose={() => setPanel(null)} footer={<button type="button" class="btn grow" onClick={() => setPanel(null)}>{ed().done}</button>}>
           <BlockProps t={t0} b={selBlock} student={e.student} images={images} />
         </Sheet>
       )}
@@ -484,32 +485,32 @@ function Edit({ e }: { e: ES }) {
         {banner}
         <div class="ed-tools">
           <button type="button" class="btn secondary small" onClick={() => setPanel('page')}>
-            頁面設定
+            {ed().pageSetup}
           </button>
           <button type="button" class="btn secondary small" onClick={() => setPanel('student')}>
-            {e.student ? '單一學生的專屬版面（使用中）' : '單一學生的專屬版面'}
+            {e.student ? ed().singleLayoutOn : ed().singleLayout}
           </button>
           <Zoom e={e} pages={pageCount(t0)} />
-          <span class="kbd-hint">Ctrl+Z 復原 · Delete 刪除 · ↑↓ 移動 · 雙擊文字直接改</span>
+          <span class="kbd-hint">{ed().kbdHint}</span>
         </div>
         <div class="ed-grid">
-          <aside class="ed-left" aria-label="區塊">
-            <h2 class="sub-h">區塊</h2>
+          <aside class="ed-left" aria-label={ed().blocks}>
+            <h2 class="sub-h">{ed().blocks}</h2>
             {blockList}
             {!e.student && (
               <button type="button" class="btn secondary" onClick={() => setPanel('add')}>
-                加入區塊
+                {ed().addBlock}
               </button>
             )}
           </aside>
-          <section class="ed-center" aria-label="頁面預覽">
+          <section class="ed-center" aria-label={ed().pagePreview}>
             {pages}
           </section>
-          <aside class="ed-right" aria-label="屬性">
+          <aside class="ed-right" aria-label={ed().props}>
             {propsPanel}
           </aside>
         </div>
-        {wnotes.length > 0 && <p class="hint">部分版面效果在 Word 可能與預覽不同（共 {wnotes.length} 處），請選取提示的區塊查看差異；正式發給學生前，建議先輸出測試檔檢查。</p>}
+        {wnotes.length > 0 && <p class="hint">{ed().wordNote(wnotes.length)}</p>}
         {sheets}
       </main>
     );
@@ -521,47 +522,47 @@ function Edit({ e }: { e: ES }) {
       <SaveNote e={e} hasFolder={st.folder.state === 'ready'} />
       {banner}
       <div class="ed-modes">
-        <div class="seg" role="group" aria-label="檢視">
+        <div class="seg" role="group" aria-label={ed().viewAria}>
           <button type="button" class={e.view === 'preview' ? 'on' : ''} aria-pressed={e.view === 'preview'} onClick={() => setView('preview')}>
-            預覽
+            {ed().preview}
           </button>
           <button type="button" class={e.view === 'list' ? 'on' : ''} aria-pressed={e.view === 'list'} onClick={() => setView('list')}>
-            區塊清單
+            {ed().blockListAria}
           </button>
         </div>
         {e.view === 'preview' && (
           <button type="button" class={`chip${e.editMode ? ' on' : ''}`} aria-pressed={e.editMode} onClick={() => setEditMode(!e.editMode)}>
-            {e.editMode ? '編輯中' : '編輯'}
+            {e.editMode ? ed().editing : ed().edit}
           </button>
         )}
       </div>
       {e.view === 'preview' ? (
         <>
           <Zoom e={e} pages={pageCount(t0)} />
-          <p class="hint">{e.editMode ? '點一下區塊選取，再按下方「編輯屬性」。' : '捲動模式：單指捲動、雙指縮放，不會誤改。要修改請打開「編輯」。'}</p>
+          <p class="hint">{e.editMode ? ed().editHint : ed().scrollHint}</p>
           {pages}
         </>
       ) : (
         <>
           {blockList}
-          <p class="hint">長按「⋮⋮」把手後拖曳排序；也可以用 ↑ ↓ 按鈕。</p>
+          <p class="hint">{ed().dragHint}</p>
         </>
       )}
       <div class="actbar ed-act">
-        <div class="ed-sel">{selBlock ? `已選取：${blockName(selBlock)}` : '沒有選取區塊'}</div>
+        <div class="ed-sel">{selBlock ? ed().selected(blockName(selBlock)) : ed().noSel}</div>
         <button type="button" class="btn secondary" onClick={() => setPanel('page')}>
-          頁面
+          {ed().page}
         </button>
         <button type="button" class="btn secondary" onClick={() => setPanel('student')}>
-          單一學生
+          {ed().singleShort}
         </button>
         {!e.student && (
           <button type="button" class="btn secondary" onClick={() => setPanel('add')}>
-            加入
+            {ed().add}
           </button>
         )}
         <button type="button" class="btn" disabled={!selBlock} onClick={() => setPanel('props')}>
-          編輯屬性
+          {ed().editProps}
         </button>
       </div>
       {sheets}
@@ -572,18 +573,18 @@ function Edit({ e }: { e: ES }) {
 function Zoom({ e, pages }: { e: ES; pages: number }) {
   const f = e.zoom ?? 1;
   return (
-    <div class="zoom" role="group" aria-label="預覽縮放">
-      <button type="button" class="icbtn" aria-label="縮小" disabled={f <= 0.5} onClick={() => setZoom(Math.max(0.5, f - 0.25))}>
+    <div class="zoom" role="group" aria-label={ed().zoomAria}>
+      <button type="button" class="icbtn" aria-label={ed().zoomOut} disabled={f <= 0.5} onClick={() => setZoom(Math.max(0.5, f - 0.25))}>
         −
       </button>
-      <button type="button" class="chip" onClick={() => setZoom(null)} aria-label="符合寬度">
+      <button type="button" class="chip" onClick={() => setZoom(null)} aria-label={ed().fitWidth}>
         {Math.round(f * 100)}%
       </button>
-      <button type="button" class="icbtn" aria-label="放大" disabled={f >= 3} onClick={() => setZoom(Math.min(3, f + 0.25))}>
+      <button type="button" class="icbtn" aria-label={ed().zoomIn} disabled={f >= 3} onClick={() => setZoom(Math.min(3, f + 0.25))}>
         ＋
       </button>
       <span class="zoom-pages" data-testid="page-count">
-        共 {pages} 頁
+        {ed().pagesCount(pages)}
       </span>
     </div>
   );
