@@ -4,6 +4,7 @@ import { en } from './strings.en';
 import { backupStrings, defaultsStrings } from './strings-backup';
 import { backupStringsEn, defaultsStringsEn } from './strings-backup.en';
 import { extraEn, extraZh } from './strings-extra';
+import { edEn, edZh, blockNameUi } from './strings-editor';
 import { dgEn, dgZh } from './strings-guide';
 import { QUICK_TEMPLATES, templateAsSurvey } from '../app/quick-templates';
 import { TEMPLATES_EN, localizeTemplate, questionsAsTextL, templateAsSurveyEn, templateHeadersEn } from '../app/quick-templates.en';
@@ -137,5 +138,23 @@ describe('英文：備份與三層設定、寫死提示、快速範本', () => {
       const hit = recognizeConfig(templateHeadersEn(t), cfgs);
       expect(hit?.config.id).toBe(`tpl-${t.id}`);
     }
+  });
+});
+
+describe('英文：範本編輯器字串（strings-editor）', () => {
+  it('英文鍵與繁中完全一致、沒有中文（函式型字串用固定參數檢查）', () => {
+    expect(shape(edEn)).toEqual(shape(edZh));
+    const bad: string[] = [];
+    cjkPaths(edEn, 'ed', bad);
+    expect(bad).toEqual([]);
+  });
+  it('繁中原文不變，帶參數的字串保留動態值', () => {
+    expect(edZh.editNamed('範本A')).toBe('編輯「範本A」');
+    expect(edZh.kbPos(2, 5)).toBe('第 2 個，共 5 個');
+    expect(edZh.pagesCount(3)).toBe('共 3 頁');
+    expect(edEn.kbPos(2, 5)).toBe('Item 2 of 5');
+    expect(edEn.indivNote('Amy', 3)).toContain('Amy');
+    expect(blockNameUi({ kind: 'hero' })).toBe('標題區');
+    expect(blockNameUi({ kind: 'hero', label: '自訂' })).toBe('自訂');
   });
 });
