@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>統計頁改版（模擬頁）</title>
+<style>
+/*
+ * 問卷回饋小幫手：設計 tokens（唯一來源）
+ * 說明見 docs/design/DESIGN.md。頁面與模擬頁要原樣放入下面三個色彩區塊。
+ * 色彩：淺色在 :root；深色在 prefers-color-scheme 與 [data-theme="dark"] 兩處，值必須相同。
+ */
+:root {
+  /* 色彩：表面 */
+  --paper: #f4f5f7;       /* 頁面底 */
+  --card: #ffffff;        /* 卡片、導覽列、輸入框底 */
+  --sunk: #eceef2;        /* 凹陷底：分段控制軌道、進度軌道、停用 */
+  /* 色彩：文字 */
+  --ink: #14171f;
+  --ink2: #444b5a;
+  --ink3: #5b6373;
+  /* 色彩：線 */
+  --line: #cfd3dc;
+  --line-soft: #e3e6ec;
+  /* 色彩：強調（鈷藍，唯一的強調色；深色版用較深的藍搭白字，不用粉彩色） */
+  --accent: #2554d8;
+  --on-accent: #ffffff;
+  --accent-soft: #e7edff;
+  --accent-ink: #1b3fa6;
+  /* 色彩：語意（不算強調色） */
+  --ok: #17713f;
+  --ok-soft: #dcf1e3;
+  --warn: #7a4f00;
+  --warn-soft: #fdf0d0;
+  --bad: #a8262b;
+  --bad-soft: #fbe2e0;
+  /* 色彩：圖表資料色（色盲友善；一定要搭配文字標籤，不單靠顏色） */
+  --d1: #2554d8;
+  --d2: #cf5f12;
+  --d3: #b3367a;
+  --d4: #0c7a88;
+  --d5: #8a6a0a;
+  --d0: #7b8494;          /* 其他、未分類 */
+  --warn-bar: #b97f00;       /* 同票、需處理的長條（對卡片 3.4:1） */
+  --bar-muted: #7f889b;   /* 未當選、未突顯的長條（對卡片 3.6:1） */
+  --ctl: #7f889b;         /* 控制項外框（選項卡、列按鈕）：對卡片與頁面底 3:1 以上 */
+  --ext-excel: #1d6f42;   /* 外部服務代表色：僅用於自畫的 Excel「X」圖示，不是品牌色 */
+  --scrim: rgba(12, 14, 20, 0.5);
+  --shadow: rgba(20, 24, 40, 0.16);
+  --shadow-sm: rgba(20, 24, 40, 0.08);   /* 卡片的細微層次 */
+
+  /* 字型：介面一律系統字型，不載入網路字型 */
+  --font: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Heiti TC", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Consolas, "Courier New", monospace;
+  --fs-xs: 13px;
+  --fs-sm: 14px;
+  --fs-md: 16px;   /* 手機輸入框不得小於 16，避免 iOS 自動放大 */
+  --fs-lg: 18px;
+  --fs-xl: 22px;
+  --fs-2xl: 28px;
+  --lh-body: 1.65;
+  --lh-tight: 1.3;
+
+  /* 間距（4 的倍數）、圓角、點擊區、動態 */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --r-sm: 8px;     /* 按鈕、輸入框、選項 */
+  --r-md: 12px;    /* 卡片、面板、提示 */
+  --r-lg: 20px;    /* 底部彈出面板上緣 */
+  --tap: 48px;     /* 手機預設點擊高度；任何可點元件不得低於 44px */
+  --tap-min: 44px;
+  --dur: 160ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0e1014;
+    --card: #171a20;
+    --sunk: #0b0c10;
+    --ink: #eceef3;
+    --ink2: #b9bfcc;
+    --ink3: #8f97a8;
+    --line: #2b303a;
+    --line-soft: #20242c;
+    --accent: #3d68f0;
+    --on-accent: #ffffff;
+    --accent-soft: #1a2850;
+    --accent-ink: #9db8ff;
+    --ok: #6fd39a;
+    --ok-soft: #12291c;
+    --warn: #f2c35c;
+    --warn-soft: #2e2410;
+    --bad: #ff9d96;
+    --bad-soft: #3a1b1d;
+    --d1: #6f93ff;
+    --d2: #f08a47;
+    --d3: #e579b3;
+    --d4: #3fc0d0;
+    --d5: #d6b43a;
+    --d0: #8f97a8;
+    --warn-bar: #f0b429;
+    --bar-muted: #6e7789;
+    --ctl: #6e7789;
+    --scrim: rgba(0, 0, 0, 0.65);
+    --shadow: rgba(0, 0, 0, 0.6);
+    --shadow-sm: rgba(0, 0, 0, 0.4);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper: #0e1014;
+  --card: #171a20;
+  --sunk: #0b0c10;
+  --ink: #eceef3;
+  --ink2: #b9bfcc;
+  --ink3: #8f97a8;
+  --line: #2b303a;
+  --line-soft: #20242c;
+  --accent: #3d68f0;
+  --on-accent: #ffffff;
+  --accent-soft: #1a2850;
+  --accent-ink: #9db8ff;
+  --ok: #6fd39a;
+  --ok-soft: #12291c;
+  --warn: #f2c35c;
+  --warn-soft: #2e2410;
+  --bad: #ff9d96;
+  --bad-soft: #3a1b1d;
+  --d1: #6f93ff;
+  --d2: #f08a47;
+  --d3: #e579b3;
+  --d4: #3fc0d0;
+  --d5: #d6b43a;
+  --d0: #8f97a8;
+  --warn-bar: #f0b429;
+  --bar-muted: #6e7789;
+  --ctl: #6e7789;
+  --scrim: rgba(0, 0, 0, 0.65);
+  --shadow: rgba(0, 0, 0, 0.6);
+  --shadow-sm: rgba(0, 0, 0, 0.4);
+  color-scheme: dark;
+}
+
+/*
+ * 輸出文件主題「溫暖」（個人回饋單預設）：紙張永遠是淺色，不隨深色模式改變。
+ * 用法：文件預覽與 PDF／Word 輸出的容器加 class="doc-warm"。
+ */
+.doc-warm {
+  --doc-paper: #fffdf9;
+  --doc-ink: #33291f;
+  --doc-ink2: #66554a;
+  --doc-line: #ead9c3;
+  --doc-accent: #a84f00;
+  --doc-accent-soft: #ffecd2;
+  --doc-leaf: #2f6f55;
+  --doc-leaf-soft: #e1f1e8;
+  --doc-card: #ffffff;
+  --doc-sunk: #efe8dc;
+  --doc-sunk2: #f4eee4;
+  --doc-blue-soft: #e3eaff;
+  --doc-blue-ink: #1b3fa6;
+  --doc-s1: #cf5f12;
+  --doc-s2: #eaa06a;
+  --doc-s3: #ddd5c8;
+  --doc-s4: #7f9be3;
+  --doc-s5: #2554d8;
+}
+
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--sunk);color:var(--ink);font-family:var(--font);font-size:var(--fs-md);line-height:var(--lh-body)}
+.doc{max-width:1360px;margin:0 auto;padding:24px 16px 64px}
+.doc h1{font-size:var(--fs-2xl);line-height:var(--lh-tight);margin:0 0 8px}
+.doc>p,.doc li{color:var(--ink2);font-size:var(--fs-sm)}
+.note{background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r-md);padding:16px;margin:16px 0}
+.note h2{font-size:var(--fs-lg);margin:0 0 8px}
+.note ul{margin:4px 0 0;padding-left:20px}
+.devs{display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start;margin-top:24px}
+.dev{flex:0 0 auto}
+.dev>h3{font-size:var(--fs-sm);color:var(--ink2);margin:0 0 8px}
+.frame{background:var(--paper);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;position:relative}
+.frame.m{width:390px}.frame.t{width:768px}.frame.d{width:1280px}
+.scroll{overflow-x:auto;max-width:100%}
+.bar{display:flex;align-items:center;gap:12px;background:var(--card);border-bottom:1px solid var(--line-soft);padding:0 16px;height:56px}
+.bar .brand{font-weight:700;font-size:17px;white-space:nowrap}
+.bar .sp{flex:1}
+.bar .lk{color:var(--accent-ink);font-weight:600;font-size:15px;white-space:nowrap}
+.steps{display:flex;gap:8px;flex:1}
+.steps i{flex:1;font-style:normal;text-align:center;font-size:var(--fs-xs);color:var(--ink3);border-top:4px solid var(--line-soft);padding-top:4px}
+.steps i.on{color:var(--accent-ink);font-weight:700;border-top-color:var(--accent)}
+.steps i.done{border-top-color:var(--accent);color:var(--ink2)}
+.stepm{display:flex;gap:6px;padding:8px 16px 0;background:var(--card)}
+.stepm i{flex:1;font-style:normal;text-align:center;font-size:var(--fs-xs);color:var(--ink3);border-top:4px solid var(--line-soft);padding-top:4px}
+.stepm i.on{color:var(--accent-ink);font-weight:700;border-top-color:var(--accent)}
+.stepm i.done{border-top-color:var(--accent)}
+.pg{padding:16px}
+.d .pg,.t .pg{padding:24px 44px}
+h2.ttl{font-size:var(--fs-xl);line-height:var(--lh-tight);margin:4px 0 4px}
+.sub{color:var(--ink2);font-size:var(--fs-sm);margin:0 0 12px}
+.card{background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r-md);padding:16px;box-shadow:0 1px 2px var(--shadow-sm)}
+.card+.card,.card+.banner,.banner+.card{margin-top:12px}
+.card h3{font-size:var(--fs-lg);margin:0 0 8px;line-height:var(--lh-tight)}
+.card h4{font-size:var(--fs-md);margin:0 0 6px}
+.hint{color:var(--ink2);font-size:var(--fs-sm);margin:0 0 8px}
+.xs{font-size:var(--fs-xs);color:var(--ink3)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:48px;padding:0 16px;border-radius:var(--r-sm);border:1px solid var(--ink3);background:var(--card);color:var(--ink);font:600 16px var(--font);white-space:nowrap}
+.btn.p{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.g{border-color:transparent;background:transparent;color:var(--accent-ink)}
+.btn.s{min-height:44px;font-size:15px}
+.btn.dis{background:var(--sunk);color:var(--ink3);border-color:transparent}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row.nw{flex-wrap:nowrap}
+.grow{flex:1}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px}
+.chip{flex:0 0 auto;min-height:44px;display:inline-flex;align-items:center;padding:0 16px;border-radius:999px;border:1px solid var(--ctl);background:var(--card);font-size:15px;font-weight:600;white-space:nowrap}
+.chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink)}
+.seg{display:flex;background:var(--sunk);border-radius:var(--r-sm);padding:3px;gap:2px}
+.seg b{flex:1;text-align:center;min-height:44px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;color:var(--ink2);border-radius:6px}
+.seg b.on{background:var(--card);color:var(--accent-ink);box-shadow:0 1px 3px var(--shadow)}
+.tiles{display:flex;gap:12px}
+.tile{flex:1;background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r-md);padding:12px 16px}
+.tile small{display:block;color:var(--ink2);font-size:var(--fs-xs)}
+.tile b{font-size:var(--fs-2xl);line-height:1.2;font-variant-numeric:tabular-nums}
+.tile.warn{background:var(--warn-soft);border-color:var(--warn)}
+.banner{display:flex;align-items:center;gap:12px;background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn);border-radius:var(--r-sm);padding:8px 12px;font-size:var(--fs-sm);min-height:44px}
+.banner.info{background:var(--accent-soft);color:var(--accent-ink);border-color:var(--accent)}
+.banner .x{margin-left:auto;font-weight:700;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center}
+.tag{display:inline-block;height:26px;line-height:26px;padding:0 8px;border-radius:6px;font-size:var(--fs-xs);font-weight:600;background:var(--sunk);color:var(--ink2)}
+.tag.w{background:var(--warn-soft);color:var(--warn)}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}
+.tag.a{background:var(--accent-soft);color:var(--accent-ink)}
+.brow{margin:8px 0}
+.brow .l{display:flex;justify-content:space-between;font-size:var(--fs-sm)}
+.track{height:12px;border-radius:6px;background:var(--sunk);overflow:hidden}
+.track i{display:block;height:100%;background:var(--accent);border-radius:6px}
+table.tb{width:100%;border-collapse:collapse;font-size:var(--fs-sm);font-variant-numeric:tabular-nums}
+table.tb th{background:var(--sunk);text-align:left;padding:8px;font-weight:700}
+table.tb td{padding:8px;border-top:1px solid var(--line-soft)}
+table.tb tr.avg td{background:var(--warn-soft)}
+.acc{display:flex;align-items:center;gap:12px;min-height:64px}
+.acc .t{flex:1}.acc .t b{display:block}
+.acc .t span{color:var(--ink2);font-size:var(--fs-sm)}
+.chev{font-size:20px;color:var(--ink3)}
+.actbar{display:flex;gap:8px;justify-content:flex-end;background:var(--card);border-top:1px solid var(--line-soft);padding:12px 16px}
+.d .actbar,.t .actbar{padding:12px 44px}
+.m .actbar .btn.p{flex:1}
+.cols{display:flex;gap:24px;align-items:flex-start}
+.cols>.main{flex:1;min-width:0}.cols>.side{flex:0 0 340px}
+.cols>.nav{flex:0 0 240px}
+.nav .item{min-height:56px;display:flex;flex-direction:column;justify-content:center;padding:6px 12px;border-radius:var(--r-sm);border:1px solid var(--line-soft);background:var(--card);margin-bottom:8px}
+.nav .item.on{background:var(--accent-soft);border-color:var(--accent)}
+.nav .item b{font-size:var(--fs-sm)}
+.nav .item span{font-size:var(--fs-xs);color:var(--ink2)}
+.nav h4{margin:12px 0 6px;font-size:var(--fs-xs);color:var(--ink3);letter-spacing:.04em}
+.fld{margin:12px 0}
+.fld label{display:block;font-weight:600;font-size:var(--fs-sm);margin-bottom:4px}
+.inp{min-height:48px;border:1px solid var(--ink3);border-radius:var(--r-sm);background:var(--card);padding:10px 12px;color:var(--ink3)}
+.inp.v{color:var(--ink)}
+.ck{display:flex;gap:10px;align-items:center;min-height:44px}
+.ck i{width:22px;height:22px;border:2px solid var(--ink3);border-radius:4px;flex:0 0 auto}
+.ck i.on{background:var(--accent);border-color:var(--accent)}
+/* 範本縮圖：整張 A4 放在固定大小的容器內，用同一個 scale 縮小，字級不另外設像素 */
+.thumbbox{width:var(--tw,150px);height:calc(var(--tw,150px)*1.414);background:#fff;border:1px solid var(--line);border-radius:6px;overflow:hidden;position:relative;flex:0 0 auto}
+.thumbbox .pg794{width:794px;height:1123px;transform:scale(var(--s,0.19));transform-origin:0 0;padding:56px 56px;font-size:20px;color:#222;font-family:var(--font);position:absolute;left:0;top:0}
+.sel{background:var(--card);border:2px solid var(--line-soft);border-radius:var(--r-md);padding:10px;display:flex;flex-direction:column;gap:6px;align-items:center;flex:0 0 auto}
+.sel.on{border-color:var(--accent);background:var(--accent-soft)}
+.sel b{font-size:var(--fs-sm)}
+.stk{position:sticky;top:12px}
+.t .bar .xs{display:none}
+.t .steps i{font-size:12px}
+
+</style></head><body><div class="doc">
+
+<h1>統計頁改版（手機／平板／桌機）</h1>
+<p>2026-11-14 設計員逐頁稽核後的重新設計，待使用者確認。稽核見 <code>docs/design/逐頁版面稽核-2026-11-14.md</code> P07、P08；規範見 DESIGN.md 5.33。全部是虛構資料。</p>
+<div class="note"><h2>改了什麼、為什麼</h2><ul>
+<li><b>結果在第一屏</b>：被評對象（或題目）改成頂端選擇器——手機是可橫向捲動的 chips，桌機是左欄清單——選了就在正下方看到數字與圖表，不必先捲過一整排大卡。</li>
+<li><b>設定收進「進階設定」</b>：最高最低分處理、反向計分題、注意用詞（九個 chip）很少動，預設收成一張卡、只顯示目前設定摘要；展開才看到內容。</li>
+<li><b>審稿成為獨立的一張卡</b>，帶進度（已審 2／5），在結果之後；這是這頁真正要做的事。</li>
+<li><b>儲存警示變成頁頂一行細橫幅</b>（可關閉本次），不再是每次都在頁底的大黃卡；沒有審稿內容的問卷（例如意見調查）不顯示。</li>
+<li><b>桌機</b>：左欄選擇、中欄結果、右欄審稿；底部固定操作列（跟手機同一個元件），「前往輸出」永遠在眼前。手機表格把座號與姓名併成一欄，避免姓名被擠成三行。</li>
+</ul></div>
+<div class="note"><h2>待使用者裁示</h2><ul>
+<li><b>A（建議）：頂端選擇器＋進階設定收合</b>。優點：第一屏就是結果、審稿有進度；缺點：進階設定多一次點擊（但很少用）。</li>
+<li><b>B：維持現在的卡片清單，只把設定與用詞移到頁底</b>。優點：改動最小；缺點：手機仍要先捲過大卡才看到結果。</li>
+</ul></div>
+<div class="devs">
+<div class="dev"><h3>手機 390</h3><div class="frame m"><div class="bar"><span class="brand">問卷回饋小幫手</span><span class="sp"></span><span class="lk">↺</span><span class="lk">✎</span><span class="btn s" style="min-height:40px">⚙</span></div><div class="stepm"><i class="done">開啟問卷</i><i class="done">準備資料</i><i class="on">統計</i><i class="">輸出</i></div><div class="pg"><h2 class="ttl">統計</h2><p class="sub">報告回饋 (回覆)・共 5 筆回覆・<u>統計方法說明</u></p><div class="banner"><span>⚠ 還有 5 則留言沒審；審稿進度不會自動儲存（尚未選資料夾）</span><span class="x" aria-label="關閉本次">✕</span></div>
+<div class="chips" style="margin-top:8px"><span class="chip">全班總覽</span><span class="chip">1 王大明</span><span class="chip on">2 林雅婷</span></div>
+<div class="tiles"><div class="tile"><small>總分（加權）</small><b>7.5</b></div><div class="tile"><small>班級平均</small><b>8.1</b></div></div>
+<div class="card" style="margin-top:12px"><h4>各題平均</h4>
+<div class="brow"><div class="l"><span>簡報內容（充實度）</span><b>7.0</b></div><div class="track"><i style="width:70%"></i></div></div>
+<div class="brow"><div class="l"><span>台風</span><b>8.0</b></div><div class="track"><i style="width:80%"></i></div></div>
+<div class="row" style="justify-content:flex-end"><span class="btn g s">下載這張圖表（JPG）</span></div></div><div class="card"><h3>審稿　<span class="tag w">已審 2／5</span></h3>
+<div class="track" style="margin-bottom:10px"><i style="width:40%"></i></div>
+<div style="border:1px solid var(--line-soft);border-radius:8px;padding:10px;margin-bottom:8px"><span class="tag w">未審</span> 講得很清楚<div class="row" style="margin-top:8px"><span class="btn s p">採用</span><span class="btn s">隱藏</span><span class="btn s">改寫</span></div></div>
+<div style="border:1px solid var(--line-soft);border-radius:8px;padding:10px"><span class="tag w">未審</span> 圖片再大一點<div class="row" style="margin-top:8px"><span class="btn s p">採用</span><span class="btn s">隱藏</span><span class="btn s">改寫</span></div></div>
+<div class="fld"><label>老師評語</label><div class="inp" style="min-height:72px">這位同學…</div></div></div><div class="card" style="margin-top:12px;padding:0;overflow:hidden"><table class="tb"><tr><th>名次</th><th>學生</th><th>簡報</th><th>台風</th><th>總分</th></tr><tr><td>1</td><td>1 王大明</td><td>8.3</td><td>9.0</td><td><b>8.7</b></td></tr><tr><td>2</td><td>2 林雅婷</td><td>7.0</td><td>8.0</td><td><b>7.5</b></td></tr><tr class="avg"><td></td><td>班級平均</td><td>7.7</td><td>8.5</td><td><b>8.1</b></td></tr></table></div><div class="card"><div class="acc"><div class="t"><b>進階設定</b><span>最高最低分：不去除 · 反向題：0 題 · 注意用詞：9 個</span></div><span class="chev">▾</span></div></div></div><div class="actbar"><span class="btn">上一步</span><span class="btn p">前往輸出</span></div></div></div>
+<div class="dev"><h3>平板 768</h3><div class="scroll"><div class="frame t"><div class="bar"><span class="brand">問卷回饋小幫手</span><span class="xs">報告回饋 (回覆).csv</span><div class="steps"><i class="done">① 開啟問卷</i><i class="done">② 準備資料</i><i class="on">③ 統計</i><i class="">④ 輸出</i></div><span class="lk">↺ 重新開始</span><span class="lk">✎ 範本</span><span class="btn s" style="min-height:40px">⚙ 設定</span></div><div class="pg"><h2 class="ttl">統計</h2><p class="sub">報告回饋 (回覆)・共 5 筆回覆・<u>統計方法說明</u></p><div class="banner"><span>⚠ 還有 5 則留言沒審；審稿進度不會自動儲存（尚未選資料夾）</span><span class="x" aria-label="關閉本次">✕</span></div>
+<div class="chips" style="margin-top:8px"><span class="chip">全班總覽</span><span class="chip">1 王大明</span><span class="chip on">2 林雅婷</span></div>
+<div class="cols"><div class="main"><div class="tiles"><div class="tile"><small>總分（加權）</small><b>7.5</b></div><div class="tile"><small>班級平均</small><b>8.1</b></div></div>
+<div class="card" style="margin-top:12px"><h4>各題平均</h4>
+<div class="brow"><div class="l"><span>簡報內容（充實度）</span><b>7.0</b></div><div class="track"><i style="width:70%"></i></div></div>
+<div class="brow"><div class="l"><span>台風</span><b>8.0</b></div><div class="track"><i style="width:80%"></i></div></div>
+<div class="row" style="justify-content:flex-end"><span class="btn g s">下載這張圖表（JPG）</span></div></div><div class="card" style="margin-top:12px;padding:0;overflow:hidden"><table class="tb"><tr><th>名次</th><th>學生</th><th>簡報</th><th>台風</th><th>總分</th></tr><tr><td>1</td><td>1 王大明</td><td>8.3</td><td>9.0</td><td><b>8.7</b></td></tr><tr><td>2</td><td>2 林雅婷</td><td>7.0</td><td>8.0</td><td><b>7.5</b></td></tr><tr class="avg"><td></td><td>班級平均</td><td>7.7</td><td>8.5</td><td><b>8.1</b></td></tr></table></div></div><div class="side" style="flex-basis:300px"><div class="card"><h3>審稿　<span class="tag w">已審 2／5</span></h3>
+<div class="track" style="margin-bottom:10px"><i style="width:40%"></i></div>
+<div style="border:1px solid var(--line-soft);border-radius:8px;padding:10px;margin-bottom:8px"><span class="tag w">未審</span> 講得很清楚<div class="row" style="margin-top:8px"><span class="btn s p">採用</span><span class="btn s">隱藏</span><span class="btn s">改寫</span></div></div>
+<div style="border:1px solid var(--line-soft);border-radius:8px;padding:10px"><span class="tag w">未審</span> 圖片再大一點<div class="row" style="margin-top:8px"><span class="btn s p">採用</span><span class="btn s">隱藏</span><span class="btn s">改寫</span></div></div>
+<div class="fld"><label>老師評語</label><div class="inp" style="min-height:72px">這位同學…</div></div></div></div></div>
+<div style="margin-top:12px"><div class="card"><div class="acc"><div class="t"><b>進階設定</b><span>最高最低分：不去除 · 反向題：0 題 · 注意用詞：9 個</span></div><span class="chev">▾</span></div></div></div></div><div class="actbar"><span class="btn">上一步</span><span class="btn p">前往輸出</span></div></div></div></div>
+<div class="dev"><h3>桌機 1280</h3><div class="scroll"><div class="frame d"><div class="bar"><span class="brand">問卷回饋小幫手</span><span class="xs">報告回饋 (回覆).csv</span><div class="steps"><i class="done">① 開啟問卷</i><i class="done">② 準備資料</i><i class="on">③ 統計</i><i class="">④ 輸出</i></div><span class="lk">↺ 重新開始</span><span class="lk">✎ 範本</span><span class="btn s" style="min-height:40px">⚙ 設定</span></div><div class="pg"><h2 class="ttl">統計</h2><p class="sub">報告回饋 (回覆)・共 5 筆回覆・<u>統計方法說明</u></p><div class="banner"><span>⚠ 還有 5 則留言沒審；審稿進度不會自動儲存（尚未選資料夾）</span><span class="x" aria-label="關閉本次">✕</span></div>
+<div class="cols" style="margin-top:12px"><div class="nav" style="flex-basis:220px"><h4 style="margin-top:0">被評對象</h4><div class="item"><b>全班統計總覽</b><span>2 人</span></div><div class="item"><b>1 王大明</b><span>8.7 · 第 1 名</span></div><div class="item on"><b>2 林雅婷</b><span>7.5 · 第 2 名</span></div></div>
+<div class="main"><div class="tiles"><div class="tile"><small>總分（加權）</small><b>7.5</b></div><div class="tile"><small>班級平均</small><b>8.1</b></div></div>
+<div class="card" style="margin-top:12px"><h4>各題平均</h4>
+<div class="brow"><div class="l"><span>簡報內容（充實度）</span><b>7.0</b></div><div class="track"><i style="width:70%"></i></div></div>
+<div class="brow"><div class="l"><span>台風</span><b>8.0</b></div><div class="track"><i style="width:80%"></i></div></div>
+<div class="row" style="justify-content:flex-end"><span class="btn g s">下載這張圖表（JPG）</span></div></div><div class="card" style="margin-top:12px;padding:0;overflow:hidden"><table class="tb"><tr><th>名次</th><th>學生</th><th>簡報</th><th>台風</th><th>總分</th></tr><tr><td>1</td><td>1 王大明</td><td>8.3</td><td>9.0</td><td><b>8.7</b></td></tr><tr><td>2</td><td>2 林雅婷</td><td>7.0</td><td>8.0</td><td><b>7.5</b></td></tr><tr class="avg"><td></td><td>班級平均</td><td>7.7</td><td>8.5</td><td><b>8.1</b></td></tr></table></div></div><div class="side"><div class="card"><h3>審稿　<span class="tag w">已審 2／5</span></h3>
+<div class="track" style="margin-bottom:10px"><i style="width:40%"></i></div>
+<div style="border:1px solid var(--line-soft);border-radius:8px;padding:10px;margin-bottom:8px"><span class="tag w">未審</span> 講得很清楚<div class="row" style="margin-top:8px"><span class="btn s p">採用</span><span class="btn s">隱藏</span><span class="btn s">改寫</span></div></div>
+<div style="border:1px solid var(--line-soft);border-radius:8px;padding:10px"><span class="tag w">未審</span> 圖片再大一點<div class="row" style="margin-top:8px"><span class="btn s p">採用</span><span class="btn s">隱藏</span><span class="btn s">改寫</span></div></div>
+<div class="fld"><label>老師評語</label><div class="inp" style="min-height:72px">這位同學…</div></div></div></div></div>
+<div style="margin-top:12px"><div class="card"><div class="acc"><div class="t"><b>進階設定</b><span>最高最低分：不去除 · 反向題：0 題 · 注意用詞：9 個</span></div><span class="chev">▾</span></div></div></div></div><div class="actbar"><span class="btn">上一步</span><span class="btn p">前往輸出</span></div></div></div></div>
+</div>
+</div>
+<script>/* 靜態模擬頁，無互動 */</script></body></html>

@@ -30,6 +30,8 @@
 
 ## 下一步
 
+- [ ] **逐頁版面稽核改版（2026-11-14，設計員）**：統計、輸出、設定三頁的重新設計提案與跨頁規則（G1～G6）**待使用者確認**；確認後由調度員派施工。稽核與小改清單 S1～S10：[逐頁版面稽核](docs/design/逐頁版面稽核-2026-11-14.md)；規範草案 [DESIGN.md 5.33](docs/design/DESIGN.md)；模擬頁 `docs/design/mockups/稽核改版-*.html`。未走到的頁（選課分配結果、票選、確認視窗、錯誤狀態、英文、深色）需補稽核。`src/` 未動。
+
 1. **真實 Google 登入實測**：需使用者本人用 derliang@gmail.com 登入，走 Picker → 試算表 → Drive 存檔；通過後再發布新版（見下方 v0.4 與「手機保存流程」兩節，來源 [docs/dispatch/調度員換手交接.md](docs/dispatch/調度員換手交接.md)）。
 2. **正式站畫面問題**：等使用者逐項說明（`ui-complaints`），產出 `docs/design/畫面問題待辦.md`（目前尚不存在）後再派補丁（同上來源）。
 3. **實機驗證**：iPhone／Android 手機與平板，唯一入口是下方「v1.0」的「實機驗證」項；步驟見 [docs/real-device-checklist.md](docs/real-device-checklist.md)。
