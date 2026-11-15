@@ -11,7 +11,9 @@ export const defaultsStringsEn: Widen<typeof defaultsStrings> = {
   kinds: { feedback: 'Presentation feedback', opinion: 'Opinion survey', vote: 'Election' },
   runNote: 'This layer only applies to this one output and is not saved.',
   revert: 'Change back to the previous layer’s value',
-  current: 'Current value',
+  custom: 'Customized',
+  inherit: 'Inherited from',
+  allDefault: 'Fields without a "Customized" tag use the built-in default.',
   fields: {
     school: 'School name',
     filenameRule: 'File name rule',

@@ -1,6 +1,6 @@
 import { type Page, expect, test } from '@playwright/test';
 import { QUICK_TEMPLATES, templateHeaders } from '../../src/app/quick-templates';
-import { makeXlsx, surveyFile } from './fixtures';
+import { makeXlsx, settingsTab, surveyFile } from './fixtures';
 
 const noOverflow = async (page: Page) => {
   const width = page.viewportSize()!.width;
@@ -25,6 +25,7 @@ async function statsPerson(page: Page) {
 test('深色模式：設定頁切換後整個畫面換深色，不橫向捲動', async ({ page }) => {
   await page.goto('./');
   await page.getByRole('button', { name: '設定', exact: true }).click();
+  await settingsTab(page, 'look');
   await page.getByRole('radio', { name: '深色' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
@@ -214,6 +215,7 @@ test('教學頁與示範資料：六個區段，載入示範資料進準備資�
 test('英文介面：切換後主要畫面變英文，沒翻到的字退回中文，換回來恢復', async ({ page }) => {
   await page.goto('./');
   await page.getByRole('button', { name: '設定', exact: true }).click();
+  await settingsTab(page, 'look');
   await page.getByRole('radio', { name: 'English' }).click();
   await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible();
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
@@ -225,6 +227,7 @@ test('英文介面：切換後主要畫面變英文，沒翻到的字退回中�
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Choose the survey to work on' })).toBeVisible();
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await settingsTab(page, 'look', 'en');
   await page.getByRole('radio', { name: '繁體中文' }).click();
   await expect(page.getByRole('heading', { name: '設定', level: 1 })).toBeVisible();
   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-Hant');

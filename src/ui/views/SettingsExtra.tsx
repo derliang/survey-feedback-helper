@@ -27,16 +27,24 @@ export function DefaultsCard() {
   const mine: Partial<ReportSettings> = layer === 'global' ? l.global : layer === 'kind' ? l.byKind[kind] ?? {} : l.run;
   void st;
 
+  // 只有被改過的欄位才有標籤：這一層自訂＝「已自訂」＋改回；沿用上一層的值＝「沿用…」；其餘（內建預設）不顯示。
   function Tag({ k }: { k: keyof ReportSettings }) {
+    const own = mine[k] !== undefined;
+    if (!own && src[k] === 'default') return null;
     return (
       <span class="row-meta">
-        <span class="tag">
-          {D.current}：{D.sources[src[k]]}
-        </span>
-        {mine[k] !== undefined && (
-          <button class="btn quiet" type="button" onClick={() => setLayerValue(layer, kind, k, undefined)}>
-            {D.revert}
-          </button>
+        {own ? (
+          <>
+            <span class="tag accent">{D.custom}</span>
+            <button class="btn quiet" type="button" onClick={() => setLayerValue(layer, kind, k, undefined)}>
+              {D.revert}
+            </button>
+          </>
+        ) : (
+          <span class="tag">
+            {D.inherit}
+            {D.sources[src[k]]}
+          </span>
         )}
       </span>
     );
@@ -44,11 +52,13 @@ export function DefaultsCard() {
 
   const text = (k: 'school' | 'filenameRule') => (
     <div class="field" key={k}>
-      <label class="label" for={`def-${k}`}>
-        {D.fields[k]}
-      </label>
+      <div class="label-row">
+        <label class="label" for={`def-${k}`}>
+          {D.fields[k]}
+        </label>
+        <Tag k={k} />
+      </div>
       <input id={`def-${k}`} class="input" type="text" value={mine[k] ?? value[k]} onInput={(e) => setLayerValue(layer, kind, k, (e.target as HTMLInputElement).value)} />
-      <Tag k={k} />
     </div>
   );
   const toggle = (k: 'deidentify' | 'showOthersNames' | 'showRawComments' | 'showClassCompare') => (
@@ -87,7 +97,10 @@ export function DefaultsCard() {
       <div class="stack" style="margin-top:var(--sp-3)">
         {text('school')}
         <div class="field">
-          <span class="label">{D.versionLabel}</span>
+          <div class="label-row">
+            <span class="label">{D.versionLabel}</span>
+            <Tag k="version" />
+          </div>
           <div class="seg" role="radiogroup" aria-label={D.versionLabel}>
             {VERSIONS.map((v) => (
               <button key={v} type="button" role="radio" aria-checked={value.version === v} class={value.version === v ? 'on' : ''} onClick={() => setLayerValue(layer, kind, 'version', v)}>
@@ -95,7 +108,6 @@ export function DefaultsCard() {
               </button>
             ))}
           </div>
-          <Tag k="version" />
         </div>
         {text('filenameRule')}
         {toggle('deidentify')}
@@ -103,9 +115,12 @@ export function DefaultsCard() {
         {toggle('showRawComments')}
         {toggle('showClassCompare')}
         <div class="field">
-          <label class="label" for="def-keywords">
-            {D.fields.keywords}
-          </label>
+          <div class="label-row">
+            <label class="label" for="def-keywords">
+              {D.fields.keywords}
+            </label>
+            <Tag k="keywords" />
+          </div>
           <input
             id="def-keywords"
             class="input"
@@ -123,9 +138,9 @@ export function DefaultsCard() {
               )
             }
           />
-          <Tag k="keywords" />
         </div>
       </div>
+      <p class="xs-note">{D.allDefault}</p>
     </section>
   );
 }
