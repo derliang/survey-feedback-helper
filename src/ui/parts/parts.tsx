@@ -46,6 +46,39 @@ export function Notice(props: { kind?: NoticeKind; title?: string; children?: Co
   );
 }
 
+
+/** 「這次先關掉」的頁頂橫幅：只記在這次開啟網站期間（不寫入任何儲存），重新整理後若問題還在會再出現。 */
+const bannerClosed = new Set<string>();
+
+/**
+ * 頁頂細橫幅（DESIGN 5.33 D①，使用者 2026-11-14 裁示 G1）：儲存警示用，一行字加一個動作，可關閉本次。
+ * 手機窄到放不下時文字折行，高度至少 44。`id` 用來記住「這次已關閉」。
+ */
+export function TopBanner(props: { id: string; children: ComponentChildren; action?: ComponentChildren }) {
+  const [, bump] = useState(0);
+  if (bannerClosed.has(props.id)) return null;
+  return (
+    <div class="top-banner" role="status" data-testid={`banner-${props.id}`}>
+      <div class="top-banner-in">
+        <Icon name="warn" />
+        <span class="top-banner-text">{props.children}</span>
+        {props.action}
+        <button
+          class="btn ghost small"
+          type="button"
+          aria-label={strings.close}
+          onClick={() => {
+            bannerClosed.add(props.id);
+            bump((n) => n + 1);
+          }}
+        >
+          {strings.close}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /** 彈出面板：手機由下往上、平板靠右、桌機置中；點遮罩關閉。 */
 export function Sheet(props: { title: string; onClose: () => void; children: ComponentChildren; footer?: ComponentChildren; label?: string }) {
   const ref = useRef<HTMLDivElement>(null);

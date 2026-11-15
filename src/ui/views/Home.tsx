@@ -1,7 +1,6 @@
 import { useRef, useState } from "preact/hooks";
 import {
   dismiss,
-  downloadSettings,
   go,
   importSettings,
   openSurveyFile,
@@ -11,6 +10,7 @@ import {
 } from "../../app/store";
 import { isTouchDevice, recentSurveys } from "../../storage";
 import { strings as S } from "../strings";
+import { sourceName } from "../strings-extra";
 import { Icon, Notice } from "../parts/parts";
 import { LazyFig } from "../parts/LazyDiagram";
 import { rich } from "../parts/rich";
@@ -68,23 +68,6 @@ export function FolderNotices() {
             </button>
           </div>
         )}
-      {f.state !== "ready" && st.dirty && (
-        <Notice
-          kind="warn"
-          title={S.folder.dirtyTitle}
-          actions={
-            <button
-              class="btn primary small"
-              type="button"
-              onClick={() => void downloadSettings()}
-            >
-              {touch ? S.folder.saveToFiles : S.folder.download}
-            </button>
-          }
-        >
-          {touch ? S.folder.touchDirtyBody : S.folder.dirtyBody}
-        </Notice>
-      )}
     </>
   );
 }
@@ -240,7 +223,7 @@ export function Home() {
                       >
                         <strong>{r.name}</strong>
                         <span class="meta">
-                          {S.home.kindNames[r.kind]} · {r.sourceLabel}
+                          {S.home.kindNames[r.kind]} · {sourceName(r.sourceLabel)}
                         </span>
                         <span class="meta">
                           {S.home.lastUsed(

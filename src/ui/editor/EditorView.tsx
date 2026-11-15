@@ -8,7 +8,7 @@ import { findBlock, walk } from '../../editor/ops';
 import type { EBlock, EditorTemplate } from '../../editor/types';
 import { pinchZoom } from '../../editor/pinch';
 import { wordNotes } from '../../editor/word';
-import { Icon, Notice, Sheet, useWide } from '../parts/parts';
+import { Icon, Notice, Sheet, TopBanner, useWide } from '../parts/parts';
 import './editor.css';
 import { useDragSort } from './drag';
 import { AddPanel, BlockProps, PagePanel, StudentPanel } from './Panels';
@@ -71,12 +71,13 @@ function Library({ e }: { e: ES }) {
   const list = allTemplates(e.data).filter((t) => filter === 'all' || (filter === 'builtin') === t.builtin);
   const menu = e.menuFor ? allTemplates(e.data).find((t) => t.id === e.menuFor) : undefined;
   return (
+    <>
+    <SaveNote e={e} hasFolder={st.folder.state === 'ready'} />
     <main class="page editor-lib" id="main">
       <div class="prep-head">
         <h1>{ed().libTitle}</h1>
         <p class="lead">{ed().libLead}</p>
       </div>
-      <SaveNote e={e} hasFolder={st.folder.state === 'ready'} />
       <div class="seg" role="group" aria-label={ed().libFilter}>
         {(
           [
@@ -193,16 +194,17 @@ function Library({ e }: { e: ES }) {
         </Sheet>
       )}
     </main>
+    </>
   );
 }
 
+/** 「範本還沒存進資料夾」：頁頂細橫幅（G1），放在 main 之前，與全站儲存警示同一個元件。 */
 function SaveNote({ e, hasFolder }: { e: ES; hasFolder: boolean }) {
   if (!e.unsaved) return null;
   return (
-    <Notice
-      kind="warn"
-      title={hasFolder ? ed().notSaved : ed().noFolder}
-      actions={
+    <TopBanner
+      id={hasFolder ? 'tpl-notsaved' : 'tpl-nofolder'}
+      action={
         <>
           <button type="button" class="btn secondary small" onClick={downloadBackup}>
             {ed().dlBackup}
@@ -215,8 +217,8 @@ function SaveNote({ e, hasFolder }: { e: ES; hasFolder: boolean }) {
         </>
       }
     >
-      {ed().keepFile}
-    </Notice>
+      {hasFolder ? ed().notSaved : ed().noFolder}
+    </TopBanner>
   );
 }
 
@@ -479,10 +481,11 @@ function Edit({ e }: { e: ES }) {
 
   if (wide) {
     return (
+      <>
+      <SaveNote e={e} hasFolder={st.folder.state === 'ready'} />
       <main class="page editor wide" id="main">
         {header}
-        <SaveNote e={e} hasFolder={st.folder.state === 'ready'} />
-        {banner}
+          {banner}
         <div class="ed-tools">
           <button type="button" class="btn secondary small" onClick={() => setPanel('page')}>
             {ed().pageSetup}
@@ -513,13 +516,15 @@ function Edit({ e }: { e: ES }) {
         {wnotes.length > 0 && <p class="hint">{ed().wordNote(wnotes.length)}</p>}
         {sheets}
       </main>
+      </>
     );
   }
 
   return (
+    <>
+    <SaveNote e={e} hasFolder={st.folder.state === 'ready'} />
     <main class="page editor narrow" id="main">
       {header}
-      <SaveNote e={e} hasFolder={st.folder.state === 'ready'} />
       {banner}
       <div class="ed-modes">
         <div class="seg" role="group" aria-label={ed().viewAria}>
@@ -567,6 +572,7 @@ function Edit({ e }: { e: ES }) {
       </div>
       {sheets}
     </main>
+    </>
   );
 }
 

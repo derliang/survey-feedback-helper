@@ -280,6 +280,30 @@ select {
   margin: var(--sp-3) auto 0;
   padding: 0 var(--sp-4);
 }
+/* 頁頂儲存警示橫幅（DESIGN 5.33 D①）：一行、可關閉本次，取代頁底大卡 */
+.top-banner {
+  background: var(--warn-soft);
+  border-bottom: 1px solid var(--warn);
+  color: var(--ink);
+  font-size: var(--fs-sm);
+}
+.top-banner-in {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 44px;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: var(--sp-1) var(--sp-4);
+}
+.top-banner .ic {
+  flex: none;
+  color: var(--warn);
+}
+.top-banner-text {
+  flex: 1;
+  min-width: 0;
+}
 .card {
   background: var(--card);
   border: 1px solid var(--line-soft);

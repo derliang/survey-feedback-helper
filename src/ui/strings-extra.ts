@@ -19,6 +19,7 @@ export const extraZh = {
   output: { previewFirst: (who: string) => `先預覽${who}` },
   phrases: { shortTitle: '短標題' },
   prep: { optional: '（選用）' },
+  source: { 'Excel 檔': 'Excel 檔', 'CSV／TSV 檔': 'CSV／TSV 檔', 'Google 試算表': 'Google 試算表' } as Record<string, string>,
   review: { original: '原文：' },
   roster: {
     status: '狀態',
@@ -114,6 +115,7 @@ export const extraEn: Extra = {
   output: { previewFirst: (who) => `Preview ${who} first` },
   phrases: { shortTitle: 'Short title' },
   prep: { optional: ' (optional)' },
+  source: { 'Excel 檔': 'Excel file', 'CSV／TSV 檔': 'CSV/TSV file', 'Google 試算表': 'Google Sheets' } as Record<string, string>,
   review: { original: 'Original: ' },
   roster: {
     status: 'Status',
@@ -185,6 +187,11 @@ export const extraEn: Extra = {
     minOver: 'The minimum class size cannot be higher than the course capacity; please fix it before allocating.',
   },
 };
+
+/** 來源標籤（存檔時是繁中原文）顯示時依介面語言轉換；不認得的字樣（如範本內自訂）原樣顯示。 */
+export function sourceName(label: string): string {
+  return extra().source[label] ?? label;
+}
 
 export function extra(): Extra {
   return currentLang() === 'en' ? extraEn : extraZh;
