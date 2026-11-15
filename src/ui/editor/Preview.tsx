@@ -224,7 +224,9 @@ export function Preview(props: {
   const dim = PAGE_SIZES[p.size];
   const pw = p.orientation === 'landscape' ? dim.h : dim.w;
   const ph = p.orientation === 'landscape' ? dim.w : dim.h;
-  const s = props.scale ?? (w ? (w / pw) * (props.factor ?? 1) : 0.5);
+  // 縮圖：整張紙以 1pt＝1px 畫出，再用同一個 transform: scale 整體縮小；文字不另設縮小後的像素字級（太小的字級會被瀏覽器的最小字級放大，蓋住縮圖）
+  const thumbK = props.thumb ? (props.scale ?? (w ? w / pw : 0.2)) : 1;
+  const s = props.thumb ? 1 : (props.scale ?? (w ? (w / pw) * (props.factor ?? 1) : 0.5));
   const vars = { ...SAMPLE_VARS, ...(props.vars ?? {}) };
   const ctx: Ctx = {
     s,
@@ -237,27 +239,38 @@ export function Preview(props: {
     ...(props.grip ? { grip: props.grip } : {}),
     drag: props.drag ?? null,
   };
+  // 縮圖一定要寫 'px' 字串：數字的 width／height 在這裡不會套用（紙張會變成撐滿容器），縮圖才會跑版
+  const dimv = (n: number): number | string => (props.thumb ? `${n}px` : n);
+  const paper = (
+    <div
+      class="pv-page doc-warm"
+      style={{
+        width: dimv(pw * s),
+        minHeight: dimv(ph * s),
+        padding: `${p.mt * s}px ${p.mx * s}px ${p.mb * s}px`,
+        background: p.background ?? 'var(--doc-card)',
+        border: p.frame ? `${Math.max(1, p.frame.width * s)}px solid ${p.frame.color}` : undefined,
+        borderRadius: p.frame?.rounded ? dimv(12 * s) : 0,
+      }}
+    >
+      {p.logoSrc && ctx.images[p.logoSrc] && <img class="pv-logo" src={ctx.images[p.logoSrc]} alt="" style={{ height: dimv(36 * s) }} />}
+      {props.t.blocks.map((b) => (
+        <Block key={b.id} b={b} c={ctx} />
+      ))}
+      <div class="pv-foot" style={{ fontSize: 9 * s }}>
+        {fillVars(p.footerText, vars)}｜{ed().pvPage1}
+      </div>
+    </div>
+  );
   return (
     <div class={`pv-box${props.thumb ? ' thumb' : ''}`} ref={box} onClick={() => props.interactive && props.onSelect?.(null)}>
-      <div
-        class="pv-page doc-warm"
-        style={{
-          width: pw * s,
-          minHeight: ph * s,
-          padding: `${p.mt * s}px ${p.mx * s}px ${p.mb * s}px`,
-          background: p.background ?? 'var(--doc-card)',
-          border: p.frame ? `${Math.max(1, p.frame.width * s)}px solid ${p.frame.color}` : undefined,
-          borderRadius: p.frame?.rounded ? 12 * s : 0,
-        }}
-      >
-        {p.logoSrc && ctx.images[p.logoSrc] && <img class="pv-logo" src={ctx.images[p.logoSrc]} alt="" style={{ height: 36 * s }} />}
-        {props.t.blocks.map((b) => (
-          <Block key={b.id} b={b} c={ctx} />
-        ))}
-        <div class="pv-foot" style={{ fontSize: 9 * s }}>
-          {fillVars(p.footerText, vars)}｜{ed().pvPage1}
+      {props.thumb ? (
+        <div class="pv-thumb" style={{ width: `${pw * thumbK}px`, height: `${ph * thumbK}px` }}>
+          <div style={{ width: `${pw}px`, transform: `scale(${thumbK})`, transformOrigin: '0 0' }}>{paper}</div>
         </div>
-      </div>
+      ) : (
+        paper
+      )}
     </div>
   );
 }

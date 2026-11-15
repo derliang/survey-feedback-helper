@@ -17,20 +17,23 @@ export default function OutputPicker() {
   const cur = pickedTemplates().personal.id;
   return (
     <div>
-      <div class="lib-grid" role="radiogroup" aria-label={S.output.templateTitle}>
+      <div class="out-tpls" role="radiogroup" aria-label={S.output.templateTitle}>
         {list.map((t) => (
-          <label key={t.id} class="lib-card" data-testid="output-template">
+          <label key={t.id} class={`out-tpl${t.id === cur ? ' on' : ''}`} data-testid="output-template">
             <input type="radio" name="out-template" checked={t.id === cur} onChange={() => setOutputTemplate(t.id)} aria-label={t.name} />
-            <div class="lib-thumb" aria-hidden="true">
-              <Preview t={t} scale={0.14} thumb />
+            <div class="out-thumb" aria-hidden="true">
+              <Preview t={t} thumb />
             </div>
-            <span class="lib-meta">{t.name}</span>
+            <b>{t.name}</b>
+            {t.id === cur && <span class="tag ok">{S.output.templateCurrent}</span>}
           </label>
         ))}
       </div>
-      <button class="btn secondary small" type="button" onClick={() => go('editor')}>
-        {S.output.templateEdit}
-      </button>
+      <div class="out-tpl-edit">
+        <button class="btn ghost small" type="button" onClick={() => go('editor')}>
+          {S.output.templateEdit}
+        </button>
+      </div>
     </div>
   );
 }
