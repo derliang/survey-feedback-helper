@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { getState, go, useApp } from '../../app/store';
 import { applyOverrides, countOverrides } from '../../editor/overrides';
 import { findBlock, walk } from '../../editor/ops';
+import { blockSummary } from '../../editor/ops';
 import type { EBlock, EditorTemplate } from '../../editor/types';
 import { pinchZoom } from '../../editor/pinch';
 import { wordNotes } from '../../editor/word';
@@ -369,10 +370,13 @@ function Edit({ e }: { e: ES }) {
                 ⋮⋮
               </span>
             )}
-            <button type="button" class="blk-name" onClick={() => select(id)} aria-pressed={sel === id}>
-              {blockName(b)}
-              {b.when && <span class="tag">{ed().condCond}</span>}
-            </button>
+            <span class="blk-main">
+              <button type="button" class="blk-name" onClick={() => select(id)} aria-pressed={sel === id}>
+                {blockName(b)}
+                {b.when && <span class="tag">{ed().condCond}</span>}
+              </button>
+              {blockSummary(b) && <span class="blk-sum">{blockSummary(b)}</span>}
+            </span>
             {!e.student && depth === 0 && (
               <span class="blk-mv">
                 <button type="button" class="icbtn" aria-label={ed().upNamed(blockName(b))} disabled={top === 0} onClick={() => moveSel(id, -1)}>

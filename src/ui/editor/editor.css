@@ -366,6 +366,26 @@
   user-select: none;
   letter-spacing: -2px;
 }
+.blk-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.blk-main .blk-name {
+  flex: none;
+  width: 100%;
+}
+.blk-sum {
+  margin-top: -10px;
+  padding-bottom: 6px;
+  font-size: var(--fs-xs);
+  color: var(--ink3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .blk-name {
   flex: 1;
   min-width: 0;
@@ -441,14 +461,21 @@
 }
 
 @media (max-width: 899px) {
+  /* S6：頂列分兩列——上列返回＋名稱（名稱吃滿剩餘寬度），下列復原／重做／試印 PDF 等分 */
   .ed-bar {
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
   }
   .ed-bar .lbl {
     display: none;
   }
   .ed-name {
     min-width: 0;
+    max-width: none;
+    flex: 1 1 calc(100% - 64px);
+  }
+  .ed-bar > .btn.secondary {
+    flex: 1 1 0;
+    white-space: nowrap;
   }
   .ed-act {
     flex-wrap: wrap;
@@ -456,8 +483,13 @@
   .ed-sel {
     flex-basis: 100%;
   }
+  /* S6：底部列四顆按鈕不折行 */
   .ed-act .btn {
     flex: 1;
+    white-space: nowrap;
+    padding-left: var(--sp-2);
+    padding-right: var(--sp-2);
+    font-size: var(--fs-sm);
   }
 }
 
