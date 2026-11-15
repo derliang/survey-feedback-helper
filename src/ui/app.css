@@ -280,6 +280,42 @@ select {
   margin: var(--sp-3) auto 0;
   padding: 0 var(--sp-4);
 }
+/* 頁頂儲存警示橫幅（DESIGN 5.33 D①）：一行、可關閉本次，取代頁底大卡 */
+.top-banner {
+  background: var(--warn-soft);
+  border-bottom: 1px solid var(--warn);
+  color: var(--ink);
+  font-size: var(--fs-sm);
+}
+.top-banner-in {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 44px;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: var(--sp-1) var(--sp-4);
+}
+.top-banner .ic {
+  flex: none;
+  color: var(--warn);
+}
+.top-banner-text {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+.top-banner-in {
+  flex-wrap: wrap;
+}
+/* 手機：文字佔一整行，動作與「關閉」排下一行靠右 */
+@media (max-width: 599px) {
+  .top-banner-text {
+    flex-basis: calc(100% - 40px);
+  }
+  .top-banner-in {
+    justify-content: flex-end;
+  }
+}
 .card {
   background: var(--card);
   border: 1px solid var(--line-soft);
@@ -1049,8 +1085,7 @@ button.tile {
     display: flex;
   }
   .open-buttons {
-    grid-template-columns: repeat(3, auto);
-    justify-content: start;
+    grid-template-columns: 1.6fr 1fr 1fr;
   }
   .prep-grid {
     grid-template-columns: 300px 1fr;
@@ -1160,9 +1195,9 @@ button.tile {
 }
 .open-why {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--sp-2);
-  margin: 0;
+  margin: var(--sp-2) 0 0;
 }
 .open-why .ic {
   flex: none;
@@ -1530,11 +1565,30 @@ button.tile {
     grid-template-columns: 1fr 1fr;
   }
 }
-.home-links {
+.home-help {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-2);
-  margin: var(--sp-3) 0 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  margin-top: var(--sp-4);
+}
+.home-help-h {
+  margin: 0 0 var(--sp-1);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--ink2);
+}
+/* 三個說明入口左緣對齊：文字按鈕與摘要都去掉左內距 */
+.home-help .btn.ghost,
+.home-help .howto summary {
+  padding-left: 0;
+  justify-content: flex-start;
+}
+.home-help .howto {
+  margin-top: 0;
+}
+.home-grid .empty {
+  padding: var(--sp-1) 0;
 }
 .demo-tag {
   flex: none;
@@ -2040,7 +2094,19 @@ details[open] > :not(summary) {
   gap: var(--sp-4);
 }
 .course-rules {
-  max-width: 860px;
+  max-width: 880px;
+  margin-inline: auto;
+  width: 100%;
+}
+/* S8 桌機：課程欄吃剩餘寬度，三個數字欄收緊，輸入框縮小 */
+.course-table {
+  width: 100%;
+}
+.course-table th:nth-child(n + 2) {
+  width: 150px;
+}
+.course-table .input.num {
+  max-width: 5.5rem;
 }
 .tiles.course-tiles {
   grid-template-columns: repeat(3, 1fr);
@@ -2531,6 +2597,65 @@ details[open] > :not(summary) {
   .out-tpl {
     flex-basis: 170px;
   }
+}
+
+/* 稽核小改（2026-11-14）：手機專用（< 600） */
+@media (max-width: 599px) {
+  /* S2：鎖住的步驟、資料檢查「正常」的項目收成單行（只留名稱與狀態），說明留給目前能做的那一項 */
+  .rail .rowbtn.st-locked,
+  .check-row.clean .rowbtn {
+    min-height: var(--tap-min);
+  }
+  .rail .rowbtn.st-locked .rb-note,
+  .check-row.clean .rb-note {
+    display: none;
+  }
+  /* S3：欄位對應的「請確認」與類型標籤放在名稱下一行，名稱不被擠成三行 */
+  .map-row .rowbtn {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sp-1);
+  }
+  .map-row .rb-main {
+    display: contents;
+  }
+  .map-row .rb-main > strong {
+    order: 1;
+    overflow-wrap: anywhere;
+  }
+  .map-row .rb-tags {
+    order: 2;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .map-row .rb-note {
+    order: 3;
+  }
+}
+
+/* S8 選課名額（手機）：每門課一張緊湊的卡——課名與第 1 志願人數一行，名額與最少開班兩個小輸入框並排 */
+@media (max-width: 599px) {
+  .rule-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-2) var(--sp-3);
+    padding: var(--sp-3);
+  }
+  .rule-card .rule-head {
+    grid-column: 1 / -1;
+  }
+  .rule-card .field {
+    min-width: 0;
+  }
+  .rule-card .field-err {
+    grid-column: 1 / -1;
+  }
+}
+
+/* G3：用 <ActBar fixed> 的頁面（沿用設定頁的 .actbar-fixed），頁面底部留出操作列的高度 */
+.page:has(.actbar-fixed) {
+  padding-bottom: calc(96px + env(safe-area-inset-bottom));
 }
 
 /* 統計頁改版（DESIGN.md 5.33 A、D）：頂端選擇器、審稿卡、進階設定、頁頂細橫幅、固定操作列 */

@@ -209,7 +209,7 @@ test('教學頁與示範資料：六個區段，載入示範資料進準備資�
   await page.getByRole('button', { name: '重新開始' }).click();
   await page.getByRole('button', { name: '確定重新開始' }).click();
   await expect(page.getByTestId('demo-tag')).toHaveCount(0);
-  await expect(page.getByText('目前沒有選擇設定資料夾；選好或重新授權後，才能查看先前儲存的問卷設定。')).toBeVisible();
+  await expect(page.getByText('選好設定資料夾後，這裡會列出最近的問卷。')).toBeVisible();
 });
 
 test('英文介面：切換後主要畫面變英文，沒翻到的字退回中文，換回來恢復', async ({ page }) => {

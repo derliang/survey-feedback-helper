@@ -2,7 +2,7 @@ import { cellText } from '../../core';
 import { cancelSheetPick, confirmSheet, pickSheet, useApp } from '../../app/store';
 import { recommendedSheet } from '../../app/load';
 import { strings as S } from '../strings';
-import { extra } from '../strings-extra';
+import { extra, sourceName } from '../strings-extra';
 import { ActBar, Icon, Notice } from '../parts/parts';
 
 const PREVIEW_ROWS = 6;
@@ -25,7 +25,7 @@ export function SheetPick() {
         <Icon name="folder" />
         <span>
           <strong>{p.fileName}</strong>
-          <span class="hint"> · {p.sourceLabel}</span>
+          <span class="hint"> · {sourceName(p.sourceLabel)}</span>
         </span>
       </p>
       <div class="sp-head">

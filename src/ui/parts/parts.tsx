@@ -2,7 +2,7 @@ import { strings } from '../strings';
 import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 
-type IconName = 'restart' | 'gear' | 'check' | 'pencil' | 'back' | 'upload' | 'folder' | 'info' | 'warn' | 'alert' | 'lock' | 'list' | 'chevron';
+type IconName = 'restart' | 'gear' | 'check' | 'pencil' | 'back' | 'upload' | 'folder' | 'info' | 'warn' | 'alert' | 'lock' | 'list' | 'chevron' | 'layout';
 
 const PATHS: Record<IconName, string> = {
   restart: 'M4 12a8 8 0 1 0 3-6.2M4 4v4h4',
@@ -18,6 +18,7 @@ const PATHS: Record<IconName, string> = {
   lock: 'M6 11h12v9H6zM8 11V8a4 4 0 0 1 8 0v3',
   list: 'M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01',
   chevron: 'M6 9l6 6 6-6',
+  layout: 'M6 3h8l5 5v13H6zM14 3v5h5M9 13h7M9 17h7',
 };
 
 export function Icon({ name }: { name: IconName }) {
@@ -41,6 +42,39 @@ export function Notice(props: { kind?: NoticeKind; title?: string; children?: Co
         {props.title && <strong>{props.title}</strong>}
         {props.children && <p>{props.children}</p>}
         {props.actions && <div class="notice-actions">{props.actions}</div>}
+      </div>
+    </div>
+  );
+}
+
+
+/** 「這次先關掉」的頁頂橫幅：只記在這次開啟網站期間（不寫入任何儲存），重新整理後若問題還在會再出現。 */
+const bannerClosed = new Set<string>();
+
+/**
+ * 頁頂細橫幅（DESIGN 5.33 D①，使用者 2026-11-14 裁示 G1）：儲存警示用，一行字加一個動作，可關閉本次。
+ * 手機窄到放不下時文字折行，高度至少 44。`id` 用來記住「這次已關閉」。
+ */
+export function TopBanner(props: { id: string; children: ComponentChildren; action?: ComponentChildren }) {
+  const [, bump] = useState(0);
+  if (bannerClosed.has(props.id)) return null;
+  return (
+    <div class="top-banner" role="status" data-testid={`banner-${props.id}`}>
+      <div class="top-banner-in">
+        <Icon name="warn" />
+        <span class="top-banner-text">{props.children}</span>
+        {props.action}
+        <button
+          class="btn ghost small"
+          type="button"
+          aria-label={strings.close}
+          onClick={() => {
+            bannerClosed.add(props.id);
+            bump((n) => n + 1);
+          }}
+        >
+          {strings.close}
+        </button>
       </div>
     </div>
   );

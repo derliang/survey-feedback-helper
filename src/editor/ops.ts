@@ -80,6 +80,13 @@ export function blankBlock(kind: EBlockKind, id = newId()): EBlock {
   }
 }
 
+/** 區塊清單的內容摘要（8 字內）：標題、文字、大標題、提示框等有文字的區塊；其餘回傳空字串。 */
+export function blockSummary(b: EBlock): string {
+  const raw = b.kind === 'heading' || b.kind === 'text' ? b.text : b.kind === 'hero' || b.kind === 'callout' ? b.title : b.kind === 'bullets' && !b.slot ? (b.items[0] ?? '') : '';
+  const t = raw.replace(/\s+/g, ' ').trim();
+  return t.length > 14 ? `${t.slice(0, 14)}…` : t;
+}
+
 export const blockName = (b: EBlock): string => b.label ?? KIND_NAMES[b.kind];
 
 /** 在 afterId 之後插入；afterId 為 null 插在最前，未提供插在最後。多欄用 colTarget 指定放進哪一欄。 */

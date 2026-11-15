@@ -210,7 +210,7 @@ export function MappingView() {
           {problems.join(' ')}
         </Notice>
       )}
-      <ActBar>
+      <ActBar fixed>
         {gate && (
           <p class="gate-why" role="status" data-testid="gate-why">
             <Icon name="lock" />

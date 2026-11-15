@@ -1,7 +1,6 @@
 import { useRef, useState } from "preact/hooks";
 import {
   dismiss,
-  downloadSettings,
   go,
   importSettings,
   openSurveyFile,
@@ -11,6 +10,7 @@ import {
 } from "../../app/store";
 import { isTouchDevice, recentSurveys } from "../../storage";
 import { strings as S } from "../strings";
+import { sourceName } from "../strings-extra";
 import { Icon, Notice } from "../parts/parts";
 import { LazyFig } from "../parts/LazyDiagram";
 import { rich } from "../parts/rich";
@@ -68,23 +68,6 @@ export function FolderNotices() {
             </button>
           </div>
         )}
-      {f.state !== "ready" && st.dirty && (
-        <Notice
-          kind="warn"
-          title={S.folder.dirtyTitle}
-          actions={
-            <button
-              class="btn primary small"
-              type="button"
-              onClick={() => void downloadSettings()}
-            >
-              {touch ? S.folder.saveToFiles : S.folder.download}
-            </button>
-          }
-        >
-          {touch ? S.folder.touchDirtyBody : S.folder.dirtyBody}
-        </Notice>
-      )}
     </>
   );
 }
@@ -138,25 +121,8 @@ export function Home() {
             <span class="drop-or">{S.home.dropOr}</span>
           </div>
           <div class="open-buttons">
-            <div class="open-cell">
-              <button
-                class="btn secondary"
-                type="button"
-                disabled={!googleOn}
-                aria-describedby="sheet-why"
-                onClick={() => setGoogleOpen(true)}
-              >
-                {S.home.openSheet}
-              </button>
-              <p class="hint open-why" id="sheet-why">
-                <Icon name="info" />
-                <span>
-                  {googleOn ? S.home.openSheetReady : S.home.openSheetWhy}
-                </span>
-              </p>
-            </div>
             <button
-              class="btn primary"
+              class="btn primary open-main"
               type="button"
               onClick={() => fileRef.current?.click()}
             >
@@ -169,7 +135,22 @@ export function Home() {
             >
               {S.home.openConfig}
             </button>
+            <button
+              class="btn secondary"
+              type="button"
+              disabled={!googleOn}
+              aria-describedby="sheet-why"
+              onClick={() => setGoogleOpen(true)}
+            >
+              {S.home.openSheet}
+            </button>
           </div>
+          <p class="hint open-why" id="sheet-why">
+            <Icon name="info" />
+            <span>
+              {googleOn ? S.home.openSheetReady : S.home.openSheetWhy}
+            </span>
+          </p>
           <input
             ref={fileRef}
             type="file"
@@ -193,7 +174,8 @@ export function Home() {
               e.currentTarget.value = "";
             }}
           />
-          <p class="home-links">
+          <nav class="home-help" aria-label={S.home2.help}>
+            <h2 class="home-help-h">{S.home2.help}</h2>
             <button
               class="btn ghost small"
               type="button"
@@ -208,15 +190,15 @@ export function Home() {
             >
               {S.home2.guide}
             </button>
-          </p>
-          <details class="howto">
-            <summary>{S.load.howExport}</summary>
-            <LazyFig id="m2a" />
-            <p>{rich(S.load.howExportBody)}</p>
-            <button class="btn ghost small" type="button" onClick={() => go("guide")}>
-              {S.load.howExportFull}
-            </button>
-          </details>
+            <details class="howto">
+              <summary>{S.load.howExport}</summary>
+              <LazyFig id="m2a" />
+              <p>{rich(S.load.howExportBody)}</p>
+              <button class="btn ghost small" type="button" onClick={() => go("guide")}>
+                {S.load.howExportFull}
+              </button>
+            </details>
+          </nav>
         </section>
 
         <section aria-labelledby="recent-h">
@@ -240,7 +222,7 @@ export function Home() {
                       >
                         <strong>{r.name}</strong>
                         <span class="meta">
-                          {S.home.kindNames[r.kind]} · {r.sourceLabel}
+                          {S.home.kindNames[r.kind]} · {sourceName(r.sourceLabel)}
                         </span>
                         <span class="meta">
                           {S.home.lastUsed(

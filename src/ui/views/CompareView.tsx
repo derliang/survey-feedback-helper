@@ -23,7 +23,7 @@ export function CompareView() {
       <div class="view">
         <h2>{S.compare.title}</h2>
         <Notice kind="info">{S.compare.noRoster}</Notice>
-        <ActBar>
+        <ActBar fixed>
           <button class="btn primary grow" type="button" onClick={() => go('prepare', 'roster')}>
             {S.compare.goRoster}
           </button>
@@ -173,7 +173,7 @@ export function CompareView() {
         </section>
       )}
 
-      <ActBar>
+      <ActBar fixed>
         <button class="btn secondary" type="button" onClick={() => go('prepare', 'roster')}>
           {S.back}
         </button>
