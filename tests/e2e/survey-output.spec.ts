@@ -157,3 +157,25 @@ test('單選題與詳答：匯入→欄位對應→統計人數，詳答列為�
   await expect(main).toContainText('圖書館可以開放到晚上');
   await noOverflow(page);
 });
+
+test('票選同票：說明句通順、不露抽籤編號，當選者排在同票第一列', async ({ page }) => {
+  const rows = [
+    ['2026-10-04 12:00:00', '甲小明', '乙小華'],
+    ['2026-10-04 12:01:00', '乙小華', '甲小明'],
+    ['2026-10-04 12:02:00', '甲小明', '丙小美'],
+    ['2026-10-04 12:03:00', '乙小華', '乙小華'],
+    ['2026-10-04 12:04:00', '丙小美', '乙小華'],
+  ];
+  await page.goto('./');
+  await page.getByTestId('file-input').setInputFiles(xlsx('同票 (回覆).xlsx', VOTE_HEAD, rows));
+  await rail(page, '問卷類型').click();
+  await page.getByRole('radio', { name: /票選幹部/ }).click();
+  await page.getByRole('button', { name: '確認，下一步：欄位對應' }).click();
+  await page.getByRole('button', { name: '完成對應，下一步' }).click();
+  await step(page, '統計').click();
+  const main = page.locator('main');
+  await expect(main).toContainText('同票時已依抽籤決定：乙小華、甲小明同為 2 票，抽中');
+  await expect(main).toContainText('同票由隨機抽籤決定');
+  await expect(main).not.toContainText('。：');
+  await expect(main).not.toContainText('抽籤-');
+});

@@ -15,7 +15,7 @@ import {
 import { canGoStats } from '../../app/progress';
 import { emptyReview, reviewCounts } from '../../app/review';
 import { go, loadReview, useApp } from '../../app/store';
-import { WORD_FONT_NOTE, loadDocx, loadPdf, loadPrint, loadXlsx, registerAssetCache } from '../../export';
+import { loadDocx, loadPdf, loadPrint, loadXlsx, registerAssetCache } from '../../export';
 import type { ClassSummaryInput, DocModel, PersonalFeedbackInput } from '../../export';
 import { downloadBytes, isTouchDevice } from '../../storage';
 import { allPeople, feedbackKey } from '../../app/output';
@@ -370,7 +370,7 @@ export function OutputView() {
                 title={S.output.warnTitle}
                 actions={
                   <button class="btn secondary small" type="button" onClick={() => { setConfirmed(false); setPreviewOpen(true); }}>
-                    {previewed ? S.output.previewDone : extra().output.previewFirst(AUDIENCE_NAMES[audience])}
+                    {previewed ? S.output.previewDone : extra().output.previewFirst(S.output.audiences[audience])}
                   </button>
                 }
               >
@@ -464,7 +464,7 @@ export function OutputView() {
       <p class="hint">{S.output.fontsNote}</p>
       <p class="hint">
         {S.output.wordFont}
-        {WORD_FONT_NOTE}
+        {S.output.wordFontNote}
       </p>
 
       {previewOpen && (
@@ -487,7 +487,7 @@ export function OutputView() {
                   setPreviewOpen(false);
                 }}
               >
-                {S.output.previewDone}
+                {confirmed ? S.output.previewDone : S.output.previewTick}
               </button>
             </>
           }
@@ -550,7 +550,7 @@ export function OutputView() {
               </li>
             ))}
           </ul>
-          <label class="check">
+          <label class="check check-inline">
             <input type="checkbox" checked={confirmed} onChange={(e) => setConfirmed((e.target as HTMLInputElement).checked)} />
             {S.output.previewConfirm}
           </label>

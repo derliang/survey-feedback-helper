@@ -79,7 +79,7 @@ test('輸出：學生版要先預覽，班級總表與批次 PDF 可下載', asy
   await expect(batch).toBeDisabled();
   await page.getByRole('button', { name: '先預覽學生版' }).click();
   await expect(page.getByTestId('preview')).toBeVisible();
-  await expect(page.getByRole('button', { name: '預覽過了' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: '勾選後完成' })).toBeDisabled();
   await page.getByRole('checkbox', { name: /我已逐則看過預覽/ }).check();
   await page.getByRole('button', { name: '預覽過了' }).click();
   await expect(batch).toBeEnabled();
@@ -149,7 +149,7 @@ test('去識別化預覽：每則留言可留著、隱藏（可還原）、改�
   await dlg.getByTestId('pv-save').click();
   await expect(dlg.getByTestId('preview')).toContainText('改寫後的留言');
 
-  await expect(dlg.getByRole('button', { name: '預覽過了' })).toBeDisabled();
+  await expect(dlg.getByRole('button', { name: '勾選後完成' })).toBeDisabled();
   await dlg.getByRole('checkbox', { name: /我已逐則看過預覽/ }).check();
   await dlg.getByRole('button', { name: '預覽過了' }).click();
   await expect(page.getByRole('button', { name: /^全部 \d+ 位/ })).toBeEnabled();

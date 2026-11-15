@@ -436,7 +436,8 @@ export const strings = {
     seats: '名額',
     elected: '當選',
     tied: '同票',
-    drawn: () => '同票時已用抽籤決定結果。只要票數、候選人與抽籤設定都不變，重新計算會得到同樣的結果；想換一個結果，可更換抽籤編號。',
+    drawn: (names: string, votes: number, won: string) => `同票時已依抽籤決定：${names}同為 ${votes} 票，抽中${won}。`,
+    drawnNote: '同票由隨機抽籤決定，重新開啟檔案時結果可能不同；想換一次結果，請按「更換抽籤編號並重新抽籤」。',
     reseed: '更換抽籤編號並重新抽籤',
     invalidVotes: (n: number) => `${n} 張投給名單以外的人（無效票）`,
     abstain: (n: number) => `${n} 張這個職位沒投`,
@@ -536,6 +537,7 @@ export const strings = {
     missingChars: (c: string) => `PDF 的字型沒有這些字，已略過或以空白顯示：${c}。要完整呈現請改輸出 Word 檔。`,
     previewTitle: '即將放入回饋單的留言',
     previewDone: '預覽過了',
+    previewTick: '勾選後完成',
     previewConfirm: '我已逐則看過預覽，沒有名單外的人名',
     warnTitle: '輸出學生版或家長版前，請先確認留言裡沒有同學的名字',
     warnBody: '系統可遮蔽已知名單中的姓名，但可能無法辨識綽號、未匯入名單者、老師或校外人士的姓名，也無法保證辨識全部個資。請逐則檢查即將輸出的留言，必要時先改寫再下載。',
@@ -564,6 +566,7 @@ export const strings = {
     templateEdit: '編輯範本',
     templateLoading: '範本載入中⋯',
     wordFont: 'Word 檔字型：',
+    wordFontNote: 'Word 版使用電腦內建的中文字型（Windows：微軟正黑體；Mac：蘋方-繁），因此換行位置可能和 PDF 有一兩個字的差異；需要版面完全一致時請使用 PDF。',
   },
 
   method: {
@@ -670,6 +673,7 @@ export const strings = {
     restartTitle: '清除目前問卷，重新開始',
     restartConfirm: '要清除目前開啟的問卷並重新開始嗎？只會清除本次畫面中的資料，不會刪除資料夾裡的設定檔。',
     restartYes: '確定重新開始',
+    restartLoseCourse: '你還沒選資料夾，選課分配結果只存在這個分頁，清除後無法復原；需要的話請先到輸出頁下載。',
     language: '語言',
     languages: { zh: '繁體中文', en: 'English' } as Record<string, string>,
     offlineTitle: '離線使用',
