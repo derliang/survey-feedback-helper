@@ -127,6 +127,9 @@ export function OutputView() {
   const [audience, setAudience] = useState<Audience>('teacher');
   const [who, setWho] = useState<string>('');
   const [busy, setBusy] = useState<string | null>(null);
+  /** 批次產生的進度字串（「產生中 3 / 20」）；busy 仍是工作代號，按鈕才認得出是哪一顆在跑。 */
+  const [prog, setProg] = useState<string | null>(null);
+  const [moreOpen, setMoreOpen] = useState(false);
   const [msg, setMsg] = useState<{ kind: 'ok' | 'bad' | 'warn'; text: string } | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
@@ -218,6 +221,7 @@ export function OutputView() {
       staleOrFail(e, S.output.failed);
     } finally {
       setBusy(null);
+      setProg(null);
     }
   }
 
@@ -285,6 +289,7 @@ export function OutputView() {
       staleOrFail(e, S.output.printFail);
     } finally {
       setBusy(null);
+      setMoreOpen(false);
     }
   };
 
@@ -299,7 +304,7 @@ export function OutputView() {
         return { name: `${p.fileName} ${AUDIENCE_NAMES[audience]}`, doc };
       });
       const missing = new Set<string>();
-      const bytes = await renderBatchZip(items, await loadFonts(), (d, t) => setBusy(S.output.progress(d, t)), (cs) => cs.forEach((c) => missing.add(c)));
+      const bytes = await renderBatchZip(items, await loadFonts(), (d, t) => setProg(S.output.progress(d, t)), (cs) => cs.forEach((c) => missing.add(c)));
       return { name: `${base} 個人回饋單 ${AUDIENCE_NAMES[audience]}.zip`, bytes, mime: MIME.zip, missing: [...missing] };
     });
 
@@ -321,6 +326,18 @@ export function OutputView() {
     });
 
   const dis = busy !== null;
+  /** 正在跑的那顆按鈕立刻改字（不等狀態提示的延遲），其他按鈕維持原字且停用。 */
+  const lbl = (key: string, text: string) => (busy === key ? (key === 'batch' && prog ? prog : S.output.working) : text);
+  const status = (
+    <>
+      {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
+      {busy && (
+        <Notice kind="info" role="status">
+          {prog ?? S.output.working}
+        </Notice>
+      )}
+    </>
+  );
   const personalDis = dis || !previewed || personal.length === 0;
 
   return (
@@ -330,17 +347,13 @@ export function OutputView() {
         <p class="meta">{s.name}</p>
       </header>
 
-      {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
-      {busy && (
-        <Notice kind="info" role="status">
-          {busy.startsWith('產生中') ? busy : S.output.working}
-        </Notice>
-      )}
+      {!summary && status}
 
       {summary && (
-        <>
+        <div class="out-cols">
+          <div class="out-main">
           <section class="card">
-            <h2>{S.output.audienceTitle}</h2>
+            <h2>{S.output.stepWho}</h2>
             <div class="seg" role="radiogroup" aria-label={S.output.audienceTitle}>
               {(['teacher', 'student', 'parent'] as Audience[]).map((a) => (
                 <button key={a} type="button" role="radio" aria-checked={audience === a} class={audience === a ? 'on' : ''} onClick={() => setAudience(a)}>
@@ -368,60 +381,71 @@ export function OutputView() {
           </section>
 
           <section class="card">
-            <h2>{S.output.classTable}</h2>
-            <p class="hint">{S.output.audiences.teacher}</p>
-            <div class="btn-row">
-              {(['xlsx', 'docx', 'pdf'] as Fmt[]).map((f) => (
-                <button key={f} class="btn secondary" type="button" disabled={dis || summary.targets.length === 0} onClick={() => void classTable(f)}>
-                  {S.output[f]}
-                </button>
-              ))}
-            </div>
-          </section>
-
-          <section class="card">
-            <h2>{S.output.templateTitle}</h2>
+            <h2>{S.output.stepTemplate}</h2>
             <p class="hint">{S.output.templateHint}</p>
             <PickerLazy />
           </section>
+          </div>
 
-          <section class="card">
-            <h2>{S.output.personal}</h2>
-            {personal.length === 0 && <p class="hint">{S.output.noFeedbackTargets}</p>}
-            <label class="field">
-              <span class="label">{S.output.pickStudent}</span>
-              <select class="input" value={sel?.key ?? ''} onChange={(e) => setWho((e.target as HTMLSelectElement).value)}>
-                {personal.map((p) => (
-                  <option key={p.key} value={p.key}>
-                    {p.fileName}
-                  </option>
+          <aside class="out-side">
+            <section class="card out-dl" aria-busy={dis} aria-label={S.output.stepDownload}>
+              <h2>{S.output.stepDownload}</h2>
+              {status}
+              <h3>{S.output.classTable}</h3>
+              <div class="out-eq">
+                {(['xlsx', 'docx', 'pdf'] as Fmt[]).map((f) => (
+                  <button key={f} class="btn secondary" type="button" disabled={dis || summary.targets.length === 0} onClick={() => void classTable(f)}>
+                    {lbl(`class-${f}`, S.output.fmtShort[f])}
+                  </button>
                 ))}
-              </select>
-            </label>
-            <div class="btn-row">
-              <button class="btn secondary" type="button" disabled={personalDis} onClick={() => void onePersonal('pdf')}>
-                {S.output.pdf}
-              </button>
-              <button class="btn secondary" type="button" disabled={personalDis} onClick={() => void onePersonal('docx')}>
-                {S.output.docx}
-              </button>
-              {!isTouchDevice() && (
-                <button class="btn secondary" type="button" disabled={personalDis} onClick={() => void printOne()}>
-                  {S.output.print}
+              </div>
+              <hr class="out-sep" />
+              <h3>{S.output.personal}</h3>
+              {personal.length === 0 && <p class="hint">{S.output.noFeedbackTargets}</p>}
+              <label class="field">
+                <span class="label">{S.output.pickStudent}</span>
+                <select class="input" value={sel?.key ?? ''} onChange={(e) => setWho((e.target as HTMLSelectElement).value)}>
+                  {personal.map((p) => (
+                    <option key={p.key} value={p.key}>
+                      {p.fileName}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div class="out-pers">
+                <button class="btn primary out-main-btn" type="button" disabled={personalDis} onClick={() => void onePersonal('docx')}>
+                  {lbl('one-docx', S.output.downloadWord)}
                 </button>
+                <button class="btn secondary" type="button" disabled={personalDis} onClick={() => void onePersonal('pdf')}>
+                  {lbl('one-pdf', S.output.pdf)}
+                </button>
+                {!isTouchDevice() && (
+                  <div class="out-more">
+                    <button class="btn secondary" type="button" aria-label={S.output.more} aria-haspopup="true" aria-expanded={moreOpen} disabled={personalDis} onClick={() => setMoreOpen((v) => !v)} onKeyDown={(e) => e.key === 'Escape' && setMoreOpen(false)}>
+                      ⋯
+                    </button>
+                    {moreOpen && !personalDis && (
+                      <div class="out-pop">
+                        <button class="btn secondary" type="button" onClick={() => void printOne()}>
+                          {lbl('print', S.output.print)}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              {!previewed && (
+                <p class="hint lock-hint">
+                  <Icon name="lock" /> {S.output.needPreview}
+                </p>
               )}
-              <button class="btn primary" type="button" disabled={personalDis} onClick={() => void batch()}>
-                {S.output.allStudents(personal.length)}
+              <p class="hint">{S.output.noteNoRank}</p>
+              <button class="btn secondary" type="button" disabled={personalDis} onClick={() => void batch()}>
+                {lbl('batch', S.output.allStudents(personal.length))}
               </button>
-            </div>
-            {!previewed && (
-              <p class="hint lock-hint">
-                <Icon name="lock" /> {S.output.needPreview}
-              </p>
-            )}
-            <p class="hint">{S.output.noteNoRank}</p>
-          </section>
-        </>
+            </section>
+          </aside>
+        </div>
       )}
 
       {(qs || vote) && (
