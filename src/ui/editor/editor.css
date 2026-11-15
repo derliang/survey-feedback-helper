@@ -520,3 +520,16 @@
 .pv-wrap {
   touch-action: pan-x pan-y;
 }
+
+/* 縮圖：整張紙用同一個 transform: scale 縮小，外框只負責裁切 */
+.pv-thumb {
+  overflow: hidden;
+  flex: none;
+  margin: 0 auto;
+  position: relative;
+}
+/* 縮圖框的寬度只由外層決定（不被內部的紙張撐大），否則「寬度→縮放→寬度」會一路放大 */
+.pv-box.thumb {
+  contain: inline-size;
+  min-width: 0;
+}
