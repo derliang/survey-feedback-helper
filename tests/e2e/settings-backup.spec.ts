@@ -1,4 +1,5 @@
 import { type Page, expect, test } from '@playwright/test';
+import { settingsTab } from './fixtures';
 
 const noOverflow = async (page: Page) => {
   const width = page.viewportSize()!.width;
@@ -16,13 +17,15 @@ test('三層設定：切層、標出來源、還原到上一層、不橫向捲�
   await openSettings(page);
   await noOverflow(page);
   const card = page.getByTestId('defaults-card');
-  await expect(card.getByText('目前的值：內建預設').first()).toBeVisible();
+  // 沒改過的欄位不顯示任何標籤（5.33 C②）
+  await expect(card.locator('.tag', { hasText: '已自訂' })).toHaveCount(0);
+  await expect(card.getByText('目前的值')).toHaveCount(0);
   await card.getByLabel('學校名稱').fill('範例國中');
-  await expect(card.getByText('目前的值：全域預設').first()).toBeVisible();
+  await expect(card.locator('.tag', { hasText: '已自訂' })).toHaveCount(1);
   await card.getByRole('radio', { name: '問卷類型' }).click();
   await card.getByRole('radio', { name: '票選' }).click();
   await card.getByRole('radio', { name: '學生版' }).click();
-  await expect(card.getByText('目前的值：問卷類型範本').first()).toBeVisible();
+  await expect(card.getByText('沿用全域預設').first()).toBeVisible();
   await card.getByRole('radio', { name: '這次輸出' }).click();
   await expect(card.getByText('只對這一次輸出有效')).toBeVisible();
   await card.getByRole('radio', { name: '全域預設' }).click();
@@ -32,6 +35,7 @@ test('三層設定：切層、標出來源、還原到上一層、不橫向捲�
 
 test('備份與還原：下載整包備份，選回後先看摘要、預設合併', async ({ page }) => {
   await openSettings(page);
+  await settingsTab(page, 'backup');
   const card = page.getByTestId('backup-card');
   await expect(card.getByText('備份可能含學生姓名與名單')).toBeVisible();
   const [download] = await Promise.all([page.waitForEvent('download'), card.getByRole('button', { name: /^(下載全部設定與範本備份|儲存整包備份到檔案)$/ }).click()]);
@@ -60,4 +64,46 @@ test('編輯器：加入面板有進階區塊，加入標題區與摘要數字�
   await page.getByRole('button', { name: '摘要數字列' }).click();
   await expect(page.getByText('顯示哪些數字')).toBeVisible();
   await expect(page.getByText('學生版與家長版不顯示全班名次')).toBeVisible();
+});
+
+test('設定頁版面（5.33 C／D）：分組導覽、內容最寬 720、底部操作列固定、說明預設收合、點擊區 ≥44', async ({ page }) => {
+  await openSettings(page);
+  await noOverflow(page);
+  const wide = page.viewportSize()!.width >= 600;
+  // 常用：資料夾與預設輸出；進階的卡片不在畫面上
+  await expect(page.getByTestId('folder-card')).toBeVisible();
+  await expect(page.getByTestId('backup-card')).toHaveCount(0);
+  await expect(page.getByTestId('look-card')).toHaveCount(0);
+  if (wide) {
+    await expect(page.getByRole('navigation', { name: '設定項目' })).toBeVisible();
+    const w = await page.locator('.set-main').evaluate((e) => e.getBoundingClientRect().width);
+    expect(w).toBeLessThanOrEqual(720);
+    await settingsTab(page, 'look');
+    await expect(page.getByTestId('look-card')).toBeVisible();
+    await expect(page.getByTestId('backup-card')).toHaveCount(0);
+  } else {
+    await expect(page.getByRole('tablist', { name: '設定分類' })).toBeVisible();
+    await settingsTab(page, 'backup');
+    // 手機：進階三項併在同一頁
+    await expect(page.getByTestId('backup-card')).toBeVisible();
+    await expect(page.getByTestId('look-card')).toBeVisible();
+    await expect(page.getByTestId('folder-card')).toHaveCount(0);
+  }
+  // 說明預設收合，點開才看到離線使用
+  await settingsTab(page, 'help');
+  const help = page.getByTestId('help-card');
+  await expect(help).not.toHaveAttribute('open', '');
+  await help.locator('summary').click();
+  await expect(help.getByRole('heading', { name: '離線使用' })).toBeVisible();
+  // 底部操作列固定在視窗底（手機、平板、桌機都一樣）
+  const bar = page.locator('.actbar');
+  expect(await bar.evaluate((e) => getComputedStyle(e).position)).toBe('fixed');
+  const box = (await bar.boundingBox())!;
+  expect(Math.round(box.y + box.height)).toBe(page.viewportSize()!.height);
+  // 導覽、分段、按鈕點擊區 ≥ 44
+  const small = await page.locator('main button, main label.btn, main summary').evaluateAll((els) =>
+    els.filter((e) => (e as HTMLElement).offsetParent !== null).map((e) => e.getBoundingClientRect()).filter((r) => r.height < 43.5).length,
+  );
+  expect(small).toBe(0);
+  await noOverflow(page);
 });

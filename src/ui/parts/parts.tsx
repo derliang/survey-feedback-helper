@@ -100,7 +100,7 @@ export function useWide(): boolean {
   return wide;
 }
 
-/** `fixed`：平板與桌機也固定在視窗底（只有統計頁用；手機本來就固定）。 */
+/** fixed：桌機也固定在視窗底（5.33 D3）；預設桌機是頁內靠右的一排。 */
 export function ActBar(props: { children: ComponentChildren; fixed?: boolean }) {
   return <div class={props.fixed ? 'actbar actbar-fixed' : 'actbar'}>{props.children}</div>;
 }
