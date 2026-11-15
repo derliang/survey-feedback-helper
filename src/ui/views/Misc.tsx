@@ -49,6 +49,7 @@ function RestartSheet({ loseCourse, loseReview }: { loseCourse: boolean; loseRev
   useEffect(() => cancel.current?.focus(), []);
   return (
     <Sheet
+      confirm
       title={S.settingsPage.restartTitle}
       onClose={() => set({ confirmRestart: false })}
       footer={
