@@ -652,6 +652,7 @@ export const enMore: DeepPartial<Strings> = {
     out: {
       needResult: 'Go to "Capacity and allocation" and press "Start allocation" first.',
       goStep3: 'Back to capacity and allocation',
+      willHave: 'Once the allocation is done, you can download these Excel files here:',
       title: 'What do you want to export?',
       list: 'Group lists',
       listNote: 'One sheet per course plus an overview sheet (seat, name, course, which choice)',

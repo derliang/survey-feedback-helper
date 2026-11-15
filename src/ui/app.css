@@ -2062,7 +2062,19 @@ details[open] > :not(summary) {
   gap: var(--sp-4);
 }
 .course-rules {
-  max-width: 860px;
+  max-width: 880px;
+  margin-inline: auto;
+  width: 100%;
+}
+/* S8 桌機：課程欄吃剩餘寬度，三個數字欄收緊，輸入框縮小 */
+.course-table {
+  width: 100%;
+}
+.course-table th:nth-child(n + 2) {
+  width: 150px;
+}
+.course-table .input.num {
+  max-width: 5.5rem;
 }
 .tiles.course-tiles {
   grid-template-columns: repeat(3, 1fr);
@@ -2329,3 +2341,47 @@ details[open] > :not(summary) {
     order: 3;
   }
 }
+
+/* S8 選課名額（手機）：每門課一張緊湊的卡——課名與第 1 志願人數一行，名額與最少開班兩個小輸入框並排 */
+@media (max-width: 599px) {
+  .rule-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-2) var(--sp-3);
+    padding: var(--sp-3);
+  }
+  .rule-card .rule-head {
+    grid-column: 1 / -1;
+  }
+  .rule-card .field {
+    min-width: 0;
+  }
+  .rule-card .field-err {
+    grid-column: 1 / -1;
+  }
+}
+
+/* S10／G3：桌機的主要動作固定在視窗底（DESIGN 5.33 D③）。這一輪只套在準備資料與選課分組；統計、輸出、設定由各自的改版沿用同一個 .actbar。 */
+@media (min-width: 1024px) {
+  .prep .actbar,
+  .course-body .actbar,
+  .course-out > .actbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 15;
+    box-sizing: border-box;
+    padding: var(--sp-3) max(var(--sp-5), calc((100% - 1240px) / 2 + var(--sp-5)));
+    background: var(--card);
+    border-top: 1px solid var(--line-soft);
+    box-shadow: 0 -2px 8px var(--shadow-sm);
+    justify-content: flex-end;
+  }
+  .page.prep,
+  .page:has(.course-body),
+  .page.course-out {
+    padding-bottom: 96px;
+  }
+}
+

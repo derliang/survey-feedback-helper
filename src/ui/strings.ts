@@ -872,6 +872,7 @@ export const strings = {
     out: {
       needResult: '先到「名額與分配」按「開始分配」。',
       goStep3: '回到名額與分配',
+      willHave: '分配完成後，這裡可以下載這些 Excel 檔：',
       title: '要輸出什麼？',
       list: '分組名單',
       listNote: '每個課程一張工作表，加一張總表（座號、姓名、課程、第幾志願）',

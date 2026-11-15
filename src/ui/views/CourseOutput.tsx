@@ -25,7 +25,33 @@ export default function CourseOutput() {
     return (
       <main class="page out" id="main">
         <h1>{S.output.title}</h1>
-        <Notice kind="warn">{O.needResult}</Notice>
+        <Notice
+          kind="warn"
+          actions={
+            <button class="btn primary small" type="button" onClick={() => go(s && canGoStats(s) ? 'stats' : s ? 'prepare' : 'home')}>
+              {O.goStep3}
+            </button>
+          }
+        >
+          {O.needResult}
+        </Notice>
+        <section class="card">
+          <p>{O.willHave}</p>
+          <ul class="plain-ul">
+            {(
+              [
+                [O.list, O.listNote],
+                [O.pending, O.pendingNote],
+                [O.hits, O.hitsNote],
+              ] as const
+            ).map(([t, n]) => (
+              <li key={t}>
+                <strong>{t}</strong>
+                <span class="hint"> {n}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
         <ActBar>
           <button class="btn secondary grow" type="button" onClick={() => go(s && canGoStats(s) ? 'stats' : s ? 'prepare' : 'home')}>
             {O.goStep3}
