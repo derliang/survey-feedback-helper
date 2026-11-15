@@ -284,6 +284,9 @@ function VoteMain({ v, sel, wide }: { v: VoteResult; sel: string; wide: boolean 
   for (const i of v.issues) counts[i.kind] += i.kind === 'multi' ? 1 : i.ballotIds.length;
   const any = counts.multi + counts.self + counts.time + counts.blank > 0;
   const elected = new Set(p.election.elected);
+  const tiedVotes = p.tally.rows.find((r) => p.election.tied.includes(r.name))?.votes ?? 0;
+  // 同票時當選者排在落選者前面，避免第一列是落選者
+  const chartRows = [...p.tally.rows].sort((a, b) => b.votes - a.votes || Number(elected.has(b.name)) - Number(elected.has(a.name)));
   return (
     <>
       <section class="card">
@@ -309,7 +312,7 @@ function VoteMain({ v, sel, wide }: { v: VoteResult; sel: string; wide: boolean 
       </label>
       <Chart
         svg={barsSvg(
-          p.tally.rows.map((r) => ({ label: r.name, value: r.votes, note: S.stats.votes(r.votes), strong: elected.has(r.name) })),
+          chartRows.map((r) => ({ label: r.name, value: r.votes, note: S.stats.votes(r.votes), strong: elected.has(r.name) })),
           { title: p.col.label, w, emphasis: true },
         )}
       />
@@ -323,7 +326,9 @@ function VoteMain({ v, sel, wide }: { v: VoteResult; sel: string; wide: boolean 
             </button>
           }
         >
-          {S.stats.drawn()}：{p.election.tied.join('、')}
+          {S.stats.drawn(p.election.tied.join('、'), tiedVotes, p.election.tied.filter((n) => elected.has(n)).join('、'))}
+          <br />
+          {S.stats.drawnNote}
         </Notice>
       )}
       {p.tally.invalid > 0 && <p class="hint">{S.stats.invalidVotes(p.tally.invalid)}</p>}
