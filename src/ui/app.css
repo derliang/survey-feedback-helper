@@ -2282,3 +2282,38 @@ details[open] > :not(summary) {
   border-radius: var(--r-md);
   background: var(--sunk);
 }
+
+/* 稽核小改（2026-11-14）：手機專用（< 600） */
+@media (max-width: 599px) {
+  /* S2：鎖住的步驟、資料檢查「正常」的項目收成單行（只留名稱與狀態），說明留給目前能做的那一項 */
+  .rail .rowbtn.st-locked,
+  .check-row.clean .rowbtn {
+    min-height: var(--tap-min);
+  }
+  .rail .rowbtn.st-locked .rb-note,
+  .check-row.clean .rb-note {
+    display: none;
+  }
+  /* S3：欄位對應的「請確認」與類型標籤放在名稱下一行，名稱不被擠成三行 */
+  .map-row .rowbtn {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sp-1);
+  }
+  .map-row .rb-main {
+    display: contents;
+  }
+  .map-row .rb-main > strong {
+    order: 1;
+    overflow-wrap: anywhere;
+  }
+  .map-row .rb-tags {
+    order: 2;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .map-row .rb-note {
+    order: 3;
+  }
+}

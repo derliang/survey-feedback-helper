@@ -115,7 +115,7 @@ export function CheckView() {
           const isHandled = n > 0 && s.checkHandled.includes(k);
           const expanded = open === k && n > 0;
           return (
-            <li key={k} class={`check-row${n > 0 && !isHandled ? ' attn' : ''}`}>
+            <li key={k} class={`check-row${n > 0 && !isHandled ? ' attn' : ''}${n === 0 ? ' clean' : ''}`}>
               <button type="button" class="rowbtn" aria-expanded={expanded} disabled={n === 0} onClick={() => setOpen(expanded ? null : k)}>
                 <span class="rb-main">
                   <strong>{S.check.rows[k][0]}</strong>
