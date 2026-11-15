@@ -1,3 +1,4 @@
+import type { ComponentChildren } from 'preact';
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { type FeedbackSummary, type TargetResult, cellText, selfVsOthers } from '../../core';
 import {
@@ -11,16 +12,20 @@ import {
 import { canGoStats } from '../../app/progress';
 import { feedbackKey, openKey } from '../../app/output';
 import { reviewCounts, setTeacher } from '../../app/review';
-import { go, loadReview, set, setStats, updateReview, useApp } from '../../app/store';
+import { blankColumns } from '../../app/analysis';
+import { downloadReview, go, loadReview, set, setStats, updateReview, useApp } from '../../app/store';
+import { isTouchDevice } from '../../storage';
 import { barsSvg, columnsSvg, pairedBarsSvg, svgSize, svgTitle, toPrintSvg } from '../chart-svg';
 import { svgToJpg } from '../chart-png';
 import { downloadBytes } from '../../storage';
 import { TrendCard } from './TrendCard';
 import { strings as S } from '../strings';
 import { ActBar, Notice, useWide } from '../parts/parts';
-import { CommentList, Keywords, SaveNote } from './ReviewParts';
+import { CommentList, Keywords } from './ReviewParts';
 import { TeacherComment } from './Phrases';
 import { extra } from '../strings-extra';
+
+const ui = () => extra().statsUi;
 
 const f1 = (n: number | null | undefined): string => (n === null || n === undefined ? '—' : n.toFixed(1));
 const pct = (x: number): string => `${Math.round(x * 100)}%`;
@@ -112,8 +117,14 @@ function FeedbackMain({ summary, sel, wide }: { summary: FeedbackSummary; sel: s
             <thead>
               <tr>
                 <th>{extra().stats.rank}</th>
-                <th>{extra().stats.seat}</th>
-                <th>{extra().stats.name}</th>
+                {wide ? (
+                  <>
+                    <th>{extra().stats.seat}</th>
+                    <th>{extra().stats.name}</th>
+                  </>
+                ) : (
+                  <th>{ui().student}</th>
+                )}
                 {summary.items.map((i) => (
                   <th key={i.id}>{i.label}</th>
                 ))}
@@ -124,8 +135,14 @@ function FeedbackMain({ summary, sel, wide }: { summary: FeedbackSummary; sel: s
               {rows.map((r) => (
                 <tr key={r.key}>
                   <td>{r.rank ?? '—'}</td>
-                  <td>{seatOf(r)}</td>
-                  <td>{personName(r)}</td>
+                  {wide ? (
+                    <>
+                      <td>{seatOf(r)}</td>
+                      <td>{personName(r)}</td>
+                    </>
+                  ) : (
+                    <td>{`${seatOf(r)} ${personName(r)}`.trim()}</td>
+                  )}
                   {r.averageRow.map((m, i) => (
                     <td key={i}>{f1(m)}</td>
                   ))}
@@ -135,7 +152,7 @@ function FeedbackMain({ summary, sel, wide }: { summary: FeedbackSummary; sel: s
                 </tr>
               ))}
               <tr class="flag">
-                <td colSpan={3}>{S.stats.classMean}</td>
+                <td colSpan={wide ? 3 : 2}>{S.stats.classMean}</td>
                 {summary.classItemMeans.map((m, i) => (
                   <td key={i}>{f1(m)}</td>
                 ))}
@@ -150,8 +167,6 @@ function FeedbackMain({ summary, sel, wide }: { summary: FeedbackSummary; sel: s
     );
   }
   const gap = selfVsOthers(summary).find((g) => g.key === t.key);
-  const review = st.review;
-  const items = t.comments.map((c) => ({ key: feedbackKey(c.recordId), text: c.text }));
   return (
     <>
       <div class="tiles">
@@ -201,29 +216,13 @@ function FeedbackMain({ summary, sel, wide }: { summary: FeedbackSummary; sel: s
         )}
         <p class="hint">{S.stats.gapNote}</p>
       </section>
-      <section class="card">
-        <h3>
-          {S.review.title}・{S.review.count(items.length)}
-        </h3>
-        <CommentList items={items} />
-      </section>
-      <section class="card">
-        <h3>{S.review.teacherTitle}</h3>
-        <p class="hint">{S.review.teacherHelp}</p>
-        <TeacherComment
-          value={review?.teacher[t.key] ?? ''}
-          onChange={(v) => updateReview((r) => setTeacher(r, t.key, v))}
-          studentName={personName(t)}
-          allNames={summary.targets.map(personName)}
-        />
-      </section>
     </>
   );
 }
 
 /* ───────── 意見調查 ───────── */
 
-function QuestionMain({ q, wide }: { q: Question; wide: boolean }) {
+function QuestionMain({ q, wide, reviewTotal }: { q: Question; wide: boolean; reviewTotal: { total: number; pending: number } }) {
   const st = useApp();
   const w = wide ? 560 : 340;
   const scale = st.session!.scale;
@@ -271,12 +270,7 @@ function QuestionMain({ q, wide }: { q: Question; wide: boolean }) {
     );
   }
   const items = q.stat.answers.map((a) => ({ key: openKey(q.col.index, a.row), text: a.text }));
-  return (
-    <section class="card">
-      <h3>{S.stats.openCount(items.length)}</h3>
-      <CommentList items={items} />
-    </section>
-  );
+  return <ReviewCard items={items} total={reviewTotal.total} pending={reviewTotal.pending} />;
 }
 
 /* ───────── 票選幹部 ───────── */
@@ -398,11 +392,96 @@ function FeedbackSettings({ summary }: { summary: FeedbackSummary }) {
   );
 }
 
+/* ───────── 審稿卡、頁頂提醒、進階設定 ───────── */
+
+interface TeacherProps {
+  value: string;
+  onChange: (v: string) => void;
+  name: string;
+  allNames: string[];
+}
+
+/** 審稿：獨立一張卡，帶進度（已審 N／M）；有老師評語就接在留言後面。 */
+function ReviewCard(props: { items: { key: string; text: string }[]; total: number; pending: number; teacher?: TeacherProps; hint?: string }) {
+  const st = useApp();
+  if (!st.review) return null;
+  const done = props.total - props.pending;
+  const R = S.review;
+  return (
+    <section class="card review-card" data-testid="review-card">
+      <h3>
+        {ui().reviewTitle}
+        {props.total > 0 && <span class="tag warn">{ui().reviewDone(done, props.total)}</span>}
+      </h3>
+      {props.total > 0 && (
+        <div class="track" role="progressbar" aria-label={ui().reviewBar} aria-valuemin={0} aria-valuemax={props.total} aria-valuenow={done}>
+          <i style={{ width: `${Math.round((done / props.total) * 100)}%` }} />
+        </div>
+      )}
+      {props.hint ? (
+        <p class="hint">{props.hint}</p>
+      ) : (
+        <>
+          <p class="hint">{R.lead}</p>
+          <p class="hint">{R.count(props.items.length)}</p>
+          <CommentList items={props.items} />
+        </>
+      )}
+      {props.teacher && (
+        <div class="review-teacher">
+          <h4>{R.teacherTitle}</h4>
+          <p class="hint">{R.teacherHelp}</p>
+          <TeacherComment value={props.teacher.value} onChange={props.teacher.onChange} studentName={props.teacher.name} allNames={props.teacher.allNames} />
+        </div>
+      )}
+      <p class="hint">{st.reviewUnsaved ? ui().bannerUnsaved : R.savedFolder}</p>
+    </section>
+  );
+}
+
+/** 頁頂一行細橫幅（可關閉本次）：還沒審的留言數與儲存狀態合併成一則。 */
+function TopBanner({ pending, flagged, onClose }: { pending: number; flagged: number; onClose: () => void }) {
+  const st = useApp();
+  const unsaved = st.reviewUnsaved;
+  if (pending === 0 && !unsaved) return null;
+  const parts = [pending > 0 ? `${ui().bannerPending(pending)}${flagged > 0 ? `（${ui().bannerFlagged(flagged)}）` : ''}` : '', unsaved ? ui().bannerUnsaved : ''].filter(Boolean);
+  return (
+    <div class={`strip ${flagged > 0 || unsaved ? 'warn' : 'info'}`} role="status" data-testid="top-banner">
+      <span class="strip-text">{parts.join('；')}</span>
+      {unsaved && (
+        <button class="btn secondary small" type="button" onClick={() => void downloadReview()}>
+          {isTouchDevice() ? S.folder.saveToFiles : S.review.downloadReview}
+        </button>
+      )}
+      <button class="strip-x" type="button" aria-label={ui().dismiss} onClick={onClose}>
+        ×
+      </button>
+    </div>
+  );
+}
+
+/** 進階設定：預設收合，只顯示目前設定摘要。 */
+function Advanced({ summary, children }: { summary: string; children: ComponentChildren }) {
+  return (
+    <details class="card adv" data-testid="advanced">
+      <summary>
+        <span class="adv-t">
+          <strong>{ui().advTitle}</strong>
+          <span class="hint">{summary}</span>
+        </span>
+        <span class="adv-chev" aria-hidden="true" />
+      </summary>
+      <div class="adv-body">{children}</div>
+    </details>
+  );
+}
+
 /* ───────── 畫面 ───────── */
 
 export function StatsView() {
   const st = useApp();
   const wide = useWide();
+  const [bannerOff, setBannerOff] = useState(false);
   const s = st.session;
   const ok = s !== null && canGoStats(s);
   useEffect(() => {
@@ -448,7 +527,28 @@ export function StatsView() {
     if (!entries.some((e) => e.key === sel)) sel = entries[0]?.key ?? '';
   }
   const counts = st.review ? reviewCounts(st.review, commentItems) : null;
+  const total = { total: counts?.total ?? 0, pending: counts?.pending ?? 0 };
   const selQ = qs?.find((q) => String(q.col.index) === sel);
+  const selT = fb?.targets.find((t) => t.key === sel);
+  const blanks = qs ? blankColumns(s) : [];
+  const hasComments = commentItems.length > 0;
+  const showBanner = !bannerOff && st.review !== null && hasComments;
+
+  const o = st.stats;
+  const advSummary = fb
+    ? [
+        `${ui().advTrim}：${o.trim === 0 ? ui().advTrimOff : ui().advTrimOne}`,
+        `${ui().advReversed}：${ui().advReversedN(o.reversed.length)}`,
+        ...(hasComments ? [`${ui().advWords}：${ui().advWordsN(st.review?.keywords.length ?? 0)}`] : []),
+      ].join('・')
+    : vote
+      ? `${ui().advRules}：${[S.stats.ruleMultiOpts[o.voteRules.multi], S.stats.ruleSelfOpts[o.voteRules.self], S.stats.ruleTimeOpts[o.voteRules.time]].join('・')}`
+      : hasComments
+        ? `${ui().advWords}：${ui().advWordsN(st.review?.keywords.length ?? 0)}`
+        : '';
+  const hasAdvanced = fb !== null || vote !== null || (qs !== null && hasComments);
+  // 審稿卡在右欄（報告回饋）；意見調查的留言題把審稿卡當成結果放在主欄
+  const hasSide = fb !== null && st.review !== null;
 
   return (
     <main class="page stats" id="main">
@@ -462,29 +562,46 @@ export function StatsView() {
           </button>
         </p>
       </header>
-      {counts && counts.pending > 0 && (
-        <Notice kind={counts.flaggedPending > 0 ? 'warn' : 'info'} title={S.review.pending(counts.pending)}>
-          {S.review.lead}
-          {counts.flaggedPending > 0 && ` ${S.review.flagged(counts.flaggedPending)}`}
-        </Notice>
-      )}
-      <div class="wb">
+      {showBanner && <TopBanner pending={total.pending} flagged={counts?.flaggedPending ?? 0} onClose={() => setBannerOff(true)} />}
+      <div class={`wb${hasSide ? '' : ' wb-noside'}`}>
         <WorkList title={listTitle} entries={entries} sel={sel} />
         <section class="wb-main" aria-live="polite">
+          {blanks.length > 0 && <Notice kind="info">{ui().blankCols(blanks.map((c) => c.label))}</Notice>}
           {fb && <FeedbackMain summary={fb} sel={sel} wide={wide} />}
           {fb && sel === '' && <TrendCard current={fb} label={s.name} max={s.scale.max} wide={wide} />}
-          {qs && selQ && <QuestionMain q={selQ} wide={wide} />}
+          {qs && selQ && <QuestionMain q={selQ} wide={wide} reviewTotal={total} />}
           {qs && !selQ && <p class="hint">{S.stats.noData}</p>}
           {vote && <VoteMain v={vote} sel={sel} wide={wide} />}
         </section>
-        <aside class="wb-side">
+        {hasSide && fb && (
+          <aside class="wb-side">
+            <ReviewCard
+              items={selT ? selT.comments.map((c) => ({ key: feedbackKey(c.recordId), text: c.text })) : []}
+              total={total.total}
+              pending={total.pending}
+              hint={selT ? undefined : ui().pickToReview}
+              teacher={
+                selT
+                  ? {
+                      value: st.review?.teacher[selT.key] ?? '',
+                      onChange: (v) => updateReview((r) => setTeacher(r, selT.key, v)),
+                      name: personName(selT),
+                      allNames: fb.targets.map(personName),
+                    }
+                  : undefined
+              }
+            />
+          </aside>
+        )}
+      </div>
+      {hasAdvanced && (
+        <Advanced summary={advSummary}>
           {fb && <FeedbackSettings summary={fb} />}
           {vote && <VoteRulesCard />}
-          {(fb || qs) && <Keywords />}
-          <SaveNote />
-        </aside>
-      </div>
-      <ActBar>
+          {hasComments && <Keywords />}
+        </Advanced>
+      )}
+      <ActBar fixed>
         <button class="btn secondary" type="button" onClick={() => go('prepare')}>
           {S.back}
         </button>
