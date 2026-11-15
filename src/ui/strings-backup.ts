@@ -31,9 +31,9 @@ export const defaultsStrings = {
 
 export const backupStrings = {
   title: '備份與還原',
-  hasTitle: '備份檔包含以下資料',
+  hasTitle: '備份檔包含以下資料：',
   has: '問卷設定、名單對照、審稿進度、各層設定、我的範本、個別學生版本、圖片。',
-  notTitle: '備份檔不包含以下資料',
+  notTitle: '備份檔不包含以下資料：',
   not: '內建範本、原始作答的 Excel 檔；需要保留原始問卷時，請另行備份。',
   warn: '備份可能含學生姓名與名單，請依學校個資規範保管、傳送與刪除，避免上傳到未核准的公開空間。',
   make: '下載全部設定與範本備份',
@@ -50,6 +50,7 @@ export const backupStrings = {
   replace: '用備份內容取代目前資料',
   replaceNote: '選擇取代時，目前的設定與範本將被備份內容覆蓋；程式會先自動下載目前資料的備份，請先確認備份確實已保存，再繼續。',
   go: '還原',
+  goReplace: '取代並還原',
   cancel: '取消',
   done: '已還原。',
   doneReplace: '已還原，並先下載了目前資料的備份。',

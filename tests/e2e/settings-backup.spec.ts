@@ -46,6 +46,8 @@ test('備份與還原：下載整包備份，選回後先看摘要、預設合�
   await expect(panel.getByRole('radio', { name: /只補上目前缺少的資料/ })).toHaveAttribute('aria-checked', 'true');
   await panel.getByRole('radio', { name: /用備份內容取代目前資料/ }).click();
   await expect(panel.getByText('先自動下載')).toBeVisible();
+  await expect(panel.getByRole('button', { name: '取代並還原' })).toHaveClass(/danger/);
+  await expect(card.getByText('備份檔包含以下資料：')).toBeVisible();
   await noOverflow(page);
   await panel.getByRole('button', { name: '取消' }).click();
   await expect(page.getByTestId('restore-panel')).toHaveCount(0);

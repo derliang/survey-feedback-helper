@@ -51,6 +51,7 @@ export const backupStringsEn: Widen<typeof backupStrings> = {
   replace: 'Replace current data with the backup',
   replaceNote: 'When replacing, your current settings and templates are overwritten by the backup; the app downloads a backup of your current data first, so check that it was really saved before you continue.',
   go: 'Restore',
+  goReplace: 'Replace and restore',
   cancel: 'Cancel',
   done: 'Restored.',
   doneReplace: 'Restored, and a backup of the previous data was downloaded first.',
