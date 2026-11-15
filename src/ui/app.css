@@ -301,8 +301,20 @@ select {
   color: var(--warn);
 }
 .top-banner-text {
-  flex: 1;
+  flex: 1 1 14rem;
   min-width: 0;
+}
+.top-banner-in {
+  flex-wrap: wrap;
+}
+/* 手機：文字佔一整行，動作與「關閉」排下一行靠右 */
+@media (max-width: 599px) {
+  .top-banner-text {
+    flex-basis: calc(100% - 40px);
+  }
+  .top-banner-in {
+    justify-content: flex-end;
+  }
 }
 .card {
   background: var(--card);

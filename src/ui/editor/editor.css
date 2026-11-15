@@ -27,10 +27,31 @@
 .lib-thumb .pv-box {
   pointer-events: none;
 }
+/* 縮圖：整張紙固定倍率排版後用 transform 整體縮小（G4） */
+.pv-thumb {
+  position: relative;
+  overflow: hidden;
+  flex: none;
+}
+.pv-thumb-in {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+}
+.pv-thumb .pv-box {
+  width: 100%;
+}
 .lib-acts {
   display: flex;
-  flex-wrap: wrap;
   gap: var(--sp-2);
+}
+.lib-acts .more {
+  flex: none;
+  min-width: var(--tap-min);
+  padding: 0;
+  font-size: var(--fs-lg);
+  line-height: 1;
 }
 .lib-meta {
   display: flex;

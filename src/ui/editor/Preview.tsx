@@ -242,21 +242,43 @@ export function Preview(props: {
       <div
         class="pv-page doc-warm"
         style={{
-          width: pw * s,
-          minHeight: ph * s,
+          width: px(pw, s),
+          minHeight: px(ph, s),
           padding: `${p.mt * s}px ${p.mx * s}px ${p.mb * s}px`,
           background: p.background ?? 'var(--doc-card)',
           border: p.frame ? `${Math.max(1, p.frame.width * s)}px solid ${p.frame.color}` : undefined,
-          borderRadius: p.frame?.rounded ? 12 * s : 0,
+          borderRadius: p.frame?.rounded ? px(12, s) : 0,
         }}
       >
-        {p.logoSrc && ctx.images[p.logoSrc] && <img class="pv-logo" src={ctx.images[p.logoSrc]} alt="" style={{ height: 36 * s }} />}
+        {p.logoSrc && ctx.images[p.logoSrc] && <img class="pv-logo" src={ctx.images[p.logoSrc]} alt="" style={{ height: px(36, s) }} />}
         {props.t.blocks.map((b) => (
           <Block key={b.id} b={b} c={ctx} />
         ))}
-        <div class="pv-foot" style={{ fontSize: 9 * s }}>
+        <div class="pv-foot" style={{ fontSize: px(9, s) }}>
           {fillVars(p.footerText, vars)}｜{ed().pvPage1}
         </div>
+      </div>
+    </div>
+  );
+}
+
+/** 縮圖用的固定放大倍率：先用夠大的字級排版（避開瀏覽器的最小字級），再整張縮小。 */
+const THUMB_BASE = 1.5;
+
+/**
+ * 範本縮圖（稽核 G4、DESIGN 5.33 B③）：整張紙以固定倍率排好，再用 `transform: scale` 整體縮到指定高度；
+ * 文字不另設縮小後的像素字級，所以頁尾與標題不會被放大蓋住縮圖。
+ */
+export function Thumb({ t, height = 190 }: { t: EditorTemplate; height?: number }) {
+  const p = t.page;
+  const dim = PAGE_SIZES[p.size];
+  const pw = p.orientation === 'landscape' ? dim.h : dim.w;
+  const ph = p.orientation === 'landscape' ? dim.w : dim.h;
+  const k = height / (ph * THUMB_BASE);
+  return (
+    <div class="pv-thumb" style={{ width: px(pw * THUMB_BASE * k, 1), height: px(height, 1) }}>
+      <div class="pv-thumb-in" style={{ width: px(pw * THUMB_BASE, 1), height: px(ph * THUMB_BASE, 1), transform: `scale(${k})` }}>
+        <Preview t={t} scale={THUMB_BASE} thumb />
       </div>
     </div>
   );

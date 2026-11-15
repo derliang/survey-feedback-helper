@@ -173,16 +173,19 @@ test('沒有資料夾時提示下載備份；有資料夾時重開後範本還�
   await expect(page.getByTestId('template-card')).toHaveCount(1);
 });
 
-test('設計落地：桌機範本卡露出「編輯」「用這份輸出」，其他寬度只有選單', async ({ page }, info) => {
+test('範本卡（S5）：各寬度都是「用這份輸出」（主）加「⋯」（更多），縮圖整張縮放不溢出', async ({ page }) => {
   await openLibrary(page);
   const card = page.getByTestId('template-card').first();
-  if (info.project.name === 'desktop') {
-    await expect(card.getByRole('button', { name: /^編輯版面/ })).toBeVisible();
-    await expect(card.getByRole('button', { name: /輸出$/ })).toBeVisible();
-  } else {
-    await expect(card.getByRole('button', { name: /^編輯版面/ })).toHaveCount(0);
-  }
+  await expect(card.getByRole('button', { name: /輸出$/ })).toBeVisible();
+  await expect(card.getByRole('button', { name: /^編輯版面/ })).toHaveCount(0);
   await expect(card.getByRole('button', { name: /的選單$/ })).toBeVisible();
+  // 縮圖：頁尾字級必須是縮圖內自己的小字（不得被放大成蓋住縮圖的大字），且縮圖不超出卡片
+  const m = await card.evaluate((el) => {
+    const th = el.querySelector('.lib-thumb')!.getBoundingClientRect();
+    const foot = el.querySelector('.pv-foot')!.getBoundingClientRect();
+    return { thH: th.height, footH: foot.height, footBottom: foot.bottom, thBottom: th.bottom };
+  });
+  expect(m.footH).toBeLessThan(m.thH / 6);
   expect(await smallButtons(page)).toEqual([]);
 });
 

@@ -12,7 +12,7 @@ import { Icon, Notice, Sheet, TopBanner, useWide } from '../parts/parts';
 import './editor.css';
 import { useDragSort } from './drag';
 import { AddPanel, BlockProps, PagePanel, StudentPanel } from './Panels';
-import { Preview } from './Preview';
+import { Preview, Thumb } from './Preview';
 import {
   type ES, allTemplates, backToLibrary, currentOverrides, deleteBlock, doRedo, doUndo, dropSel, downloadBackup, duplicate, exportOne, importFile, load, moveSel, newTemplate, overrideBlock,
   openEditor, patchBlock, removeTemplate, renameTemplate, resetTemplate, select, setConfirm, setEditMode, setMenuFor, setPanel, setView, setZoom, useEditor, useTemplate,
@@ -42,19 +42,6 @@ export default function EditorView() {
 
 // ---- 範本庫 ----
 
-/** 桌機寬度（≥1024）：範本卡直接露出常用動作；較窄只留「選單」。 */
-function useDesk(): boolean {
-  const q = '(min-width: 1024px)';
-  const [desk, setDesk] = useState(() => window.matchMedia(q).matches);
-  useEffect(() => {
-    const m = window.matchMedia(q);
-    const on = () => setDesk(m.matches);
-    m.addEventListener('change', on);
-    return () => m.removeEventListener('change', on);
-  }, []);
-  return desk;
-}
-
 /** 頁數：以分頁線計（內容超出一頁的自動換頁要到輸出才知道）。 */
 function pageCount(t: EditorTemplate): number {
   let n = 1;
@@ -66,7 +53,6 @@ function pageCount(t: EditorTemplate): number {
 
 function Library({ e }: { e: ES }) {
   const st = useApp();
-  const desk = useDesk();
   const [filter, setFilter] = useState<'all' | 'builtin' | 'mine'>('all');
   const list = allTemplates(e.data).filter((t) => filter === 'all' || (filter === 'builtin') === t.builtin);
   const menu = e.menuFor ? allTemplates(e.data).find((t) => t.id === e.menuFor) : undefined;
@@ -101,7 +87,7 @@ function Library({ e }: { e: ES }) {
         {list.map((t) => (
           <div key={t.id} class="lib-card" data-testid="template-card">
             <button type="button" class="lib-thumb" aria-label={ed().editNamed(t.name)} onClick={() => openEditor(t.id)}>
-              <Preview t={t} scale={0.14} thumb />
+              <Thumb t={t} />
             </button>
             <div class="lib-meta">
               <strong>{t.name}</strong>
@@ -111,18 +97,11 @@ function Library({ e }: { e: ES }) {
               </span>
             </div>
             <div class="lib-acts">
-              {desk && (
-                <>
-                  <button type="button" class="btn secondary small" onClick={() => openEditor(t.id)} aria-label={ed().editLayoutNamed(t.name)}>
-                    {ed().edit}
-                  </button>
-                  <button type="button" class="btn secondary small" onClick={() => useTemplate(t.id)} aria-label={ed().useNamed(t.name)}>
-                    {ed().useForOutput}
-                  </button>
-                </>
-              )}
-              <button type="button" class="btn secondary small" onClick={() => setMenuFor(t.id)} aria-label={ed().menuOf(t.name)}>
-                {ed().menu}
+              <button type="button" class="btn primary small grow" onClick={() => useTemplate(t.id)} aria-label={ed().useNamed(t.name)}>
+                {ed().useForOutput}
+              </button>
+              <button type="button" class="btn secondary small more" onClick={() => setMenuFor(t.id)} aria-label={ed().menuOf(t.name)} title={ed().menu}>
+                ⋯
               </button>
             </div>
           </div>
@@ -375,7 +354,7 @@ function Edit({ e }: { e: ES }) {
         const top = t0.blocks.findIndex((x) => x.id === id);
         const dropMark = drag?.target === id ? (drag.before ? 'before' : 'after') : '';
         return (
-          <li key={id} data-bid={id} class={`blk${sel === id ? ' sel' : ''}${drag?.id === id || kb?.id === id ? ' lift' : ''}${dropMark ? ` drop-${dropMark}` : ''}`} style={{ paddingLeft: depth * 16 }}>
+          <li key={id} data-bid={id} class={`blk${sel === id ? ' sel' : ''}${drag?.id === id || kb?.id === id ? ' lift' : ''}${dropMark ? ` drop-${dropMark}` : ''}`} style={{ paddingLeft: `${depth * 16}px` }}>
             {!e.student && (
               <span
                 class="grip"
