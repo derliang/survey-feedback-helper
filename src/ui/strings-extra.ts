@@ -30,6 +30,8 @@ export const extraZh = {
   },
   statsUi: {
     student: '學生',
+    seatsDec: '減少當選名額',
+    seatsInc: '增加當選名額',
     reviewTitle: '審稿',
     reviewDone: (d: number, t: number) => `已審 ${d}／${t}`,
     reviewBar: '審稿進度',
@@ -148,6 +150,8 @@ export const extraEn: Extra = {
   },
   statsUi: {
     student: 'Student',
+    seatsDec: 'Fewer seats',
+    seatsInc: 'More seats',
     reviewTitle: 'Review',
     reviewDone: (d, t) => `${d} of ${t} reviewed`,
     reviewBar: 'Review progress',

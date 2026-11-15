@@ -81,7 +81,7 @@ export function TopBanner(props: { id: string; children: ComponentChildren; acti
 }
 
 /** 彈出面板：手機由下往上、平板靠右、桌機置中；點遮罩關閉。 */
-export function Sheet(props: { title: string; onClose: () => void; children: ComponentChildren; footer?: ComponentChildren; label?: string }) {
+export function Sheet(props: { title: string; onClose: () => void; children: ComponentChildren; footer?: ComponentChildren; label?: string; wide?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const prev = document.activeElement as HTMLElement | null;
@@ -111,7 +111,7 @@ export function Sheet(props: { title: string; onClose: () => void; children: Com
   }, []);
   return (
     <div class="scrim" onClick={(e) => e.target === e.currentTarget && props.onClose()}>
-      <div class="sheet" role="dialog" aria-modal="true" aria-label={props.label ?? props.title} tabIndex={-1} ref={ref}>
+      <div class={props.wide ? 'sheet sheet-wide' : 'sheet'} role="dialog" aria-modal="true" aria-label={props.label ?? props.title} tabIndex={-1} ref={ref}>
         <div class="sheet-handle" aria-hidden="true" />
         <div class="sheet-head">
           <h2 class="sheet-title">{props.title}</h2>

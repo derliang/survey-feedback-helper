@@ -80,7 +80,7 @@ test('編輯：區塊清單用按鈕上移；多欄與頁面設定', async ({ pa
   // 頁面設定：改成橫式
   await page.getByRole('button', { name: wide ? '頁面設定' : '頁面', exact: true }).click();
   await page.getByRole('dialog').getByRole('button', { name: '橫式' }).click();
-  await page.getByRole('dialog').getByRole('button', { name: /完成|關閉/ }).click();
+  await page.getByRole('dialog').getByRole('button', { name: '完成' }).click();
   await noOverflow(page);
 });
 

@@ -118,7 +118,7 @@ test('票選幹部：匯入→類型→統計票數→Excel、Word、PDF', async
   const x = await download(page, () => page.getByRole('button', { name: /^Excel/ }).first().click());
   const xt = zipText(await bytesOf(x));
   for (const must of ['當選結果', '得票數', '你推薦誰當班長？', '你推薦誰當副班長？', '甲小明', '乙小華', '丙小美']) expect(xt, `xlsx 應含「${must}」`).toContain(must);
-  const w = await download(page, () => page.getByRole('button', { name: /^Word/ }).first().click());
+  const w = await download(page, () => page.getByRole('button', { name: /下載 Word/ }).first().click());
   const wt = zipText(await bytesOf(w));
   for (const must of ['票選結果', '當選：甲小明', '當選：乙小華', '票數']) expect(wt, `docx 應含「${must}」`).toContain(must);
   const p = await download(page, () => page.getByRole('button', { name: /^PDF/ }).first().click());

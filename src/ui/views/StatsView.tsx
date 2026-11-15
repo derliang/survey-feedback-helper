@@ -20,7 +20,7 @@ import { svgToJpg } from '../chart-png';
 import { downloadBytes } from '../../storage';
 import { TrendCard } from './TrendCard';
 import { strings as S } from '../strings';
-import { ActBar, Notice, OptionGroup, useWide } from '../parts/parts';
+import { ActBar, Icon, Notice, OptionGroup, useWide } from '../parts/parts';
 import { CommentList, Keywords } from './ReviewParts';
 import { TeacherComment } from './Phrases';
 import { extra } from '../strings-extra';
@@ -275,64 +275,138 @@ function QuestionMain({ q, wide, reviewTotal }: { q: Question; wide: boolean; re
 
 /* ───────── 票選幹部 ───────── */
 
-function VoteMain({ v, sel, wide }: { v: VoteResult; sel: string; wide: boolean }) {
+/** 只放「另存圖片」：票選結果畫面用 HTML 長條列，圖片版仍由 SVG 產生。 */
+function ImageSave({ svg }: { svg: string }) {
+  const [failed, setFailed] = useState(false);
+  const save = async () => {
+    try {
+      const { w, h } = svgSize(svg);
+      downloadBytes(`${svgTitle(svg)}.jpg`, await svgToJpg(toPrintSvg(svg), w, h), 'image/jpeg');
+      setFailed(false);
+    } catch {
+      setFailed(true);
+    }
+  };
+  return (
+    <div class="chart-tools">
+      <button class="btn ghost small" type="button" onClick={() => void save()}>
+        {S.stats.saveImage}
+      </button>
+      {failed && <span class="hint" role="alert">{S.stats.saveImageFailed}</span>}
+    </div>
+  );
+}
+
+/** 當選名額小步進器：−、數字、＋（取代拉滿寬的輸入框）。 */
+function SeatStepper({ value, onChange }: { value: number; onChange: (n: number) => void }) {
+  const clamp = (n: number) => Math.min(20, Math.max(1, n));
+  return (
+    <div class="stepper-num" role="group" aria-label={S.stats.seats}>
+      <span class="stepper-l">{S.stats.seats}</span>
+      <button class="icbtn" type="button" aria-label={ui().seatsDec} disabled={value <= 1} onClick={() => onChange(clamp(value - 1))}>
+        <span aria-hidden="true">−</span>
+      </button>
+      <output class="stepper-v" data-testid="seats-value" aria-live="polite">
+        {value}
+      </output>
+      <button class="icbtn" type="button" aria-label={ui().seatsInc} disabled={value >= 20} onClick={() => onChange(clamp(value + 1))}>
+        <span aria-hidden="true">＋</span>
+      </button>
+    </div>
+  );
+}
+
+function VoteMain({ v, sel }: { v: VoteResult; sel: string; wide: boolean }) {
   const st = useApp();
-  const w = wide ? 560 : 340;
   const p = v.positions.find((x) => String(x.col.index) === sel) ?? v.positions[0];
   if (!p) return <p class="hint">{S.stats.noData}</p>;
   const counts = { multi: 0, self: 0, time: 0, blank: 0 };
   for (const i of v.issues) counts[i.kind] += i.kind === 'multi' ? 1 : i.ballotIds.length;
   const any = counts.multi + counts.self + counts.time + counts.blank > 0;
   const elected = new Set(p.election.elected);
-  const tiedVotes = p.tally.rows.find((r) => p.election.tied.includes(r.name))?.votes ?? 0;
-  // 同票時當選者排在落選者前面，避免第一列是落選者
-  const chartRows = [...p.tally.rows].sort((a, b) => b.votes - a.votes || Number(elected.has(b.name)) - Number(elected.has(a.name)));
+  const tied = new Set(p.election.tied);
+  const tiedVotes = p.tally.rows.find((r) => tied.has(r.name))?.votes ?? 0;
+  // 當選者固定在前（同票時當選者排在落選者前面），避免第一列是落選者
+  const rows = [...p.tally.rows].sort((a, b) => Number(elected.has(b.name)) - Number(elected.has(a.name)) || b.votes - a.votes);
+  const total = rows.reduce((n, r) => n + r.votes, 0);
+  const maxVotes = Math.max(1, ...rows.map((r) => r.votes));
+  const pct = (n: number) => (total === 0 ? 0 : Math.round((n / total) * 100));
+  const electedText = p.election.elected.join('、') || '—';
+  const imgSvg = barsSvg(
+    rows.map((r) => ({ label: r.name, value: r.votes, note: S.stats.votes(r.votes), strong: elected.has(r.name) })),
+    { title: p.col.label, w: 560, emphasis: true },
+  );
   return (
     <>
-      <section class="card">
-        <h3>{S.stats.issuesTitle}</h3>
-        {any ? (
+      {any && (
+        <section class="card issue-card" data-testid="vote-issues">
+          <h3>{S.stats.issuesTitle}</h3>
           <ul class="plain-list">
             {counts.multi > 0 && <li>{S.stats.issueMulti(counts.multi)}</li>}
             {counts.self > 0 && <li>{S.stats.issueSelf(counts.self)}</li>}
             {counts.time > 0 && <li>{S.stats.issueTime(counts.time)}</li>}
             {counts.blank > 0 && <li>{S.stats.issueBlank(counts.blank)}</li>}
           </ul>
-        ) : (
-          <p class="hint">{S.stats.noIssue}</p>
-        )}
-      </section>
-      <div class="tiles">
-        <Tile label={extra().stats.ballots} value={String(p.tally.validBallots)} />
-        <Tile label={S.stats.elected} value={p.election.elected.join('、') || '—'} />
-      </div>
-      <label class="field">
-        <span class="label">{S.stats.seats}</span>
-        <input class="input" type="number" min={1} max={20} value={p.seats} onInput={(e) => setStats({ seats: { ...st.stats.seats, [p.col.index]: Number((e.target as HTMLInputElement).value) || 1 } })} />
-      </label>
-      <Chart
-        svg={barsSvg(
-          chartRows.map((r) => ({ label: r.name, value: r.votes, note: S.stats.votes(r.votes), strong: elected.has(r.name) })),
-          { title: p.col.label, w, emphasis: true },
-        )}
-      />
-      {p.election.tied.length > 0 && p.election.draw && (
-        <Notice
-          kind="info"
-          title={S.stats.tied}
-          actions={
-            <button class="btn secondary small" type="button" onClick={() => setStats({ seed: newSeed() })}>
-              {S.stats.reseed}
-            </button>
-          }
-        >
-          {S.stats.drawn(p.election.tied.join('、'), tiedVotes, p.election.tied.filter((n) => elected.has(n)).join('、'))}
-          <br />
-          {S.stats.drawnNote}
-        </Notice>
+        </section>
       )}
-      {p.tally.invalid > 0 && <p class="hint">{S.stats.invalidVotes(p.tally.invalid)}</p>}
-      {p.tally.abstain > 0 && <p class="hint">{S.stats.abstain(p.tally.abstain)}</p>}
+      <section class="card vote-result" data-testid="vote-result" aria-label={p.col.label}>
+        <header class="vote-head">
+          <h3>{p.col.label}</h3>
+          <SeatStepper value={p.seats} onChange={(n) => setStats({ seats: { ...st.stats.seats, [p.col.index]: n } })} />
+        </header>
+        <div class="tiles">
+          <Tile label={extra().stats.ballots} value={String(p.tally.validBallots)} />
+          <div class="tile on-soft">
+            <span class="tile-l">{S.stats.elected}</span>
+            <span class={`tile-n${[...electedText].length > 7 ? ' long' : ''}`}>{electedText}</span>
+          </div>
+        </div>
+        <div class="vote-bars" role="list">
+          {rows.map((r) => {
+            const isElected = elected.has(r.name);
+            const isTied = tied.has(r.name);
+            return (
+              <div key={r.name} class="brow" role="listitem">
+                <div class="h">
+                  <span class="nm">
+                    {r.name}
+                    {isElected && <span class="tag accent">{S.stats.elected}</span>}
+                    {isTied && <span class="tag warn">{S.stats.tied}</span>}
+                  </span>
+                  <span class="v">{`${S.stats.votes(r.votes)} · ${pct(r.votes)}%`}</span>
+                </div>
+                <div class="track">
+                  <i class={isElected ? 'win' : isTied ? 'tie' : ''} style={{ width: `${Math.max(2, Math.round((r.votes / maxVotes) * 100))}%` }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        {p.election.tied.length > 0 && p.election.draw && (
+          <Notice
+            kind="info"
+            title={S.stats.tied}
+            actions={
+              <button class="btn secondary small" type="button" onClick={() => setStats({ seed: newSeed() })}>
+                {S.stats.reseed}
+              </button>
+            }
+          >
+            {S.stats.drawn(p.election.tied.join('、'), tiedVotes, p.election.tied.filter((n) => elected.has(n)).join('、'))}
+            <br />
+            {S.stats.drawnNote}
+          </Notice>
+        )}
+        {p.tally.invalid > 0 && <p class="hint">{S.stats.invalidVotes(p.tally.invalid)}</p>}
+        {p.tally.abstain > 0 && <p class="hint">{S.stats.abstain(p.tally.abstain)}</p>}
+        <ImageSave svg={imgSvg} />
+      </section>
+      {!any && (
+        <p class="ok-line" data-testid="vote-no-issue">
+          <Icon name="check" />
+          <span>{S.stats.noIssue}</span>
+        </p>
+      )}
     </>
   );
 }

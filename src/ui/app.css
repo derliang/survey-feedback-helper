@@ -3000,3 +3000,97 @@ ul.chips {
   list-style: none;
   padding: 0;
 }
+
+/* 確認視窗（S17、DESIGN 5.34 C）：平板與桌機標題上方 24 內距；列出會遺失的項目 */
+@media (min-width: 600px) {
+  .sheet {
+    padding-top: var(--sp-5);
+  }
+}
+.lose-box {
+  border: 1.5px solid var(--warn);
+  background: var(--warn-soft);
+  border-radius: var(--r-sm);
+  padding: var(--sp-3);
+}
+.lose-box ul {
+  margin: var(--sp-2) 0 0;
+  padding-left: var(--sp-5);
+  display: grid;
+  gap: var(--sp-1);
+}
+@media (min-width: 1024px) {
+  .sheet.sheet-wide {
+    width: 640px;
+  }
+}
+
+/* 票選統計（DESIGN 5.34 A）：結果卡、名額步進器、長條列、沒有可疑票時的一行字 */
+.vote-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2) var(--sp-3);
+}
+.vote-head h3 {
+  margin: 0;
+  min-width: 0;
+}
+.stepper-num {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+}
+.stepper-l {
+  color: var(--ink2);
+  font-size: var(--fs-sm);
+  margin-right: var(--sp-1);
+}
+.stepper-num .icbtn {
+  border: 1px solid var(--ctl);
+  background: var(--card);
+  color: var(--ink);
+  font-size: var(--fs-lg);
+}
+.stepper-num .icbtn:disabled {
+  background: var(--sunk);
+  color: var(--ink3);
+}
+.stepper-v {
+  min-width: 2ch;
+  text-align: center;
+  font-weight: 700;
+  font-size: var(--fs-lg);
+  font-variant-numeric: tabular-nums;
+}
+.tile.on-soft {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+.vote-bars {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.track > i.win {
+  background: var(--accent);
+}
+.issue-card {
+  border: 1.5px solid var(--warn);
+  background: var(--warn-soft);
+}
+.ok-line {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  margin: 0;
+  color: var(--ink2);
+  font-size: var(--fs-sm);
+}
+.ok-line .ic {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--ok);
+}
