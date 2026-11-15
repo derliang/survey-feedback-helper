@@ -32,7 +32,7 @@ export const TEMPLATES_EN: Record<string, TplEn> = {
       { text: 'I would join a similar activity again' },
       { text: 'What I liked best, and what could be better' },
     ],
-    defaults: 'Charts show the scale distribution of each question; open-ended comments are listed one by one. Anonymous, no name question.',
+    defaults: 'Charts show the scale distribution of each question; open-ended comments are listed one by one. No name question; whether replies are anonymous also depends on the sign-in and email-collection settings, so please check them yourself.',
   },
   parent: {
     name: 'Parent feedback',
@@ -64,7 +64,7 @@ export const TEMPLATES_EN: Record<string, TplEn> = {
       { text: 'One thing I hope the teacher keeps doing' },
       { text: 'One thing I hope the teacher changes' },
     ],
-    defaults: 'Compare the scale distribution of each question in charts; if there is a class column, compare classes as well.',
+    defaults: 'Compare the scale distribution of each question in charts.',
     note: 'This is feedback about the teacher personally. The version shown to students contains only the summary.',
   },
   selfeval: {
