@@ -139,7 +139,7 @@ test('重新開始會先確認，設定頁有隱私三句與忘記資料夾', as
   await expect(page.getByText('設定與名單存在你選的資料夾。')).toBeVisible();
   await expect(page.getByText('放在雲端的檔案由該服務處理。')).toBeVisible();
   await page.getByRole('button', { name: '重新開始' }).click();
-  await page.getByRole('button', { name: '確定重新開始' }).click();
+  await page.getByRole('button', { name: '清除並重新開始' }).click();
   await expect(page.getByRole('heading', { name: '選擇要整理的問卷' })).toBeVisible();
 });
 

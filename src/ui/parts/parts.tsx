@@ -81,7 +81,7 @@ export function TopBanner(props: { id: string; children: ComponentChildren; acti
 }
 
 /** 彈出面板：手機由下往上、平板靠右、桌機置中；點遮罩關閉。 */
-export function Sheet(props: { title: string; onClose: () => void; children: ComponentChildren; footer?: ComponentChildren; label?: string }) {
+export function Sheet(props: { title: string; onClose: () => void; children: ComponentChildren; footer?: ComponentChildren; label?: string; wide?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const prev = document.activeElement as HTMLElement | null;
@@ -111,9 +111,14 @@ export function Sheet(props: { title: string; onClose: () => void; children: Com
   }, []);
   return (
     <div class="scrim" onClick={(e) => e.target === e.currentTarget && props.onClose()}>
-      <div class="sheet" role="dialog" aria-modal="true" aria-label={props.label ?? props.title} tabIndex={-1} ref={ref}>
+      <div class={props.wide ? 'sheet sheet-wide' : 'sheet'} role="dialog" aria-modal="true" aria-label={props.label ?? props.title} tabIndex={-1} ref={ref}>
         <div class="sheet-handle" aria-hidden="true" />
-        <h2 class="sheet-title">{props.title}</h2>
+        <div class="sheet-head">
+          <h2 class="sheet-title">{props.title}</h2>
+          <button class="icbtn sheet-x" type="button" aria-label={strings.close} onClick={props.onClose}>
+            <span aria-hidden="true">✕</span>
+          </button>
+        </div>
         <div class="sheet-body">{props.children}</div>
         {props.footer && <div class="sheet-foot">{props.footer}</div>}
       </div>
@@ -161,5 +166,43 @@ export function AccountChooser() {
       </div>
       <figcaption>{G.chooserNote}</figcaption>
     </figure>
+  );
+}
+
+/** 粗估標籤寬度（以 16px 為單位）：中日韓字 1、其餘約 0.55。 */
+const labelUnits = (t: string): number => [...t].reduce((n, ch) => n + (/[⺀-鿿＀-￯]/.test(ch) ? 1 : 0.55), 0);
+
+/**
+ * 單選選項（DESIGN 5.34 D）：2–4 項且每項標籤在窄欄（約 300px）下都能單行才用分段控制 `.seg`；
+ * 否則改成單選選項卡 `.rcard` 直排。英文與長標籤因此不會折成四行。
+ */
+export function OptionGroup<T extends string | number>(props: { label: string; value: T; options: readonly { value: T; label: string }[]; onChange: (v: T) => void }) {
+  const n = props.options.length;
+  const fits = n >= 2 && n <= 4 && props.options.every((o) => labelUnits(o.label) * 15 + 24 <= 300 / n);
+  if (fits) {
+    return (
+      <div class="seg" role="radiogroup" aria-label={props.label}>
+        {props.options.map((o) => (
+          <button key={String(o.value)} type="button" role="radio" aria-checked={props.value === o.value} class={props.value === o.value ? 'on' : ''} onClick={() => props.onChange(o.value)}>
+            {o.label}
+          </button>
+        ))}
+      </div>
+    );
+  }
+  return (
+    <div class="rcards" role="radiogroup" aria-label={props.label}>
+      {props.options.map((o) => {
+        const on = props.value === o.value;
+        return (
+          <button key={String(o.value)} type="button" role="radio" aria-checked={on} class={`rcard${on ? ' on' : ''}`} onClick={() => props.onChange(o.value)}>
+            <span class="radio" aria-hidden="true" />
+            <span class="rc-main">
+              <strong>{o.label}</strong>
+            </span>
+          </button>
+        );
+      })}
+    </div>
   );
 }

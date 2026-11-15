@@ -40,10 +40,10 @@ export function FolderDialog() {
 export function RestartDialog() {
   const st = useApp();
   if (!st.confirmRestart) return null;
-  return <RestartSheet loseCourse={st.folder.state !== 'ready' && st.session?.course.result != null} />;
+  return <RestartSheet loseCourse={st.folder.state !== 'ready' && st.session?.course.result != null} loseReview={st.reviewUnsaved} />;
 }
 
-function RestartSheet({ loseCourse }: { loseCourse: boolean }) {
+function RestartSheet({ loseCourse, loseReview }: { loseCourse: boolean; loseReview: boolean }) {
   const cancel = useRef<HTMLButtonElement>(null);
   // 取消是預設焦點（Sheet 先把焦點放在視窗上，這裡再移到取消鈕）
   useEffect(() => cancel.current?.focus(), []);
@@ -63,7 +63,15 @@ function RestartSheet({ loseCourse }: { loseCourse: boolean }) {
       }
     >
       <p>{S.settingsPage.restartConfirm}</p>
-      {loseCourse && <p><strong>{S.settingsPage.restartLoseCourse}</strong></p>}
+      {(loseCourse || loseReview) && (
+        <div class="lose-box" data-testid="restart-lose">
+          <strong>{S.settingsPage.restartLoseTitle}</strong>
+          <ul>
+            {loseCourse && <li>{S.settingsPage.restartLoseCourse}</li>}
+            {loseReview && <li>{S.settingsPage.restartLoseReview}</li>}
+          </ul>
+        </div>
+      )}
     </Sheet>
   );
 }

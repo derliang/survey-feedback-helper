@@ -5,7 +5,8 @@ import { currentLang } from './locale';
 
 export const extraZh = {
   skip: '跳到主要內容',
-  chrome: { steps: '步驟', templateAria: '範本與版面', templateLabel: '範本' },
+  chrome: { steps: '步驟', templateAria: '範本與版面', templateLabel: '範本', brand: '問卷回饋小幫手', stepNames: ['開啟問卷', '準備資料', '統計', '輸出'], courseStep: '名額與分配', restart: '重新開始' },
+  loadState: { loading: '載入中…', failTitle: '這個畫面沒有載入成功', failBody: '可能是網路中斷。你的資料還在，按「重新載入」再試一次。', retry: '重新載入', back: '回上一步' },
   loadFail: { view: '畫面載入失敗，請檢查網路後重新整理。', guide: '教學頁載入失敗，請檢查網路後重新整理。', editor: '編輯器載入失敗，請檢查網路後重新整理。' },
   check: { rows: (list: string) => `第 ${list} 列`, more: (n: number) => `…還有 ${n} 筆`, sep: '、' },
   compare: {
@@ -29,6 +30,8 @@ export const extraZh = {
   },
   statsUi: {
     student: '學生',
+    seatsDec: '減少當選名額',
+    seatsInc: '增加當選名額',
     reviewTitle: '審稿',
     reviewDone: (d: number, t: number) => `已審 ${d}／${t}`,
     reviewBar: '審稿進度',
@@ -118,7 +121,8 @@ export type Extra = Widen<typeof extraZh>;
 
 export const extraEn: Extra = {
   skip: 'Skip to main content',
-  chrome: { steps: 'Steps', templateAria: 'Templates and layout', templateLabel: 'Templates' },
+  chrome: { steps: 'Steps', templateAria: 'Templates and layout', templateLabel: 'Templates', brand: 'Feedback Helper', stepNames: ['Open', 'Prepare', 'Stats', 'Output'], courseStep: 'Quota', restart: 'Restart' },
+  loadState: { loading: 'Loading…', failTitle: 'This screen did not load', failBody: 'The network may have dropped. Your data is still here; press Reload to try again.', retry: 'Reload', back: 'Back' },
   loadFail: {
     view: 'This screen could not be loaded. Please check your network and reload.',
     guide: 'The guide could not be loaded. Please check your network and reload.',
@@ -146,6 +150,8 @@ export const extraEn: Extra = {
   },
   statsUi: {
     student: 'Student',
+    seatsDec: 'Fewer seats',
+    seatsInc: 'More seats',
     reviewTitle: 'Review',
     reviewDone: (d, t) => `${d} of ${t} reviewed`,
     reviewBar: 'Review progress',

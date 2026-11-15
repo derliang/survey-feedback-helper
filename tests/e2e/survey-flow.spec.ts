@@ -252,7 +252,7 @@ test('重複回覆：同班同名但座號不同要提醒，不預設刪除；�
   await page.getByRole('button', { name: '取消' }).click();
   await expect(page.getByText('已排除 1 筆回覆')).toBeVisible();
   await page.getByRole('button', { name: '重新開始' }).click();
-  await page.getByRole('button', { name: '確定重新開始' }).click();
+  await page.getByRole('button', { name: '清除並重新開始' }).click();
   await expect(page.getByRole('heading', { name: '選擇要整理的問卷' })).toBeVisible();
   // 再開同一份檔案：排除的紀錄不殘留，重複填答又回到待處理
   await openFeedback(page, { name: '報告回饋 (回覆).xlsx', mimeType: 'application/octet-stream', buffer: makeXlsx(FB_HEAD, rows) });
