@@ -163,7 +163,7 @@ test('報告回饋：Word 班級總表與學生版個人回饋單（只含採用
   await page.getByRole('button', { name: '預覽過了' }).click();
   const select = page.locator('select.input');
   await select.selectOption((await select.locator('option', { hasText: '林雅婷' }).first().getAttribute('value'))!);
-  const one = await download(page, () => page.getByRole('button', { name: /^Word/ }).last().click());
+  const one = await download(page, () => page.getByRole('button', { name: '下載 Word' }).click());
   expect(one.suggestedFilename()).toMatch(/\.docx$/);
   const ot = zipText(await bytesOf(one));
   expect(ot).toContain('講得很清楚');
