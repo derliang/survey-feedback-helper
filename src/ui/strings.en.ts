@@ -35,6 +35,7 @@ const enCore: DeepPartial<Strings> = {
   home2: {
     templates: 'Use a quick template',
     guide: 'How to design a Google Form',
+    help: 'Getting started',
   },
   folder: {
     label: 'Folder: ',

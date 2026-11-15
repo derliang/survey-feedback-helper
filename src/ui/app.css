@@ -1069,8 +1069,7 @@ button.tile {
     display: flex;
   }
   .open-buttons {
-    grid-template-columns: repeat(3, auto);
-    justify-content: start;
+    grid-template-columns: 1.6fr 1fr 1fr;
   }
   .prep-grid {
     grid-template-columns: 300px 1fr;
@@ -1180,9 +1179,9 @@ button.tile {
 }
 .open-why {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--sp-2);
-  margin: 0;
+  margin: var(--sp-2) 0 0;
 }
 .open-why .ic {
   flex: none;
@@ -1550,11 +1549,30 @@ button.tile {
     grid-template-columns: 1fr 1fr;
   }
 }
-.home-links {
+.home-help {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-2);
-  margin: var(--sp-3) 0 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  margin-top: var(--sp-4);
+}
+.home-help-h {
+  margin: 0 0 var(--sp-1);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--ink2);
+}
+/* 三個說明入口左緣對齊：文字按鈕與摘要都去掉左內距 */
+.home-help .btn.ghost,
+.home-help .howto summary {
+  padding-left: 0;
+  justify-content: flex-start;
+}
+.home-help .howto {
+  margin-top: 0;
+}
+.home-grid .empty {
+  padding: var(--sp-1) 0;
 }
 .demo-tag {
   flex: none;

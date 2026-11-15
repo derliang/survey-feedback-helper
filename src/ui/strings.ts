@@ -64,14 +64,14 @@ export const strings = {
     drop: '把 Excel 或 CSV 檔拖曳到這裡',
     dropOr: '或用下面的按鈕選擇',
     openSheet: '開啟試算表',
-    openSheetWhy: '這個版本還沒設定 Google 連線；現在請先從試算表下載 Excel 檔（做法見「Google 表單教學」的做法二）。',
+    openSheetWhy: '這個版本尚未開放 Google 連線，請先用 Excel 檔。',
     openSheetReady: '用 Google 帳號直接讀取，不必先下載 Excel 檔。',
     pickFile: '選擇 Excel 檔',
     openConfig: '開啟設定檔',
     recent: '最近的問卷',
     recentLead: '選取後重新指定問卷檔，即可沿用上次的欄位設定。',
     recentEmpty: '還沒有最近的問卷。處理過的問卷會出現在這裡。',
-    recentNeedFolder: '目前沒有選擇設定資料夾；選好或重新授權後，才能查看先前儲存的問卷設定。',
+    recentNeedFolder: '選好設定資料夾後，這裡會列出最近的問卷。',
     recentNeedAuth: '請重新授權資料夾，才能顯示最近處理的問卷。',
     recentPick: '請重新選取這份問卷的資料檔；系統將沿用先前儲存的欄位對應設定，不會把舊的填答回覆當作最新資料。',
     newRows: (n: number) => `新增 ${n} 筆`,
@@ -661,6 +661,7 @@ export const strings = {
   home2: {
     templates: '用快速範本',
     guide: 'Google 表單怎麼設計',
+    help: '新手協助',
   },
 
   recognitionTpl: {
