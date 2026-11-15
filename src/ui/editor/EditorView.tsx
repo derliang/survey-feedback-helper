@@ -157,6 +157,7 @@ function Library({ e }: { e: ES }) {
       )}
       {e.confirm && (
         <Sheet
+          confirm
           title={e.confirm.kind === 'delete' ? ed().confDelTitle : ed().confRestTitle}
           onClose={() => setConfirm(null)}
           footer={

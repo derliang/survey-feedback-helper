@@ -26,7 +26,7 @@ import { findPossibleNames, type PossibleName } from '../../core/possible-names'
 import { PRINT, pairedBarsSvg } from '../chart-svg';
 import { svgToPng } from '../chart-png';
 import { strings as S } from '../strings';
-import { ActBar, Icon, Notice, Sheet } from '../parts/parts';
+import { ActBar, Icon, Notice, OptionGroup, Sheet } from '../parts/parts';
 import { extra } from '../strings-extra';
 
 type Fmt = 'xlsx' | 'docx' | 'pdf';
@@ -347,20 +347,14 @@ export function OutputView() {
         <p class="meta">{s.name}</p>
       </header>
 
-      {!summary && !vote && status}
+      {!summary && !vote && !qs && status}
 
       {summary && (
         <div class="out-cols">
           <div class="out-main">
           <section class="card">
             <h2>{S.output.stepWho}</h2>
-            <div class="seg" role="radiogroup" aria-label={S.output.audienceTitle}>
-              {(['teacher', 'student', 'parent'] as Audience[]).map((a) => (
-                <button key={a} type="button" role="radio" aria-checked={audience === a} class={audience === a ? 'on' : ''} onClick={() => setAudience(a)}>
-                  {S.output.audiences[a]}
-                </button>
-              ))}
-            </div>
+            <OptionGroup label={S.output.audienceTitle} value={audience} options={(['teacher', 'student', 'parent'] as Audience[]).map((a) => ({ value: a, label: S.output.audiences[a] }))} onChange={setAudience} />
             <p class="hint">{S.output.audienceNotes[audience]}</p>
             {audience !== 'teacher' && counts.pending > 0 && <Notice kind="info">{S.output.unreviewed(counts.pending)}</Notice>}
             {audience !== 'teacher' && counts.flaggedPending > 0 && <Notice kind="warn">{S.output.flaggedUnreviewed(counts.flaggedPending)}</Notice>}
@@ -503,16 +497,58 @@ export function OutputView() {
       )}
 
       {qs && (
-        <section class="card">
-          <h2>{S.output.report}</h2>
-          <div class="btn-row">
-            {(['xlsx', 'docx', 'pdf'] as Fmt[]).map((f) => (
-              <button key={f} class="btn secondary" type="button" disabled={dis} onClick={() => void report(f)}>
-                {S.output[f]}
-              </button>
-            ))}
+        <div class="out-cols" data-testid="opinion-output">
+          <div class="out-main">
+            <section class="card">
+              <h2>{S.output.voteContent}</h2>
+              <div class="table-wrap">
+                <table class="roster-table vote-sum opinion-sum">
+                  <thead>
+                    <tr>
+                      {S.output.opinionCols.map((c) => (
+                        <th key={c}>{c}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {qs.map((q) => {
+                      const answered = q.kind === 'score' ? q.stat.n : q.kind === 'choice' ? q.stat.answered : q.stat.answers.length;
+                      const top = q.kind === 'choice' ? [...q.stat.counts].sort((x, y) => y.count - x.count)[0] : undefined;
+                      const gist =
+                        q.kind === 'score' ? (q.stat.mean === null ? '—' : S.output.opinionMean(q.stat.mean.toFixed(2))) : q.kind === 'choice' ? (top ? `${top.option}（${top.count}）` : '—') : '—';
+                      return (
+                        <tr key={q.col.index}>
+                          <td>{q.col.label}</td>
+                          <td>{S.output.opinionKinds[q.kind]}</td>
+                          <td>{answered}</td>
+                          <td>{gist}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <p class="hint">{S.output.opinionFileNote}</p>
+            </section>
           </div>
-        </section>
+          <aside class="out-side">
+            <section class="card out-dl" aria-busy={dis} aria-label={S.output.stepDownload}>
+              <h2>{S.output.voteDownload}</h2>
+              {status}
+              <div class="out-pers">
+                <button class="btn primary out-main-btn" type="button" disabled={dis} onClick={() => void report('docx')}>
+                  {lbl('report-docx', S.output.downloadWord)}
+                </button>
+                <button class="btn secondary" type="button" disabled={dis} onClick={() => void report('pdf')}>
+                  {lbl('report-pdf', S.output.pdf)}
+                </button>
+                <button class="btn secondary" type="button" disabled={dis} onClick={() => void report('xlsx')}>
+                  {lbl('report-xlsx', S.output.fmtShort.xlsx)}
+                </button>
+              </div>
+            </section>
+          </aside>
+        </div>
       )}
 
       <p class="hint">{S.output.fontsNote}</p>

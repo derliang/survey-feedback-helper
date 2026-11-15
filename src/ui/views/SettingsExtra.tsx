@@ -77,22 +77,34 @@ export function DefaultsCard() {
     <section class="card" data-testid="defaults-card">
       <h2>{D.title}</h2>
       <p class="hint">{D.intro}</p>
-      <div class="seg" role="radiogroup" aria-label={D.title}>
-        {(['global', 'kind', 'run'] as Layer[]).map((x) => (
-          <button key={x} type="button" role="radio" aria-checked={layer === x} class={layer === x ? 'on' : ''} onClick={() => setLayer(x)}>
-            {D.layers[x]}
-          </button>
-        ))}
-      </div>
-      {layer === 'kind' && (
-        <div class="seg" role="radiogroup" aria-label={D.layers.kind} style="margin-top:var(--sp-2)">
-          {KINDS.map((x) => (
-            <button key={x} type="button" role="radio" aria-checked={kind === x} class={kind === x ? 'on' : ''} onClick={() => setKind(x)}>
-              {D.kinds[x]}
-            </button>
-          ))}
+      <div class="scope-row">
+        <div class="field">
+          <label class="label" for="def-scope">
+            {D.scopeLabel}
+          </label>
+          <select id="def-scope" class="input" value={layer} onChange={(e) => setLayer((e.target as HTMLSelectElement).value as Layer)}>
+            {(['global', 'kind', 'run'] as Layer[]).map((x) => (
+              <option key={x} value={x}>
+                {D.layers[x]}
+              </option>
+            ))}
+          </select>
         </div>
-      )}
+        {layer === 'kind' && (
+          <div class="field">
+            <label class="label" for="def-kind">
+              {D.layers.kind}
+            </label>
+            <select id="def-kind" class="input" value={kind} onChange={(e) => setKind((e.target as HTMLSelectElement).value as Kind)}>
+              {KINDS.map((x) => (
+                <option key={x} value={x}>
+                  {D.kinds[x]}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+      </div>
       {layer === 'run' && <Notice kind="warn">{D.runNote}</Notice>}
       <div class="stack" style="margin-top:var(--sp-3)">
         {text('school')}

@@ -1088,7 +1088,7 @@ button.tile {
     grid-template-columns: 1.6fr 1fr 1fr;
   }
   .prep-grid {
-    grid-template-columns: 300px 1fr;
+    grid-template-columns: 300px minmax(0, 1fr);
     align-items: start;
   }
   .prep:not(.has-sub) .panel,
@@ -1163,7 +1163,7 @@ button.tile {
     gap: var(--sp-6);
   }
   .prep-grid {
-    grid-template-columns: 340px 1fr;
+    grid-template-columns: 340px minmax(0, 1fr);
   }
   .wb {
     grid-template-columns: 240px minmax(0, 1fr) 300px;
@@ -1806,6 +1806,13 @@ details[open] > :not(summary) {
   .icbtn[aria-label]:focus-visible::after {
     opacity: 1;
     transition: opacity 100ms ease-out;
+  }
+  /* 列尾的圖示鈕：提示向左展開，不把頁面撐出橫向捲軸（準備資料右欄加寬後） */
+  .map-row .icbtn[aria-label]::after,
+  .rowbtn-end .icbtn[aria-label]::after {
+    left: auto;
+    right: 0;
+    transform: none;
   }
 }
 /* 圖表長條：懸停或鍵盤聚焦加 2px --ink 外框，提示用原生 title（無動畫） */
@@ -2508,6 +2515,32 @@ details[open] > :not(summary) {
 }
 .out-pers > .out-main-btn {
   flex: 1 1 auto;
+  white-space: nowrap;
+}
+.out-pers {
+  flex-wrap: wrap;
+}
+.out-pers > .out-main-btn {
+  min-width: 140px;
+}
+/* 輸出內容摘要表：數字與標籤欄不折行；窄於 400 時意見調查表隱藏「題型」欄 */
+.vote-sum th:nth-child(2),
+.vote-sum td:nth-child(2),
+.vote-sum th:nth-child(3),
+.vote-sum td:nth-child(3) {
+  white-space: nowrap;
+}
+@media (max-width: 399px) {
+  .vote-sum th,
+  .vote-sum td {
+    padding-inline: 8px;
+  }
+  .opinion-sum th:nth-child(2),
+  .opinion-sum td:nth-child(2),
+  .opinion-sum th:nth-child(3),
+  .opinion-sum td:nth-child(3) {
+    display: none;
+  }
 }
 .out-more {
   position: relative;
@@ -2964,7 +2997,7 @@ details[open] > :not(summary) {
   white-space: nowrap;
 }
 @media (max-width: 1099px) {
-  :root:lang(en) .file-name {
+  .file-name {
     display: none;
   }
 }
@@ -3018,6 +3051,20 @@ ul.chips {
   padding-left: var(--sp-5);
   display: grid;
   gap: var(--sp-1);
+}
+/* 確認視窗在平板也置中、寬 480，不做滿高側欄 */
+@media (min-width: 600px) {
+  .scrim:has(.sheet-confirm) {
+    justify-content: center;
+    align-items: center;
+  }
+  .sheet.sheet-confirm {
+    width: 480px;
+    max-width: calc(100vw - 32px);
+    height: auto;
+    max-height: 86vh;
+    border-radius: var(--r-md);
+  }
 }
 @media (min-width: 1024px) {
   .sheet.sheet-wide {
@@ -3093,4 +3140,22 @@ ul.chips {
   width: 18px;
   height: 18px;
   color: var(--ok);
+}
+
+/* 設定頁：預設輸出設定的「套用範圍」下拉，與內容選項的分段控制區隔（S14） */
+.scope-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  align-items: end;
+  margin-top: var(--sp-2);
+}
+.scope-row .field {
+  flex: 1 1 200px;
+  max-width: 320px;
+}
+
+/* 準備資料桌機：右欄撐到 1240 容器（左 340＋右 860），不留 160 空白（S11） */
+.prep-grid .view {
+  max-width: none;
 }

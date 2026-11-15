@@ -869,6 +869,7 @@ export default function CourseView() {
       )}
       {confirmRun && (
         <Sheet
+          confirm
           title={C.rerunConfirmTitle}
           onClose={() => setConfirmRun(false)}
           footer={
