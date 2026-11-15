@@ -467,6 +467,7 @@ function Edit({ e }: { e: ES }) {
       <>
       <SaveNote e={e} hasFolder={st.folder.state === 'ready'} />
       <main class="page editor wide" id="main">
+        <h1 class="sr">{t0.name}</h1>
         {header}
           {banner}
         <div class="ed-tools">
@@ -507,6 +508,7 @@ function Edit({ e }: { e: ES }) {
     <>
     <SaveNote e={e} hasFolder={st.folder.state === 'ready'} />
     <main class="page editor narrow" id="main">
+      <h1 class="sr">{t0.name}</h1>
       {header}
       {banner}
       <div class="ed-modes">

@@ -392,7 +392,7 @@ export const enMore: DeepPartial<Strings> = {
     seats: 'Seats',
     elected: 'Elected',
     tied: 'Tied',
-    drawn: (seed) => `The tie was decided by draw number ${seed}. To reproduce it, keep the same votes, candidates and draw settings.`,
+    drawn: () => 'The tie was decided by a lottery. With the same votes, candidates and draw settings you get the same result again; change the draw number to draw differently.',
     reseed: 'Change the draw number and draw again',
     invalidVotes: (n) => `${n} ballot(s) name someone outside the list (invalid)`,
     abstain: (n) => `${n} ballot(s) left this position blank`,

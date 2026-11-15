@@ -436,7 +436,7 @@ export const strings = {
     seats: '名額',
     elected: '當選',
     tied: '同票',
-    drawn: (seed: string) => `同票時已依抽籤編號 ${seed} 決定結果。要重現，必須保持相同票數、候選人及抽籤設定。`,
+    drawn: () => '同票時已用抽籤決定結果。只要票數、候選人與抽籤設定都不變，重新計算會得到同樣的結果；想換一個結果，可更換抽籤編號。',
     reseed: '更換抽籤編號並重新抽籤',
     invalidVotes: (n: number) => `${n} 張投給名單以外的人（無效票）`,
     abstain: (n: number) => `${n} 張這個職位沒投`,

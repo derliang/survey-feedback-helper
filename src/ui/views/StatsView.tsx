@@ -329,7 +329,7 @@ function VoteMain({ v, sel, wide }: { v: VoteResult; sel: string; wide: boolean 
             </button>
           }
         >
-          {S.stats.drawn(p.election.draw.seed)}：{p.election.tied.join('、')}
+          {S.stats.drawn()}：{p.election.tied.join('、')}
         </Notice>
       )}
       {p.tally.invalid > 0 && <p class="hint">{S.stats.invalidVotes(p.tally.invalid)}</p>}
