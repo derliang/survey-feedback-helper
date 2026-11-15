@@ -5,10 +5,11 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { getState, go, useApp } from '../../app/store';
 import { applyOverrides, countOverrides } from '../../editor/overrides';
 import { findBlock, walk } from '../../editor/ops';
+import { blockSummary } from '../../editor/ops';
 import type { EBlock, EditorTemplate } from '../../editor/types';
 import { pinchZoom } from '../../editor/pinch';
 import { wordNotes } from '../../editor/word';
-import { Icon, Notice, Sheet, useWide } from '../parts/parts';
+import { Icon, Notice, Sheet, TopBanner, useWide } from '../parts/parts';
 import './editor.css';
 import { useDragSort } from './drag';
 import { AddPanel, BlockProps, PagePanel, StudentPanel } from './Panels';
@@ -42,19 +43,6 @@ export default function EditorView() {
 
 // ---- 範本庫 ----
 
-/** 桌機寬度（≥1024）：範本卡直接露出常用動作；較窄只留「選單」。 */
-function useDesk(): boolean {
-  const q = '(min-width: 1024px)';
-  const [desk, setDesk] = useState(() => window.matchMedia(q).matches);
-  useEffect(() => {
-    const m = window.matchMedia(q);
-    const on = () => setDesk(m.matches);
-    m.addEventListener('change', on);
-    return () => m.removeEventListener('change', on);
-  }, []);
-  return desk;
-}
-
 /** 頁數：以分頁線計（內容超出一頁的自動換頁要到輸出才知道）。 */
 function pageCount(t: EditorTemplate): number {
   let n = 1;
@@ -66,17 +54,17 @@ function pageCount(t: EditorTemplate): number {
 
 function Library({ e }: { e: ES }) {
   const st = useApp();
-  const desk = useDesk();
   const [filter, setFilter] = useState<'all' | 'builtin' | 'mine'>('all');
   const list = allTemplates(e.data).filter((t) => filter === 'all' || (filter === 'builtin') === t.builtin);
   const menu = e.menuFor ? allTemplates(e.data).find((t) => t.id === e.menuFor) : undefined;
   return (
+    <>
+    <SaveNote e={e} hasFolder={st.folder.state === 'ready'} />
     <main class="page editor-lib" id="main">
       <div class="prep-head">
         <h1>{ed().libTitle}</h1>
         <p class="lead">{ed().libLead}</p>
       </div>
-      <SaveNote e={e} hasFolder={st.folder.state === 'ready'} />
       <div class="seg" role="group" aria-label={ed().libFilter}>
         {(
           [
@@ -110,18 +98,11 @@ function Library({ e }: { e: ES }) {
               </span>
             </div>
             <div class="lib-acts">
-              {desk && (
-                <>
-                  <button type="button" class="btn secondary small" onClick={() => openEditor(t.id)} aria-label={ed().editLayoutNamed(t.name)}>
-                    {ed().edit}
-                  </button>
-                  <button type="button" class="btn secondary small" onClick={() => useTemplate(t.id)} aria-label={ed().useNamed(t.name)}>
-                    {ed().useForOutput}
-                  </button>
-                </>
-              )}
-              <button type="button" class="btn secondary small" onClick={() => setMenuFor(t.id)} aria-label={ed().menuOf(t.name)}>
-                {ed().menu}
+              <button type="button" class="btn primary small grow" onClick={() => useTemplate(t.id)} aria-label={ed().useNamed(t.name)}>
+                {ed().useForOutput}
+              </button>
+              <button type="button" class="btn secondary small more" onClick={() => setMenuFor(t.id)} aria-label={ed().menuOf(t.name)} title={ed().menu}>
+                ⋯
               </button>
             </div>
           </div>
@@ -193,16 +174,17 @@ function Library({ e }: { e: ES }) {
         </Sheet>
       )}
     </main>
+    </>
   );
 }
 
+/** 「範本還沒存進資料夾」：頁頂細橫幅（G1），放在 main 之前，與全站儲存警示同一個元件。 */
 function SaveNote({ e, hasFolder }: { e: ES; hasFolder: boolean }) {
   if (!e.unsaved) return null;
   return (
-    <Notice
-      kind="warn"
-      title={hasFolder ? ed().notSaved : ed().noFolder}
-      actions={
+    <TopBanner
+      id={hasFolder ? 'tpl-notsaved' : 'tpl-nofolder'}
+      action={
         <>
           <button type="button" class="btn secondary small" onClick={downloadBackup}>
             {ed().dlBackup}
@@ -215,8 +197,8 @@ function SaveNote({ e, hasFolder }: { e: ES; hasFolder: boolean }) {
         </>
       }
     >
-      {ed().keepFile}
-    </Notice>
+      {hasFolder ? ed().notSaved : ed().noFolder}
+    </TopBanner>
   );
 }
 
@@ -373,7 +355,7 @@ function Edit({ e }: { e: ES }) {
         const top = t0.blocks.findIndex((x) => x.id === id);
         const dropMark = drag?.target === id ? (drag.before ? 'before' : 'after') : '';
         return (
-          <li key={id} data-bid={id} class={`blk${sel === id ? ' sel' : ''}${drag?.id === id || kb?.id === id ? ' lift' : ''}${dropMark ? ` drop-${dropMark}` : ''}`} style={{ paddingLeft: depth * 16 }}>
+          <li key={id} data-bid={id} class={`blk${sel === id ? ' sel' : ''}${drag?.id === id || kb?.id === id ? ' lift' : ''}${dropMark ? ` drop-${dropMark}` : ''}`} style={{ paddingLeft: `${depth * 16}px` }}>
             {!e.student && (
               <span
                 class="grip"
@@ -388,10 +370,13 @@ function Edit({ e }: { e: ES }) {
                 ⋮⋮
               </span>
             )}
-            <button type="button" class="blk-name" onClick={() => select(id)} aria-pressed={sel === id}>
-              {blockName(b)}
-              {b.when && <span class="tag">{ed().condCond}</span>}
-            </button>
+            <span class="blk-main">
+              <button type="button" class="blk-name" onClick={() => select(id)} aria-pressed={sel === id}>
+                {blockName(b)}
+                {b.when && <span class="tag">{ed().condCond}</span>}
+              </button>
+              {blockSummary(b) && <span class="blk-sum">{blockSummary(b)}</span>}
+            </span>
             {!e.student && depth === 0 && (
               <span class="blk-mv">
                 <button type="button" class="icbtn" aria-label={ed().upNamed(blockName(b))} disabled={top === 0} onClick={() => moveSel(id, -1)}>
@@ -479,10 +464,12 @@ function Edit({ e }: { e: ES }) {
 
   if (wide) {
     return (
+      <>
+      <SaveNote e={e} hasFolder={st.folder.state === 'ready'} />
       <main class="page editor wide" id="main">
+        <h1 class="sr">{t0.name}</h1>
         {header}
-        <SaveNote e={e} hasFolder={st.folder.state === 'ready'} />
-        {banner}
+          {banner}
         <div class="ed-tools">
           <button type="button" class="btn secondary small" onClick={() => setPanel('page')}>
             {ed().pageSetup}
@@ -513,13 +500,16 @@ function Edit({ e }: { e: ES }) {
         {wnotes.length > 0 && <p class="hint">{ed().wordNote(wnotes.length)}</p>}
         {sheets}
       </main>
+      </>
     );
   }
 
   return (
+    <>
+    <SaveNote e={e} hasFolder={st.folder.state === 'ready'} />
     <main class="page editor narrow" id="main">
+      <h1 class="sr">{t0.name}</h1>
       {header}
-      <SaveNote e={e} hasFolder={st.folder.state === 'ready'} />
       {banner}
       <div class="ed-modes">
         <div class="seg" role="group" aria-label={ed().viewAria}>
@@ -567,6 +557,7 @@ function Edit({ e }: { e: ES }) {
       </div>
       {sheets}
     </main>
+    </>
   );
 }
 

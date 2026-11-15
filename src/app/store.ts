@@ -712,7 +712,8 @@ export async function loadReview(): Promise<void> {
       set({ toast: extra().store.reviewUnreadable });
     }
   }
-  set({ review: loaded, reviewUnsaved: folder.state !== "ready" });
+  // 剛讀進來、老師還沒動過審稿，沒有東西會遺失，所以不亮「尚未儲存」（Issue #90）；改了而存不進資料夾時 writeReview 才會亮。
+  set({ review: loaded, reviewUnsaved: false });
 }
 
 let reviewTimer: ReturnType<typeof setTimeout> | undefined;

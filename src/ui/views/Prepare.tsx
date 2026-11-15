@@ -8,7 +8,7 @@ import { CompareView } from './CompareView';
 import { MappingView } from './MappingView';
 import { RosterView } from './RosterView';
 import { TypeView } from './TypeView';
-import { extra } from '../strings-extra';
+import { extra, sourceName } from '../strings-extra';
 
 const SUB_OF: Record<PrepItem['key'], Sub> = { type: 'type', mapping: 'mapping', roster: 'roster', check: 'check' };
 const ITEM_OF: Record<Sub, PrepItem['key']> = { type: 'type', mapping: 'mapping', roster: 'roster', compare: 'roster', check: 'check' };
@@ -51,7 +51,7 @@ export function Prepare() {
       <header class="prep-head">
         <h1>{s.name}</h1>
         <p class="meta">
-          {S.prep.sourceInfo(s.sourceLabel, s.table.rows.length, s.table.headers.length)}
+          {S.prep.sourceInfo(sourceName(s.sourceLabel), s.table.rows.length, s.table.headers.length)}
           {more !== null && more > 0 && <span class="tag accent">{S.prep.moreRows(more)}</span>}
         </p>
         {!wide && sheetLine}
@@ -102,7 +102,7 @@ export function Prepare() {
       </div>
 
       {!active && (
-        <ActBar>
+        <ActBar fixed>
           <button class="btn secondary" type="button" onClick={() => go('home')}>
             {S.back}
           </button>

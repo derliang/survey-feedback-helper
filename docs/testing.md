@@ -22,5 +22,5 @@
 
 - 真機測試（iOS Safari、Android Chrome）：見 [real-device-checklist.md](real-device-checklist.md)，需要人拿真的裝置。
 - Google 表單的**真實匯出檔**：`form-samples.test.ts` 的欄位標題是依描述自編的近似（例如格狀題的「題目 [列名]」寫法），尚未對照真實匯出，待核對。
-- 英文介面：`google`（登入面板）、`guide`（Google 表單教學）、`tpl`（快速範本題目）三段仍是繁體中文，要先對照真實 Google 英文介面才能翻（硬規則 10）。
+- 英文介面：`google`、`guide`、`tpl` 三段已於 2026-11-04 補上英文（見 `strings.en.test.ts` 註解），但其中 Google 英文介面名稱尚未對照真實英文介面，句尾標「(to be verified)」，待核對（硬規則 10）；範本編輯器與範本庫於 PR #88 起走 `strings-editor.ts`，範本內的預設區塊標籤與示範學生姓名屬使用者資料，不翻譯。
 - 首屏 2 秒：2026-11-07 重測在機器忙碌時模擬 Slow 4G 仍有 1.8～2.4 秒，真機未量，見 [performance.md](performance.md)。

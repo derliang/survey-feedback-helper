@@ -50,10 +50,10 @@ export function TopBar() {
             <span class="lbl">{S.restart}</span>
           </button>
           <button class="btn ghost small" type="button" onClick={() => go('editor')} aria-label={extra().chrome.templateAria}>
-            <Icon name="pencil" />
+            <Icon name="layout" />
             <span class="lbl">{extra().chrome.templateLabel}</span>
           </button>
-          <button class="btn secondary small" type="button" onClick={() => go('settings')} aria-label={unsaved ? S.settingsUnsaved : S.settings}>
+          <button class="btn secondary small" type="button" onClick={() => go('settings')} aria-label={unsaved ? S.settingsUnsaved : S.settings} title={unsaved ? S.settingsUnsaved : undefined}>
             <Icon name="gear" />
             <span class="lbl">{S.settings}</span>
             {unsaved && <span class="dot-warn" data-testid="unsaved-dot" aria-hidden="true" />}
