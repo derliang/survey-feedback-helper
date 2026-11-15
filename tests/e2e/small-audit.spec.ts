@@ -1,5 +1,5 @@
 import { type Page, expect, test } from '@playwright/test';
-import { surveyFile } from './fixtures';
+import { settingsTab, surveyFile } from './fixtures';
 
 // 2026-11-14 逐頁版面稽核小改（S1～S10）與 Issue #90、#92 的回歸測試。資料皆為虛構。
 
@@ -54,6 +54,7 @@ test('學生名單（S4）：底部列只有「上一步」「下一步」，略
 test('英文介面（#92）：來源標籤「Excel 檔」依語言顯示', async ({ page }) => {
   await page.goto('./');
   await page.getByRole('button', { name: '設定', exact: true }).click();
+  await settingsTab(page, 'look');
   await page.getByRole('radio', { name: 'English' }).click();
   await page.getByRole('button', { name: 'Back', exact: true }).click();
   await page.getByTestId('file-input').setInputFiles(surveyFile());
