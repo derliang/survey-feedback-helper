@@ -100,8 +100,9 @@ export function useWide(): boolean {
   return wide;
 }
 
-export function ActBar(props: { children: ComponentChildren }) {
-  return <div class="actbar">{props.children}</div>;
+/** `fixed`：平板與桌機也固定在視窗底（只有統計頁用；手機本來就固定）。 */
+export function ActBar(props: { children: ComponentChildren; fixed?: boolean }) {
+  return <div class={props.fixed ? 'actbar actbar-fixed' : 'actbar'}>{props.children}</div>;
 }
 
 /** Google 選帳號畫面的示意圖（自畫、虛構帳號；「選這個」用文字加底色，不只靠顏色）。登入前提示卡與教學共用。 */
