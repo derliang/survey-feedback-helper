@@ -948,6 +948,10 @@ button.tile {
   gap: var(--sp-2);
   min-height: var(--tap-min);
 }
+.check-inline {
+  flex-wrap: nowrap;
+  align-items: flex-start;
+}
 .check input {
   width: 22px;
   height: 22px;

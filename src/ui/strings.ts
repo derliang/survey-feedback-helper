@@ -537,6 +537,7 @@ export const strings = {
     missingChars: (c: string) => `PDF 的字型沒有這些字，已略過或以空白顯示：${c}。要完整呈現請改輸出 Word 檔。`,
     previewTitle: '即將放入回饋單的留言',
     previewDone: '預覽過了',
+    previewTick: '勾選後完成',
     previewConfirm: '我已逐則看過預覽，沒有名單外的人名',
     warnTitle: '輸出學生版或家長版前，請先確認留言裡沒有同學的名字',
     warnBody: '系統可遮蔽已知名單中的姓名，但可能無法辨識綽號、未匯入名單者、老師或校外人士的姓名，也無法保證辨識全部個資。請逐則檢查即將輸出的留言，必要時先改寫再下載。',
@@ -565,6 +566,7 @@ export const strings = {
     templateEdit: '編輯範本',
     templateLoading: '範本載入中⋯',
     wordFont: 'Word 檔字型：',
+    wordFontNote: 'Word 版使用電腦內建的中文字型（Windows：微軟正黑體；Mac：蘋方-繁），因此換行位置可能和 PDF 有一兩個字的差異；需要版面完全一致時請使用 PDF。',
   },
 
   method: {
