@@ -79,7 +79,7 @@ export function Prepare() {
                     <span class="rb-num">{it.state === 'done' ? <Icon name="check" /> : locked ? <Icon name="lock" /> : n + 1}</span>
                     <span class="rb-main">
                       <strong>{S.prep.items[it.key]}</strong>
-                      <span class="rb-note">{it.note}</span>
+                      {!locked && <span class="rb-note">{it.note}</span>}
                     </span>
                     <span class={`tag ${it.state === 'done' ? 'ok' : it.state === 'attention' || it.state === 'todo' ? 'warn' : ''}`}>
                       {S.prep.states[it.state]}

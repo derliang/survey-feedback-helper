@@ -2843,3 +2843,128 @@ details[open] > :not(summary) {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* ───────── 第二輪稽核施工（DESIGN 5.34）───────── */
+
+/* 載入中骨架：標題條加兩三塊灰卡 */
+.skel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.skel-text {
+  margin: 0;
+  color: var(--ink2);
+  font-size: var(--fs-sm);
+}
+.skel-bar {
+  height: 28px;
+  width: 40%;
+  border-radius: var(--r-sm);
+  background: var(--sunk);
+}
+.skel-card {
+  height: 120px;
+  border-radius: var(--r-md);
+  background: var(--sunk);
+}
+.skel-card.short {
+  height: 72px;
+}
+
+/* 手機底部面板：標題列右側「✕」（所有 .sheet 共用） */
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+}
+.sheet-head .sheet-title {
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.sheet-x {
+  flex: 0 0 auto;
+  margin-right: calc(var(--sp-2) * -1);
+  font-size: var(--fs-lg);
+}
+
+/* 選課「移到…」選項：單行（名稱、人數／名額、短標籤） */
+.move-opt .mo-main {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-1) var(--sp-2);
+}
+.move-opt .mo-main strong {
+  margin-right: auto;
+}
+
+/* 選課課程卡：標籤在卡內折行，數字不折行（#100） */
+.cr-tags {
+  max-width: 100%;
+}
+.cr-tags .tag {
+  height: auto;
+  min-height: 26px;
+  padding-block: 2px;
+  white-space: normal;
+  max-width: 100%;
+}
+.cr-n,
+.course-tiles .tile-n {
+  white-space: nowrap;
+}
+@media (max-width: 359px) {
+  .tiles.course-tiles {
+    grid-template-columns: 1fr 1fr;
+  }
+  .tiles.course-tiles > .tile:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* 頂列：標籤一律不折行；英文縮短（Feedback Helper／Open／Prepare…）並在窄於 1100 時隱藏檔名（DESIGN 5.34 D） */
+.brand-name,
+.ds .nm,
+.bar-actions .btn {
+  white-space: nowrap;
+}
+@media (max-width: 1099px) {
+  :root:lang(en) .file-name {
+    display: none;
+  }
+}
+
+/* 數字磚：較長的值（英文片語）縮字級，不撐高磚 */
+.tile-n.long {
+  font-size: var(--fs-lg);
+  line-height: 1.3;
+}
+
+/* 下載成功／失敗訊息浮在底部操作列上方，不把頁面往下推（S16，#93） */
+.out-float {
+  position: fixed;
+  left: var(--sp-4);
+  right: var(--sp-4);
+  bottom: calc(88px + env(safe-area-inset-bottom));
+  z-index: 40;
+  max-width: 640px;
+  margin-inline: auto;
+  box-shadow: var(--shadow);
+  border-radius: var(--r-md);
+  background: var(--card);
+}
+
+/* S12：統計長條圖撐滿卡片寬、表格儲存格左右內距 12；S18：晶片列不要項目符號 */
+.chart-fig .chart svg {
+  width: 100%;
+}
+.roster-table td {
+  padding-inline: var(--sp-3);
+}
+ul.chips {
+  list-style: none;
+  padding: 0;
+}

@@ -23,7 +23,7 @@ function stepState(i: number, st: ReturnType<typeof getState>): { enabled: boole
 export function TopBar() {
   const st = useApp();
   const unsaved = st.dirty && st.folder.state !== 'ready';
-  const steps: StepDef[] = STEP_ROUTES.map((route, i) => ({ route, label: (i === 2 && st.session?.kind === 'course' ? S.course.step : S.steps[i]) as string }));
+  const steps: StepDef[] = STEP_ROUTES.map((route, i) => ({ route, label: (i === 2 && st.session?.kind === 'course' ? extra().chrome.courseStep : extra().chrome.stepNames[i]) as string }));
   return (
     <header class="topbar">
       <div class="appbar">
@@ -33,7 +33,7 @@ export function TopBar() {
             <path d="M8 22V16M14 22V11M20 22V14" stroke="#fff" stroke-width="3" stroke-linecap="round" />
             <path d="M18 8l3 3 5-6" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
-          <span class="brand-name">{S.appName}</span>
+          <span class="brand-name">{extra().chrome.brand}</span>
         </button>
         {st.session && <span class="file-name">{st.session.fileName}</span>}
         {st.session?.demo && (
@@ -47,7 +47,7 @@ export function TopBar() {
         <div class="bar-actions">
           <button class="btn ghost small" type="button" onClick={requestRestart} aria-label={S.restart}>
             <Icon name="restart" />
-            <span class="lbl">{S.restart}</span>
+            <span class="lbl">{extra().chrome.restart}</span>
           </button>
           <button class="btn ghost small" type="button" onClick={() => go('editor')} aria-label={extra().chrome.templateAria}>
             <Icon name="layout" />

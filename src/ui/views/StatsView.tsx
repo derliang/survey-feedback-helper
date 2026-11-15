@@ -20,7 +20,7 @@ import { svgToJpg } from '../chart-png';
 import { downloadBytes } from '../../storage';
 import { TrendCard } from './TrendCard';
 import { strings as S } from '../strings';
-import { ActBar, Notice, useWide } from '../parts/parts';
+import { ActBar, Notice, OptionGroup, useWide } from '../parts/parts';
 import { CommentList, Keywords } from './ReviewParts';
 import { TeacherComment } from './Phrases';
 import { extra } from '../strings-extra';
@@ -60,7 +60,7 @@ function Tile({ label, value, note }: { label: string; value: string; note?: str
   return (
     <div class="tile">
       <span class="tile-l">{label}</span>
-      <span class="tile-n">{value}</span>
+      <span class={`tile-n${[...value].length > 7 ? ' long' : ''}`}>{value}</span>
       {note && <span class="hint">{note}</span>}
     </div>
   );
@@ -366,13 +366,15 @@ function FeedbackSettings({ summary }: { summary: FeedbackSummary }) {
       <h3>{S.stats.settingsTitle}</h3>
       <div class="field">
         <span class="label">{S.stats.trim}</span>
-        <div class="seg" role="radiogroup" aria-label={S.stats.trim}>
-          {[0, 1].map((k) => (
-            <button key={k} type="button" role="radio" aria-checked={o.trim === k} class={o.trim === k ? 'on' : ''} onClick={() => setStats({ trim: k })}>
-              {k === 0 ? S.stats.trimOff : S.stats.trimOne}
-            </button>
-          ))}
-        </div>
+        <OptionGroup
+          label={S.stats.trim}
+          value={o.trim}
+          options={[
+            { value: 0, label: S.stats.trimOff },
+            { value: 1, label: S.stats.trimOne },
+          ]}
+          onChange={(k) => setStats({ trim: k })}
+        />
         <p class="hint">{S.stats.trimHelp}</p>
       </div>
       <div class="field">
@@ -434,7 +436,7 @@ function ReviewCard(props: { items: { key: string; text: string }[]; total: numb
           <TeacherComment value={props.teacher.value} onChange={props.teacher.onChange} studentName={props.teacher.name} allNames={props.teacher.allNames} />
         </div>
       )}
-      <p class="hint">{st.reviewUnsaved ? ui().bannerUnsaved : R.savedFolder}</p>
+      {!st.reviewUnsaved && <p class="hint">{R.savedFolder}</p>}
     </section>
   );
 }
