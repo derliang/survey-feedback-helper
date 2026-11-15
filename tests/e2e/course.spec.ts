@@ -236,3 +236,17 @@ test('名單外填答者：預設不進分配，按「納入」後算進去，�
   await page.getByTestId('undo-include').click();
   await expect(page.getByTestId('include-outside')).toBeVisible();
 });
+
+test('重新開始：沒選資料夾且已有分配結果時，提醒會遺失；取消是預設焦點', async ({ page }) => {
+  await mapped(page);
+  await step(page, '名額與分配').click();
+  await page.getByRole('button', { name: '重新開始' }).click();
+  await expect(page.getByRole('dialog')).not.toContainText('選課分配結果只存在這個分頁'); // 還沒分配：不提醒
+  await page.getByRole('button', { name: '取消' }).click();
+  await fillRules(page);
+  await page.getByTestId('course-start').click();
+  await expect(page.getByTestId('crow')).toHaveCount(4);
+  await page.getByRole('button', { name: '重新開始' }).click();
+  await expect(page.getByRole('dialog')).toContainText('選課分配結果只存在這個分頁');
+  await expect(page.getByRole('button', { name: '取消' })).toBeFocused();
+});

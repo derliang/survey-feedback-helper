@@ -563,6 +563,7 @@ export const enMore: DeepPartial<Strings> = {
     browserTitle: 'Browser support',
     browserBody: 'Chrome, Edge, Safari and Firefox from the last two years, and iOS 16.4 or later. Automatic folder access is limited to desktop Chrome and Edge; other browsers use manual download and file picking.',
     restartTitle: 'Clear this survey and start over',
+    restartLoseCourse: 'No folder is chosen, so the course allocation result exists only in this tab and cannot be recovered once cleared; download it from the Output page first if you need it.',
     restartConfirm: 'Clear the survey that is open and start over? Only what is on screen is cleared; the settings files in your folder are not deleted.',
     restartYes: 'Yes, start over',
     languages: { zh: '繁體中文', en: 'English' },

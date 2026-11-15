@@ -673,6 +673,7 @@ export const strings = {
     restartTitle: '清除目前問卷，重新開始',
     restartConfirm: '要清除目前開啟的問卷並重新開始嗎？只會清除本次畫面中的資料，不會刪除資料夾裡的設定檔。',
     restartYes: '確定重新開始',
+    restartLoseCourse: '你還沒選資料夾，選課分配結果只存在這個分頁，清除後無法復原；需要的話請先到輸出頁下載。',
     language: '語言',
     languages: { zh: '繁體中文', en: 'English' } as Record<string, string>,
     offlineTitle: '離線使用',
