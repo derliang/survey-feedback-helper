@@ -96,19 +96,24 @@ test('意見調查：Excel、Word、PDF 輸出，內容含統計結果', async (
   await step(page, '輸出').click();
   await expect(page.getByRole('heading', { name: '輸出', level: 1 })).toBeVisible();
   await noOverflow(page);
+  // 對齊票選輸出頁：摘要表（每題一列）＋右側下載面板（DESIGN 5.34 A）
+  const sum = page.getByTestId('opinion-output');
+  await expect(sum.getByRole('heading', { name: '① 輸出內容' })).toBeVisible();
+  await expect(sum.getByRole('cell', { name: '課程滿意度' })).toBeVisible();
+  await expect(sum.getByRole('button', { name: '下載 Word' })).toBeVisible();
 
   const xlsx = await download(page, () => page.getByRole('button', { name: /^Excel/ }).first().click());
   expect(xlsx.suggestedFilename()).toBe('課程意見調查 (回覆) 統計報告.xlsx');
   const xt = zipText(await bytesOf(xlsx));
   for (const must of ['課程滿意度', '喜歡的學習方式', '籃球', '作業可以少一點']) expect(xt, `xlsx 應含「${must}」`).toContain(must);
 
-  const docx = await download(page, () => page.getByRole('button', { name: /^Word/ }).first().click());
+  const docx = await download(page, () => page.getByRole('button', { name: /Word/ }).first().click());
   expect(docx.suggestedFilename()).toBe('課程意見調查 (回覆) 統計報告.docx');
   const dt = zipText(await bytesOf(docx));
   for (const must of ['課程滿意度', '喜歡的學習方式', '實作']) expect(dt, `docx 應含「${must}」`).toContain(must);
   expect(dt).toContain('4.0');
 
-  const pdf = await download(page, () => page.getByRole('button', { name: /^PDF/ }).first().click());
+  const pdf = await download(page, () => page.getByRole('button', { name: /PDF/ }).first().click());
   expect(pdf.suggestedFilename()).toBe('課程意見調查 (回覆) 統計報告.pdf');
   const pb = await bytesOf(pdf);
   expect(pb.subarray(0, 5).toString()).toBe('%PDF-');
@@ -149,7 +154,7 @@ test('報告回饋：Word 班級總表與學生版個人回饋單（只含採用
   await page.getByRole('textbox', { name: '老師評語' }).fill('架構完整，繼續加油。');
 
   await step(page, '輸出').click();
-  const cls = await download(page, () => page.getByRole('button', { name: /^Word/ }).first().click());
+  const cls = await download(page, () => page.getByRole('button', { name: /Word/ }).first().click());
   expect(cls.suggestedFilename()).toBe('報告回饋 (回覆) 班級總表.docx');
   const ct = zipText(await bytesOf(cls));
   for (const must of ['王大明', '林雅婷']) expect(ct).toContain(must);

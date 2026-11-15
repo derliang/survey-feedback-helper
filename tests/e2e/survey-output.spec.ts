@@ -72,7 +72,7 @@ test('複選題：Excel、Word、PDF 輸出，解開後有選項、人數與比�
   const x = await download(page, () => page.getByRole('button', { name: /^Excel/ }).first().click());
   const xt = zipText(await bytesOf(x));
   for (const must of ['你參加哪些社團活動？', '複選題', '籃球', '閱讀', '手作', '8 人作答', '75%', '50%', '38%', '場地可以再大一點']) expect(xt, `xlsx 應含「${must}」`).toContain(must);
-  const w = await download(page, () => page.getByRole('button', { name: /^Word/ }).first().click());
+  const w = await download(page, () => page.getByRole('button', { name: /Word/ }).first().click());
   const wt = zipText(await bytesOf(w));
   for (const must of ['你參加哪些社團活動？', '籃球', '75%', '50%', '38%']) expect(wt, `docx 應含「${must}」`).toContain(must);
   const p = await download(page, () => page.getByRole('button', { name: /^PDF/ }).first().click());
