@@ -52,7 +52,7 @@ export function TypeView() {
         <summary>{S.type.howTitle}</summary>
         <p>{suggested.reason}</p>
       </details>
-      <ActBar>
+      <ActBar fixed>
         <button class="btn secondary" type="button" onClick={() => go('prepare')}>
           {S.back}
         </button>

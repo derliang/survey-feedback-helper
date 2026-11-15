@@ -1,10 +1,8 @@
 import type { ComponentChildren } from 'preact';
 import { useState } from 'preact/hooks';
 import { commentState, flaggedWords, setComment, setKeywords, setRewrite, type Review } from '../../app/review';
-import { isTouchDevice } from '../../storage';
-import { downloadReview, updateReview, useApp } from '../../app/store';
+import { updateReview, useApp } from '../../app/store';
 import { strings as S } from '../strings';
-import { Notice } from '../parts/parts';
 import { extra } from '../strings-extra';
 
 export interface CommentItem {
@@ -134,23 +132,11 @@ export function Keywords() {
   );
 }
 
+/** 審稿進度存放狀態：已存進資料夾才說；沒存好的警示在頁頂橫幅（SaveBanners，G1）。 */
 export function SaveNote() {
   const st = useApp();
-  if (!st.review) return null;
-  return st.reviewUnsaved ? (
-    <Notice
-      kind="warn"
-      actions={
-        <button class="btn secondary small" type="button" onClick={() => void downloadReview()}>
-          {isTouchDevice() ? S.folder.saveToFiles : S.review.downloadReview}
-        </button>
-      }
-    >
-      {S.review.unsaved}
-    </Notice>
-  ) : (
-    <p class="hint">{S.review.savedFolder}</p>
-  );
+  if (!st.review || st.reviewUnsaved || st.folder.state !== 'ready') return null;
+  return <p class="hint">{S.review.savedFolder}</p>;
 }
 
 /**

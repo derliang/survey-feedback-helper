@@ -21,3 +21,12 @@ test('首頁頁尾有隱私權政策連結，指向 privacy.html', async ({ page
   const box = await link.boundingBox();
   expect(box!.height).toBeGreaterThanOrEqual(44);
 });
+
+test('隱私頁頁首有「繁體中文／English」錨點連結（S7）', async ({ page }) => {
+  await page.goto('privacy.html');
+  const en = page.getByRole('link', { name: 'English', exact: true }).first();
+  await expect(en).toHaveAttribute('href', '#english');
+  await expect(page.getByRole('link', { name: '繁體中文', exact: true }).first()).toHaveAttribute('href', '#zh');
+  await expect(page.locator('#english')).toHaveCount(1);
+  await expect(page.locator('#zh')).toHaveCount(1);
+});

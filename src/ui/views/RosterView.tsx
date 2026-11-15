@@ -74,12 +74,14 @@ export function RosterView() {
           class="input area"
           rows={5}
           value={paste}
-          placeholder={s.rosterMixed ? S.roster.pasteHintMixed : S.roster.pasteHintSame}
           onInput={(e) => setPaste(e.currentTarget.value)}
         />
         <span class="hint">{s.rosterMixed ? S.roster.pasteHintMixed : S.roster.pasteHintSame}</span>
       </label>
       <div class="btn-row">
+        <button class="btn secondary" type="button" onClick={() => fileRef.current?.click()}>
+          {S.roster.openFile}
+        </button>
         <button
           class="btn secondary"
           type="button"
@@ -91,9 +93,6 @@ export function RosterView() {
           }}
         >
           {S.roster.pasteAction}
-        </button>
-        <button class="btn secondary" type="button" onClick={() => fileRef.current?.click()}>
-          {S.roster.openFile}
         </button>
         <input
           ref={fileRef}
@@ -186,13 +185,10 @@ export function RosterView() {
         <p class="empty">{S.roster.empty}</p>
       )}
 
-      <ActBar>
-        <button class="btn secondary" type="button" onClick={() => go('prepare')}>
-          {S.back}
-        </button>
-        {students.length === 0 && (
+      {students.length === 0 && (
+        <p class="roster-skip">
           <button
-            class="btn secondary"
+            class="btn ghost small"
             type="button"
             onClick={() => {
               setSession({ rosterSkipped: true });
@@ -201,7 +197,13 @@ export function RosterView() {
           >
             {S.roster.skip}
           </button>
-        )}
+        </p>
+      )}
+
+      <ActBar fixed>
+        <button class="btn secondary" type="button" onClick={() => go('prepare')}>
+          {S.back}
+        </button>
         <button
           class="btn primary grow"
           type="button"

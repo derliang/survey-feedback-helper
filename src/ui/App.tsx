@@ -1,3 +1,4 @@
+import { SaveBanners } from './parts/SaveBanners';
 import { useEffect } from 'preact/hooks';
 import { CloudAlert } from './views/CloudBackup';
 import { boot, set, useApp } from '../app/store';
@@ -38,6 +39,7 @@ export function App() {
         {extra().skip}
       </a>
       <TopBar />
+      <SaveBanners />
       {st.oldBrowser && (
         <div class="banner">
           <Notice kind="warn">{S.oldBrowser}</Notice>
