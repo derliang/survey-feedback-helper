@@ -102,7 +102,7 @@ export function Prepare() {
       </div>
 
       {!active && (
-        <ActBar>
+        <ActBar fixed>
           <button class="btn secondary" type="button" onClick={() => go('home')}>
             {S.back}
           </button>

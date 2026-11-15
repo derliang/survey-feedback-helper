@@ -9,7 +9,9 @@ export const defaultsStrings = {
   kinds: { feedback: '報告回饋', opinion: '意見調查', vote: '票選' },
   runNote: '這一層只對這一次輸出有效，不會存檔。',
   revert: '改回上一層的設定值',
-  current: '目前的值',
+  custom: '已自訂',
+  inherit: '沿用',
+  allDefault: '沒有「已自訂」標籤的欄位都在用內建預設。',
   fields: {
     school: '學校名稱',
     filenameRule: '檔名規則',

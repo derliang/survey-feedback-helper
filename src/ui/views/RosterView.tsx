@@ -200,7 +200,7 @@ export function RosterView() {
         </p>
       )}
 
-      <ActBar>
+      <ActBar fixed>
         <button class="btn secondary" type="button" onClick={() => go('prepare')}>
           {S.back}
         </button>

@@ -260,7 +260,7 @@ function Rules(props: { onRun: () => void; onBack: () => void; hasResult: boolea
       </button>
       <p class="hint">{C.minNote}</p>
 
-      <ActBar>
+      <ActBar fixed>
         <button class="btn secondary" type="button" onClick={props.onBack}>
           {S.back}
         </button>
@@ -796,7 +796,7 @@ function Result(props: { onRules: () => void }) {
       ))}
       {st.courseUnsaved && <p class="hint">{C.unsaved}</p>}
 
-      <ActBar>
+      <ActBar fixed>
         <button class="btn secondary" type="button" onClick={props.onRules}>
           {S.back}
         </button>

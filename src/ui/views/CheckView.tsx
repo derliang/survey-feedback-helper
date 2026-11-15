@@ -128,7 +128,7 @@ export function CheckView() {
           );
         })}
       </ul>
-      <ActBar>
+      <ActBar fixed>
         <button class="btn secondary" type="button" onClick={() => go('prepare')}>
           {S.check.back}
         </button>

@@ -13,7 +13,7 @@ import { Icon, Notice, Sheet, TopBanner, useWide } from '../parts/parts';
 import './editor.css';
 import { useDragSort } from './drag';
 import { AddPanel, BlockProps, PagePanel, StudentPanel } from './Panels';
-import { Preview, Thumb } from './Preview';
+import { Preview } from './Preview';
 import {
   type ES, allTemplates, backToLibrary, currentOverrides, deleteBlock, doRedo, doUndo, dropSel, downloadBackup, duplicate, exportOne, importFile, load, moveSel, newTemplate, overrideBlock,
   openEditor, patchBlock, removeTemplate, renameTemplate, resetTemplate, select, setConfirm, setEditMode, setMenuFor, setPanel, setView, setZoom, useEditor, useTemplate,
@@ -88,7 +88,7 @@ function Library({ e }: { e: ES }) {
         {list.map((t) => (
           <div key={t.id} class="lib-card" data-testid="template-card">
             <button type="button" class="lib-thumb" aria-label={ed().editNamed(t.name)} onClick={() => openEditor(t.id)}>
-              <Thumb t={t} />
+              <Preview t={t} scale={0.14} thumb />
             </button>
             <div class="lib-meta">
               <strong>{t.name}</strong>
