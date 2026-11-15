@@ -45,7 +45,9 @@ test('統計：全班總覽、個人結果、自評與同學評分比較與審�
   await page.getByRole('textbox', { name: '老師評語' }).fill('報告很有條理，繼續加油。');
   await expect(page.getByRole('textbox', { name: '老師評語' })).toHaveValue('報告很有條理，繼續加油。');
 
-  // 最高最低分處理設定
+  // 最高最低分處理設定：進階設定預設收合，要先展開
+  await expect(page.getByTestId('advanced')).not.toHaveAttribute('open', '');
+  await page.getByTestId('advanced').locator('summary').click();
   await page.getByRole('radio', { name: /每題各排除 1 個最高分和最低分/ }).click();
   await expect(page.getByRole('radio', { name: /每題各排除 1 個最高分和最低分/ })).toHaveAttribute('aria-checked', 'true');
 
@@ -151,4 +153,62 @@ test('去識別化預覽：每則留言可留著、隱藏（可還原）、改�
   await dlg.getByRole('checkbox', { name: /我已逐則看過預覽/ }).check();
   await dlg.getByRole('button', { name: '預覽過了' }).click();
   await expect(page.getByRole('button', { name: /^全部 \d+ 位/ })).toBeEnabled();
+});
+
+test('統計頁版面：選擇器在結果上方、審稿獨立成卡、進階設定收合、固定操作列', async ({ page }) => {
+  await prepared(page);
+  await step(page, '統計').click();
+  await page.locator('.wb-list').getByRole('button', { name: /林雅婷/ }).click();
+  // 結果在選擇器之後第一屏可見（手機、平板選擇器在上方；桌機在左欄）
+  const list = await page.locator('.wb-list').boundingBox();
+  const tiles = await page.locator('.wb-main .tiles').boundingBox();
+  const vh = page.viewportSize()!.height;
+  expect(tiles!.y).toBeLessThan(vh);
+  if (page.viewportSize()!.width < 1024) expect(tiles!.y).toBeGreaterThanOrEqual(list!.y + list!.height - 1);
+  else expect(tiles!.x).toBeGreaterThan(list!.x + list!.width - 1);
+  // 審稿卡有進度；進階設定預設收合並顯示目前設定摘要
+  const review = page.getByTestId('review-card');
+  await expect(review).toContainText(/已審 \d+／\d+/);
+  await expect(review.getByRole('progressbar')).toBeVisible();
+  const adv = page.getByTestId('advanced');
+  await expect(adv).toContainText('最高最低分：不去除');
+  await expect(adv.getByRole('radio', { name: /每題各排除 1 個/ })).toBeHidden();
+  await adv.locator('summary').click();
+  await expect(adv.getByRole('radio', { name: /每題各排除 1 個/ })).toBeVisible();
+  // 頁頂細橫幅可關閉本次
+  const banner = page.getByTestId('top-banner');
+  if (await banner.count()) {
+    await banner.getByRole('button', { name: '關閉這則提醒' }).click();
+    await expect(banner).toBeHidden();
+  }
+  // 底部固定操作列：三種寬度都貼在視窗底
+  const bar = await page.locator('.actbar').boundingBox();
+  expect(Math.abs(bar!.y + bar!.height - vh)).toBeLessThanOrEqual(1);
+  await expect(page.locator('.actbar').getByRole('button', { name: '前往輸出' })).toBeVisible();
+  await noOverflow(page);
+});
+
+test('統計頁版面：320 寬沒有橫向溢出，手機表格座號與姓名併成一欄', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 640 });
+  await prepared(page);
+  await step(page, '統計').click();
+  await noOverflow(page);
+  await expect(page.locator('.roster-table thead th', { hasText: '座號' })).toHaveCount(0);
+  await expect(page.locator('.roster-table thead th', { hasText: '學生' })).toHaveCount(1);
+  await page.locator('.wb-list').getByRole('button', { name: /林雅婷/ }).click();
+  await noOverflow(page);
+});
+
+test('整欄空白的評分題：統計頁給可見提示（Issue #94）', async ({ page }) => {
+  const csv = ['時間戳記,滿意度,建議', '2026-10-10 10:00:00,,', '2026-10-10 10:05:00,,希望多做實驗'].join('\n');
+  await page.goto('./');
+  await page.getByTestId('file-input').setInputFiles({ name: '空白題.csv', mimeType: 'text/csv', buffer: Buffer.from(csv, 'utf8') });
+  await page.locator('.rail').getByRole('button', { name: /^\d?\s*問卷類型/ }).click();
+  await page.getByRole('radio', { name: /意見調查/ }).click();
+  await page.getByRole('button', { name: '確認，下一步：欄位對應' }).click();
+  await page.getByRole('button', { name: '完成對應，下一步' }).click();
+  await step(page, '統計').click();
+  await expect(page.getByRole('heading', { name: '統計', level: 1 })).toBeVisible();
+  await expect(page.locator('.wb-main')).toContainText('「滿意度」整欄沒有人填寫，所以沒有列入統計');
+  await noOverflow(page);
 });

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { tableFromCsv } from '../core';
-import { type StatsOpts, defaultStatsOpts, looksMulti, opinionQuestions, runFeedback, runVote } from './analysis';
+import { type StatsOpts, blankColumns, defaultStatsOpts, looksMulti, opinionQuestions, runFeedback, runVote } from './analysis';
 import { analyzeColumns, detectScale } from './columns';
 import { AUDIENCE_NAMES, classSummaryInput, opinionSheets, personalInputs, voteSheets } from './output';
 import { commentState, emptyReview, finalText, flaggedWords, parseReview, reviewCounts, serializeReview, setComment, setKeywords, setRewrite, setTeacher } from './review';
@@ -145,5 +145,19 @@ describe('SVG 圖表', () => {
     expect(svg).toContain('A&lt;B');
     expect(columnsSvg([1, 2], ['1', '2'], { title: 'x' })).toContain('<rect');
     expect(pairedBarsSvg([{ label: 'q', a: 5, b: null }], { title: 't', max: 10, aName: 'a', bName: 'b', palette: PRINT })).toContain('#2554d8');
+  });
+});
+
+describe('整欄空白的欄位提示（Issue #94）', () => {
+  const csv = ['時間戳記,滿意度,建議', '2026-10-10,,', '2026-10-11,,希望多做實驗'].join('\n');
+  it('沒被當成題型、整欄沒人填的欄位會列出；有人填的不列', () => {
+    const s = session(csv, { 建議: 'comment' }, 'opinion');
+    expect(blankColumns(s).map((c) => c.header)).toEqual(['滿意度']);
+    expect(opinionQuestions(s, defaultStatsOpts()).map((q) => q.col.header)).toEqual(['建議']);
+  });
+  it('被排除的列不算：只剩空白的列時整欄視為空白', () => {
+    const s = session(['滿意度,建議', '4,好', ',有意見', '5,棒'].join('\n'), { 建議: 'comment' }, 'opinion');
+    expect(blankColumns(s)).toHaveLength(0);
+    expect(blankColumns({ ...s, excluded: [0, 2] }).map((c) => c.header)).toEqual(['滿意度']);
   });
 });

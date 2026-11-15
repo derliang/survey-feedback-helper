@@ -61,6 +61,12 @@ function activeRows(s: Session): number[] {
 const colsOf = (s: Session, role: ColumnInfo['role']): ColumnInfo[] => s.cols.filter((c) => c.role === role);
 const cellAt = (s: Session, row: number, col: number): Cell => s.table.rows[row]?.[col] ?? null;
 
+/** 整欄沒有人填寫、又沒被當成任何題型的欄位（統計頁用它提示「這欄沒有列入」，Issue #94）。 */
+export function blankColumns(s: Session): ColumnInfo[] {
+  const rows = activeRows(s);
+  return s.cols.filter((c) => c.role === 'ignore' && rows.every((i) => isBlankCell(cellAt(s, i, c.index))));
+}
+
 /* ───────── 報告回饋 ───────── */
 
 export function feedbackItems(s: Session, o: StatsOpts): FeedbackItem[] {

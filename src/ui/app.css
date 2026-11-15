@@ -2500,3 +2500,221 @@ details[open] > :not(summary) {
     flex-basis: 170px;
   }
 }
+
+/* 統計頁改版（DESIGN.md 5.33 A、D）：頂端選擇器、審稿卡、進階設定、頁頂細橫幅、固定操作列 */
+.stats .wb {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    'list'
+    'main'
+    'side';
+}
+.stats .wb-list {
+  grid-area: list;
+}
+.stats .wb-main {
+  grid-area: main;
+}
+.stats .wb-side {
+  grid-area: side;
+}
+/* 選擇器：手機與平板是橫向可捲的 chips */
+.stats .wb-list h2 {
+  font-size: var(--fs-xs);
+  color: var(--ink3);
+  margin: 0;
+}
+.stats .wb-list .plain-ul {
+  flex-direction: row;
+  overflow-x: auto;
+  padding: 2px 0 6px;
+}
+.stats .wb-list li {
+  flex: 0 0 auto;
+}
+.stats .wb-list .rowbtn {
+  width: auto;
+  min-height: var(--tap-min);
+  border-radius: 999px;
+  padding: 0 var(--sp-4);
+  white-space: nowrap;
+  font-weight: 600;
+}
+.stats .wb-list .rb-note {
+  display: none;
+}
+.strip {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-3);
+  min-height: var(--tap-min);
+  padding: var(--sp-1) var(--sp-1) var(--sp-1) var(--sp-3);
+  border: 1px solid var(--warn);
+  border-radius: var(--r-sm);
+  background: var(--warn-soft);
+  color: var(--warn);
+  font-size: var(--fs-sm);
+}
+.strip.info {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+.strip-text {
+  flex: 1 1 200px;
+}
+.strip-x {
+  margin-left: auto;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  background: none;
+  border: 0;
+  color: inherit;
+  font-size: var(--fs-xl);
+  cursor: pointer;
+}
+.review-card h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+.review-card .track {
+  height: 12px;
+  border-radius: 6px;
+  background: var(--sunk);
+  overflow: hidden;
+  margin-bottom: var(--sp-3);
+}
+.review-card .track i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 6px;
+}
+.review-teacher {
+  margin-top: var(--sp-4);
+}
+.review-teacher h4 {
+  margin: 0 0 var(--sp-1);
+  font-size: var(--fs-md);
+}
+.adv {
+  padding: 0;
+}
+.adv > summary {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 64px;
+  padding: var(--sp-3) var(--sp-4);
+  cursor: pointer;
+  list-style: none;
+}
+.adv > summary::-webkit-details-marker {
+  display: none;
+}
+.adv-t {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.adv-t .hint {
+  margin: 0;
+}
+.adv-chev {
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid var(--ink3);
+  border-bottom: 2px solid var(--ink3);
+  transform: rotate(45deg);
+  transition: transform var(--dur);
+}
+.adv[open] .adv-chev {
+  transform: rotate(-135deg);
+}
+.adv-body {
+  padding: 0 var(--sp-4) var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.adv-body > .card {
+  border: 0;
+  border-top: 1px solid var(--line-soft);
+  border-radius: 0;
+  box-shadow: none;
+  background: none;
+  padding: var(--sp-4) 0 0;
+}
+@media (min-width: 768px) {
+  .stats .wb {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    grid-template-areas:
+      'list list'
+      'main side';
+  }
+  .stats .wb.wb-noside {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'list'
+      'main';
+  }
+}
+@media (min-width: 1024px) {
+  /* 桌機：左欄清單、中欄結果、右欄審稿 */
+  .stats .wb {
+    grid-template-columns: 220px minmax(0, 1fr) 340px;
+    grid-template-areas: 'list main side';
+  }
+  .stats .wb.wb-noside {
+    grid-template-columns: 220px minmax(0, 1fr);
+    grid-template-areas: 'list main';
+  }
+  .stats .wb-list h2 {
+    font-size: var(--fs-md);
+    color: var(--ink);
+    margin: 0 0 var(--sp-1);
+  }
+  .stats .wb-list .plain-ul {
+    flex-direction: column;
+    overflow: visible;
+  }
+  .stats .wb-list .rowbtn {
+    width: 100%;
+    min-height: 56px;
+    border-radius: var(--r-sm);
+    padding: var(--sp-1) var(--sp-3);
+    white-space: normal;
+  }
+  .stats .wb-list .rb-note {
+    display: block;
+  }
+}
+/* 固定底部操作列（只有統計頁）：平板與桌機也固定在視窗底，內容在 1240 寬內靠右 */
+@media (min-width: 600px) {
+  .stats > .actbar.actbar-fixed {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    z-index: 15;
+    justify-content: flex-end;
+    background: var(--card);
+    border-top: 1px solid var(--line-soft);
+    box-shadow: 0 -2px 8px var(--shadow-sm);
+    padding: var(--sp-3) max(var(--sp-5), calc((100% - 1240px) / 2 + var(--sp-5))) calc(var(--sp-3) + env(safe-area-inset-bottom));
+  }
+  .stats {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (min-width: 600px) and (max-width: 1023px) {
+  .stats .wb-main .tiles {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
