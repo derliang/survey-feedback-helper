@@ -16,6 +16,8 @@ async function prepared(page: Page) {
 
 test('首頁（S1）：「選擇 Excel 檔」是第一顆主要按鈕，停用的「開啟試算表」排在後面', async ({ page }) => {
   await page.goto('./');
+  await expect(page.locator('.open-buttons .btn').first()).toBeVisible();
+  await expect(page.locator('.open-buttons .btn')).toHaveCount(3);
   const names = await page.locator('.open-buttons .btn').allTextContents();
   expect(names[0]).toBe('選擇 Excel 檔');
   expect(names.at(-1)).toBe('開啟試算表');
@@ -47,6 +49,7 @@ test('學生名單（S4）：底部列只有「上一步」「下一步」，略
   await expect(bar.getByRole('button')).toHaveCount(2);
   await expect(page.locator('.roster-skip').getByRole('button', { name: '這次先不匯入名單' })).toBeVisible();
   // 「開啟名單檔」排在停用的「加入名單」前面
+  await expect(page.locator('.btn-row .btn').first()).toBeVisible();
   const order = await page.locator('.btn-row .btn').allTextContents();
   expect(order.indexOf('開啟名單檔')).toBeLessThan(order.indexOf('加入名單'));
 });

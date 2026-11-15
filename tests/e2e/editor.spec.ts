@@ -180,6 +180,7 @@ test('範本卡（S5）：各寬度都是「用這份輸出」（主）加「⋯
   await expect(card.getByRole('button', { name: /^編輯版面/ })).toHaveCount(0);
   await expect(card.getByRole('button', { name: /的選單$/ })).toBeVisible();
   // 縮圖：頁尾字級必須是縮圖內自己的小字（不得被放大成蓋住縮圖的大字），且縮圖不超出卡片
+  await expect(card.locator('.pv-foot')).toBeVisible();
   const m = await card.evaluate((el) => {
     const th = el.querySelector('.lib-thumb')!.getBoundingClientRect();
     const foot = el.querySelector('.pv-foot')!.getBoundingClientRect();
