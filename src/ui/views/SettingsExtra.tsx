@@ -230,9 +230,12 @@ export function BackupCard() {
           <h3>{B.modeTitle}</h3>
           <div role="radiogroup" aria-label={B.modeTitle} class="stack">
             {(['merge', 'replace'] as const).map((m) => (
-              <button key={m} type="button" role="radio" aria-checked={mode === m} class={`pick${mode === m ? ' on' : ''}`} onClick={() => setMode(m)}>
-                <strong>{B[m]}</strong>
-                <span class="hint">{B[m === 'merge' ? 'mergeNote' : 'replaceNote']}</span>
+              <button key={m} type="button" role="radio" aria-checked={mode === m} class={`pick pick-radio${mode === m ? ' on' : ''}`} onClick={() => setMode(m)}>
+                <span class="radio-dot" aria-hidden="true" />
+                <span class="pick-text">
+                  <strong>{B[m]}</strong>
+                  <span class="hint">{B[m === 'merge' ? 'mergeNote' : 'replaceNote']}</span>
+                </span>
               </button>
             ))}
           </div>
@@ -240,8 +243,8 @@ export function BackupCard() {
             <button class="btn secondary" type="button" onClick={() => setParsed(null)}>
               {B.cancel}
             </button>
-            <button class="btn primary grow" type="button" onClick={() => void go()}>
-              {B.go}
+            <button class={mode === 'replace' ? 'btn danger grow' : 'btn primary grow'} type="button" onClick={() => void go()}>
+              {mode === 'replace' ? B.goReplace : B.go}
             </button>
           </div>
         </div>
