@@ -1,5 +1,5 @@
 import { type Page, expect, test } from '@playwright/test';
-import { ROSTER_TEXT, surveyFile } from './fixtures';
+import { ROSTER_TEXT, settingsTab, surveyFile } from './fixtures';
 
 const noOverflow = async (page: Page) => {
   // 以裝置寬度為準（手機會因內容太寬而縮小版面，innerWidth 會跟著變大而漏掉問題）
@@ -134,6 +134,7 @@ test('重新開始會先確認，設定頁有隱私三句與忘記資料夾', as
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.getByRole('button', { name: '取消' }).click();
   await page.getByRole('button', { name: '設定', exact: true }).click();
+  await settingsTab(page, 'help');
   await expect(page.getByText('本程式沒有伺服器，問卷結果只在這個瀏覽器處理。')).toBeVisible();
   await expect(page.getByText('設定與名單存在你選的資料夾。')).toBeVisible();
   await expect(page.getByText('放在雲端的檔案由該服務處理。')).toBeVisible();

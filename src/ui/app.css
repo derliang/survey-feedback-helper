@@ -2240,3 +2240,132 @@ details[open] > :not(summary) {
   border-radius: var(--r-md);
   background: var(--sunk);
 }
+
+/* 設定頁（5.33 C／D）：分組、左側導覽、桌機固定底部操作列 */
+.settings-page {
+  max-width: 984px; /* 導覽 240＋間距 24＋內容 720 */
+}
+.set-cols {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.set-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+.set-seg {
+  margin: 0;
+}
+.set-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.set-nav-h {
+  margin: var(--sp-3) 0 0;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--ink3);
+  letter-spacing: 0.04em;
+}
+.set-nav-h:first-child {
+  margin-top: 0;
+}
+.set-nav-item {
+  min-height: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0;
+  padding: 6px var(--sp-3);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line-soft);
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.set-nav-item b {
+  font-size: var(--fs-sm);
+}
+.set-nav-item span {
+  font-size: var(--fs-xs);
+  color: var(--ink2);
+}
+.set-nav-item.on {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+.label-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-1) var(--sp-2);
+}
+.xs-note {
+  margin: 0;
+  font-size: var(--fs-xs);
+  color: var(--ink3);
+}
+.help-acc > summary {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  cursor: pointer;
+  list-style: none;
+}
+.help-acc > summary::-webkit-details-marker {
+  display: none;
+}
+.help-acc > summary::after {
+  content: '▾';
+  margin-left: auto;
+  font-size: 20px;
+  color: var(--ink3);
+}
+.help-acc[open] > summary::after {
+  content: '▴';
+}
+.help-t {
+  display: flex;
+  flex-direction: column;
+}
+.help-t span {
+  color: var(--ink2);
+  font-size: var(--fs-sm);
+}
+@media (min-width: 600px) {
+  .set-cols {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--sp-5);
+  }
+  .set-nav {
+    flex: 0 0 240px;
+  }
+  .set-main {
+    flex: 1 1 auto;
+    max-width: 720px;
+  }
+}
+@media (min-width: 600px) {
+  .actbar.actbar-fixed {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: var(--sp-3) max(var(--sp-5), calc((100% - 1240px) / 2 + var(--sp-5)));
+    background: var(--card);
+    border-top: 1px solid var(--line-soft);
+    box-shadow: 0 -2px 8px var(--shadow-sm);
+  }
+  .page.settings-page {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  }
+}
