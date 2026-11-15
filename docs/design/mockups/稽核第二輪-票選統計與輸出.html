@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第二輪：票選統計與輸出（模擬頁）</title>
+<style>
+/*
+ * 問卷回饋小幫手：設計 tokens（唯一來源）
+ * 說明見 docs/design/DESIGN.md。頁面與模擬頁要原樣放入下面三個色彩區塊。
+ * 色彩：淺色在 :root；深色在 prefers-color-scheme 與 [data-theme="dark"] 兩處，值必須相同。
+ */
+:root {
+  /* 色彩：表面 */
+  --paper: #f4f5f7;       /* 頁面底 */
+  --card: #ffffff;        /* 卡片、導覽列、輸入框底 */
+  --sunk: #eceef2;        /* 凹陷底：分段控制軌道、進度軌道、停用 */
+  /* 色彩：文字 */
+  --ink: #14171f;
+  --ink2: #444b5a;
+  --ink3: #5b6373;
+  /* 色彩：線 */
+  --line: #cfd3dc;
+  --line-soft: #e3e6ec;
+  /* 色彩：強調（鈷藍，唯一的強調色；深色版用較深的藍搭白字，不用粉彩色） */
+  --accent: #2554d8;
+  --on-accent: #ffffff;
+  --accent-soft: #e7edff;
+  --accent-ink: #1b3fa6;
+  /* 色彩：語意（不算強調色） */
+  --ok: #17713f;
+  --ok-soft: #dcf1e3;
+  --warn: #7a4f00;
+  --warn-soft: #fdf0d0;
+  --bad: #a8262b;
+  --bad-soft: #fbe2e0;
+  /* 色彩：圖表資料色（色盲友善；一定要搭配文字標籤，不單靠顏色） */
+  --d1: #2554d8;
+  --d2: #cf5f12;
+  --d3: #b3367a;
+  --d4: #0c7a88;
+  --d5: #8a6a0a;
+  --d0: #7b8494;          /* 其他、未分類 */
+  --warn-bar: #b97f00;       /* 同票、需處理的長條（對卡片 3.4:1） */
+  --bar-muted: #7f889b;   /* 未當選、未突顯的長條（對卡片 3.6:1） */
+  --ctl: #7f889b;         /* 控制項外框（選項卡、列按鈕）：對卡片與頁面底 3:1 以上 */
+  --ext-excel: #1d6f42;   /* 外部服務代表色：僅用於自畫的 Excel「X」圖示，不是品牌色 */
+  --scrim: rgba(12, 14, 20, 0.5);
+  --shadow: rgba(20, 24, 40, 0.16);
+  --shadow-sm: rgba(20, 24, 40, 0.08);   /* 卡片的細微層次 */
+
+  /* 字型：介面一律系統字型，不載入網路字型 */
+  --font: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Heiti TC", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Consolas, "Courier New", monospace;
+  --fs-xs: 13px;
+  --fs-sm: 14px;
+  --fs-md: 16px;   /* 手機輸入框不得小於 16，避免 iOS 自動放大 */
+  --fs-lg: 18px;
+  --fs-xl: 22px;
+  --fs-2xl: 28px;
+  --lh-body: 1.65;
+  --lh-tight: 1.3;
+
+  /* 間距（4 的倍數）、圓角、點擊區、動態 */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --r-sm: 8px;     /* 按鈕、輸入框、選項 */
+  --r-md: 12px;    /* 卡片、面板、提示 */
+  --r-lg: 20px;    /* 底部彈出面板上緣 */
+  --tap: 48px;     /* 手機預設點擊高度；任何可點元件不得低於 44px */
+  --tap-min: 44px;
+  --dur: 160ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0e1014;
+    --card: #171a20;
+    --sunk: #0b0c10;
+    --ink: #eceef3;
+    --ink2: #b9bfcc;
+    --ink3: #8f97a8;
+    --line: #2b303a;
+    --line-soft: #20242c;
+    --accent: #3d68f0;
+    --on-accent: #ffffff;
+    --accent-soft: #1a2850;
+    --accent-ink: #9db8ff;
+    --ok: #6fd39a;
+    --ok-soft: #12291c;
+    --warn: #f2c35c;
+    --warn-soft: #2e2410;
+    --bad: #ff9d96;
+    --bad-soft: #3a1b1d;
+    --d1: #6f93ff;
+    --d2: #f08a47;
+    --d3: #e579b3;
+    --d4: #3fc0d0;
+    --d5: #d6b43a;
+    --d0: #8f97a8;
+    --warn-bar: #f0b429;
+    --bar-muted: #6e7789;
+    --ctl: #6e7789;
+    --scrim: rgba(0, 0, 0, 0.65);
+    --shadow: rgba(0, 0, 0, 0.6);
+    --shadow-sm: rgba(0, 0, 0, 0.4);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper: #0e1014;
+  --card: #171a20;
+  --sunk: #0b0c10;
+  --ink: #eceef3;
+  --ink2: #b9bfcc;
+  --ink3: #8f97a8;
+  --line: #2b303a;
+  --line-soft: #20242c;
+  --accent: #3d68f0;
+  --on-accent: #ffffff;
+  --accent-soft: #1a2850;
+  --accent-ink: #9db8ff;
+  --ok: #6fd39a;
+  --ok-soft: #12291c;
+  --warn: #f2c35c;
+  --warn-soft: #2e2410;
+  --bad: #ff9d96;
+  --bad-soft: #3a1b1d;
+  --d1: #6f93ff;
+  --d2: #f08a47;
+  --d3: #e579b3;
+  --d4: #3fc0d0;
+  --d5: #d6b43a;
+  --d0: #8f97a8;
+  --warn-bar: #f0b429;
+  --bar-muted: #6e7789;
+  --ctl: #6e7789;
+  --scrim: rgba(0, 0, 0, 0.65);
+  --shadow: rgba(0, 0, 0, 0.6);
+  --shadow-sm: rgba(0, 0, 0, 0.4);
+  color-scheme: dark;
+}
+
+/*
+ * 輸出文件主題「溫暖」（個人回饋單預設）：紙張永遠是淺色，不隨深色模式改變。
+ * 用法：文件預覽與 PDF／Word 輸出的容器加 class="doc-warm"。
+ */
+.doc-warm {
+  --doc-paper: #fffdf9;
+  --doc-ink: #33291f;
+  --doc-ink2: #66554a;
+  --doc-line: #ead9c3;
+  --doc-accent: #a84f00;
+  --doc-accent-soft: #ffecd2;
+  --doc-leaf: #2f6f55;
+  --doc-leaf-soft: #e1f1e8;
+  --doc-card: #ffffff;
+  --doc-sunk: #efe8dc;
+  --doc-sunk2: #f4eee4;
+  --doc-blue-soft: #e3eaff;
+  --doc-blue-ink: #1b3fa6;
+  --doc-s1: #cf5f12;
+  --doc-s2: #eaa06a;
+  --doc-s3: #ddd5c8;
+  --doc-s4: #7f9be3;
+  --doc-s5: #2554d8;
+}
+
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--sunk);color:var(--ink);font-family:var(--font);font-size:var(--fs-md);line-height:var(--lh-body)}
+.doc{max-width:1360px;margin:0 auto;padding:24px 16px 64px}
+.doc h1{font-size:var(--fs-2xl);line-height:var(--lh-tight);margin:0 0 8px}
+.doc>p,.doc li{color:var(--ink2);font-size:var(--fs-sm)}
+.note{background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r-md);padding:16px;margin:16px 0}
+.note h2{font-size:var(--fs-lg);margin:0 0 8px}
+.note ul{margin:4px 0 0;padding-left:20px}
+.devs{display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start;margin-top:24px}
+.dev{flex:0 0 auto}
+.dev>h3{font-size:var(--fs-sm);color:var(--ink2);margin:0 0 8px}
+.frame{background:var(--paper);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;position:relative}
+.frame.m{width:390px}.frame.t{width:768px}.frame.d{width:1280px}
+.scroll{overflow-x:auto;max-width:100%}
+.bar{display:flex;align-items:center;gap:12px;background:var(--card);border-bottom:1px solid var(--line-soft);padding:0 16px;height:56px}
+.bar .brand{font-weight:700;font-size:17px;white-space:nowrap}
+.bar .sp{flex:1}
+.bar .lk{color:var(--accent-ink);font-weight:600;font-size:15px;white-space:nowrap}
+.steps{display:flex;gap:8px;flex:1}
+.steps i{flex:1;font-style:normal;text-align:center;font-size:var(--fs-xs);color:var(--ink3);border-top:4px solid var(--line-soft);padding-top:4px}
+.steps i.on{color:var(--accent-ink);font-weight:700;border-top-color:var(--accent)}
+.steps i.done{border-top-color:var(--accent);color:var(--ink2)}
+.stepm{display:flex;gap:6px;padding:8px 16px 0;background:var(--card)}
+.stepm i{flex:1;font-style:normal;text-align:center;font-size:var(--fs-xs);color:var(--ink3);border-top:4px solid var(--line-soft);padding-top:4px}
+.stepm i.on{color:var(--accent-ink);font-weight:700;border-top-color:var(--accent)}
+.stepm i.done{border-top-color:var(--accent)}
+.pg{padding:16px}
+.d .pg,.t .pg{padding:24px 44px}
+h2.ttl{font-size:var(--fs-xl);line-height:var(--lh-tight);margin:4px 0 4px}
+.sub{color:var(--ink2);font-size:var(--fs-sm);margin:0 0 12px}
+.card{background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r-md);padding:16px;box-shadow:0 1px 2px var(--shadow-sm)}
+.card+.card,.card+.banner,.banner+.card{margin-top:12px}
+.card h3{font-size:var(--fs-lg);margin:0 0 8px;line-height:var(--lh-tight)}
+.card h4{font-size:var(--fs-md);margin:0 0 6px}
+.hint{color:var(--ink2);font-size:var(--fs-sm);margin:0 0 8px}
+.xs{font-size:var(--fs-xs);color:var(--ink3)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:48px;padding:0 16px;border-radius:var(--r-sm);border:1px solid var(--ink3);background:var(--card);color:var(--ink);font:600 16px var(--font);white-space:nowrap}
+.btn.p{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.g{border-color:transparent;background:transparent;color:var(--accent-ink)}
+.btn.s{min-height:44px;font-size:15px}
+.btn.dis{background:var(--sunk);color:var(--ink3);border-color:transparent}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row.nw{flex-wrap:nowrap}
+.grow{flex:1}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px}
+.chip{flex:0 0 auto;min-height:44px;display:inline-flex;align-items:center;padding:0 16px;border-radius:999px;border:1px solid var(--ctl);background:var(--card);font-size:15px;font-weight:600;white-space:nowrap}
+.chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink)}
+.seg{display:flex;background:var(--sunk);border-radius:var(--r-sm);padding:3px;gap:2px}
+.seg b{flex:1;text-align:center;min-height:44px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;color:var(--ink2);border-radius:6px}
+.seg b.on{background:var(--card);color:var(--accent-ink);box-shadow:0 1px 3px var(--shadow)}
+.tiles{display:flex;gap:12px}
+.tile{flex:1;background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r-md);padding:12px 16px}
+.tile small{display:block;color:var(--ink2);font-size:var(--fs-xs)}
+.tile b{font-size:var(--fs-2xl);line-height:1.2;font-variant-numeric:tabular-nums}
+.tile.warn{background:var(--warn-soft);border-color:var(--warn)}
+.banner{display:flex;align-items:center;gap:12px;background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn);border-radius:var(--r-sm);padding:8px 12px;font-size:var(--fs-sm);min-height:44px}
+.banner.info{background:var(--accent-soft);color:var(--accent-ink);border-color:var(--accent)}
+.banner .x{margin-left:auto;font-weight:700;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center}
+.tag{display:inline-block;height:26px;line-height:26px;padding:0 8px;border-radius:6px;font-size:var(--fs-xs);font-weight:600;background:var(--sunk);color:var(--ink2)}
+.tag.w{background:var(--warn-soft);color:var(--warn)}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}
+.tag.a{background:var(--accent-soft);color:var(--accent-ink)}
+.brow{margin:8px 0}
+.brow .l{display:flex;justify-content:space-between;font-size:var(--fs-sm)}
+.track{height:12px;border-radius:6px;background:var(--sunk);overflow:hidden}
+.track i{display:block;height:100%;background:var(--accent);border-radius:6px}
+table.tb{width:100%;border-collapse:collapse;font-size:var(--fs-sm);font-variant-numeric:tabular-nums}
+table.tb th{background:var(--sunk);text-align:left;padding:8px;font-weight:700}
+table.tb td{padding:8px;border-top:1px solid var(--line-soft)}
+table.tb tr.avg td{background:var(--warn-soft)}
+.acc{display:flex;align-items:center;gap:12px;min-height:64px}
+.acc .t{flex:1}.acc .t b{display:block}
+.acc .t span{color:var(--ink2);font-size:var(--fs-sm)}
+.chev{font-size:20px;color:var(--ink3)}
+.actbar{display:flex;gap:8px;justify-content:flex-end;background:var(--card);border-top:1px solid var(--line-soft);padding:12px 16px}
+.d .actbar,.t .actbar{padding:12px 44px}
+.m .actbar .btn.p{flex:1}
+.cols{display:flex;gap:24px;align-items:flex-start}
+.cols>.main{flex:1;min-width:0}.cols>.side{flex:0 0 340px}
+.cols>.nav{flex:0 0 240px}
+.nav .item{min-height:56px;display:flex;flex-direction:column;justify-content:center;padding:6px 12px;border-radius:var(--r-sm);border:1px solid var(--line-soft);background:var(--card);margin-bottom:8px}
+.nav .item.on{background:var(--accent-soft);border-color:var(--accent)}
+.nav .item b{font-size:var(--fs-sm)}
+.nav .item span{font-size:var(--fs-xs);color:var(--ink2)}
+.nav h4{margin:12px 0 6px;font-size:var(--fs-xs);color:var(--ink3);letter-spacing:.04em}
+.fld{margin:12px 0}
+.fld label{display:block;font-weight:600;font-size:var(--fs-sm);margin-bottom:4px}
+.inp{min-height:48px;border:1px solid var(--ink3);border-radius:var(--r-sm);background:var(--card);padding:10px 12px;color:var(--ink3)}
+.inp.v{color:var(--ink)}
+.ck{display:flex;gap:10px;align-items:center;min-height:44px}
+.ck i{width:22px;height:22px;border:2px solid var(--ink3);border-radius:4px;flex:0 0 auto}
+.ck i.on{background:var(--accent);border-color:var(--accent)}
+/* 範本縮圖：整張 A4 放在固定大小的容器內，用同一個 scale 縮小，字級不另外設像素 */
+.thumbbox{width:var(--tw,150px);height:calc(var(--tw,150px)*1.414);background:#fff;border:1px solid var(--line);border-radius:6px;overflow:hidden;position:relative;flex:0 0 auto}
+.thumbbox .pg794{width:794px;height:1123px;transform:scale(var(--s,0.19));transform-origin:0 0;padding:56px 56px;font-size:20px;color:#222;font-family:var(--font);position:absolute;left:0;top:0}
+.sel{background:var(--card);border:2px solid var(--line-soft);border-radius:var(--r-md);padding:10px;display:flex;flex-direction:column;gap:6px;align-items:center;flex:0 0 auto}
+.sel.on{border-color:var(--accent);background:var(--accent-soft)}
+.sel b{font-size:var(--fs-sm)}
+.stk{position:sticky;top:12px}
+.t .bar .xs{display:none}
+.t .steps i{font-size:12px}
+
+.opt{border:2px solid var(--line-soft);border-radius:var(--r-md);padding:12px;background:var(--card)}
+.opt.rec{border-color:var(--accent)}
+.opt h4{margin:0 0 4px}
+.pro,.con{font-size:var(--fs-sm);margin:2px 0}
+.pro::before{content:"＋ ";color:var(--ok);font-weight:700}.con::before{content:"－ ";color:var(--bad);font-weight:700}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin:12px 0}
+.badge{display:inline-block;background:var(--accent);color:var(--on-accent);border-radius:6px;padding:0 8px;font-size:var(--fs-xs);font-weight:700;line-height:22px;margin-left:6px}
+.sec{margin-top:40px;padding-top:16px;border-top:3px solid var(--line)}
+.sec>h2{font-size:var(--fs-xl);margin:0 0 4px}
+.lbl{font-size:var(--fs-xs);font-weight:700;color:var(--ink3);margin:0 0 6px;letter-spacing:.04em}
+.tag.b{background:var(--bad-soft);color:var(--bad)}
+.tilew{min-width:0}
+.tile b.nw{white-space:nowrap}
+.crow2{border:1px solid var(--line-soft);border-radius:var(--r-md);background:var(--card);padding:12px;margin-top:8px}
+.crow2 .h{display:flex;align-items:center;gap:8px;justify-content:space-between}
+.crow2 .h b{font-size:var(--fs-md)}
+.crow2 .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.tag.wrap{height:auto;line-height:1.35;padding:4px 8px;white-space:normal}
+.warnbar i{background:var(--warn-bar)}
+.sheetm{position:relative;height:640px;background:var(--paper);overflow:hidden}
+.sheetm .scrim{position:absolute;inset:0;background:var(--scrim)}
+.sheetm .sh{position:absolute;left:0;right:0;bottom:0;background:var(--card);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:8px 16px 16px;box-shadow:0 -4px 16px var(--shadow)}
+.sh .grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 8px}
+.sh .hd{display:flex;align-items:center;gap:8px;min-height:48px}
+.sh .hd b{flex:1;font-size:var(--fs-lg)}
+.xbtn{width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--ink2);border-radius:var(--r-sm);border:1px solid transparent}
+.orow{display:flex;align-items:center;gap:12px;min-height:52px;border-top:1px solid var(--line-soft)}
+.orow .rd{width:22px;height:22px;border:2px solid var(--ink3);border-radius:50%;flex:0 0 auto}
+.orow .rd.on{border-color:var(--accent);box-shadow:inset 0 0 0 4px var(--card);background:var(--accent)}
+.orow .t{flex:1;min-width:0}.orow .n{font-variant-numeric:tabular-nums;color:var(--ink2);font-size:var(--fs-sm)}
+.dlg{background:var(--card);border-radius:var(--r-lg);box-shadow:0 8px 32px var(--shadow);padding:24px;margin:0 auto}
+.dlg h3{font-size:var(--fs-xl);line-height:var(--lh-tight);margin:0 0 8px}
+.dlg .ft{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.btn.d{border-color:var(--bad);color:var(--bad);background:transparent}
+.dlgbg{background:var(--scrim);padding:24px 16px;border-radius:var(--r-md)}
+.sk{background:var(--sunk);border-radius:var(--r-md);height:16px}
+.nt{display:flex;gap:12px;border-radius:var(--r-md);padding:12px 16px;background:var(--bad-soft);border:1px solid var(--bad);color:var(--ink)}
+.nt b{display:block}
+.thumbrow{display:flex;gap:16px;align-items:flex-start}
+.lst{margin:6px 0 0;padding-left:20px;color:var(--ink)}
+.lst li{margin:2px 0}
+.cmp{font-size:var(--fs-sm);width:100%;border-collapse:collapse}
+.cmp td,.cmp th{border:1px solid var(--line-soft);padding:6px 8px;text-align:left;vertical-align:top}
+.cmp th{background:var(--sunk)}
+.fix .bar{height:auto;min-height:56px;flex-wrap:wrap;row-gap:0;padding-top:8px;padding-bottom:0}
+.tb1{display:flex;align-items:center;gap:12px;background:var(--card);border-bottom:1px solid var(--line-soft);padding:0 16px;height:56px}
+.tb2{background:var(--card);border-bottom:1px solid var(--line-soft)}
+.tb2 .r1{display:flex;align-items:center;gap:12px;height:48px;padding:0 16px}
+.rcard{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--ctl);border-radius:var(--r-md);padding:10px 12px;background:var(--card);margin-top:8px;min-height:56px}
+.rcard.on{border-color:var(--accent);background:var(--accent-soft)}
+.rcard .rd{width:22px;height:22px;border:2px solid var(--ink3);border-radius:50%;flex:0 0 auto;margin-top:2px}
+.rcard.on .rd{border-color:var(--accent);background:var(--accent);box-shadow:inset 0 0 0 4px var(--card)}
+.rcard span{display:block;color:var(--ink2);font-size:var(--fs-sm)}
+.lock{display:flex;gap:10px;align-items:center;min-height:48px;padding:0 12px;border:1px solid var(--line-soft);border-radius:var(--r-md);background:var(--sunk);color:var(--ink3);margin-top:8px}
+.lock b{font-size:var(--fs-sm);flex:1}
+.lock small{font-size:var(--fs-xs)}
+.fldh{font-weight:700;font-size:var(--fs-sm);margin:0 0 6px}
+.stp{display:inline-flex;align-items:center;border:1px solid var(--ctl);border-radius:var(--r-sm);background:var(--card);overflow:hidden}
+.stp i{font-style:normal;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--accent-ink)}
+.stp b{min-width:36px;text-align:center}
+.bl{display:grid;grid-template-columns:minmax(72px,auto) 1fr auto;gap:12px;align-items:center;margin:10px 0}
+.bl .nm{font-weight:600}
+.bl .tr{height:12px;border-radius:6px;background:var(--sunk);overflow:hidden}
+.bl .tr i{display:block;height:100%;border-radius:6px;background:var(--bar-muted)}
+.bl .tr i.w{background:var(--accent)}.bl .tr i.tie{background:var(--warn-bar)}
+.bl .vv{font-size:var(--fs-sm);font-variant-numeric:tabular-nums;color:var(--ink2);white-space:nowrap}
+.m .bl{grid-template-columns:1fr auto}.m .bl .tr{grid-column:1/-1;order:3}
+.winc{background:var(--accent-soft);border:1px solid var(--accent);border-radius:var(--r-md);padding:12px 16px;flex:1.4}
+.winc small{display:block;color:var(--accent-ink);font-size:var(--fs-xs)}
+.winc b{font-size:var(--fs-2xl);color:var(--accent-ink);line-height:1.2}
+
+</style></head><body><div class="doc">
+<h1>票選幹部：統計頁＋輸出頁</h1><p>2026-11-15 設計員第二輪，待使用者裁示。 全部是虛構資料。規範見 DESIGN.md 5.34；稽核見 docs/design/逐頁版面稽核-第二輪-2026-11-15.md。</p><section class="sec" id="s1"><h2>① 票選幹部：統計頁＋輸出頁（併入 5.33 統計頁／輸出頁改版）</h2>
+<p class="sub">使用者已裁示（2026-11-15）：與統計頁改版一致、輸出頁一起重新設計、同票說明句加在結果旁。稽核見 第二輪稽核 V1–V5；Issue <a href="https://github.com/derliang/survey-feedback-helper/issues/101">#101</a>。</p>
+<div class="note"><h2>統計頁：改了什麼、為什麼</h2><ul>
+<li><b>結果在第一屏</b>：職位用頂端選擇器（手機 chips／平板 chips／桌機左欄），選了就在正下方看到當選者與票數；「需要確認的投票紀錄」沒有可疑票時只剩一行字（✓ 沒有偵測到…），有可疑票才展開成警示卡放在結果上方。</li>
+<li><b>當選者固定第一列</b>並標「當選」標籤；同票的列標「同票」（不只靠顏色）。長條圖與卡片同寬，手機字級回到 15。</li>
+<li><b>同票說明直接放在結果旁</b>（使用者已裁示）：「同票：甲小明、乙小華（各 2 票）　已依抽籤決定，乙小華當選。」重寫句型（修掉「。：」標點錯誤）；內部編號縮成次要小字「抽籤編號 mwhn0zi8」，不再嵌在句子裡；「重新抽籤」留在同一個提示內。</li>
+<li><b>當選名額</b>改成結果卡標題旁的小步進器（− 1 ＋），不再是一個拉滿 620 的輸入框；<b>計票規則</b>收進「進階設定」（#99 已做）。</li>
+<li>沒有審稿內容的問卷，<b>不顯示「審稿進度尚未儲存」黃卡／橫幅</b>（併 #90，規範 5.33 D① 已有，這裡明確指票選與意見調查）。</li></ul></div>
+<div class="note"><h2>輸出頁：改了什麼、為什麼</h2><ul>
+<li>現況只有一張「統計報告」卡加三顆按鈕，看不出會輸出什麼；桌機下半全空。改成與 5.33 輸出頁同構：<b>① 輸出內容（預覽）② 下載</b>；桌機左右兩欄、右欄下載面板 sticky。</li>
+<li><b>預覽</b>＝各職位當選者、票數、同票備註的摘要表，加一句「檔案包含什麼、不含什麼」；<b>下載</b>＝一顆主要「下載 Word」＋ PDF、Excel（格式選擇列：主要在最左、最寬，見 DESIGN.md 5.34 的按鈕主次裁定）。</li></ul></div>
+<h3>裁示選項 1-1：統計頁同票說明與結果的關係</h3><div class="opts">
+<div class="opt rec"><h4>A：說明併入結果卡，當選與同票用標籤標在列上<span class="badge">建議</span></h4><p class="pro">第一屏就看到當選者與同票原因，不必捲動</p><p class="pro">與其他統計頁的「結果卡」同構，好實作</p><p class="pro">同票只用一個提示區塊，抽籤編號降為次要小字</p><p class="con">卡片稍長（多一個提示區塊）</p></div>
+<div class="opt "><h4>B：維持獨立的藍色資訊卡，但搬到結果最上方</h4><p class="pro">同票是重大事件，最醒目</p><p class="pro">提示與結果分開，改動最小</p><p class="con">結果被往下推，手機第一屏看不到票數</p><p class="con">資訊卡與結果卡兩層視覺</p></div>
+</div>
+<h3>裁示選項 1-2：輸出頁預覽的形式</h3><div class="opts">
+<div class="opt rec"><h4>A：摘要表（各職位當選者、票數、同票備註）<span class="badge">建議</span></h4><p class="pro">不需另寫文件縮圖，改動小</p><p class="pro">老師要確認的就是「誰當選、同票怎麼處理」，表格最直接</p><p class="pro">手機也好讀</p><p class="con">看不到實際文件版面</p></div>
+<div class="opt "><h4>B：A4 縮圖＋摘要（模擬頁最下方）</h4><p class="pro">和個人回饋單輸出的縮圖一致</p><p class="pro">看得到公布版長相</p><p class="con">要另寫票選文件的縮圖渲染（工作量大）；縮圖必須遵守 5.33 縮圖規則</p></div>
+</div>
+<div class="devs"><div class="dev"><h3>統計 手機 390（A）</h3><div class="frame m"><div class="bar"><span class="brand">問卷回饋小幫手</span><span class="sp"></span><span class="lk">↺</span><span class="lk">✎</span><span class="btn s" style="min-height:40px">⚙</span></div><div class="stepm"><i class="done">開啟問卷</i><i class="done">準備資料</i><i class="on">統計</i><i class="">輸出</i></div><div class="pg"><h2 class="ttl">統計</h2><p class="sub">選幹部 (回覆)・共 5 筆回覆・<u>統計方法說明</u></p>
+<div class="chips"><span class="chip on">你推薦誰當班長？</span><span class="chip">你推薦誰當副班長？</span></div><div class="card"><div class="row" style="justify-content:space-between"><h3 style="margin:0">你推薦誰當班長？</h3><span class="row xs" style="gap:6px">當選名額 <span class="stp"><i>−</i><b>1</b><i>＋</i></span></span></div>
+<div class="tiles" style="margin:12px 0 4px"><div class="tile"><small>計入票數</small><b>5</b></div><div class="winc"><small>當選</small><b>乙小華</b></div></div>
+<div class="bl"><span class="nm">乙小華 <span class="tag a">當選</span></span><span class="vv">2 票 · 40%</span><div class="tr"><i class="w" style="width:100%"></i></div></div>
+<div class="bl"><span class="nm">甲小明 <span class="tag w">同票</span></span><span class="vv">2 票 · 40%</span><div class="tr"><i class="tie" style="width:100%"></i></div></div>
+<div class="bl"><span class="nm">丙小美</span><span class="vv">1 票 · 20%</span><div class="tr"><i style="width:50%"></i></div></div><div class="row" style="justify-content:flex-end"><span class="btn g s">下載這張圖表（JPG）</span></div><div class="banner info" style="margin-top:12px;align-items:flex-start"><span style="flex:1"><b>同票：甲小明、乙小華（各 2 票）</b>　已依抽籤決定，乙小華當選。<br><span class="xs" style="color:inherit">抽籤編號 mwhn0zi8；要重現同樣結果，必須保持相同票數、候選人與抽籤設定。</span></span><span class="btn s g" style="min-height:44px">重新抽籤</span></div><p class="xs" style="margin:8px 0 0">✓ 沒有偵測到需要確認的投票紀錄（這不代表已排除所有投票異常）。</p></div><div style="margin-top:12px"><div class="card"><div class="acc"><div class="t"><b>進階設定</b><span>計票規則：只算最後一張 · 照算 · 保留</span></div><span class="chev">▾</span></div></div></div></div><div class="actbar"><span class="btn">上一步</span><span class="btn p">前往輸出</span></div></div></div><div class="dev"><h3>統計 平板 768（A）</h3><div class="scroll"><div class="frame t"><div class="bar"><span class="brand">問卷回饋小幫手</span><span class="xs">選幹部 (回覆).xlsx</span><div class="steps"><i class="done">① 開啟問卷</i><i class="done">② 準備資料</i><i class="on">③ 統計</i><i class="">④ 輸出</i></div><span class="lk">↺ 重新開始</span><span class="lk">✎ 範本</span><span class="btn s" style="min-height:40px">⚙ 設定</span></div><div class="pg"><h2 class="ttl">統計</h2><p class="sub">選幹部 (回覆)・共 5 筆回覆・<u>統計方法說明</u></p>
+<div class="chips"><span class="chip on">你推薦誰當班長？</span><span class="chip">你推薦誰當副班長？</span></div><div class="card"><div class="row" style="justify-content:space-between"><h3 style="margin:0">你推薦誰當班長？</h3><span class="row xs" style="gap:6px">當選名額 <span class="stp"><i>−</i><b>1</b><i>＋</i></span></span></div>
+<div class="tiles" style="margin:12px 0 4px"><div class="tile"><small>計入票數</small><b>5</b></div><div class="winc"><small>當選</small><b>乙小華</b></div></div>
+<div class="bl"><span class="nm">乙小華 <span class="tag a">當選</span></span><span class="vv">2 票 · 40%</span><div class="tr"><i class="w" style="width:100%"></i></div></div>
+<div class="bl"><span class="nm">甲小明 <span class="tag w">同票</span></span><span class="vv">2 票 · 40%</span><div class="tr"><i class="tie" style="width:100%"></i></div></div>
+<div class="bl"><span class="nm">丙小美</span><span class="vv">1 票 · 20%</span><div class="tr"><i style="width:50%"></i></div></div><div class="row" style="justify-content:flex-end"><span class="btn g s">下載這張圖表（JPG）</span></div><div class="banner info" style="margin-top:12px;align-items:flex-start"><span style="flex:1"><b>同票：甲小明、乙小華（各 2 票）</b>　已依抽籤決定，乙小華當選。<br><span class="xs" style="color:inherit">抽籤編號 mwhn0zi8；要重現同樣結果，必須保持相同票數、候選人與抽籤設定。</span></span><span class="btn s g" style="min-height:44px">重新抽籤</span></div><p class="xs" style="margin:8px 0 0">✓ 沒有偵測到需要確認的投票紀錄（這不代表已排除所有投票異常）。</p></div><div style="margin-top:12px"><div class="card"><div class="acc"><div class="t"><b>進階設定</b><span>計票規則：只算最後一張 · 照算 · 保留</span></div><span class="chev">▾</span></div></div></div></div><div class="actbar"><span class="btn">上一步</span><span class="btn p">前往輸出</span></div></div></div></div><div class="dev"><h3>統計 桌機 1280（A）</h3><div class="scroll"><div class="frame d"><div class="bar"><span class="brand">問卷回饋小幫手</span><span class="xs">選幹部 (回覆).xlsx</span><div class="steps"><i class="done">① 開啟問卷</i><i class="done">② 準備資料</i><i class="on">③ 統計</i><i class="">④ 輸出</i></div><span class="lk">↺ 重新開始</span><span class="lk">✎ 範本</span><span class="btn s" style="min-height:40px">⚙ 設定</span></div><div class="pg"><h2 class="ttl">統計</h2><p class="sub">選幹部 (回覆)・共 5 筆回覆・<u>統計方法說明</u></p>
+<div class="cols" style="margin-top:12px"><div class="nav" style="flex-basis:220px"><h4 style="margin-top:0">職位</h4><div class="item on"><b>你推薦誰當班長？</b><span>乙小華（抽籤）</span></div><div class="item"><b>你推薦誰當副班長？</b><span>乙小華</span></div></div><div class="main"><div class="card"><div class="row" style="justify-content:space-between"><h3 style="margin:0">你推薦誰當班長？</h3><span class="row xs" style="gap:6px">當選名額 <span class="stp"><i>−</i><b>1</b><i>＋</i></span></span></div>
+<div class="tiles" style="margin:12px 0 4px"><div class="tile"><small>計入票數</small><b>5</b></div><div class="winc"><small>當選</small><b>乙小華</b></div></div>
+<div class="bl"><span class="nm">乙小華 <span class="tag a">當選</span></span><span class="vv">2 票 · 40%</span><div class="tr"><i class="w" style="width:100%"></i></div></div>
+<div class="bl"><span class="nm">甲小明 <span class="tag w">同票</span></span><span class="vv">2 票 · 40%</span><div class="tr"><i class="tie" style="width:100%"></i></div></div>
+<div class="bl"><span class="nm">丙小美</span><span class="vv">1 票 · 20%</span><div class="tr"><i style="width:50%"></i></div></div><div class="row" style="justify-content:flex-end"><span class="btn g s">下載這張圖表（JPG）</span></div><div class="banner info" style="margin-top:12px;align-items:flex-start"><span style="flex:1"><b>同票：甲小明、乙小華（各 2 票）</b>　已依抽籤決定，乙小華當選。<br><span class="xs" style="color:inherit">抽籤編號 mwhn0zi8；要重現同樣結果，必須保持相同票數、候選人與抽籤設定。</span></span><span class="btn s g" style="min-height:44px">重新抽籤</span></div><p class="xs" style="margin:8px 0 0">✓ 沒有偵測到需要確認的投票紀錄（這不代表已排除所有投票異常）。</p></div><div style="margin-top:12px"><div class="card"><div class="acc"><div class="t"><b>進階設定</b><span>計票規則：只算最後一張 · 照算 · 保留</span></div><span class="chev">▾</span></div></div></div></div></div></div><div class="actbar"><span class="btn">上一步</span><span class="btn p">前往輸出</span></div></div></div></div><div class="dev"><h3>統計 桌機 1280（B：資訊卡置頂）</h3><div class="scroll"><div class="frame d"><div class="bar"><span class="brand">問卷回饋小幫手</span><span class="xs">選幹部 (回覆).xlsx</span><div class="steps"><i class="done">① 開啟問卷</i><i class="done">② 準備資料</i><i class="on">③ 統計</i><i class="">④ 輸出</i></div><span class="lk">↺ 重新開始</span><span class="lk">✎ 範本</span><span class="btn s" style="min-height:40px">⚙ 設定</span></div><div class="pg"><h2 class="ttl">統計</h2><p class="sub">選幹部 (回覆)・共 5 筆回覆</p>
+<div class="cols" style="margin-top:12px"><div class="nav" style="flex-basis:220px"><h4 style="margin-top:0">職位</h4><div class="item on"><b>你推薦誰當班長？</b><span>乙小華（抽籤）</span></div><div class="item"><b>你推薦誰當副班長？</b><span>乙小華</span></div></div><div class="main"><div class="banner info" style="margin-top:0;align-items:flex-start"><span style="flex:1"><b>同票：甲小明、乙小華（各 2 票）</b>　已依抽籤決定，乙小華當選。<br><span class="xs" style="color:inherit">抽籤編號 mwhn0zi8；要重現同樣結果，必須保持相同票數、候選人與抽籤設定。</span></span><span class="btn s g" style="min-height:44px">重新抽籤</span></div><div class="card" style="margin-top:12px"><h3>你推薦誰當班長？</h3><div class="tiles"><div class="tile"><small>計入票數</small><b>5</b></div><div class="winc"><small>當選</small><b>乙小華</b></div></div><div class="bl"><span class="nm">乙小華 <span class="tag a">當選</span></span><span class="vv">2 票 · 40%</span><div class="tr"><i class="w" style="width:100%"></i></div></div>
+<div class="bl"><span class="nm">甲小明 <span class="tag w">同票</span></span><span class="vv">2 票 · 40%</span><div class="tr"><i class="tie" style="width:100%"></i></div></div>
+<div class="bl"><span class="nm">丙小美</span><span class="vv">1 票 · 20%</span><div class="tr"><i style="width:50%"></i></div></div></div><div class="card"><b>需要確認的投票紀錄</b><p class="hint" style="margin:4px 0 0">沒有偵測到需要確認的票。</p></div><div class="card"><div class="row" style="justify-content:space-between"><b>當選名額</b><span class="stp"><i>−</i><b>1</b><i>＋</i></span></div></div></div></div></div><div class="actbar"><span class="btn">上一步</span><span class="btn p">前往輸出</span></div></div></div></div></div>
+<div class="devs"><div class="dev"><h3>輸出 手機 390（A）</h3><div class="frame m"><div class="bar"><span class="brand">問卷回饋小幫手</span><span class="sp"></span><span class="lk">↺</span><span class="lk">✎</span><span class="btn s" style="min-height:40px">⚙</span></div><div class="stepm"><i class="done">開啟問卷</i><i class="done">準備資料</i><i class="done">統計</i><i class="on">輸出</i></div><div class="pg"><h2 class="ttl">輸出</h2><p class="sub">選幹部 (回覆)</p><div class="card"><h3>① 輸出內容</h3><p class="hint">檔案會包含每個職位的當選者、完整票數、同票處理與計票規則；不含填答者姓名。</p><div style="border:1px solid var(--line-soft);border-radius:8px;overflow:hidden"><table class="tb"><tr><th>職位</th><th>當選</th><th>票數</th><th>備註</th></tr><tr><td>班長</td><td><b>乙小華</b></td><td>2 票（40%）</td><td><span class="tag w">同票</span> 與甲小明同票，抽籤決定</td></tr><tr><td>副班長</td><td><b>乙小華</b></td><td>3 票（60%）</td><td>—</td></tr></table></div><p class="xs" style="margin-top:8px">計票規則：同一位填答者多張票只算最後一張、投給自己照算、填答時間異常保留。</p></div><div class="card "><h3>② 下載</h3><h4>票選結果</h4><div class="row nw"><span class="btn p grow">下載 Word</span><span class="btn">PDF</span><span class="btn">Excel</span></div><p class="xs" style="margin-top:8px">Word 可再編修；Excel 含完整票數。第一次產生 PDF 或 Word 可能需要載入約 5 MB 字型資源。</p></div></div><div class="actbar"><span class="btn">回到統計</span></div></div></div><div class="dev"><h3>輸出 平板 768（A）</h3><div class="scroll"><div class="frame t"><div class="bar"><span class="brand">問卷回饋小幫手</span><span class="xs">選幹部 (回覆).xlsx</span><div class="steps"><i class="done">① 開啟問卷</i><i class="done">② 準備資料</i><i class="done">③ 統計</i><i class="on">④ 輸出</i></div><span class="lk">↺ 重新開始</span><span class="lk">✎ 範本</span><span class="btn s" style="min-height:40px">⚙ 設定</span></div><div class="pg"><h2 class="ttl">輸出</h2><p class="sub">選幹部 (回覆)</p><div class="card"><h3>① 輸出內容</h3><p class="hint">檔案會包含每個職位的當選者、完整票數、同票處理與計票規則；不含填答者姓名。</p><div style="border:1px solid var(--line-soft);border-radius:8px;overflow:hidden"><table class="tb"><tr><th>職位</th><th>當選</th><th>票數</th><th>備註</th></tr><tr><td>班長</td><td><b>乙小華</b></td><td>2 票（40%）</td><td><span class="tag w">同票</span> 與甲小明同票，抽籤決定</td></tr><tr><td>副班長</td><td><b>乙小華</b></td><td>3 票（60%）</td><td>—</td></tr></table></div><p class="xs" style="margin-top:8px">計票規則：同一位填答者多張票只算最後一張、投給自己照算、填答時間異常保留。</p></div><div class="card "><h3>② 下載</h3><h4>票選結果</h4><div class="row nw"><span class="btn p grow">下載 Word</span><span class="btn">PDF</span><span class="btn">Excel</span></div><p class="xs" style="margin-top:8px">Word 可再編修；Excel 含完整票數。第一次產生 PDF 或 Word 可能需要載入約 5 MB 字型資源。</p></div></div><div class="actbar"><span class="btn">回到統計</span></div></div></div></div><div class="dev"><h3>輸出 桌機 1280（A）</h3><div class="scroll"><div class="frame d"><div class="bar"><span class="brand">問卷回饋小幫手</span><span class="xs">選幹部 (回覆).xlsx</span><div class="steps"><i class="done">① 開啟問卷</i><i class="done">② 準備資料</i><i class="done">③ 統計</i><i class="on">④ 輸出</i></div><span class="lk">↺ 重新開始</span><span class="lk">✎ 範本</span><span class="btn s" style="min-height:40px">⚙ 設定</span></div><div class="pg"><h2 class="ttl">輸出</h2><p class="sub">選幹部 (回覆)</p><div class="cols"><div class="main"><div class="card"><h3>① 輸出內容</h3><p class="hint">檔案會包含每個職位的當選者、完整票數、同票處理與計票規則；不含填答者姓名。</p><div style="border:1px solid var(--line-soft);border-radius:8px;overflow:hidden"><table class="tb"><tr><th>職位</th><th>當選</th><th>票數</th><th>備註</th></tr><tr><td>班長</td><td><b>乙小華</b></td><td>2 票（40%）</td><td><span class="tag w">同票</span> 與甲小明同票，抽籤決定</td></tr><tr><td>副班長</td><td><b>乙小華</b></td><td>3 票（60%）</td><td>—</td></tr></table></div><p class="xs" style="margin-top:8px">計票規則：同一位填答者多張票只算最後一張、投給自己照算、填答時間異常保留。</p></div></div><div class="side" style="flex-basis:400px"><div class="card stk"><h3>② 下載</h3><h4>票選結果</h4><div class="row nw"><span class="btn p grow">下載 Word</span><span class="btn">PDF</span><span class="btn">Excel</span></div><p class="xs" style="margin-top:8px">Word 可再編修；Excel 含完整票數。第一次產生 PDF 或 Word 可能需要載入約 5 MB 字型資源。</p></div></div></div></div><div class="actbar"><span class="btn">回到統計</span></div></div></div></div><div class="dev"><h3>輸出 桌機 1280（B：A4 縮圖）</h3><div class="scroll"><div class="frame d"><div class="bar"><span class="brand">問卷回饋小幫手</span><span class="xs">選幹部 (回覆).xlsx</span><div class="steps"><i class="done">① 開啟問卷</i><i class="done">② 準備資料</i><i class="done">③ 統計</i><i class="on">④ 輸出</i></div><span class="lk">↺ 重新開始</span><span class="lk">✎ 範本</span><span class="btn s" style="min-height:40px">⚙ 設定</span></div><div class="pg"><h2 class="ttl">輸出</h2><p class="sub">選幹部 (回覆)</p><div class="cols"><div class="main"><div class="card"><h3>① 輸出內容</h3><div class="thumbrow"><div class="thumbbox" style="--tw:220px;--s:0.2771"><div class="pg794"><div style="text-align:center;font-weight:700;font-size:30px">票選結果</div><div style="text-align:center;color:#666">選幹部 (回覆)・共 5 筆回覆</div><div style="height:20px"></div><div style="background:#9a4a00;color:#fff;padding:8px 10px">班長　當選：乙小華</div><div style="padding:8px 10px;border-bottom:1px solid #eee">乙小華　2 票　40%</div><div style="padding:8px 10px;border-bottom:1px solid #eee">甲小明　2 票　40%（同票）</div><div style="padding:8px 10px;border-bottom:1px solid #eee">丙小美　1 票　20%</div><div style="height:16px"></div><div style="background:#9a4a00;color:#fff;padding:8px 10px">副班長　當選：乙小華</div><div style="padding:8px 10px">…</div><div style="position:absolute;left:56px;right:56px;bottom:40px;color:#888;font-size:18px">〇〇國中 三年二班 票選結果｜第 1 頁</div></div></div><div style="flex:1"><p class="hint">這是 PDF／Word 第 1 頁的縮圖（文件頁面縮小，不是另一套畫面）。</p><table class="tb"><tr><th>職位</th><th>當選</th><th>票數</th><th>備註</th></tr><tr><td>班長</td><td><b>乙小華</b></td><td>2 票（40%）</td><td><span class="tag w">同票</span> 與甲小明同票，抽籤決定</td></tr><tr><td>副班長</td><td><b>乙小華</b></td><td>3 票（60%）</td><td>—</td></tr></table></div></div></div></div><div class="side" style="flex-basis:400px"><div class="card stk"><h3>② 下載</h3><h4>票選結果</h4><div class="row nw"><span class="btn p grow">下載 Word</span><span class="btn">PDF</span><span class="btn">Excel</span></div><p class="xs" style="margin-top:8px">Word 可再編修；Excel 含完整票數。第一次產生 PDF 或 Word 可能需要載入約 5 MB 字型資源。</p></div></div></div></div><div class="actbar"><span class="btn">回到統計</span></div></div></div></div></div></section>
+</div><script>/* 靜態模擬頁，無互動 */</script></body></html>
