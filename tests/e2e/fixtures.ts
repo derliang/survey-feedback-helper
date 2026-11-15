@@ -109,3 +109,20 @@ export const surveyFile = (name ='讀書報告回饋  (回覆).xlsx') => ({
   mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   buffer: makeXlsx(HEADERS, ROWS),
 });
+
+/** 設定頁切到「進階與資訊」的某一項：平板、桌機點左側導覽，手機點頂端的分段（進階三項併在同一頁）。 */
+export async function settingsTab(
+  page: import('@playwright/test').Page,
+  tab: 'common' | 'backup' | 'look' | 'help',
+  lang: 'zh' | 'en' = 'zh',
+): Promise<void> {
+  const names = {
+    zh: { common: '資料夾與預設輸出', backup: '備份與還原', look: '外觀與語言', help: '說明與隱私', seg: { common: '常用', adv: '進階與資訊' } },
+    en: { common: 'Folder and default output', backup: 'Backup and restore', look: 'Appearance and language', help: 'Help and privacy', seg: { common: 'Common', adv: 'Advanced and info' } },
+  }[lang];
+  if (page.viewportSize()!.width >= 600) {
+    await page.getByRole('navigation').getByRole('button', { name: names[tab] }).click();
+  } else {
+    await page.getByRole('tab', { name: tab === 'common' ? names.seg.common : names.seg.adv }).click();
+  }
+}
