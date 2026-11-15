@@ -121,7 +121,7 @@ test('名額與分配：合併、分配、手動移人、復原、輸出', async
   await expect(page.getByTestId('record')).toContainText('名額 10');
   await expect(page.getByTestId('close-note')).toContainText('攝影社');
   await expect(page.getByTestId('close-note')).toContainText('不會自動停開或重分');
-  await expect(page.getByTestId('crow').filter({ hasText: '攝影社' })).toContainText('建議人工評估是否開班');
+  await expect(page.getByTestId('crow').filter({ hasText: '攝影社' })).toContainText('建議人工評估');
   await noOverflow(page);
   const seed = await page.getByTestId('seed-value').innerText();
 
@@ -241,12 +241,12 @@ test('重新開始：沒選資料夾且已有分配結果時，提醒會遺失�
   await mapped(page);
   await step(page, '名額與分配').click();
   await page.getByRole('button', { name: '重新開始' }).click();
-  await expect(page.getByRole('dialog')).not.toContainText('選課分配結果只存在這個分頁'); // 還沒分配：不提醒
+  await expect(page.getByRole('dialog')).not.toContainText('選課分配結果：你還沒選資料夾'); // 還沒分配：不提醒
   await page.getByRole('button', { name: '取消' }).click();
   await fillRules(page);
   await page.getByTestId('course-start').click();
   await expect(page.getByTestId('crow')).toHaveCount(4);
   await page.getByRole('button', { name: '重新開始' }).click();
-  await expect(page.getByRole('dialog')).toContainText('選課分配結果只存在這個分頁');
+  await expect(page.getByRole('dialog')).toContainText('選課分配結果：你還沒選資料夾');
   await expect(page.getByRole('button', { name: '取消' })).toBeFocused();
 });

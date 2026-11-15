@@ -98,7 +98,11 @@ export default function CourseOutput() {
         <h1>{S.output.title}</h1>
         <p class="meta">{s.name}</p>
       </header>
-      {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
+      {msg && (
+        <div class="out-float" data-testid="out-msg">
+          <Notice kind={msg.kind}>{msg.text}</Notice>
+        </div>
+      )}
       <div class="out-grid">
         <section class="card">
           <h2>{O.title}</h2>
@@ -146,7 +150,7 @@ export default function CourseOutput() {
       <Notice kind="warn">{O.privacy}</Notice>
       <ActBar fixed>
         <button class="btn secondary" type="button" onClick={() => go('stats')}>
-          {S.output.back}
+          {O.back}
         </button>
         <button class="btn primary grow" type="button" disabled={busy || chosen.length === 0} onClick={() => void run()} data-testid="course-download">
           {O.download}

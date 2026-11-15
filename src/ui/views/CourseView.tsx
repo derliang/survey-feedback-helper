@@ -386,14 +386,13 @@ function MoveSheet(props: { id: string; onClose: () => void; onMove: (to: string
   });
 
   const label = personLabel(people.get(props.id));
-  const note = (name: string | null): string => {
-    if (name === null) return C.pendingNote;
+  /** 選項列單行：人數／名額＋短標籤（已滿、第 N 志願、目前所在）；較長的超額說明在選取後以一行提示出現。 */
+  const tags = (name: string | null): { text: string; kind?: string }[] => {
+    if (name === null) return [];
     const x = cs(name);
-    const base = `${x.filled}／${x.capacity}`;
     const r = prefs.indexOf(name);
-    if (name === current) return `${base} · ${C.here}`;
-    if (x.filled >= x.capacity) return `${base} · ${C.fullOver}`;
-    return r >= 0 ? `${base} · ${C.hisPick(r + 1)}` : base;
+    if (name === current) return [{ text: C.hereTag }];
+    return [...(x.filled >= x.capacity ? [{ text: C.fullTag, kind: 'warn' }] : []), ...(r >= 0 ? [{ text: C.rankTag(r + 1) }] : [])];
   };
   const target = pick !== undefined && pick !== null ? cs(pick) : null;
   const overBy = target && pick !== current ? target.filled + 1 - target.capacity : 0;
@@ -403,9 +402,14 @@ function MoveSheet(props: { id: string; onClose: () => void; onMove: (to: string
       title={current === null ? C.putIn(label) : C.moveTitle(label)}
       onClose={props.onClose}
       footer={
-        <button class="btn primary grow" type="button" disabled={pick === undefined} onClick={() => pick !== undefined && props.onMove(pick)} data-testid="move-confirm">
-          {pick === undefined ? C.pickFirst : pick === null ? C.moveToPending : C.moveTo(pick)}
-        </button>
+        <>
+          <button class="btn secondary" type="button" onClick={props.onClose}>
+            {C.cancel}
+          </button>
+          <button class="btn primary grow" type="button" disabled={pick === undefined} onClick={() => pick !== undefined && props.onMove(pick)} data-testid="move-confirm">
+            {pick === undefined ? C.pickFirst : pick === null ? C.moveToPending : C.moveTo(pick)}
+          </button>
+        </>
       }
     >
       <p class="hint">{current === null ? C.nowPending : C.nowIn(current, me?.rank ?? null)}</p>
@@ -428,7 +432,12 @@ function MoveSheet(props: { id: string; onClose: () => void; onMove: (to: string
               <span class="radio" aria-hidden="true" />
               <span class="mo-main">
                 <strong>{name ?? C.pending}</strong>
-                <span class="rb-note">{note(name)}</span>
+                {name !== null && <span class="rb-note">{`${cs(name).filled}／${cs(name).capacity}`}</span>}
+                {tags(name).map((t) => (
+                  <span key={t.text} class={`tag${t.kind ? ` ${t.kind}` : ''}`}>
+                    {t.text}
+                  </span>
+                ))}
               </span>
             </button>
           );
@@ -830,12 +839,19 @@ export default function CourseView() {
   const st = useApp();
   const s = st.session;
   const [editRules, setEditRules] = useState(false);
+  const [confirmRun, setConfirmRun] = useState(false);
   useEffect(() => {
     void loadCourse();
   }, [s?.surveyId]);
   if (!s) return null;
   const c = s.course;
   const showResult = c.result !== null && !editRules;
+  const manualN = (c.result ?? []).filter((a) => a.manual).length;
+  const run = () => {
+    updateCourse((cur) => runAllocation(s, cur));
+    setEditRules(false);
+    setConfirmRun(false);
+  };
   return (
     <main class="page course-page" id="main">
       <header class="prep-head">
@@ -848,11 +864,26 @@ export default function CourseView() {
         <Rules
           hasResult={c.result !== null}
           onBack={() => (c.result !== null ? setEditRules(false) : go('prepare'))}
-          onRun={() => {
-            updateCourse((cur) => runAllocation(s, cur));
-            setEditRules(false);
-          }}
+          onRun={() => (manualN > 0 ? setConfirmRun(true) : run())}
         />
+      )}
+      {confirmRun && (
+        <Sheet
+          title={C.rerunConfirmTitle}
+          onClose={() => setConfirmRun(false)}
+          footer={
+            <>
+              <button class="btn secondary" type="button" onClick={() => setConfirmRun(false)}>
+                {C.cancel}
+              </button>
+              <button class="btn danger grow" type="button" onClick={run} data-testid="rerun-yes">
+                {C.rerunConfirmYes}
+              </button>
+            </>
+          }
+        >
+          <p>{C.rerunConfirmBody(manualN)}</p>
+        </Sheet>
       )}
     </main>
   );

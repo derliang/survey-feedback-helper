@@ -207,7 +207,7 @@ test('教學頁與示範資料：六個區段，載入示範資料進準備資�
   // 不進最近的問卷、不要求存資料夾
   await expect(page.getByTestId('unsaved-dot')).toHaveCount(0);
   await page.getByRole('button', { name: '重新開始' }).click();
-  await page.getByRole('button', { name: '確定重新開始' }).click();
+  await page.getByRole('button', { name: '清除並重新開始' }).click();
   await expect(page.getByTestId('demo-tag')).toHaveCount(0);
   await expect(page.getByText('選好設定資料夾後，這裡會列出最近的問卷。')).toBeVisible();
 });

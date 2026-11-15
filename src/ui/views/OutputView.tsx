@@ -347,7 +347,7 @@ export function OutputView() {
         <p class="meta">{s.name}</p>
       </header>
 
-      {!summary && status}
+      {!summary && !vote && status}
 
       {summary && (
         <div class="out-cols">
@@ -448,7 +448,61 @@ export function OutputView() {
         </div>
       )}
 
-      {(qs || vote) && (
+      {vote && (
+        <div class="out-cols" data-testid="vote-output">
+          <div class="out-main">
+            <section class="card">
+              <h2>{S.output.voteContent}</h2>
+              <div class="table-wrap">
+                <table class="roster-table vote-sum">
+                  <thead>
+                    <tr>
+                      {S.output.voteCols.map((c) => (
+                        <th key={c}>{c}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {vote.positions.map((p) => {
+                      const top = p.tally.rows.filter((r) => p.election.elected.includes(r.name));
+                      return (
+                        <tr key={p.col.index}>
+                          <td>{p.col.label}</td>
+                          <td>
+                            <strong>{p.election.elected.join('、') || '—'}</strong>
+                          </td>
+                          <td>{top.map((r) => r.votes).join('、') || '—'}</td>
+                          <td>{p.election.draw ? <span class="tag warn">{S.output.voteTied}</span> : '—'}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <p class="hint">{S.output.voteFileNote}</p>
+            </section>
+          </div>
+          <aside class="out-side">
+            <section class="card out-dl" aria-busy={dis} aria-label={S.output.stepDownload}>
+              <h2>{S.output.voteDownload}</h2>
+              {status}
+              <div class="out-pers">
+                <button class="btn primary out-main-btn" type="button" disabled={dis} onClick={() => void report('docx')}>
+                  {lbl('report-docx', S.output.downloadWord)}
+                </button>
+                <button class="btn secondary" type="button" disabled={dis} onClick={() => void report('pdf')}>
+                  {lbl('report-pdf', S.output.pdf)}
+                </button>
+                <button class="btn secondary" type="button" disabled={dis} onClick={() => void report('xlsx')}>
+                  {lbl('report-xlsx', S.output.fmtShort.xlsx)}
+                </button>
+              </div>
+            </section>
+          </aside>
+        </div>
+      )}
+
+      {qs && (
         <section class="card">
           <h2>{S.output.report}</h2>
           <div class="btn-row">
@@ -469,6 +523,7 @@ export function OutputView() {
 
       {previewOpen && (
         <Sheet
+          wide
           title={S.output.previewTitle}
           onClose={() => setPreviewOpen(false)}
           footer={
