@@ -43,7 +43,7 @@ function FolderCard() {
       <div class="btn-row">
         {f.state !== 'unsupported' && (
           <button class="btn secondary" type="button" onClick={() => set({ folderDialog: true })}>
-            {S.folder.choose}
+            {f.state === 'ready' || f.state === 'needsPermission' ? S.folder.repick : S.folder.choose}
           </button>
         )}
         {f.state !== 'unsupported' && f.state !== 'none' && (
