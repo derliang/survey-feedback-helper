@@ -15,11 +15,16 @@ self.addEventListener('install', (event) => {
       const files = await res.json();
       const cache = await caches.open(APP_CACHE);
       await cache.addAll(files.map((f) => new Request(`${BASE}${f}`, { cache: 'reload' })));
-      await self.skipWaiting();
+      // 不自動 skipWaiting：開著的分頁還在用舊版程式，換版會刪掉舊快取，之後才載入的舊版區塊會失敗。
+      // 由頁面顯示「有新版本」，使用者選「現在更新」才傳 SKIP_WAITING（DESIGN 5.15、D53）。
     })().catch(() => {
       /* 清單抓不到（例如開發模式）就不快取，下次再試 */
     }),
   );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') void self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
