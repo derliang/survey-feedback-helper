@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { strings } from '../ui/strings';
+import { enMore } from '../ui/strings.en.more';
 import { QUICK_TEMPLATES } from './quick-templates';
 import { TEMPLATES_EN } from './quick-templates.en';
 
@@ -10,6 +12,11 @@ describe('快速範本預設說明不過度承諾', () => {
   it('不提目前沒有的圖表與班級比較', () => {
     for (const d of zh) expect(d).not.toMatch(/雷達|熱圖|堆疊橫條|不同班級/);
     for (const d of en) expect(d).not.toMatch(/radar|heat ?map|stacked|compare classes/i);
+  });
+
+  it('範本清單標籤只說「無姓名題」，不單獨標「匿名」', () => {
+    expect(strings.tpl.anonymous).toBe('無姓名題');
+    expect((enMore as unknown as { tpl: { anonymous: string } }).tpl.anonymous).toBe('No name question');
   });
 
   it('不單獨保證「匿名」：不放姓名題的說明要同時提醒匿名取決於表單設定', () => {
