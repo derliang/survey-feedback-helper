@@ -28,6 +28,8 @@ export interface PersonalFeedbackInput {
   chartPng?: Uint8Array;
   /** 圖的高度（寬固定 440）；沒給就用 190。題數多時圖較高，不能寫死（#144）。 */
   chartH?: number;
+  /** 依範本圖表區塊的設定（類型、參考線、顏色）預先畫好的圖，鍵由 editor 的 chartKey 決定；沒有對應的鍵就退回 chartPng。 */
+  charts?: Record<string, { png: Uint8Array; h: number }>;
   /** 標題、副標的範本，可含變數 {姓名}{座號}{班級}{事項}。 */
   titleTemplate?: string;
   /** 摘要數字列用的統計；沒有的欄位在輸出時略過。名次只在老師版顯示（compile 處理）。 */

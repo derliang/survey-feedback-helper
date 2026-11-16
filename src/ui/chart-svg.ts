@@ -7,6 +7,8 @@ export interface Palette {
   a: string;
   b: string;
   bg: string;
+  /** 空心點與分段間隙的填色；沒給就用 bg（透明底時用卡片色）。 */
+  hole?: string;
 }
 
 export const SCREEN: Palette = { ink: 'var(--ink)', muted: 'var(--ink3)', grid: 'var(--line-soft)', a: 'var(--d1)', b: 'var(--d2)', bg: 'transparent' };
@@ -19,6 +21,7 @@ const PRINT_VARS: Record<string, string> = {
   '--d1': PRINT.a,
   '--d2': PRINT.b,
   '--bar-muted': '#7f889b',
+  '--card': '#ffffff',
 };
 
 /** 把畫面用的圖表（CSS 變數、透明底）換成紙本淺色版：另存圖片時不隨深色模式變色（紙張永遠淺色）。 */
@@ -41,11 +44,11 @@ export function svgTitle(svg: string): string {
   return (m?.[1] ?? '圖表').replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
 }
 
-const esc = (s: string): string => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-const f1 = (n: number): string => (Number.isInteger(n) ? String(n) : n.toFixed(1));
+export const esc = (s: string): string => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+export const f1 = (n: number): string => (Number.isInteger(n) ? String(n) : n.toFixed(1));
 const FONT = `font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif"`;
 
-function wrapSvg(w: number, h: number, title: string, p: Palette, body: string): string {
+export function wrapSvg(w: number, h: number, title: string, p: Palette, body: string): string {
   const bg = p.bg === 'transparent' ? '' : `<rect width="${w}" height="${h}" style="fill:${p.bg}"/>`;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="${esc(title)}" ${FONT}>${bg}${body}</svg>`;
 }

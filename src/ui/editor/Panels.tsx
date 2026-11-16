@@ -5,7 +5,7 @@ import { describeCondition } from '../../editor/condition';
 import { listOverrides, withoutBlockPart } from '../../editor/overrides';
 import { wordNotes } from '../../editor/word';
 import type { Condition, EBlock, EBlockKind, EditorTemplate, ReportVersion } from '../../editor/types';
-import { STAT_KEYS, type StatKey } from '../../editor/types';
+import { STAT_KEYS, asChartKind, type StatKey } from '../../editor/types';
 import { addBlock, addImage, columnCount, currentOverrides, deleteBlock, dupBlock, moveSel, overrideBlock, overrideVar, patchBlock, patchPage, pickStudent } from './state';
 import { VAR_NAMES } from './Preview';
 
@@ -202,7 +202,8 @@ export function BlockProps(props: { t: EditorTemplate; b: EBlock; student: strin
       )}
       {b.kind === 'data' && b.dataKind === 'chart' && (
         <>
-          <Seg label={ed().chartType} value={(((ov?.patch?.chartType as string | undefined) ?? b.chartType) ?? 'bar')} opts={CHARTS()} onPick={(v) => setP({ chartType: v })} />
+          <Seg label={ed().chartType} value={asChartKind((ov?.patch?.chartType as string | undefined) ?? b.chartType)} opts={CHARTS()} onPick={(v) => setP({ chartType: v })} />
+          <p class="hint" data-testid="chart-hint">{ed().chartHint[asChartKind((ov?.patch?.chartType as string | undefined) ?? b.chartType)]}</p>
           <div class="field">
             <span class="label">{ed().color}</span>
             <div class="chips">
@@ -219,7 +220,11 @@ export function BlockProps(props: { t: EditorTemplate; b: EBlock; student: strin
               })}
             </div>
           </div>
-          <Toggle label={ed().compareLine} on={((ov?.patch?.compareLine as boolean | undefined) ?? b.compareLine) ?? false} onChange={(v) => setP({ compareLine: v })} />
+          {asChartKind((ov?.patch?.chartType as string | undefined) ?? b.chartType) === 'compare' ? (
+            <p class="hint" data-testid="compare-line-na">{ed().compareLineNa}</p>
+          ) : (
+            <Toggle label={ed().compareLine} on={((ov?.patch?.compareLine as boolean | undefined) ?? b.compareLine) ?? false} onChange={(v) => setP({ compareLine: v })} />
+          )}
         </>
       )}
       {b.kind === 'hero' && (

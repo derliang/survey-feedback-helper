@@ -1,6 +1,5 @@
 import type { ComponentType } from 'preact';
 import { useEffect, useMemo, useState } from 'preact/hooks';
-import { type TargetResult } from '../../core';
 import { feedbackRecords, opinionQuestions, runFeedback, runVote } from '../../app/analysis';
 import {
   AUDIENCE_NAMES,
@@ -21,9 +20,11 @@ import { downloadBytes, isTouchDevice } from '../../storage';
 import { allPeople, feedbackKey } from '../../app/output';
 import { docSignature, overrideTexts, teacherCommentHits } from '../../app/output-check';
 import { resolveSettings } from '../../editor/settings';
+import { applyOverrides } from '../../editor/overrides';
+import { walk } from '../../editor/ops';
+import { chartKey, type DataEB } from '../../editor/types';
 import { PreviewActions } from './ReviewParts';
 import { findPossibleNames, type PossibleName } from '../../core/possible-names';
-import { PRINT, pairedBarsHeight, pairedBarsSvg } from '../chart-svg';
 import { svgToPng } from '../chart-png';
 import { strings as S } from '../strings';
 import { ActBar, Icon, Notice, OptionGroup, Sheet } from '../parts/parts';
@@ -44,6 +45,15 @@ async function docTools() {
     personal: (inp: PersonalFeedbackInput, audience: Audience, plain = false): DocModel => {
       const ov = plain ? undefined : overrides[`${inp.className}-${inp.student.seat}`];
       return r.personalDocFromTemplate(picks.personal, inp, { version: audience, school, images: data.images, ...(ov ? { override: ov } : {}) });
+    },
+    /** 這位學生的範本裡有哪些圖表區塊（已套用個別版本），每種設定畫一張。 */
+    chartSpecs: (inp: PersonalFeedbackInput): DataEB[] => {
+      const t = applyOverrides(picks.personal, overrides[`${inp.className}-${inp.student.seat}`]);
+      const out: DataEB[] = [];
+      walk(t.blocks, (b) => {
+        if (b.kind === 'data' && b.dataKind === 'chart') out.push(b);
+      });
+      return out;
     },
     summary: (inp: ClassSummaryInput): DocModel => r.classDocFromTemplate(picks.summary, inp, { version: 'teacher', school, images: data.images }),
   };
@@ -231,26 +241,29 @@ export function OutputView() {
   }
 
   const base = s.name;
-  const charts = async (): Promise<Map<string, Uint8Array>> => {
-    const map = new Map<string, Uint8Array>();
-    if (!summary || audience === 'parent') return map;
-    const chartH = pairedBarsHeight(summary.items.length);
-    for (const t of summary.targets) {
-      try {
-        const svg = pairedBarsSvg(
-          summary.items.map((it, i) => ({ label: it.label, a: t.averageRow[i] ?? null, b: summary.classItemMeans[i] ?? null })),
-          { title: S.stats.itemsTitle, max: s.scale.max, aName: S.stats.mine, bName: S.stats.classAvg, w: 440, palette: PRINT },
-        );
-        map.set(t.key, await svgToPng(svg, 440, chartH));
-      } catch {
-        /* 畫不出圖就不放圖，其餘照常輸出 */
-      }
-    }
-    return map;
-  };
+  /** 個人回饋單：依範本圖表區塊的設定（類型、參考線、顏色）替每位學生畫圖，輸出與預覽用同一套畫法。 */
   const withCharts = async () => {
-    const map = await charts();
-    return personalInputs(s, summary!, review, audience, raters, (t: TargetResult) => map.get(t.key), pairedBarsHeight(summary!.items.length));
+    const list = personalInputs(s, summary!, review, audience, raters);
+    if (audience === 'parent') return list;
+    const tools = await docTools();
+    const { buildChart } = await import('../chart-types');
+    const { chartText, chartPalette } = await import('../chart-text');
+    const text = chartText();
+    for (const p of list) {
+      const out: NonNullable<PersonalFeedbackInput['charts']> = {};
+      for (const spec of tools.chartSpecs(p.input)) {
+        const key = chartKey(spec);
+        if (out[key]) continue;
+        try {
+          const r = buildChart(spec.chartType, spec.compareLine === true, p.chart, text, { w: 440, palette: chartPalette(spec.colors) });
+          out[key] = { png: await svgToPng(r.svg, r.w, r.h), h: r.h };
+        } catch {
+          /* 畫不出圖就不放圖，其餘照常輸出 */
+        }
+      }
+      p.input.charts = out;
+    }
+    return list;
   };
 
   const classTable = (fmt: Fmt) =>
