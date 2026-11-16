@@ -1,4 +1,24 @@
+import { expect, type Locator } from '@playwright/test';
 import { strToU8, zipSync } from 'fflate';
+
+/**
+ * 等元素可見且位置、大小穩定（連續兩次量測相同）後才回傳框；用於會滑入或淡入的對話框、面板。
+ * boundingBox() 只等元素存在，不等進場動畫（220ms）結束；機器忙時動畫幀被拉長，直接量會量到動畫中途。
+ */
+export async function settledBox(loc: Locator): Promise<{ x: number; y: number; width: number; height: number }> {
+  await expect(loc).toBeVisible();
+  let prev = '';
+  await expect
+    .poll(async () => {
+      const b = await loc.boundingBox();
+      const cur = b ? [b.x, b.y, b.width, b.height].map((n) => n.toFixed(1)).join(',') : '';
+      const stable = cur !== '' && cur === prev;
+      prev = cur;
+      return stable;
+    }, { intervals: [50, 100, 100, 200] })
+    .toBe(true);
+  return (await loc.boundingBox())!;
+}
 
 // 測試用虛構資料（姓名、書名、分數皆為捏造，不含任何真實學生資料；硬規則 5）。
 // xlsx 在測試時才產生，不把 xlsx／csv 放進 repo。

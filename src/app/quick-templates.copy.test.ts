@@ -17,6 +17,8 @@ describe('快速範本預設說明不過度承諾', () => {
   it('範本清單標籤只說「無姓名題」，不單獨標「匿名」', () => {
     expect(strings.tpl.anonymous).toBe('無姓名題');
     expect((enMore as unknown as { tpl: { anonymous: string } }).tpl.anonymous).toBe('No name question');
+    expect(strings.tpl.named).toBe('有姓名題');
+    expect((enMore as unknown as { tpl: { named: string } }).tpl.named).toBe('Has name question');
   });
 
   it('不單獨保證「匿名」：不放姓名題的說明要同時提醒匿名取決於表單設定', () => {

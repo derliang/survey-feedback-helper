@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { applyLang } from '../ui/locale';
+import { DEFAULT_PHRASES_EN } from './phrases.en';
 import { emptyFolderData, mergeFolderData, parseFolderData, serializeFolderData } from '../storage';
 import { DEFAULT_PHRASES, MAX_PER_CATEGORY, addCategory, addPhrase, autoTitle, fillName, insertAt, movePhrase, phraseLibrary, removePhrase, searchPhrases, toTemplate, updatePhrase } from './phrases';
 
@@ -62,5 +64,27 @@ describe('常用評語', () => {
     expect(parseFolderData(serializeFolderData(emptyFolderData())).phrases).toBeUndefined();
     const merged = mergeFolderData({ ...emptyFolderData(), phrases: lib }, { ...emptyFolderData(), phrases: [] });
     expect(merged.phrases).toEqual(lib);
+  });
+  it('英文內建評語：分類 id 與句數對應中文版，除了 {姓名} 沒有中文字', () => {
+    expect(DEFAULT_PHRASES_EN.map((c) => [c.id, c.phrases.length])).toEqual(DEFAULT_PHRASES.map((c) => [c.id, c.phrases.length]));
+    for (const c of DEFAULT_PHRASES_EN) {
+      expect(c.name).not.toMatch(/[一-鿿]/);
+      for (const p of c.phrases) {
+        expect(p.title).not.toMatch(/[一-鿿]/);
+        expect(p.text.replace(/\{姓名\}/g, '')).not.toMatch(/[一-鿿]/);
+      }
+    }
+  });
+  it('英文介面：沒自訂過就用英文內建評語，自訂過的不翻；換回中文即還原', async () => {
+    await applyLang('en');
+    try {
+      expect(phraseLibrary(undefined)[0]?.name).toBe('Praise effort and attitude');
+      expect(phraseLibrary([{ id: 'x', name: '我的自訂', phrases: [] }])[0]?.name).toBe('我的自訂');
+      expect(fillName('{姓名} did well', undefined)).toBe('this student did well');
+      expect(autoTitle('{姓名} prepared with great care today')).toBe('prepared with great');
+    } finally {
+      await applyLang('zh');
+    }
+    expect(phraseLibrary(undefined)[0]?.name).toBe('稱讚努力與態度');
   });
 });
