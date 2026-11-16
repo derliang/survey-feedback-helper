@@ -6,6 +6,7 @@ import { strings as S } from './strings';
 import { Notice } from './parts/parts';
 import { TopBar } from './parts/Chrome';
 import { lazyView } from './lazy-view';
+import { UpdateDialog } from './views/UpdateDialog';
 import { Home } from './views/Home';
 import { SheetPick } from './views/SheetPick';
 import { FolderDialog, RestartDialog, Settings } from './views/Misc';
@@ -71,6 +72,7 @@ export function App() {
       <FolderDialog />
       <CloudAlert />
       <RestartDialog />
+      <UpdateDialog />
       {st.toast && !st.cloudAlert && (
         <div class="toast" role="status" data-testid="toast">
           {st.toast}
