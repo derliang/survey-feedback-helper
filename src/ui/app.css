@@ -994,8 +994,11 @@ button.tile {
 }
 .toast {
   position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
+  /* Issue #179：left:50% 會把可用寬度砍半、手機被擠成窄條；改成左右置中、寬度跟內容 */
+  left: 0;
+  right: 0;
+  margin-inline: auto;
+  width: fit-content;
   bottom: calc(96px + env(safe-area-inset-bottom));
   z-index: 60;
   background: var(--ink);
@@ -1930,9 +1933,14 @@ details[open] > :not(summary) {
 }
 .toast-bad {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--sp-3);
   border-left: 4px solid var(--warn-bar);
+}
+.toast-bad > span {
+  flex: 1 1 12rem;
+  min-width: 0;
 }
 .toast-bad .btn,
 .toast-x {
@@ -3250,4 +3258,14 @@ ul.chips {
 .seg .count {
   margin-inline-start: var(--sp-1);
   font-size: var(--fs-sm);
+}
+
+/* 平板橫向 1024～1199（Issue #187）：左欄與審稿欄收窄，結果欄才夠放數字磚與表格 */
+@media (min-width: 1024px) and (max-width: 1199px) {
+  .stats .wb {
+    grid-template-columns: 170px minmax(0, 1fr) 280px;
+  }
+  .stats .wb.wb-noside {
+    grid-template-columns: 170px minmax(0, 1fr);
+  }
 }
