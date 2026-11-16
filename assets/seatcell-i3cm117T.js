@@ -1,0 +1,1 @@
+function e(e){let t=String(e??``).trim();return/^(0|[1-9]\d{0,8})$/.test(t)?Number(t):{v:t,s:`text`}}export{e as t};
