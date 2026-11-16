@@ -1,4 +1,4 @@
-import { downloadReview, downloadSettings, useApp } from '../../app/store';
+import { downloadReview, downloadSettings, reauthorize, set, useApp } from '../../app/store';
 import { isTouchDevice } from '../../storage';
 import { strings as S } from '../strings';
 import { TopBanner } from './parts';
@@ -13,15 +13,35 @@ export function SaveBanners() {
   const touch = isTouchDevice();
   const noFolder = st.folder.state !== 'ready';
   const onReviewPage = st.route === 'stats' || st.route === 'output';
+  const f = st.folder;
   return (
     <>
+      {f.state === 'needsPermission' && st.route !== 'home' && (
+        <TopBanner
+          id="reauth"
+          action={
+            <button class="btn secondary small" type="button" data-testid="banner-reauth-btn" onClick={() => void reauthorize()}>
+              {S.folder.reauthShort}
+            </button>
+          }
+        >
+          {S.folder.reauthBanner(f.name)}
+        </TopBanner>
+      )}
       {noFolder && st.dirty && (
         <TopBanner
           id="settings"
           action={
-            <button class="btn secondary small" type="button" onClick={() => void downloadSettings()}>
-              {touch ? S.folder.saveToFiles : S.folder.download}
-            </button>
+            <>
+              {f.state === 'none' && (
+                <button class="btn secondary small" type="button" data-testid="banner-pick-folder" onClick={() => set({ folderDialog: true })}>
+                  {S.folder.pickBtn}
+                </button>
+              )}
+              <button class="btn secondary small" type="button" onClick={() => void downloadSettings()}>
+                {touch ? S.folder.saveToFiles : S.folder.download}
+              </button>
+            </>
           }
         >
           {S.folder.dirtyTitle}

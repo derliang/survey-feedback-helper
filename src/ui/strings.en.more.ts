@@ -72,6 +72,9 @@ export const enMore: DeepPartial<Strings> = {
     reauthTitle: (name) => `Access to the folder "${name}" needs to be granted again`,
     reauthBody: 'This is normal browser behaviour. The settings and rosters in the folder are still there. Choose it once more and your recent surveys come back.',
     reauth: 'Choose and allow the folder again',
+    reauthBanner: (name) => `Access to the folder "${name}" was revoked, so settings are not saved automatically for now.`,
+    reauthShort: 'Grant access',
+    pickBtn: 'Choose folder',
     notNow: 'Not this time',
     unsupportedTitle: 'This browser does not support saving to a folder automatically',
     unsupportedBody: 'You can still use everything. The difference is that you download the settings file and rosters yourself and pick them again next time. For automatic saving, use desktop Chrome or Edge.',
@@ -586,6 +589,8 @@ export const enMore: DeepPartial<Strings> = {
     noSession: 'No survey is open yet. Once one is open, the settings it actually uses are listed here.',
   },
   settingsPage: {
+    forgetBody: 'This site will only stop remembering where the folder is; no file in it is deleted. Pick it again whenever you need it.',
+    statePermNote: 'The browser revoked access to the folder. Your settings and rosters are still there; grant access again to resume automatic saving.',
     forgetNote: 'Only the folder location remembered by this site is removed; no file in the folder is deleted.',
     browserTitle: 'Browser support',
     browserBody: 'Chrome, Edge, Safari and Firefox from the last two years, and iOS 16.4 or later. Automatic folder access is limited to desktop Chrome and Edge; other browsers use manual download and file picking.',

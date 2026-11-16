@@ -70,7 +70,12 @@ const enCore: DeepPartial<Strings> = {
     theme: 'Appearance',
     themes: { auto: 'Follow system', light: 'Light', dark: 'Dark' },
     folderTitle: 'Folder',
-    forget: 'Stop remembering this folder',
+    forget: 'Forget this folder',
+    forgetTitle: 'Forget this folder?',
+    forgetYes: 'Forget folder',
+    stateReady: 'Connected',
+    statePerm: 'Access revoked',
+    reauthBtn: 'Grant access again',
     language: 'Language',
     offlineTitle: 'Offline use',
     offlineBody:
