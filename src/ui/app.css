@@ -3387,3 +3387,15 @@ ul.chips {
   display: grid;
   gap: var(--sp-2);
 }
+
+/* 票選輸出表（Issue #176）：手機上備註欄不被切掉，職位與備註換行，不出現橫向捲動 */
+.vote-sum {
+  min-width: 0;
+}
+.vote-sum td:first-child,
+.vote-sum td:nth-child(4),
+.vote-sum th:first-child,
+.vote-sum th:nth-child(4) {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}

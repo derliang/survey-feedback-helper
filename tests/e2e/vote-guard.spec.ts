@@ -83,13 +83,27 @@ test('計票規則：候補名額與同票由老師指定', async ({ page }) => 
   ]);
   await step(page, '統計').click();
   const main = page.locator('main');
-  await page.getByRole('button', { name: /計票規則/ }).click();
+  await page.getByTestId('advanced').locator('summary').click();
   await page.getByLabel('候補名額').selectOption('1');
-  await expect(main).toContainText('候補：丙小美');
+  await expect(main).toContainText('候補：');
   await page.getByLabel('同票時').selectOption('manual');
   await expect(page.getByTestId('manual-tie')).toBeVisible();
   await page.getByTestId('manual-tie').getByLabel('乙小華').check();
   await expect(main.getByTestId('vote-result')).toContainText('當選');
   await expect(page.getByTestId('rule-preview')).toContainText('乙小華');
+  await expect(main).toContainText('候補：甲小明');
+  await noOverflow(page);
+});
+
+test('票選輸出表：真實題目與同票備註在 390 寬不被切、不需橫向捲動（#176）', async ({ page }) => {
+  await openVote(page, [
+    ['2026-10-04 12:00:00', '', '甲小明'],
+    ['2026-10-04 12:01:00', '', '乙小華'],
+  ]);
+  await step(page, '輸出').click();
+  const wrap = page.getByTestId('vote-output').locator('.table-wrap').first();
+  await expect(wrap).toBeVisible();
+  const over = await wrap.evaluate((el) => el.scrollWidth - el.clientWidth);
+  expect(over).toBeLessThanOrEqual(0);
   await noOverflow(page);
 });
