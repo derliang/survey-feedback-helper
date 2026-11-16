@@ -3,11 +3,13 @@ import { useEffect, useMemo, useState } from 'preact/hooks';
 import { type FeedbackSummary, type TargetResult, cellText, selfVsOthers } from '../../core';
 import {
   type Question,
+  type PositionResult,
   type VoteResult,
   newSeed,
   opinionQuestions,
   runFeedback,
   runVote,
+  voteGuardPending,
 } from '../../app/analysis';
 import { canGoStats } from '../../app/progress';
 import { detectScale, scaleSuspect, scoreSignature, suspectScoreColumns, withRole } from '../../app/columns';
@@ -25,6 +27,8 @@ import { ActBar, Icon, Notice, OptionGroup, useWide } from '../parts/parts';
 import { CommentList, Keywords } from './ReviewParts';
 import { TeacherComment } from './Phrases';
 import { extra } from '../strings-extra';
+import { vt } from '../strings-vote';
+import { VoteGuard } from './VoteGuard';
 
 const ui = () => extra().statsUi;
 
@@ -325,8 +329,11 @@ function VoteMain({ v, sel }: { v: VoteResult; sel: string; wide: boolean }) {
   const counts = { multi: 0, self: 0, time: 0, blank: 0 };
   for (const i of v.issues) counts[i.kind] += i.kind === 'multi' ? 1 : i.ballotIds.length;
   const any = counts.multi + counts.self + counts.time + counts.blank > 0;
+  const pendingGuard = voteGuardPending(v, st.stats);
+  const gated = pendingGuard.length > 0;
   const elected = new Set(p.election.elected);
   const tied = new Set(p.election.tied);
+  const alts = new Set(p.election.alternates);
   const tiedVotes = p.tally.rows.find((r) => tied.has(r.name))?.votes ?? 0;
   // 當選者固定在前（同票時當選者排在落選者前面），避免第一列是落選者
   const rows = [...p.tally.rows].sort((a, b) => Number(elected.has(b.name)) - Number(elected.has(a.name)) || b.votes - a.votes);
@@ -340,17 +347,14 @@ function VoteMain({ v, sel }: { v: VoteResult; sel: string; wide: boolean }) {
   );
   return (
     <>
-      {any && (
-        <section class="card issue-card" data-testid="vote-issues">
-          <h3>{S.stats.issuesTitle}</h3>
-          <ul class="plain-list">
-            {counts.multi > 0 && <li>{S.stats.issueMulti(counts.multi)}</li>}
-            {counts.self > 0 && <li>{S.stats.issueSelf(counts.self)}</li>}
-            {counts.time > 0 && <li>{S.stats.issueTime(counts.time)}</li>}
-            {counts.blank > 0 && <li>{S.stats.issueBlank(counts.blank)}</li>}
-          </ul>
+      {any && <VoteGuard v={v} />}
+      {gated ? (
+        <section class="card guard-gate" data-testid="vote-gate">
+          <Notice kind="warn" title={vt().guard.gateTitle(pendingGuard.length)}>
+            {vt().guard.gateBody}
+          </Notice>
         </section>
-      )}
+      ) : (
       <section class="card vote-result" data-testid="vote-result" aria-label={p.col.label}>
         <header class="vote-head">
           <h3>{p.col.label}</h3>
@@ -373,6 +377,7 @@ function VoteMain({ v, sel }: { v: VoteResult; sel: string; wide: boolean }) {
                   <span class="nm">
                     {r.name}
                     {isElected && <span class="tag accent">{S.stats.elected}</span>}
+                    {alts.has(r.name) && <span class="tag">{vt().rules.alternate}</span>}
                     {isTied && <span class="tag warn">{S.stats.tied}</span>}
                   </span>
                   <span class="v">{`${S.stats.votes(r.votes)} · ${pct(r.votes)}%`}</span>
@@ -384,6 +389,8 @@ function VoteMain({ v, sel }: { v: VoteResult; sel: string; wide: boolean }) {
             );
           })}
         </div>
+        {p.election.alternates.length > 0 && <p class="hint">{vt().rules.alternatesLine(p.election.alternates.join('、'))}</p>}
+        {p.election.tied.length > 0 && st.stats.voteRules.tie === 'manual' && <ManualTie p={p} />}
         {p.election.tied.length > 0 && p.election.draw && (
           <Notice
             kind="info"
@@ -399,6 +406,7 @@ function VoteMain({ v, sel }: { v: VoteResult; sel: string; wide: boolean }) {
             {S.stats.drawnNote}
           </Notice>
         )}
+        {p.multiPick > 0 && <p class="hint">{vt().rules.multiPick(p.multiPick)}</p>}
         {p.tally.invalid > 0 && <p class="hint">{S.stats.invalidVotes(p.tally.invalid)}</p>}
         {p.tally.abstain > 0 && <p class="hint">{S.stats.abstain(p.tally.abstain)}</p>}
         {v.inclusion.rowOrderBallots.length > 0 && (
@@ -409,6 +417,7 @@ function VoteMain({ v, sel }: { v: VoteResult; sel: string; wide: boolean }) {
         )}
         <ImageSave svg={imgSvg} />
       </section>
+      )}
       {!any && (
         <p class="ok-line" data-testid="vote-no-issue">
           <Icon name="check" />
@@ -419,16 +428,40 @@ function VoteMain({ v, sel }: { v: VoteResult; sel: string; wide: boolean }) {
   );
 }
 
-function VoteRulesCard() {
+function ManualTie({ p }: { p: PositionResult }) {
   const st = useApp();
+  const R = vt().rules;
+  const chosen = st.stats.tieManual[p.col.index] ?? [];
+  const slots = p.seats - p.election.certain.length;
+  const toggle = (name: string, on: boolean) => {
+    const next = on ? [...chosen.filter((n) => n !== name), name] : chosen.filter((n) => n !== name);
+    setStats({ tieManual: { ...st.stats.tieManual, [p.col.index]: next } });
+  };
+  return (
+    <div class="manual-pick" data-testid="manual-tie">
+      <strong>{R.manualTitle(Math.max(0, slots - chosen.length))}</strong>
+      {p.election.tied.map((n) => (
+        <label key={n} class="guard-toggle">
+          <input type="checkbox" checked={chosen.includes(n)} disabled={!chosen.includes(n) && chosen.length >= slots} onChange={(e) => toggle(n, (e.target as HTMLInputElement).checked)} />
+          {n}
+        </label>
+      ))}
+      {p.election.pendingManual && <p class="hint">{R.manualPending}</p>}
+    </div>
+  );
+}
+
+function VoteRulesCard({ v }: { v: VoteResult }) {
+  const st = useApp();
+  const R = vt().rules;
   const r = st.stats.voteRules;
-  const set1 = <K extends keyof typeof r>(k: K, v: (typeof r)[K]) => setStats({ voteRules: { ...r, [k]: v } });
+  const set1 = <K extends keyof typeof r>(k: K, val: (typeof r)[K]) => setStats({ voteRules: { ...r, [k]: val } });
   const sel = <K extends keyof typeof r>(label: string, k: K, opts: Record<string, string>) => (
     <label class="field">
       <span class="label">{label}</span>
       <select class="input" value={r[k] as string} onChange={(e) => set1(k, (e.target as HTMLSelectElement).value as (typeof r)[K])}>
-        {Object.entries(opts).map(([v, n]) => (
-          <option key={v} value={v}>
+        {Object.entries(opts).map(([val, n]) => (
+          <option key={val} value={val}>
             {n}
           </option>
         ))}
@@ -438,9 +471,50 @@ function VoteRulesCard() {
   return (
     <section class="card">
       <h3>{S.stats.rules}</h3>
+      <label class="guard-toggle">
+        <input type="checkbox" checked={r.oneVote} onChange={(e) => set1('oneVote', (e.target as HTMLInputElement).checked)} />
+        <span>
+          {R.oneVote}
+          <span class="hint"> {R.oneVoteHelp}</span>
+        </span>
+      </label>
       {sel(S.stats.ruleMulti, 'multi', S.stats.ruleMultiOpts)}
       {sel(S.stats.ruleSelf, 'self', S.stats.ruleSelfOpts)}
       {sel(S.stats.ruleTime, 'time', S.stats.ruleTimeOpts)}
+      <label class="field">
+        <span class="label">{R.alternates}</span>
+        <select class="input" value={String(r.alternates)} onChange={(e) => set1('alternates', Number((e.target as HTMLSelectElement).value))}>
+          {[0, 1, 2].map((n) => (
+            <option key={n} value={String(n)}>
+              {R.alternatesOpt(n)}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label class="field">
+        <span class="label">{R.tie}</span>
+        <select class="input" value={r.tie} onChange={(e) => set1('tie', (e.target as HTMLSelectElement).value as 'draw' | 'manual')}>
+          {(['draw', 'manual'] as const).map((k) => (
+            <option key={k} value={k}>
+              {`${R.tieOpts[k]}（${R.tieHelp[k]}）`}
+            </option>
+          ))}
+        </select>
+      </label>
+      <div class="rule-preview" data-testid="rule-preview" aria-live="polite">
+        <strong>{R.preview}</strong>
+        <span class="hint">{R.previewHelp}</span>
+        {voteGuardPending(v, st.stats).length > 0 ? null : (
+          <ul class="plain-list">
+            {v.positions.map((p) => (
+              <li key={p.col.index}>
+                {p.col.label}：{R.previewElected} {p.election.elected.join('、') || R.none}
+                {p.election.alternates.length > 0 && `；${R.previewAlt} ${p.election.alternates.join('、')}`}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </section>
   );
 }
@@ -612,7 +686,7 @@ export function StatsView() {
     commentItems = qs.flatMap((q) => (q.kind === 'comment' ? q.stat.answers.map((a) => ({ key: openKey(q.col.index, a.row), text: a.text })) : []));
   } else if (vote) {
     listTitle = S.stats.listTitle.vote;
-    entries = vote.positions.map((p) => ({ key: String(p.col.index), name: p.col.label, note: p.election.elected.join('、') }));
+    entries = vote.positions.map((p) => ({ key: String(p.col.index), name: p.col.label, note: voteGuardPending(vote, st.stats).length > 0 ? '' : p.election.elected.join('、') }));
     if (!entries.some((e) => e.key === sel)) sel = entries[0]?.key ?? '';
   }
   const counts = st.review ? reviewCounts(st.review, commentItems) : null;
@@ -686,7 +760,7 @@ export function StatsView() {
       {hasAdvanced && (
         <Advanced summary={advSummary}>
           {fb && <FeedbackSettings summary={fb} />}
-          {vote && <VoteRulesCard />}
+          {vote && <VoteRulesCard v={vote} />}
           {hasComments && <Keywords />}
         </Advanced>
       )}

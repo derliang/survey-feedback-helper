@@ -106,9 +106,22 @@ export interface VoteRules {
   self: 'count' | 'excludePick' | 'excludeBallot';
   /** 時間異常：保留／不算。 */
   time: 'keep' | 'exclude';
+  /** 每人每職位限投一票：同一職位填了多個人的，該職位視為無效（D49）。 */
+  oneVote: boolean;
+  /** 候補名額（0～2）：當選者之後依票數排的人。 */
+  alternates: number;
+  /** 名額邊界同票：抽籤（記錄種子，可重現）或由老師手動指定。 */
+  tie: 'draw' | 'manual';
 }
 
-export const DEFAULT_VOTE_RULES: VoteRules = { multi: 'last', self: 'count', time: 'keep' };
+export const DEFAULT_VOTE_RULES: VoteRules = { multi: 'last', self: 'count', time: 'keep', oneVote: true, alternates: 0, tie: 'draw' };
+
+/** 各類可疑票的件數（同人多票以「人」計，其餘以「票」計）；防弊檢查四項的件數來源。 */
+export function countVoteIssues(issues: readonly VoteIssue[]): Record<VoteIssueKind, number> {
+  const c: Record<VoteIssueKind, number> = { multi: 0, self: 0, time: 0, blank: 0 };
+  for (const i of issues) c[i.kind] += i.kind === 'multi' ? 1 : i.ballotIds.length;
+  return c;
+}
 
 export interface BallotDecision {
   ballotId: string | number;
@@ -273,35 +286,54 @@ export interface Election {
   /** 名額邊界同票的所有人（含中籤與落選）；無同票時為 []。 */
   tied: string[];
   draw: DrawRecord | null;
+  /** 候補（依票數排在當選者之後，最多 alternates 人）。 */
+  alternates: string[];
+  /** 同票改由老師指定、但還沒指定夠：當選名單暫不含同票者。 */
+  pendingManual: boolean;
+}
+
+export interface ElectOptions {
+  alternates?: number;
+  /** 'manual' 時不抽籤；manual 為老師指定的當選者（同票者之中）。 */
+  tie?: 'draw' | 'manual';
+  manual?: readonly string[];
 }
 
 /**
  * 依名額決定當選者；名額邊界同票時以種子抽籤（同一種子、同一組同票者永遠同一結果）。
  * 0 票者不當選（名額多於有票者時空缺不補）。
  */
-export function elect(tally: PositionTally, seats: number, seed: string): Election {
+export function elect(tally: PositionTally, seats: number, seed: string, opts: ElectOptions = {}): Election {
   const rows = tally.rows.filter((r) => r.votes > 0);
-  if (seats <= 0 || rows.length === 0) return { seats, certain: [], elected: [], tied: [], draw: null };
+  const nAlt = Math.max(0, opts.alternates ?? 0);
+  const withAlt = (e: Omit<Election, 'alternates' | 'pendingManual'>, pendingManual = false): Election => {
+    const out = new Set(e.elected);
+    const alt = rows.map((r) => r.name).filter((n) => !out.has(n)).slice(0, nAlt);
+    return { ...e, alternates: alt, pendingManual };
+  };
+  if (seats <= 0 || rows.length === 0) return withAlt({ seats, certain: [], elected: [], tied: [], draw: null });
   if (rows.length <= seats) {
     const all = rows.map((r) => r.name);
-    return { seats, certain: all, elected: all, tied: [], draw: null };
+    return withAlt({ seats, certain: all, elected: all, tied: [], draw: null });
   }
   const cutVotes = (rows[seats - 1] as TallyRow).votes;
   const nextVotes = (rows[seats] as TallyRow).votes;
   if (cutVotes !== nextVotes) {
     const win = rows.slice(0, seats).map((r) => r.name);
-    return { seats, certain: win, elected: win, tied: [], draw: null };
+    return withAlt({ seats, certain: win, elected: win, tied: [], draw: null });
   }
   const certain = rows.filter((r) => r.votes > cutVotes).map((r) => r.name);
   const tiedRows = rows.filter((r) => r.votes === cutVotes);
   const base = tiedRows.map((r) => r.name).sort((a, b) => a.localeCompare(b, 'zh-Hant', { numeric: true }));
-  const order = seededShuffle(base, seed);
   const slots = seats - certain.length;
-  return {
-    seats,
-    certain,
-    elected: [...certain, ...order.slice(0, slots)],
-    tied: base,
-    draw: { seed, order, basis: `${cutVotes}|${base.join(',')}` },
-  };
+  if (opts.tie === 'manual') {
+    const picked = (opts.manual ?? []).filter((n) => base.includes(n)).slice(0, slots);
+    return withAlt({ seats, certain, elected: [...certain, ...picked], tied: base, draw: null }, picked.length < slots);
+  }
+  const order = seededShuffle(base, seed);
+  const draw: DrawRecord = { seed, order, basis: `${cutVotes}|${base.join(',')}` };
+  const elected = [...certain, ...order.slice(0, slots)];
+  // 候補：落選的同票者依抽籤順序先補，再接票數較低者
+  const alt = [...order.slice(slots), ...rows.filter((r) => r.votes < cutVotes).map((r) => r.name)].slice(0, nAlt);
+  return { seats, certain, elected, tied: base, draw, alternates: alt, pendingManual: false };
 }

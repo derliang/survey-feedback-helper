@@ -12,10 +12,12 @@ import {
   type LikertSummary,
   type PositionTally,
   type VoteIssue,
+  type VoteIssueKind,
   type VoteRules,
   DEFAULT_VOTE_RULES,
   type PersonRef,
   cellText,
+  countVoteIssues,
   decideInclusion,
   normalizeSeat,
   personKey,
@@ -46,10 +48,16 @@ export interface StatsOpts {
   seats: Record<number, number>;
   /** 抽籤種子：同一種子永遠同一結果，要記錄。 */
   seed: string;
+  /** 票選防弊：老師已「確認這樣處理」的類別（全部決定後才看得到正式結果）。 */
+  guardDone: VoteIssueKind[];
+  /** 票選防弊逐張覆寫：票的資料列 → 是否計入（與整類規則不同的才記）。 */
+  ballotOverrides: Record<number, boolean>;
+  /** 同票改由老師指定時：職位欄位 index → 指定的當選者。 */
+  tieManual: Record<number, string[]>;
 }
 
 export function defaultStatsOpts(): StatsOpts {
-  return { trim: 0, reversed: [], multi: {}, voteRules: { ...DEFAULT_VOTE_RULES }, seats: {}, seed: newSeed() };
+  return { trim: 0, reversed: [], multi: {}, voteRules: { ...DEFAULT_VOTE_RULES }, seats: {}, seed: newSeed(), guardDone: [], ballotOverrides: {}, tieManual: {} };
 }
 
 export function newSeed(): string {
@@ -189,6 +197,8 @@ export interface PositionResult {
   tally: PositionTally;
   seats: number;
   election: Election;
+  /** 限投一票：這個職位因為填了多人而視為無效的票數。 */
+  multiPick: number;
 }
 
 export interface VoteResult {
@@ -215,15 +225,40 @@ export function voteBallots(s: Session): Ballot[] {
   }));
 }
 
-export function runVote(s: Session, o: StatsOpts, overrides: ReadonlyMap<string | number, boolean> = new Map()): VoteResult {
-  const ballots = voteBallots(s);
+export function runVote(s: Session, o: StatsOpts, overrides: ReadonlyMap<string | number, boolean> | null = null): VoteResult {
+  const raw = voteBallots(s);
+  const choiceCols = colsOf(s, 'choice');
+  // 每人每職位限投一票：同一職位填了多個人，該職位視為沒投（並計入該職位的「無效」件數）
+  const multiPicks = new Map<string, number>();
+  const ballots = o.voteRules.oneVote
+    ? raw.map((b) => {
+        const picks = { ...b.picks };
+        for (const [k, v] of Object.entries(picks)) {
+          if (v !== null && splitMulti(v).selected.length > 1) {
+            picks[k] = null;
+            multiPicks.set(k, (multiPicks.get(k) ?? 0) + 1);
+          }
+        }
+        return { ...b, picks };
+      })
+    : raw;
   const issues = detectVoteIssues(ballots);
-  const inclusion = decideInclusion(ballots, issues, o.voteRules, overrides);
+  const ov = overrides ?? new Map(Object.entries(o.ballotOverrides).map(([k, v]) => [Number(k), v] as const));
+  const inclusion = decideInclusion(ballots, issues, o.voteRules, ov);
   const names = rosterStudents(s).map((st) => st.name);
-  const positions = colsOf(s, 'choice').map((col): PositionResult => {
+  const positions = choiceCols.map((col): PositionResult => {
     const tally = tallyPosition(ballots, inclusion, String(col.index), names.length > 0 ? names : undefined);
     const seats = Math.max(1, o.seats[col.index] ?? 1);
-    return { col, tally, seats, election: elect(tally, seats, `${o.seed}|${col.index}`) };
+    const election = elect(tally, seats, `${o.seed}|${col.index}`, { alternates: o.voteRules.alternates, tie: o.voteRules.tie, manual: o.tieManual[col.index] ?? [] });
+    return { col, tally, seats, election, multiPick: multiPicks.get(String(col.index)) ?? 0 };
   });
   return { ballots, issues, inclusion, positions };
+}
+
+export const VOTE_GUARD_KINDS: readonly VoteIssueKind[] = ['multi', 'self', 'time', 'blank'];
+
+/** 防弊四項中，有可疑票但老師還沒決定的類別；有的話正式結果不顯示（Issue #175）。 */
+export function voteGuardPending(v: VoteResult, o: StatsOpts): VoteIssueKind[] {
+  const c = countVoteIssues(v.issues);
+  return VOTE_GUARD_KINDS.filter((k) => c[k] > 0 && !o.guardDone.includes(k));
 }
