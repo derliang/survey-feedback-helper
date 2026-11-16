@@ -23,7 +23,7 @@ import { docSignature, overrideTexts, teacherCommentHits } from '../../app/outpu
 import { resolveSettings } from '../../editor/settings';
 import { PreviewActions } from './ReviewParts';
 import { findPossibleNames, type PossibleName } from '../../core/possible-names';
-import { PRINT, pairedBarsSvg } from '../chart-svg';
+import { PRINT, pairedBarsHeight, pairedBarsSvg } from '../chart-svg';
 import { svgToPng } from '../chart-png';
 import { strings as S } from '../strings';
 import { ActBar, Icon, Notice, OptionGroup, Sheet } from '../parts/parts';
@@ -145,6 +145,11 @@ export function OutputView() {
     void registerAssetCache();
     void loadReview();
   }, [ok]);
+  useEffect(() => {
+    if (msg?.kind !== 'ok') return;
+    const t = setTimeout(() => setMsg(null), 8000);
+    return () => clearTimeout(t);
+  }, [msg]);
 
   const review = st.review ?? emptyReview(s?.surveyId ?? '');
   const summary = useMemo(() => (ok && s.kind === 'feedback' ? runFeedback(s, st.stats) : null), [ok, s, st.stats]);
@@ -229,13 +234,14 @@ export function OutputView() {
   const charts = async (): Promise<Map<string, Uint8Array>> => {
     const map = new Map<string, Uint8Array>();
     if (!summary || audience === 'parent') return map;
+    const chartH = pairedBarsHeight(summary.items.length);
     for (const t of summary.targets) {
       try {
         const svg = pairedBarsSvg(
           summary.items.map((it, i) => ({ label: it.label, a: t.averageRow[i] ?? null, b: summary.classItemMeans[i] ?? null })),
-          { title: S.stats.itemsTitle, max: s.scale.max, aName: S.stats.mine, bName: S.stats.classAvg, w: 440, h: 190, palette: PRINT },
+          { title: S.stats.itemsTitle, max: s.scale.max, aName: S.stats.mine, bName: S.stats.classAvg, w: 440, palette: PRINT },
         );
-        map.set(t.key, await svgToPng(svg, 440, 190));
+        map.set(t.key, await svgToPng(svg, 440, chartH));
       } catch {
         /* 畫不出圖就不放圖，其餘照常輸出 */
       }
@@ -244,7 +250,7 @@ export function OutputView() {
   };
   const withCharts = async () => {
     const map = await charts();
-    return personalInputs(s, summary!, review, audience, raters, (t: TargetResult) => map.get(t.key));
+    return personalInputs(s, summary!, review, audience, raters, (t: TargetResult) => map.get(t.key), pairedBarsHeight(summary!.items.length));
   };
 
   const classTable = (fmt: Fmt) =>
@@ -328,16 +334,18 @@ export function OutputView() {
   const dis = busy !== null;
   /** 正在跑的那顆按鈕立刻改字（不等狀態提示的延遲），其他按鈕維持原字且停用。 */
   const lbl = (key: string, text: string) => (busy === key ? (key === 'batch' && prog ? prog : S.output.working) : text);
-  const status = (
-    <>
-      {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
-      {busy && (
-        <Notice kind="info" role="status">
-          {prog ?? S.output.working}
-        </Notice>
-      )}
-    </>
-  );
+  /** 下載成功／失敗與進行中的提示：浮在畫面下方，不推擠版面，連點按鈕不會點空（#146）。 */
+  const status =
+    msg || busy ? (
+      <div class="out-status" data-testid="out-status">
+        {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
+        {busy && (
+          <Notice kind="info" role="status">
+            {prog ?? S.output.working}
+          </Notice>
+        )}
+      </div>
+    ) : null;
   const personalDis = dis || !previewed || personal.length === 0;
 
   return (

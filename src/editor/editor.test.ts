@@ -213,7 +213,7 @@ describe('編譯成輸出文件', () => {
     );
     expect(heads(withAll)).toContain('老師的話');
     expect(withAll.blocks.find((b) => b.type === 'bullets')).toMatchObject({ items: ['很棒 王小明'] });
-    expect(withAll.footerText).toBe(' 301 王小明');
+    expect(withAll.footerText).toBe('301 王小明');
   });
   it('版本條件、覆寫、分頁與分隔線、多欄並排', () => {
     let t: EditorTemplate = { ...personal(), blocks: [] };
