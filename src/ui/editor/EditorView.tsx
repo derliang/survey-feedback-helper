@@ -409,15 +409,19 @@ function Edit({ e }: { e: ES }) {
         <span class="lbl">{ed().libShort}</span>
       </button>
       <input class="input ed-name" aria-label={ed().tplName} value={t0.name} disabled={t0.builtin} onInput={(ev) => renameTemplate((ev.currentTarget as HTMLInputElement).value)} />
-      <button type="button" class="btn secondary small" disabled={!canUndo(e.hist!)} onClick={doUndo}>
-        {ed().undo}
+      <button type="button" class="btn secondary small ed-ic" aria-label={ed().undo} disabled={!canUndo(e.hist!)} onClick={doUndo}>
+        <span class="ed-ic-g" aria-hidden="true">↶</span>
+        <span class="ed-ic-t">{ed().undo}</span>
       </button>
-      <button type="button" class="btn secondary small" disabled={!canRedo(e.hist!)} onClick={doRedo}>
-        {ed().redo}
+      <button type="button" class="btn secondary small ed-ic" aria-label={ed().redo} disabled={!canRedo(e.hist!)} onClick={doRedo}>
+        <span class="ed-ic-g" aria-hidden="true">↷</span>
+        <span class="ed-ic-t">{ed().redo}</span>
       </button>
-      <button type="button" class="btn secondary small" disabled={trial.busy} onClick={doTrial}>
-        {ed().trialPdf}
-      </button>
+      {wide && (
+        <button type="button" class="btn secondary small" disabled={trial.busy} onClick={doTrial}>
+          {ed().trialPdf}
+        </button>
+      )}
       <span class="sr" role="status" data-testid="trial-msg">
         {trial.msg}
       </span>
@@ -447,6 +451,11 @@ function Edit({ e }: { e: ES }) {
       )}
       {e.panel === 'page' && (
         <Sheet title={ed().pageSetup} onClose={() => setPanel(null)} footer={<button type="button" class="btn grow" onClick={() => setPanel(null)}>{ed().done}</button>}>
+          {!wide && (
+            <button type="button" class="btn secondary" disabled={trial.busy} onClick={doTrial}>
+              {ed().trialPdf}
+            </button>
+          )}
           <PagePanel t={t0} images={images} />
         </Sheet>
       )}
@@ -530,7 +539,7 @@ function Edit({ e }: { e: ES }) {
       {e.view === 'preview' ? (
         <>
           <Zoom e={e} pages={pageCount(t0)} />
-          <p class="hint">{e.editMode ? ed().editHint : ed().scrollHint}</p>
+          {e.editMode && <p class="hint">{ed().editHint}</p>}
           {pages}
         </>
       ) : (
@@ -540,7 +549,7 @@ function Edit({ e }: { e: ES }) {
         </>
       )}
       <div class="actbar ed-act">
-        <div class="ed-sel">{selBlock ? ed().selected(blockName(selBlock)) : ed().noSel}</div>
+        {e.editMode && <div class="ed-sel">{selBlock ? ed().selected(blockName(selBlock)) : ed().noSel}</div>}
         <button type="button" class="btn secondary" onClick={() => setPanel('page')}>
           {ed().page}
         </button>
