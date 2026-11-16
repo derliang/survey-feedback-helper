@@ -2,10 +2,10 @@
 // 分「常用」（資料夾、預設輸出）與「進階與資訊」（備份與還原、外觀與語言、說明與隱私）。
 // 手機（<600）頂端分段控制二選一；平板、桌機（≥600）左側導覽四項。內容最寬 720，底部固定操作列。
 import { useEffect, useState } from 'preact/hooks';
-import { downloadSettings, forgetThisFolder, go, set, updatePrefs, useApp } from '../../app/store';
+import { downloadSettings, forgetThisFolder, go, reauthorize, set, updatePrefs, useApp } from '../../app/store';
 import { type Lang, type Theme, isTouchDevice } from '../../storage';
 import { strings as S } from '../strings';
-import { ActBar } from '../parts/parts';
+import { ActBar, Sheet } from '../parts/parts';
 import { LazySteps } from '../parts/LazyDiagram';
 import { rich } from '../parts/rich';
 import { CloudCard } from './CloudBackup';
@@ -33,21 +33,38 @@ function FolderCard() {
   const st = useApp();
   const f = st.folder;
   const touch = isTouchDevice();
+  const [confirmForget, setConfirmForget] = useState(false);
   return (
     <section class="card" data-testid="folder-card">
       <h2>{S.settingsPage.folderTitle}</h2>
       <p>
         {S.folder.label}
         <strong>{f.state === 'ready' ? f.store.name : f.state === 'needsPermission' ? f.name : S.folder.none}</strong>
+        {f.state === 'ready' && (
+          <span class="tag ok" style={{ marginLeft: 8 }} data-testid="folder-state">
+            {S.settingsPage.stateReady}
+          </span>
+        )}
+        {f.state === 'needsPermission' && (
+          <span class="tag warn" style={{ marginLeft: 8 }} data-testid="folder-state">
+            {S.settingsPage.statePerm}
+          </span>
+        )}
       </p>
+      {f.state === 'needsPermission' && <p class="hint">{S.settingsPage.statePermNote}</p>}
       <div class="btn-row">
+        {f.state === 'needsPermission' && (
+          <button class="btn primary" type="button" data-testid="folder-reauth" onClick={() => void reauthorize()}>
+            {S.settingsPage.reauthBtn}
+          </button>
+        )}
         {f.state !== 'unsupported' && (
           <button class="btn secondary" type="button" onClick={() => set({ folderDialog: true })}>
             {f.state === 'ready' || f.state === 'needsPermission' ? S.folder.repick : S.folder.choose}
           </button>
         )}
         {f.state !== 'unsupported' && f.state !== 'none' && (
-          <button class="btn danger" type="button" onClick={() => void forgetThisFolder()}>
+          <button class="btn danger" type="button" data-testid="folder-forget" onClick={() => setConfirmForget(true)}>
             {S.settingsPage.forget}
           </button>
         )}
@@ -58,6 +75,33 @@ function FolderCard() {
         )}
       </div>
       {f.state !== 'unsupported' && f.state !== 'none' && <p class="hint">{S.settingsPage.forgetNote}</p>}
+      {confirmForget && (
+        <Sheet
+          confirm
+          title={S.settingsPage.forgetTitle}
+          onClose={() => setConfirmForget(false)}
+          footer={
+            <>
+              <button class="btn secondary" type="button" onClick={() => setConfirmForget(false)}>
+                {S.cancel}
+              </button>
+              <button
+                class="btn danger"
+                type="button"
+                data-testid="forget-yes"
+                onClick={() => {
+                  setConfirmForget(false);
+                  void forgetThisFolder();
+                }}
+              >
+                {S.settingsPage.forgetYes}
+              </button>
+            </>
+          }
+        >
+          <p>{S.settingsPage.forgetBody}</p>
+        </Sheet>
+      )}
       {f.state === 'unsupported' && (
         <>
           <p class="hint">{S.folder.unsupportedBody}</p>
