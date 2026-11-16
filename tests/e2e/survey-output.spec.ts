@@ -179,3 +179,21 @@ test('票選同票：說明句通順、不露抽籤編號，當選者排在同�
   await expect(main).not.toContainText('。：');
   await expect(main).not.toContainText('抽籤-');
 });
+
+test('票選：同人多票且時間無法判讀時，統計頁提示「依資料列順序判定」（#126）', async ({ page }) => {
+  const head = ['時間戳記', '你的名字', '你推薦誰當班長？'];
+  const rows = [
+    ['2026-10-04 12:00:00', '王大明', '甲小明'],
+    ['（空）', '王大明', '乙小華'],
+    ['2026-10-04 12:02:00', '林雅婷', '甲小明'],
+  ];
+  await page.goto('./');
+  await page.getByTestId('file-input').setInputFiles(xlsx('列序 (回覆).xlsx', head, rows));
+  await rail(page, '問卷類型').click();
+  await page.getByRole('radio', { name: /票選幹部/ }).click();
+  await page.getByRole('button', { name: '確認，下一步：欄位對應' }).click();
+  await page.getByRole('button', { name: '完成對應，下一步' }).click();
+  await step(page, '統計').click();
+  await expect(page.getByTestId('row-order-hint')).toContainText('依資料列順序判定');
+  await noOverflow(page);
+});
