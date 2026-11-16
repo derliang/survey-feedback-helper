@@ -5,7 +5,7 @@ import type { StudentOverride } from '../editor/overrides';
 import { walk } from '../editor/ops';
 import type { EditorTemplate, ReportVersion } from '../editor/types';
 import * as advanced from '../export/advanced';
-import { contentWidth, type Block, type DocModel } from '../export/model';
+import { cleanTopic, contentWidth, tidyFilled, type Block, type DocModel } from '../export/model';
 import type { ClassSummaryInput, PersonalFeedbackInput } from '../export';
 
 const fmt1 = (n: number | null | undefined): string => (n === null || n === undefined || !Number.isFinite(n) ? '—' : n.toFixed(1));
@@ -108,7 +108,7 @@ export function personalDocFromTemplate(t: EditorTemplate, inp: PersonalFeedback
     姓名: inp.student.name,
     座號: inp.student.seat,
     班級: inp.className,
-    事項: inp.topic,
+    事項: cleanTopic(inp.topic),
     學校: ctx.school ?? inp.school ?? '',
     平均分: fmt1(inp.average.mine),
     班級平均: fmt1(inp.average.classMean),
@@ -130,7 +130,7 @@ export function personalDocFromTemplate(t: EditorTemplate, inp: PersonalFeedback
       case SLOTS.chart: {
         if (!inp.chartPng) return [];
         const w = Math.min(440, width);
-        return [{ type: 'image', png: inp.chartPng, w, h: (190 * w) / 440 }];
+        return [{ type: 'image', png: inp.chartPng, w, h: ((inp.chartH ?? 190) * w) / 440 }];
       }
       case SLOTS.praise:
         return inp.praise.length ? [{ type: 'bullets', items: inp.praise, size }] : [];
@@ -144,7 +144,7 @@ export function personalDocFromTemplate(t: EditorTemplate, inp: PersonalFeedback
         return [];
     }
   };
-  const title = `${inp.student.name} 的${inp.topic}回饋單`;
+  const title = tidyFilled(`${inp.student.name} 的${cleanTopic(inp.topic)}回饋單`);
   return finish(
     compile(t, {
       version: ctx.version,
@@ -160,14 +160,14 @@ export function personalDocFromTemplate(t: EditorTemplate, inp: PersonalFeedback
 /** 班級總表。 */
 export function classDocFromTemplate(t: EditorTemplate, inp: ClassSummaryInput, ctx: CommonCtx): DocModel {
   const width = contentWidth(pageSetup(t.page));
-  const vars = { 班級: inp.className, 事項: inp.topic, 學校: ctx.school ?? inp.school ?? '' };
+  const vars = { 班級: inp.className, 事項: cleanTopic(inp.topic), 學校: ctx.school ?? inp.school ?? '' };
   return finish(
     compile(t, {
       version: ctx.version,
       vars,
       slot: (name) => (name === SLOTS.classTable ? [classTable(inp, width)] : []),
       image: (src) => dataUrlToPng(ctx.images?.[src]),
-      title: `${inp.className} ${inp.topic} 班級總表`,
+      title: tidyFilled(`${inp.className} ${cleanTopic(inp.topic)} 班級總表`),
     }),
   );
 }

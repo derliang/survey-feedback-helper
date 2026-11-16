@@ -54,11 +54,22 @@ test('產生中：按鈕立刻改字（狀態提示在面板內），完成後�
   test.setTimeout(90_000);
   await toOutput(page);
   const pdf = page.getByRole('button', { name: 'PDF', exact: true }).last();
+  const y0 = (await pdf.boundingBox())!.y + (await page.evaluate(() => scrollY));
   const done = page.waitForEvent('download', { timeout: 60_000 });
   await pdf.click();
   await expect(page.locator('.out-dl').getByRole('button', { name: '產生中⋯' })).toBeVisible();
   await done;
   await expect(page.getByRole('button', { name: 'PDF', exact: true }).last()).toBeEnabled();
+  // #146：成功提示浮在畫面上，不推擠版面，按鈕位置不變
+  await expect(page.getByTestId('out-status')).toBeVisible();
+  expect(await page.getByTestId('out-status').evaluate((el) => getComputedStyle(el).position)).toBe('fixed');
+  const y1 = (await page.getByRole('button', { name: 'PDF', exact: true }).last().boundingBox())!.y + (await page.evaluate(() => scrollY));
+  expect(Math.abs(y1 - y0)).toBeLessThan(2);
+});
+
+test('範本縮圖標示「範例預覽」（#153）', async ({ page }) => {
+  await toOutput(page);
+  await expect(page.locator('.out-thumb-tag').first()).toHaveText('範例預覽');
 });
 
 test('桌機：更多選單有列印視窗；觸控裝置沒有', async ({ page }, info) => {

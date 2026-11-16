@@ -982,6 +982,17 @@ button.tile {
   font-weight: 700;
   color: var(--accent-ink);
 }
+.out-status {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(96px + env(safe-area-inset-bottom));
+  z-index: 55;
+  width: min(32rem, calc(100vw - 32px));
+  display: grid;
+  gap: var(--sp-2);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 18%);
+}
 .toast {
   position: fixed;
   left: 50%;
@@ -1170,7 +1181,8 @@ button.tile {
   .page {
     padding-bottom: var(--sp-6);
   }
-  .toast {
+  .toast,
+  .out-status {
     bottom: var(--sp-5);
   }
   .tiles {
@@ -3218,4 +3230,19 @@ ul.chips {
 /* 準備資料桌機：右欄撐到 1240 容器（左 340＋右 860），不留 160 空白（S11） */
 .prep-grid .view {
   max-width: none;
+}
+
+.out-thumb {
+  position: relative;
+}
+.out-thumb-tag {
+  position: absolute;
+  top: var(--sp-1);
+  right: var(--sp-1);
+  padding: 0 var(--sp-2);
+  border-radius: var(--r-sm);
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 12px;
+  line-height: 20px;
 }

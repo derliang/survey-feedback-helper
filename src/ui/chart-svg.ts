@@ -99,6 +99,9 @@ export interface PairRow {
   b: number | null;
 }
 
+/** 成對橫條的圖高：圖例 26 ＋ 每列 38 ＋ 6。輸出用它算 PNG 與文件裡的圖高，題數多時不被裁切（#144）。 */
+export const pairedBarsHeight = (rows: number): number => 26 + Math.max(rows, 1) * 38 + 6;
+
 /** 成對橫條：每列兩條（例如「你」和「班級平均」）。 */
 export function pairedBarsSvg(
   rows: readonly PairRow[],
@@ -108,7 +111,7 @@ export function pairedBarsSvg(
   const w = o.w ?? 560;
   const legendH = 26;
   const rowH = 38;
-  const h = o.h ?? legendH + Math.max(rows.length, 1) * rowH + 6;
+  const h = o.h ?? pairedBarsHeight(rows.length);
   const narrow = w < 420;
   const labelW = narrow ? 96 : 130;
   const barW = w - labelW - 48;

@@ -16,6 +16,7 @@ import { rosterStudents } from './progress';
 import { type Question, type VoteResult } from './analysis';
 import { finalText, type Review } from './review';
 import type { Session } from './store';
+import { fillName } from './phrases';
 
 export type Audience = ViewKind;
 
@@ -61,6 +62,7 @@ export function personalInputs(
   audience: Audience,
   raters: PersonRef[],
   chartFor?: (t: TargetResult) => Uint8Array | undefined,
+  chartHeight?: number,
 ): PersonalOutput[] {
   const map: PseudonymMap = pseudonymize(allPeople(s, summary, raters));
   const sorted = [...summary.targets].sort((a, b) => Number(seatText(a.person)) - Number(seatText(b.person)) || nameText(a.person).localeCompare(nameText(b.person), 'zh-Hant'));
@@ -86,8 +88,9 @@ export function personalInputs(
       praise: comments,
       praiseTitle: '同學的留言',
       advice: [],
-      teacherComment: review.teacher[t.key] || undefined,
+      teacherComment: review.teacher[t.key] ? fillName(review.teacher[t.key]!, nameText(t.person)) : undefined,
       chartPng: chartFor?.(t),
+      ...(chartHeight ? { chartH: chartHeight } : {}),
       stats: { rank: t.rank, count: t.raters, median: classMedian, sd: classSd },
       selfCompare: (gaps.get(t.key)?.items ?? [])
         .filter((g) => g.self !== null && g.others !== null)
