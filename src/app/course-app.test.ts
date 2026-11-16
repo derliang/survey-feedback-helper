@@ -147,6 +147,12 @@ describe('名額與分配的資料接線', () => {
     expect(c.result!.find((a) => a.id === '3')?.reason).toBe('noPrefs');
     expect(resultStale(s, c)).toBe(false);
     expect(resultStale(session({ excluded: [1] }), c)).toBe(true);
+    // Issue #119：名額、優先名單變動要被偵測；最少人數不影響；重新分配後恢復
+    expect(resultStale(s, { ...c, capacity: { ...c.capacity, 甲課: '1' } })).toBe(true);
+    expect(resultStale(s, { ...c, priority: ['0'] })).toBe(true);
+    expect(resultStale(s, { ...c, minSize: { 甲課: '5' } })).toBe(false);
+    expect(resultStale(s, runAllocation(s, { ...c, capacity: { ...c.capacity, 甲課: '1' } }))).toBe(false);
+    expect(resultStale(s, { ...c, basis: null })).toBe(false);
     const moved = moveTo(s, c, '3', '甲課');
     expect(moved.result!.find((a) => a.id === '3')).toMatchObject({ course: '甲課', manual: true });
     expect(c.result!.find((a) => a.id === '3')?.course).toBeNull();

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { allocate, cleanPrefs, guessRank, matchCourseNames, moveApplicant, readPrefs, summarize, type Applicant, type Course } from './course';
+import { allocate, cleanPrefs, guessRank, matchCourseNames, moveApplicant, readPrefs, readPrefSlots, summarize, type Applicant, type Course } from './course';
 
 const courses: Course[] = [
   { name: '微積分', capacity: 2, minSize: 2 },
@@ -111,5 +111,27 @@ describe('readPrefs 與 guessRank', () => {
     expect(guessRank('第十二志願')).toBe(12);
     expect(guessRank('第二十志願')).toBe(20);
     expect(guessRank('姓名')).toBeNull();
+  });
+});
+
+describe('原始志願順位（Issue #120）', () => {
+  const cs: Course[] = [{ name: 'A', capacity: 0 }, { name: 'B', capacity: 5 }];
+  it('第一志願留白、第二有效 → rank=2', () => {
+    const r = allocate([{ id: '1', prefs: ['', 'B'] }], cs, 's');
+    expect(r.assignments[0]).toMatchObject({ course: 'B', rank: 2 });
+  });
+  it('[A, A, B]：A 滿額，分到 B 時 rank=3', () => {
+    const r = allocate([{ id: '1', prefs: ['A', 'A', 'B'] }], cs, 's');
+    expect(r.assignments[0]).toMatchObject({ course: 'B', rank: 3 });
+  });
+  it('手動調整與第一志願統計也用原始順位', () => {
+    const ap: Applicant[] = [{ id: '1', prefs: ['', 'B'] }];
+    const moved = moveApplicant([{ id: '1', course: null, rank: null }], ap, '1', 'B', cs);
+    expect(moved[0]?.rank).toBe(2);
+    const sum = summarize(moved, ap, cs);
+    expect(sum.courses.find((c) => c.name === 'B')?.firstChoice).toBe(0);
+  });
+  it('readPrefSlots 保留空白佔位', () => {
+    expect(readPrefSlots(['', '生物實驗'], [0, 1])).toEqual(['', '生物實驗']);
   });
 });

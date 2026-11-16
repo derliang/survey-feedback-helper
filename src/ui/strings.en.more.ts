@@ -656,7 +656,7 @@ export const enMore: DeepPartial<Strings> = {
     redrew: 'Drew again with a new draw number.',
     moved: (who, from, to) => `Moved ${who} from ${from} to ${to}.`,
     undo: 'Undo',
-    stale: 'The responses changed and the result no longer matches. Please allocate again.',
+    stale: 'The responses, capacities or priority list changed and the result no longer matches. Please allocate again.',
     tileAssigned: 'Placed',
     tileFirst: '1st choice met',
     redraw: 'Draw again',

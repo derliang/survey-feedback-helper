@@ -53,6 +53,19 @@ export function cleanPrefs(prefs: readonly string[], courses: readonly Course[])
   return out;
 }
 
+/** 志願清單清理並保留原始順位：略過不存在／重複／空白的項目，但 rank 仍是填答時的第幾志願。 */
+export function rankedPrefs(prefs: readonly string[], courses: readonly Course[]): { course: string; rank: number }[] {
+  const known = new Set(courses.map((c) => c.name));
+  const seen = new Set<string>();
+  const out: { course: string; rank: number }[] = [];
+  prefs.forEach((p, i) => {
+    if (!known.has(p) || seen.has(p)) return;
+    seen.add(p);
+    out.push({ course: p, rank: i + 1 });
+  });
+  return out;
+}
+
 /**
  * 逐志願輪分配：第 k 輪處理「尚未分到」的人的第 k 志願；該課程剩餘名額夠就全收，
  * 不夠則優先名單先取、其餘在同組內以種子可重現抽籤。沒分到的進下一輪。
@@ -60,7 +73,7 @@ export function cleanPrefs(prefs: readonly string[], courses: readonly Course[])
  */
 export function allocate(applicants: readonly Applicant[], courses: readonly Course[], seed: string): AllocationResult {
   const left = new Map(courses.map((c) => [c.name, Math.max(0, Math.floor(c.capacity))]));
-  const prefs = new Map(applicants.map((a) => [a.id, cleanPrefs(a.prefs, courses)]));
+  const prefs = new Map(applicants.map((a) => [a.id, rankedPrefs(a.prefs, courses)]));
   const result = new Map<string, Assignment>();
   let pending = [...applicants].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
   const rounds = Math.max(0, ...[...prefs.values()].map((p) => p.length));
@@ -68,7 +81,7 @@ export function allocate(applicants: readonly Applicant[], courses: readonly Cou
   for (let r = 0; r < rounds; r++) {
     const byCourse = new Map<string, Applicant[]>();
     for (const a of pending) {
-      const c = prefs.get(a.id)?.[r];
+      const c = prefs.get(a.id)?.[r]?.course;
       if (c === undefined) continue;
       const list = byCourse.get(c) ?? [];
       list.push(a);
@@ -87,7 +100,7 @@ export function allocate(applicants: readonly Applicant[], courses: readonly Cou
       const won = new Set(winners.map((a) => a.id));
       left.set(name, room - winners.length);
       for (const a of list) {
-        if (won.has(a.id)) result.set(a.id, { id: a.id, course: name, rank: r + 1 });
+        if (won.has(a.id)) result.set(a.id, { id: a.id, course: name, rank: prefs.get(a.id)?.[r]?.rank ?? r + 1 });
       }
     }
     pending = pending.filter((a) => !result.has(a.id));
@@ -110,12 +123,11 @@ export function moveApplicant(
   courses: readonly Course[],
 ): Assignment[] {
   const a = applicants.find((x) => x.id === id);
-  const list = a ? cleanPrefs(a.prefs, courses) : [];
+  const list = a ? rankedPrefs(a.prefs, courses) : [];
   return assignments.map((s) => {
     if (s.id !== id) return s;
     if (course === null) return { id, course: null, rank: null, reason: list.length === 0 ? 'noPrefs' : 'allFull', manual: true };
-    const idx = list.indexOf(course);
-    return { id, course, rank: idx < 0 ? null : idx + 1, manual: true };
+    return { id, course, rank: list.find((x) => x.course === course)?.rank ?? null, manual: true };
   });
 }
 
@@ -163,9 +175,9 @@ export function summarize(
     let first = 0;
     let any = 0;
     for (const a of applicants) {
-      const p = cleanPrefs(a.prefs, courses);
-      if (p[0] === c.name) first++;
-      if (p.includes(c.name)) any++;
+      const p = rankedPrefs(a.prefs, courses);
+      if (p.some((x) => x.course === c.name && x.rank === 1)) first++;
+      if (p.some((x) => x.course === c.name)) any++;
     }
     return {
       name: c.name,
@@ -212,6 +224,14 @@ export function matchCourseNames(options: readonly string[], courses: readonly C
     const [best, second] = scored;
     if (best && best.s >= threshold && (!second || second.s < best.s)) return { option, course: best.name, fuzzy: true };
     return { option, course: null, fuzzy: false };
+  });
+}
+
+/** 同 {@link readPrefs}，但空白欄保留為 ''（佔位），讓分配時仍知道原始第幾志願。 */
+export function readPrefSlots(row: readonly Cell[], columns: readonly number[]): string[] {
+  return columns.map((i) => {
+    const v = row[i];
+    return v === null || v === undefined ? '' : String(v).trim();
   });
 }
 

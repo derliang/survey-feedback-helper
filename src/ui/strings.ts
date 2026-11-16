@@ -889,7 +889,7 @@ export const strings = {
     redrew: '已用新的抽籤編號重新抽籤。',
     moved: (who: string, from: string, to: string) => `已把 ${who} 從${from}移到${to}。`,
     undo: '復原',
-    stale: '回覆資料有變動，目前結果和資料對不上，請重新分配。',
+    stale: '回覆資料、名額或優先名單有變動，目前結果和資料對不上，請重新分配。',
     tileAssigned: '已分配',
     tileFirst: '第 1 志願達成',
     redraw: '更換抽籤編號並重新抽籤',
