@@ -5,7 +5,7 @@ import { strings as S } from '../strings';
 import { ActBar, Notice } from '../parts/parts';
 import { extra } from '../strings-extra';
 
-const KEYS: CheckKey[] = ['duplicates', 'timestamps', 'scores', 'blanks', 'titles'];
+const KEYS: CheckKey[] = ['duplicates', 'timestamps', 'scores', 'blanks', 'titles', 'targets'];
 
 export function CheckView() {
   const s = useApp().session;
@@ -70,6 +70,21 @@ export function CheckView() {
             </li>
           ))}
         </ul>
+      );
+    }
+    if (k === 'targets') {
+      return (
+        <>
+          <p class="hint">{S.check.leadTargets}</p>
+          <ul class="plain-list">
+            {report.singleTargets.map((t) => (
+              <li key={t.id}>{S.check.targetLine(rowNo(t.id), t.name, t.similarTo)}</li>
+            ))}
+          </ul>
+          <button class="btn secondary small" type="button" onClick={() => mark(k)}>
+            {S.check.markHandled}
+          </button>
+        </>
       );
     }
     const lines =

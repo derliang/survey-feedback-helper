@@ -78,7 +78,7 @@ export function checkReport(s: Session): CheckReport {
   return runChecks(records, { withTarget: s.kind === 'feedback', scale: s.scale });
 }
 
-export type CheckKey = 'duplicates' | 'timestamps' | 'scores' | 'blanks' | 'titles';
+export type CheckKey = 'duplicates' | 'timestamps' | 'scores' | 'blanks' | 'titles' | 'targets';
 
 export function checkCounts(r: CheckReport): Record<CheckKey, number> {
   return {
@@ -87,6 +87,7 @@ export function checkCounts(r: CheckReport): Record<CheckKey, number> {
     scores: r.invalidScores.length,
     blanks: r.blanks.length,
     titles: r.titleClusters.length,
+    targets: r.singleTargets.length,
   };
 }
 

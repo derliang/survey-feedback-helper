@@ -81,6 +81,19 @@ describe('runChecks', () => {
     expect(runChecks(rows).invalidScores).toEqual([]);
   });
   it('空表', () => {
-    expect(runChecks([])).toEqual({ total: 0, duplicates: [], blanks: [], invalidScores: [], badTimestamps: [], titleClusters: [] });
+    expect(runChecks([])).toEqual({ total: 0, duplicates: [], blanks: [], invalidScores: [], badTimestamps: [], titleClusters: [], singleTargets: [] });
+  });
+});
+
+describe('只有 1 筆回覆的被評者（#148）', () => {
+  const rec = (id: number, target: string) => ({ id, respondent: { name: `填${id}` }, target: { name: target } });
+  it('其他人有多筆、某人只有 1 筆 → 提示，並指出最像的姓名', () => {
+    const rs = [rec(0, '陳語彤'), rec(1, '陳語彤'), rec(2, '陳語彤'), rec(3, '陳語形'), rec(4, '李沐庭')];
+    const r = runChecks(rs, { withTarget: true });
+    expect(r.singleTargets.map((t) => [t.name, t.similarTo])).toEqual([['陳語形', '陳語彤'], ['李沐庭', null]]);
+  });
+  it('大家都只有 1 筆、或不是報告回饋 → 不提示', () => {
+    expect(runChecks([rec(0, '甲'), rec(1, '乙')], { withTarget: true }).singleTargets).toEqual([]);
+    expect(runChecks([rec(0, '甲'), rec(1, '甲'), rec(2, '乙')]).singleTargets).toEqual([]);
   });
 });
