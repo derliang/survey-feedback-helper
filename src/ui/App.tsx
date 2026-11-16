@@ -71,7 +71,7 @@ export function App() {
       <FolderDialog />
       <CloudAlert />
       <RestartDialog />
-      {st.toast && (
+      {st.toast && !st.cloudAlert && (
         <div class="toast" role="status" data-testid="toast">
           {st.toast}
         </div>
