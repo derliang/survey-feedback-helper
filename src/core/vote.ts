@@ -29,6 +29,15 @@ export interface DetectOptions {
   burst?: { count: number; withinMs: number };
 }
 
+/**
+ * 候選選項常寫成「座號＋姓名」（如「01 王小明」「301 01 王小明」）：去掉開頭的班級／座號數字與分隔符，
+ * 只留姓名部分（姓名不會以數字開頭）。去不出姓名（整串都是數字）時回傳原樣。
+ */
+export function stripSeatPrefix(normalized: string): string {
+  const t = normalized.replace(/^(?:[(（[【]?[0-9]+[號号]?[)）\]】]?[.\-、:：_]*)+/, '');
+  return t === '' ? normalized : t;
+}
+
 function hasPick(v: string | null | undefined): boolean {
   return v !== null && v !== undefined && normalizeName(v) !== '';
 }
@@ -54,7 +63,7 @@ export function detectVoteIssues(ballots: readonly Ballot[], opts: DetectOptions
     const me = normalizeName(b.voter.name);
     if (me === '') continue;
     for (const [position, pick] of Object.entries(b.picks)) {
-      if (hasPick(pick) && normalizeName(pick) === me) {
+      if (hasPick(pick) && (normalizeName(pick) === me || stripSeatPrefix(normalizeName(pick)) === me)) {
         issues.push({ kind: 'self', ballotIds: [b.id], voterKey: personKey(b.voter) ?? me, detail: position });
       }
     }
@@ -115,6 +124,8 @@ export interface Inclusion {
   decisions: BallotDecision[];
   /** 「X 位為手動調整」的 X。 */
   manualCount: number;
+  /** 同人多票但有票的時間無法解析，這幾張是依資料列順序（而非時間）決定保留哪張；UI 應提示老師確認。 */
+  rowOrderBallots: (string | number)[];
 }
 
 /**
@@ -129,9 +140,16 @@ export function decideInclusion(
   overrides: ReadonlyMap<string | number, boolean> = new Map(),
 ): Inclusion {
   const order = new Map(ballots.map((b, i) => [b.id, i] as const));
-  const time = new Map(ballots.map((b) => [b.id, parseTimestamp(b.timestamp) ?? 0] as const));
-  const cmp = (a: string | number, b: string | number): number =>
-    (time.get(a) ?? 0) - (time.get(b) ?? 0) || (order.get(a) ?? 0) - (order.get(b) ?? 0);
+  const time = new Map(ballots.map((b) => [b.id, parseTimestamp(b.timestamp)] as const));
+  const byOrder = (a: string | number, b: string | number): number => (order.get(a) ?? 0) - (order.get(b) ?? 0);
+  // 同人多票的先後：全部時間都能解析才以時間為準（同時間看輸入順序）；
+  // 只要有一張時間缺失或無法解析，整組退回輸入順序（Issue #126），不把缺時間當成 1970 年。
+  const sortGroup = (ids: readonly (string | number)[]): { sorted: (string | number)[]; byRow: boolean } => {
+    const byRow = ids.some((id) => time.get(id) == null);
+    const cmp = byRow ? byOrder : (a: string | number, b: string | number) => (time.get(a) as number) - (time.get(b) as number) || byOrder(a, b);
+    return { sorted: [...ids].sort(cmp), byRow };
+  };
+  const rowOrderBallots = new Set<string | number>();
 
   const excluded = new Map<string | number, Set<VoteIssueKind>>();
   const drop = (id: string | number, k: VoteIssueKind) => excluded.set(id, (excluded.get(id) ?? new Set()).add(k));
@@ -144,7 +162,8 @@ export function decideInclusion(
     if (issue.kind === 'blank') issue.ballotIds.forEach((id) => drop(id, 'blank'));
     else if (issue.kind === 'time' && rules.time === 'exclude') issue.ballotIds.forEach((id) => drop(id, 'time'));
     else if (issue.kind === 'multi' && rules.multi !== 'all') {
-      const sorted = [...issue.ballotIds].sort(cmp);
+      const { sorted, byRow } = sortGroup(issue.ballotIds);
+      if (byRow && (rules.multi === 'last' || rules.multi === 'first')) sorted.forEach((id) => rowOrderBallots.add(id));
       const keep = rules.multi === 'last' ? sorted[sorted.length - 1] : rules.multi === 'first' ? sorted[0] : undefined;
       sorted.filter((id) => id !== keep).forEach((id) => drop(id, 'multi'));
     } else if (issue.kind === 'self') {
@@ -167,7 +186,7 @@ export function decideInclusion(
     const droppedPositions = override === true ? [] : [...(dropped.get(b.id) ?? [])];
     return { ballotId: b.id, included, droppedPositions, reasons: [...(reasons.get(b.id) ?? [])], manual };
   });
-  return { decisions, manualCount };
+  return { decisions, manualCount, rowOrderBallots: [...rowOrderBallots] };
 }
 
 export interface TallyRow {
@@ -216,7 +235,11 @@ export function tallyPosition(
       abstain++;
       continue;
     }
-    const k = normalizeName(raw);
+    let k = normalizeName(raw);
+    if (candidates !== undefined && !display.has(k)) {
+      const bare = stripSeatPrefix(k);
+      if (display.has(bare)) k = bare;
+    }
     if (candidates !== undefined && !display.has(k)) {
       invalid++;
       continue;

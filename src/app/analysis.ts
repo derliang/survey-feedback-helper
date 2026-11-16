@@ -14,8 +14,11 @@ import {
   type VoteIssue,
   type VoteRules,
   DEFAULT_VOTE_RULES,
+  type PersonRef,
   cellText,
   decideInclusion,
+  normalizeSeat,
+  personKey,
   detectVoteIssues,
   elect,
   isBlankCell,
@@ -27,7 +30,7 @@ import {
   tallyPosition,
 } from '../core';
 import { type ColumnInfo, personRefs } from './columns';
-import { rosterStudents } from './progress';
+import { respondentRefs, rosterStudents } from './progress';
 import type { Session } from './store';
 
 /** 統計畫面上老師可調的選項（都不含作答內容，換問卷時重設）。 */
@@ -74,7 +77,7 @@ export function feedbackItems(s: Session, o: StatsOpts): FeedbackItem[] {
 }
 
 export function feedbackRecords(s: Session): FeedbackRecord[] {
-  const resp = personRefs(s.table, s.cols, 'respondent');
+  const resp = respondentRefs(s);
   const target = personRefs(s.table, s.cols, 'target');
   const scoreCols = colsOf(s, 'score');
   const commentCol = colsOf(s, 'comment')[0];
@@ -87,8 +90,26 @@ export function feedbackRecords(s: Session): FeedbackRecord[] {
   }));
 }
 
+/**
+ * 被評者比對鍵：預設「班級＋姓名」（座號常填錯，不單獨拿來分人）。
+ * 名單裡同班同名的人（座號不同）才帶座號區分，否則會被併成同一人（Issue #121）；座號沒填或不是整數者仍用預設鍵。
+ */
+export function rosterKeyOf(s: Session): (p: PersonRef) => string | null {
+  const counts = new Map<string, number>();
+  for (const st of rosterStudents(s)) {
+    const k = personKey({ class: st.class, name: st.name });
+    if (k !== null) counts.set(k, (counts.get(k) ?? 0) + 1);
+  }
+  return (p) => {
+    const k = personKey(p);
+    if (k === null || (counts.get(k) ?? 0) < 2) return k;
+    const seat = normalizeSeat(p.seat);
+    return seat === null ? k : `${k}|${seat}`;
+  };
+}
+
 export function runFeedback(s: Session, o: StatsOpts): FeedbackSummary {
-  return summarizeFeedback(feedbackRecords(s), feedbackItems(s, o), { scale: s.scale, trim: o.trim });
+  return summarizeFeedback(feedbackRecords(s), feedbackItems(s, o), { scale: s.scale, trim: o.trim, keyOf: rosterKeyOf(s) });
 }
 
 /* ───────── 意見調查 ───────── */
@@ -178,7 +199,7 @@ export interface VoteResult {
 }
 
 export function voteBallots(s: Session): Ballot[] {
-  const resp = personRefs(s.table, s.cols, 'respondent');
+  const resp = respondentRefs(s);
   const choiceCols = colsOf(s, 'choice');
   const ts = colsOf(s, 'timestamp')[0];
   return activeRows(s).map((i) => ({
