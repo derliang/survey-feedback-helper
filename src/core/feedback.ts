@@ -61,6 +61,8 @@ export interface ItemStat {
   n: number;
   /** 有套用去極端值（各去掉最高、最低 trim 個）；筆數不足時不去除，為 false。 */
   trimmed: boolean;
+  /** 他評分數的人數分布：索引 0 ＝ 量表最低分，依序到最高分（整數分格；去極端值前、反向題換算後）。圖表的分布與堆疊用。 */
+  dist: number[];
 }
 
 export interface TargetResult {
@@ -156,7 +158,12 @@ export function summarizeFeedback(
   const targets: TargetResult[] = [...byTarget].map(([key, a]) => {
     const itemStats: ItemStat[] = items.map((it, i) => {
       const t = trimExtremes(a.vals[i] ?? [], trim);
-      return { itemId: it.id, n: (a.vals[i] ?? []).length, mean: mean(t.values), trimmed: t.trimmed };
+      const dist = Array.from({ length: Math.max(1, Math.round(scale.max) - Math.round(scale.min) + 1) }, () => 0);
+      for (const v of a.vals[i] ?? []) {
+        const at = Math.min(dist.length - 1, Math.max(0, Math.round(v) - Math.round(scale.min)));
+        dist[at] = (dist[at] ?? 0) + 1;
+      }
+      return { itemId: it.id, n: (a.vals[i] ?? []).length, mean: mean(t.values), trimmed: t.trimmed, dist };
     });
     let wsum = 0;
     let total = 0;

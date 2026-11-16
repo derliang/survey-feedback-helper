@@ -571,3 +571,13 @@
   contain: inline-size;
   min-width: 0;
 }
+
+/* 圖表預覽：輸出同一套 SVG，寬度跟著頁面縮放 */
+.ph-svg {
+  width: 100%;
+}
+.ph-svg svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
