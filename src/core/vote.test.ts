@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { decideInclusion, detectVoteIssues, elect, tallyPosition, DEFAULT_VOTE_RULES, type Ballot } from './vote';
+import { countVoteIssues, decideInclusion, detectVoteIssues, elect, tallyPosition, DEFAULT_VOTE_RULES, type Ballot } from './vote';
 import { makeSeed, seededShuffle } from './random';
 
 const t = (min: number, sec = 0) => `2026/10/12 14:${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
@@ -178,5 +178,38 @@ describe('同票名單自然排序（#150）', () => {
     expect(tally.rows.map((r) => r.name)).toEqual(['1方馨', '2李', '10王', '19陳']);
     const e = elect(tally, 2, 's');
     expect(e.tied).toEqual(['1方馨', '2李', '10王', '19陳']);
+  });
+});
+
+describe('候補、同票老師指定與防弊件數（#175）', () => {
+  const tallyOf = (votes: [string, number][]) => ({
+    position: 'p',
+    rows: votes.map(([name, v], i) => ({ name, votes: v, rank: i + 1 })),
+    invalid: 0,
+    abstain: 0,
+    validBallots: 0,
+  });
+  it('候補：當選者之後依票數排，最多 N 人；預設 0 人', () => {
+    const tl = tallyOf([['甲', 5], ['乙', 3], ['丙', 2], ['丁', 1]]);
+    expect(elect(tl, 1, 's').alternates).toEqual([]);
+    expect(elect(tl, 1, 's', { alternates: 2 }).alternates).toEqual(['乙', '丙']);
+  });
+  it('同票抽籤時落選的同票者先補候補', () => {
+    const tl = tallyOf([['甲', 5], ['乙', 3], ['丙', 3], ['丁', 1]]);
+    const e = elect(tl, 2, 's', { alternates: 1 });
+    expect(e.alternates).toHaveLength(1);
+    expect(['乙', '丙']).toContain(e.alternates[0]);
+    expect(e.elected).not.toContain(e.alternates[0]);
+  });
+  it('同票由老師指定：不抽籤，沒選齊時標待指定、當選者暫不含同票者', () => {
+    const tl = tallyOf([['甲', 5], ['乙', 3], ['丙', 3]]);
+    const none = elect(tl, 2, 's', { tie: 'manual' });
+    expect(none).toMatchObject({ elected: ['甲'], draw: null, pendingManual: true });
+    const one = elect(tl, 2, 's', { tie: 'manual', manual: ['丙', '路人'] });
+    expect(one).toMatchObject({ elected: ['甲', '丙'], draw: null, pendingManual: false });
+  });
+  it('countVoteIssues：同人多票以人計，其餘以票計', () => {
+    const bs = [ballot(0, '甲', { 班長: '甲' }), ballot(1, '甲', { 班長: '乙' }), ballot(2, '乙', { 班長: null })];
+    expect(countVoteIssues(detectVoteIssues(bs))).toEqual({ multi: 1, self: 1, time: 0, blank: 1 });
   });
 });

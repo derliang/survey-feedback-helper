@@ -4,6 +4,74 @@ import { go, setSession, useApp } from '../../app/store';
 import { strings as S } from '../strings';
 import { ActBar, Notice } from '../parts/parts';
 import { extra } from '../strings-extra';
+import { vt } from '../strings-vote';
+import { cellText, isBlankCell, parseTimestamp } from '../../core';
+import type { DuplicateGroup } from '../../core';
+import type { Session } from '../../app/store';
+
+type DupChoice = 'last' | 'first' | 'none';
+
+/** 同人多票：兩份（或更多份）並排，列出每份的時間與各投給誰，預設只算最後一份（DESIGN 5.14、D47）。 */
+function VoteDup({ s, g, onApply, rowNo }: { s: Session; g: DuplicateGroup; onApply: (excludeIds: number[]) => void; rowNo: (id: number) => number }) {
+  const V = vt().dup;
+  const [choice, setChoice] = useState<DupChoice>('last');
+  const ts = s.cols.find((c) => c.role === 'timestamp');
+  const choiceCols = s.cols.filter((c) => c.role === 'choice');
+  const timeOf = (id: number) => (ts ? s.table.rows[id]?.[ts.index] ?? null : null);
+  // 先後：全部時間可解析才用時間，否則依資料列順序（與 decideInclusion 同一套）
+  const ids = [...g.ids].sort((a, b) => a - b);
+  const times = ids.map((id) => parseTimestamp(timeOf(id)));
+  const sorted = times.every((x) => x !== null) ? [...ids].sort((a, b) => (times[ids.indexOf(a)] as number) - (times[ids.indexOf(b)] as number) || a - b) : ids;
+  const keep = choice === 'last' ? sorted[sorted.length - 1] : choice === 'first' ? sorted[0] : undefined;
+  const excludeIds = ids.filter((id) => id !== keep);
+  const radios: [DupChoice, string][] = [['last', V.last], ['first', V.first], ['none', V.none]];
+  return (
+    <>
+      <div class="dup-copies" data-testid="dup-copies">
+        {sorted.map((id, i) => {
+          const picks = choiceCols.map((c) => {
+            const v = s.table.rows[id]?.[c.index] ?? null;
+            return [c.label, isBlankCell(v) ? V.noPick : cellText(v)] as const;
+          });
+          const tv = timeOf(id);
+          const on = keep === id;
+          return (
+            <div key={id} class={`dup-copy${on ? ' on' : ''}`}>
+              <strong>
+                {V.copy(i + 1)}
+                {on && <span class="tag accent">{V.chosen}</span>}
+              </strong>
+              <span class="hint">
+                {V.rowAt(rowNo(id))}・{isBlankCell(tv) ? V.noTime : V.time(cellText(tv))}
+              </span>
+              <ul class="plain-list">
+                {picks.map(([label, who]) => (
+                  <li key={label}>
+                    {label}：{who}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })}
+      </div>
+      <div role="radiogroup" aria-label={V.pickLegend(g.label)} class="dup-choices">
+        {radios.map(([k, label]) => (
+          <button key={k} type="button" role="radio" aria-checked={choice === k} class={`dup-radio${choice === k ? ' on' : ''}`} onClick={() => setChoice(k)}>
+            <span class="dot" aria-hidden="true" />
+            {label}
+          </button>
+        ))}
+      </div>
+      <p class="hint">{choice === 'none' ? V.whyNone : V.why}</p>
+      <div class="btn-row">
+        <button class="btn primary small" type="button" onClick={() => onApply(choice === 'none' ? ids : excludeIds)}>
+          {V.apply}
+        </button>
+      </div>
+    </>
+  );
+}
 
 const KEYS: CheckKey[] = ['duplicates', 'timestamps', 'scores', 'blanks', 'titles', 'targets'];
 
@@ -34,6 +102,9 @@ export function CheckView() {
                   <strong>{S.check.dupDetail(who, g.ids.length)}</strong>
                   <span class="hint">{extra().check.rows(sorted.map(rowNo).join(extra().check.sep))}</span>
                   {g.seatConflict && <Notice kind="warn">{S.check.dupSeatNote}</Notice>}
+                  {s.kind === 'vote' ? (
+                    <VoteDup s={s} g={g} onApply={exclude} rowNo={rowNo} />
+                  ) : (
                   <div class="btn-row">
                     <button class={`btn ${g.seatConflict ? 'secondary' : 'primary'} small`} type="button" onClick={() => exclude(sorted.slice(0, -1))}>
                       {S.check.keepLast}
@@ -45,6 +116,7 @@ export function CheckView() {
                       {S.check.excludeBoth}
                     </button>
                   </div>
+                  )}
                 </li>
               );
             })}
