@@ -1,4 +1,4 @@
-import { type CheckReport, type RosterComparison, type Student, compareRoster, runChecks } from '../core';
+import { type CheckReport, type PersonRef, type RosterComparison, type Student, compareRoster, runChecks } from '../core';
 import { buildCheckRecords, countToConfirm, mappingProblems, pendingCols, personRefs, scaleDoubt } from './columns';
 import { rosterFromRows } from './roster-input';
 import type { Session } from './store';
@@ -17,6 +17,32 @@ export function rosterStudents(s: Session): Student[] {
   return s.rosterRows ? rosterFromRows(s.rosterRows).students : [];
 }
 
+/** 老師在名單對照按「是同一人」的列 → 名單上那位學生（Issue #117：統計與資料檢查也要用）。 */
+function acceptedStudents(s: Session, students: Student[]): Map<number, Student> {
+  const accepted = new Map<number, Student>();
+  if (students.length === 0 || Object.keys(s.resolutions).length === 0) return accepted;
+  const refs = personRefs(s.table, s.cols, 'respondent');
+  const entries = refs.map((person, id) => ({ id, person })).filter((e) => !s.excluded.includes(e.id));
+  for (const r of compareRoster(students, entries).results) {
+    const target = r.match.student ?? r.match.suggestion;
+    if (s.resolutions[r.id as number] === 'accept' && target) accepted.set(r.id as number, target);
+  }
+  return accepted;
+}
+
+/**
+ * 填寫者身分：照問卷填的，但老師確認過「是同一人」的列改用名單上那位的班級、座號、姓名。
+ * 統計（票選去重、自投、互評自評判斷）與資料檢查都用它；原始資料表不動，「復原」後自動還原。
+ */
+export function respondentRefs(s: Session): PersonRef[] {
+  const refs = personRefs(s.table, s.cols, 'respondent');
+  const accepted = acceptedStudents(s, rosterStudents(s));
+  return refs.map((p, i) => {
+    const st = accepted.get(i);
+    return st ? { class: st.class, seat: st.seat, name: st.name } : p;
+  });
+}
+
 export function rosterComparison(s: Session): RosterComparison | null {
   const students = rosterStudents(s);
   if (students.length === 0) return null;
@@ -24,11 +50,7 @@ export function rosterComparison(s: Session): RosterComparison | null {
   const entries = refs.map((person, id) => ({ id, person })).filter((e) => !s.excluded.includes(e.id));
   const first = compareRoster(students, entries);
   // 老師按「是同一人」的列，改用名單上那位的資料再比一次
-  const accepted = new Map<number | string, Student>();
-  for (const r of first.results) {
-    const target = r.match.student ?? r.match.suggestion;
-    if (s.resolutions[r.id as number] === 'accept' && target) accepted.set(r.id, target);
-  }
+  const accepted = acceptedStudents(s, students);
   if (accepted.size === 0) return first;
   return compareRoster(
     students,
@@ -40,8 +62,10 @@ export function rosterComparison(s: Session): RosterComparison | null {
 }
 
 export function checkReport(s: Session): CheckReport {
+  const resolved = respondentRefs(s);
   const records = buildCheckRecords(s.table, s.cols)
     .filter((r) => !s.excluded.includes(r.id))
+    .map((r) => ({ ...r, respondent: resolved[r.id] ?? r.respondent }))
     .map((r) => {
       const title = typeof r.bookTitle === 'string' ? r.bookTitle.trim() : '';
       const merged = s.titleMerges[title];
