@@ -4,6 +4,9 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { fillVars } from '../../export/model';
 import { describeCondition } from '../../editor/condition';
 import type { DragInfo } from './drag';
+import type { Palette } from '../chart-svg';
+import { buildChart, type ChartInput } from '../chart-types';
+import { chartPalette, chartText } from '../chart-text';
 import { STAT_KEYS, PAGE_SIZES, type DataEB, type EBlock, type EditorTemplate } from '../../editor/types';
 
 export const SAMPLE_VARS: Record<string, string> = {
@@ -16,6 +19,20 @@ export const SAMPLE_VARS: Record<string, string> = {
   班級平均: '4.0',
   滿分: '5',
   老師評語: '這次的表現很穩，期待你在下次發表時更放得開。',
+};
+/** 紙張永遠淺色：圖表預覽用紙張色（doc-warm），不跟深色模式。 */
+const PAPER: Palette = { ink: 'var(--doc-ink)', muted: 'var(--doc-ink2)', grid: 'var(--doc-line)', a: 'var(--doc-s5)', b: 'var(--doc-s1)', bg: 'transparent', hole: 'var(--doc-card)' };
+
+/** 圖表預覽用的示範資料（虛構）：量表 1–5，四個向度。 */
+const SAMPLE_CHART: ChartInput = {
+  scaleMin: 1,
+  scaleMax: 5,
+  items: [
+    { label: '表達', mine: 4.2, cls: 3.8, dist: [0, 1, 2, 5, 4], classDist: [2, 6, 14, 22, 16] },
+    { label: '合作', mine: 3.9, cls: 4.1, dist: [0, 1, 3, 5, 3], classDist: [1, 5, 12, 24, 18] },
+    { label: '內容', mine: 4.5, cls: 3.9, dist: [0, 0, 1, 5, 6], classDist: [1, 4, 15, 21, 19] },
+    { label: '創意', mine: 3.6, cls: 3.7, dist: [0, 2, 3, 5, 2], classDist: [3, 7, 13, 20, 17] },
+  ],
 };
 export const VAR_NAMES = Object.keys(SAMPLE_VARS);
 
@@ -35,7 +52,6 @@ interface Ctx {
 }
 
 function Placeholder({ b, s }: { b: DataEB; s: number }) {
-  const colors = b.colors?.length ? b.colors : ['var(--d1)', 'var(--d2)', 'var(--d3)'];
   if (b.dataKind === 'table')
     return (
       <div class="ph ph-table" style={{ fontSize: px(9, s) }}>
@@ -48,14 +64,11 @@ function Placeholder({ b, s }: { b: DataEB; s: number }) {
         ))}
       </div>
     );
-  if (b.dataKind === 'chart')
-    return (
-      <div class="ph ph-chart" style={{ height: px(90, s) }} role="img" aria-label={ed().pvChartAlt}>
-        {[70, 55, 85, 62].map((h, i) => (
-          <i key={i} style={{ height: `${h}%`, background: colors[i % colors.length] }} />
-        ))}
-      </div>
-    );
+  if (b.dataKind === 'chart') {
+    // 用輸出同一套畫法，畫一張示範資料的圖：類型、參考線、顏色改了立刻看得到
+    const r = buildChart(b.chartType, b.compareLine === true, SAMPLE_CHART, chartText(), { w: 440, palette: chartPalette(b.colors, PAPER) });
+    return <div class="ph-svg" role="img" aria-label={ed().pvChartAlt} dangerouslySetInnerHTML={{ __html: r.svg }} />;
+  }
   return (
     <div class="ph ph-lines" role="img" aria-label={ed().pvLinesAlt}>
       <i />

@@ -44,8 +44,33 @@ const seatText = (p: PersonRef): string => cellText(p.seat);
 const classText = (p: PersonRef): string => cellText(p.class);
 const nameText = (p: PersonRef): string => cellText(p.name);
 
+/** 圖表要畫的資料（這位被評者＋全班）。純資料，由 ui/chart-types 畫成 SVG。 */
+export interface ChartData {
+  items: { label: string; mine: number | null; cls: number | null; dist: number[]; classDist: number[] }[];
+  scaleMin: number;
+  scaleMax: number;
+}
+
+export function chartData(summary: FeedbackSummary, t: TargetResult, scale: { min: number; max: number }): ChartData {
+  const n = Math.max(1, Math.round(scale.max) - Math.round(scale.min) + 1);
+  return {
+    scaleMin: scale.min,
+    scaleMax: scale.max,
+    items: summary.items.map((it, i) => ({
+      label: it.label,
+      mine: t.averageRow[i] ?? null,
+      cls: summary.classItemMeans[i] ?? null,
+      dist: t.items[i]?.dist ?? Array<number>(n).fill(0),
+      // 全班：所有被評者各分數的人數合計
+      classDist: Array.from({ length: n }, (_, k) => summary.targets.reduce((a, x) => a + (x.items[i]?.dist[k] ?? 0), 0)),
+    })),
+  };
+}
+
 export interface PersonalOutput {
   key: string;
+  /** 圖表資料；輸出頁依範本圖表區塊的設定畫成圖。 */
+  chart: ChartData;
   fileName: string;
   input: PersonalFeedbackInput;
   /** 這份將放進去的留言（預覽給老師看）。 */
@@ -61,8 +86,6 @@ export function personalInputs(
   review: Review,
   audience: Audience,
   raters: PersonRef[],
-  chartFor?: (t: TargetResult) => Uint8Array | undefined,
-  chartHeight?: number,
 ): PersonalOutput[] {
   const map: PseudonymMap = pseudonymize(allPeople(s, summary, raters));
   const sorted = [...summary.targets].sort((a, b) => Number(seatText(a.person)) - Number(seatText(b.person)) || nameText(a.person).localeCompare(nameText(b.person), 'zh-Hant'));
@@ -89,8 +112,6 @@ export function personalInputs(
       praiseTitle: '同學的留言',
       advice: [],
       teacherComment: review.teacher[t.key] ? fillName(review.teacher[t.key]!, nameText(t.person)) : undefined,
-      chartPng: chartFor?.(t),
-      ...(chartHeight ? { chartH: chartHeight } : {}),
       stats: { rank: t.rank, count: t.raters, median: classMedian, sd: classSd },
       selfCompare: (gaps.get(t.key)?.items ?? [])
         .filter((g) => g.self !== null && g.others !== null)
@@ -98,7 +119,7 @@ export function personalInputs(
     };
     const prefix = seat === '' ? '' : `${seat.padStart(2, '0')} `;
     const commentKeys = reviewed.comments.slice(0, comments.length).map((c) => feedbackKey(c.recordId));
-    return { key: t.key, fileName: `${prefix}${nameText(t.person)}`, input, comments, commentKeys };
+    return { key: t.key, chart: chartData(summary, t, s.scale), fileName: `${prefix}${nameText(t.person)}`, input, comments, commentKeys };
   });
 }
 
