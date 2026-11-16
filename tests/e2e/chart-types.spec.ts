@@ -53,7 +53,8 @@ test('編輯器：圖表類型與參考線改了，預覽立刻換成對應的�
   const stacked = await preview(page).innerHTML();
   expect(stacked).toContain('fill-opacity');
   expect(stacked).not.toEqual(compare);
-  expect(stacked).not.toContain('stroke-dasharray');
+  // 內建範本的參考線預設是開的
+  expect(stacked).toContain('stroke-dasharray');
 
   if (!wide) await page.getByRole('button', { name: '編輯屬性' }).click();
   await toggle.click();
@@ -61,9 +62,9 @@ test('編輯器：圖表類型與參考線改了，預覽立刻換成對應的�
     await page.getByRole('button', { name: '完成' }).click();
     await page.getByRole('button', { name: '預覽', exact: true }).click();
   }
-  expect(await preview(page).innerHTML()).toContain('stroke-dasharray');
-
+  expect(await preview(page).innerHTML()).not.toContain('stroke-dasharray');
   if (!wide) await page.getByRole('button', { name: '編輯屬性' }).click();
+  await toggle.click();
   await page.getByRole('button', { name: '分布', exact: true }).click();
   if (!wide) {
     await page.getByRole('button', { name: '完成' }).click();
@@ -90,8 +91,9 @@ test('輸出：範本改成堆疊圖，下載的 Word 裡的圖就不再是原�
 
   await openChartPanel(page, true);
   await page.getByRole('button', { name: '堆疊', exact: true }).click();
-  await page.getByRole('checkbox', { name: '在圖表顯示班級平均參考線' }).click();
-  await page.getByRole('button', { name: '返回輸出' }).click();
+  await page.getByRole('button', { name: '回範本庫' }).click();
+  await page.getByTestId('template-card').filter({ hasText: '（我的）' }).first().getByRole('button', { name: /輸出$/ }).click();
+  await page.locator('.stepper').getByRole('button', { name: /輸出/ }).click();
   await expect(page.getByRole('heading', { name: '輸出', level: 1 })).toBeVisible();
 
   const after = await media();
