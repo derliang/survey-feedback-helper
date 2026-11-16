@@ -104,6 +104,45 @@ select {
   top: 0;
   z-index: 20;
 }
+.folder-strip {
+  display: none;
+}
+@media (max-width: 599px) {
+  /* R3-1：手機工作頁頂列下方的資料夾狀態細條（高 36）；未選或需重新授權用警示底色，已選平淡 */
+  .folder-strip {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    min-height: 36px;
+    padding: 0 var(--sp-4);
+    border-top: 1px solid var(--line-soft);
+    color: var(--ink2);
+    font-size: var(--fs-sm);
+  }
+  .folder-strip.warn {
+    background: var(--warn-soft);
+    color: var(--ink);
+  }
+  .folder-strip .ic {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+  }
+  .folder-strip .fs-text {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .folder-strip .fs-text strong {
+    color: var(--ink);
+  }
+  .folder-strip .btn {
+    flex: 0 0 auto;
+    color: var(--accent-ink);
+  }
+}
 .appbar {
   display: flex;
   flex-wrap: wrap;
