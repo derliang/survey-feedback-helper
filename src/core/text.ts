@@ -92,6 +92,8 @@ export function parseNumber(c: Cell | undefined): number | null {
   return Number(t);
 }
 
+const TAIPEI_OFFSET_MS = 8 * 3600000;
+
 /** 解析時間戳記為「牆上時間」的毫秒（以 UTC 計，不受時區影響）。無法解析回傳 null。 */
 export function parseTimestamp(c: Cell | undefined): number | null {
   if (c instanceof Date) return Number.isNaN(c.getTime()) ? null : c.getTime();
@@ -103,11 +105,11 @@ export function parseTimestamp(c: Cell | undefined): number | null {
   const t = cellText(c).normalize('NFKC');
   if (t === '') return null;
   const m =
-    /^(\d{4})[/.-](\d{1,2})[/.-](\d{1,2})(?:[ T]+(上午|下午|AM|PM|am|pm)?\s*(\d{1,2}):(\d{2})(?::(\d{2}))?(?:\.\d+)?\s*(AM|PM|am|pm)?)?(?:Z)?$/.exec(
+    /^(\d{4})[/.-](\d{1,2})[/.-](\d{1,2})(?:[ T]+(上午|下午|AM|PM|am|pm)?\s*(\d{1,2}):(\d{2})(?::(\d{2}))?(?:\.\d+)?\s*(AM|PM|am|pm)?)?\s*(Z|[+-]\d{2}(?::?\d{2})?)?$/.exec(
       t,
     );
   if (!m) return null;
-  const [, y, mo, d, ap1, hh, mm, ss, ap2] = m;
+  const [, y, mo, d, ap1, hh, mm, ss, ap2, tz] = m;
   let hour = hh === undefined ? 0 : Number(hh);
   const min = mm === undefined ? 0 : Number(mm);
   const sec = ss === undefined ? 0 : Number(ss);
@@ -122,5 +124,16 @@ export function parseTimestamp(c: Cell | undefined): number | null {
   // 擋掉 2 月 31 日這類溢位
   const back = new Date(ms);
   if (back.getUTCMonth() !== month - 1 || back.getUTCDate() !== day) return null;
-  return ms;
+  if (tz === undefined) return ms;
+  // 明確時區（Z、+08:00、-05:00）：先換成真實瞬間，再換成台北牆上時間（UTC+8），
+  // 才能與沒有時區的 Google 表單時間（本來就是台北牆上時間）放在同一條時間軸上比較。
+  let offset = 0;
+  if (tz !== 'Z') {
+    const digits = tz.slice(1).replace(':', '');
+    const oh = Number(digits.slice(0, 2));
+    const om = digits.length > 2 ? Number(digits.slice(2)) : 0;
+    if (oh > 14 || om > 59) return null;
+    offset = (tz.startsWith('-') ? -1 : 1) * (oh * 60 + om) * 60000;
+  }
+  return ms - offset + TAIPEI_OFFSET_MS;
 }

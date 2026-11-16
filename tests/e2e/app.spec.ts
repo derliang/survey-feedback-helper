@@ -84,7 +84,8 @@ test('名單對照、資料檢查完整流程', async ({ page }) => {
   const pending = page.getByTestId('check-pending');
   await expect(pending).not.toHaveText('0');
   await page.getByRole('button', { name: /^重複填答/ }).click();
-  await page.getByRole('button', { name: '採用最後提交的回覆' }).click();
+  // Issue #117：確認「同一位學生」後，那一列也併入重複填答的判斷，所以可能有兩組重複
+  await page.getByRole('button', { name: '採用最後提交的回覆' }).first().click();
   await expect(page.getByText('已排除 1 筆回覆')).toBeVisible();
   await page.getByRole('button', { name: /^同一本書有不同名稱/ }).click();
   await page.getByRole('button', { name: /^合併成/ }).click();

@@ -105,12 +105,13 @@ export interface FeedbackSummary {
  * - 權重預設等重；總分只在有分數的項目間正規化
  * - 反向題（item.reversed）在驗證範圍後換算；自評也同樣換算
  * - trim：每題各去掉最高、最低 trim 個後再平均（去極端值）；該題有效筆數 ≤ 2×trim 時不去除
+ * - keyOf：被評者／填寫者的比對鍵，預設「班級＋姓名」；名單裡同班同名的人要帶座號才分得開（Issue #121）
  * - totalGroups：全班應有幾組（例如名單裡要報告的人數）；未提供時班均只寫「已計入」
  */
 export function summarizeFeedback(
   records: readonly FeedbackRecord[],
   items: readonly FeedbackItem[],
-  opts: { scale?: FeedbackScale; totalGroups?: number; trim?: number } = {},
+  opts: { scale?: FeedbackScale; totalGroups?: number; trim?: number; keyOf?: (p: PersonRef) => string | null } = {},
 ): FeedbackSummary {
   const scale = opts.scale ?? DEFAULT_SCALE;
   const weights = effectiveWeights(items);
@@ -118,13 +119,14 @@ export function summarizeFeedback(
   const problems: ScoreProblem[] = [];
   type Acc = { person: PersonRef; vals: number[][]; raters: Set<string>; raterCount: number; self: Record<string, number | null> | null; comments: { recordId: number; text: string }[] };
   const byTarget = new Map<string, Acc>();
+  const keyOf = opts.keyOf ?? personKey;
 
   for (const r of records) {
-    const key = personKey(r.target);
+    const key = keyOf(r.target);
     if (key === null) continue;
     const acc = byTarget.get(key) ?? { person: r.target, vals: items.map(() => []), raters: new Set(), raterCount: 0, self: null, comments: [] };
     byTarget.set(key, acc);
-    const isSelf = personKey(r.rater) === key;
+    const isSelf = keyOf(r.rater) === key;
     const parsed = items.map((it) => {
       const cell = r.scores[it.id];
       if (isBlankCell(cell)) return null;
