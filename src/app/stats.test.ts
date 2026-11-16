@@ -164,3 +164,21 @@ describe('整欄空白的欄位提示（Issue #94）', () => {
     expect(blankColumns({ ...s, excluded: [0, 2] }).map((c) => c.header)).toEqual(['滿意度']);
   });
 });
+
+describe('票選小問題（#150）', () => {
+  it('匯出的抽籤紀錄不露出內部「|欄位序號」後綴', () => {
+    const csv = ['時間戳記,填寫者,班長', '2026/10/01 10:00:00,甲,乙', '2026/10/01 10:01:00,丙,丁'].join('\n');
+    const s = session(csv, { 時間戳記: 'timestamp', 填寫者: 'respondentName', 班長: 'choice' }, 'vote');
+    const o = { ...defaultStatsOpts(), seed: 'draw-abc', seats: { 2: 1 } };
+    const v = runVote(s, o);
+    const draw = voteSheets(v)[0]!.rows[1]![2] as string;
+    expect(draw).toContain('抽籤編號「draw-abc」');
+    expect(draw).not.toContain('|');
+  });
+  it('時間戳記空白的票列入時間異常', () => {
+    const csv = ['時間戳記,填寫者,班長', ',甲,乙', '2026/10/01 10:01:00,丙,丁'].join('\n');
+    const s = session(csv, { 時間戳記: 'timestamp', 填寫者: 'respondentName', 班長: 'choice' }, 'vote');
+    const v = runVote(s, defaultStatsOpts());
+    expect(v.issues.filter((i) => i.kind === 'time').flatMap((i) => i.ballotIds)).toEqual([0]);
+  });
+});

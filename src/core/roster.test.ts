@@ -100,3 +100,20 @@ describe('compareRoster', () => {
     expect(compareRoster([], [{ id: 1, person: { name: 'x' } }]).missing).toEqual([]);
   });
 });
+
+describe('compareRoster 的重複判斷（#147）', () => {
+  const p = { class: '301', seat: 1, name: '王小明' };
+  it('有分組（報告回饋）：同填寫者對不同被評者不算重複，同被評者才算', () => {
+    const c = compareRoster(roster, [
+      { id: 0, person: p, dupGroup: 'A' },
+      { id: 1, person: p, dupGroup: 'B' },
+      { id: 2, person: p, dupGroup: 'B' },
+    ]);
+    expect(c.duplicates).toHaveLength(1);
+    expect(c.duplicates[0]!.ids).toEqual([1, 2]);
+  });
+  it('沒分組：同一位學生多份就算重複（原行為）', () => {
+    const c = compareRoster(roster, [{ id: 0, person: p }, { id: 1, person: p }]);
+    expect(c.duplicates).toHaveLength(1);
+  });
+});

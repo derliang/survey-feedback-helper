@@ -9,7 +9,10 @@ import { cleanTopic, contentWidth, tidyFilled, type Block, type DocModel } from 
 import type { ClassSummaryInput, PersonalFeedbackInput } from '../export';
 
 const fmt1 = (n: number | null | undefined): string => (n === null || n === undefined || !Number.isFinite(n) ? '—' : n.toFixed(1));
-const signed = (n: number): string => (n >= 0 ? '+' : '') + n.toFixed(1);
+const signed = (n: number): string => {
+  const s = n.toFixed(1);
+  return Number(s) === 0 ? '+0.0' : (n > 0 ? '+' : '') + s;
+};
 
 /** 範本是不是「班級總表」類（含班級總表資料槽）。 */
 export function isSummaryTemplate(t: EditorTemplate): boolean {

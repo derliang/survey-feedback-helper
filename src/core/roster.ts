@@ -116,6 +116,12 @@ export interface RosterEntry {
   /** 回覆的識別（通常是資料列索引）。 */
   id: number | string;
   person: PersonRef;
+  /**
+   * 判斷「重複」的附加分組：有給時，同一位學生只有「分組相同」的多份才算重複
+   * （報告回饋：同一填寫者對不同被評者本來就會填多份，分組用被評者；Issue #147）。
+   * 沒給（undefined）時，同一位學生出現多份就算重複。
+   */
+  dupGroup?: string | null;
 }
 
 export interface RosterComparison {
@@ -136,16 +142,30 @@ export interface RosterComparison {
 export function compareRoster(roster: readonly Student[], entries: readonly RosterEntry[]): RosterComparison {
   const results = entries.map((e) => ({ id: e.id, match: matchPerson(roster, e.person) }));
   const seen = new Map<Student, (number | string)[]>();
+  const groupOf = new Map(entries.map((e) => [e.id, e.dupGroup] as const));
+  const grouped = entries.some((e) => e.dupGroup !== undefined);
+  const dupSeen = new Map<string, { student: Student; ids: (number | string)[] }>();
+  const studentNo = new Map<Student, number>();
   for (const r of results) {
     const { status, student } = r.match;
     if (student !== null && (status === 'ok' || status === 'seatMismatch' || status === 'seatOnly')) {
       seen.set(student, [...(seen.get(student) ?? []), r.id]);
+      const g = groupOf.get(r.id);
+      if (g !== undefined && g !== null) {
+        if (!studentNo.has(student)) studentNo.set(student, studentNo.size);
+        const k = `${studentNo.get(student)}\u0000${g}`;
+        const cur = dupSeen.get(k) ?? { student, ids: [] };
+        cur.ids.push(r.id);
+        dupSeen.set(k, cur);
+      }
     }
   }
   return {
     results,
     missing: roster.filter((s) => !seen.has(s)),
-    duplicates: [...seen].filter(([, ids]) => ids.length > 1).map(([student, ids]) => ({ student, ids })),
+    duplicates: grouped
+      ? [...dupSeen.values()].filter((d) => d.ids.length > 1)
+      : [...seen].filter(([, ids]) => ids.length > 1).map(([student, ids]) => ({ student, ids })),
     unknown: results.filter((r) => r.match.status === 'unknownName'),
     seatMismatches: results.filter((r) => r.match.status === 'seatMismatch'),
     ambiguous: results.filter((r) => r.match.status === 'ambiguous').map((r) => r.id),
