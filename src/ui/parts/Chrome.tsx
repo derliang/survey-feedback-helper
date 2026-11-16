@@ -1,5 +1,5 @@
 import { canGoStats } from '../../app/progress';
-import { type Route, getState, go, requestRestart, useApp } from '../../app/store';
+import { type Route, getState, go, reauthorize, requestRestart, set, useApp } from '../../app/store';
 import { strings as S } from '../strings';
 import { Icon } from './parts';
 import { extra } from '../strings-extra';
@@ -60,7 +60,40 @@ export function TopBar() {
           </button>
         </div>
       </div>
+      <FolderStrip />
     </header>
+  );
+}
+
+/** 手機工作頁（準備資料、統計、輸出）頂列下方的資料夾狀態細條（R3-1 方案 A）；寬螢幕由 CSS 隱藏。不支援資料夾的瀏覽器沒有資料夾可談，不顯示。 */
+function FolderStrip() {
+  const st = useApp();
+  const f = st.folder;
+  const work = st.session !== null && (st.route === 'prepare' || st.route === 'stats' || st.route === 'output');
+  if (!work || f.state === 'unsupported') return null;
+  const name = f.state === 'ready' ? f.store.name : f.state === 'needsPermission' ? f.name : S.folder.none;
+  const warn = f.state !== 'ready';
+  return (
+    <div class={`folder-strip${warn ? ' warn' : ''}`} data-testid="folder-strip">
+      <Icon name="folder" />
+      <span class="fs-text">
+        {f.state === 'none' ? (
+          name
+        ) : (
+          <>
+            {S.folder.label}
+            <strong>{name}</strong>
+          </>
+        )}
+      </span>
+      <button
+        class="btn ghost small"
+        type="button"
+        onClick={() => (f.state === 'needsPermission' ? void reauthorize() : set({ folderDialog: true }))}
+      >
+        {f.state === 'none' ? S.folder.choose : S.folder.repick}
+      </button>
+    </div>
   );
 }
 
