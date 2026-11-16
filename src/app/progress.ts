@@ -1,4 +1,4 @@
-import { type CheckReport, type PersonRef, type RosterComparison, type Student, compareRoster, runChecks } from '../core';
+import { type CheckReport, type PersonRef, type RosterComparison, type Student, compareRoster, personKey, runChecks } from '../core';
 import { buildCheckRecords, countToConfirm, mappingProblems, pendingCols, personRefs, scaleDoubt } from './columns';
 import { rosterFromRows } from './roster-input';
 import type { Session } from './store';
@@ -47,7 +47,11 @@ export function rosterComparison(s: Session): RosterComparison | null {
   const students = rosterStudents(s);
   if (students.length === 0) return null;
   const refs = personRefs(s.table, s.cols, 'respondent');
-  const entries = refs.map((person, id) => ({ id, person })).filter((e) => !s.excluded.includes(e.id));
+  // 報告回饋：同一填寫者對不同被評者本來就會填多份，只有「同填寫者＋同被評者」才算重複（Issue #147）
+  const targets = s.kind === 'feedback' ? personRefs(s.table, s.cols, 'target') : null;
+  const entries = refs
+    .map((person, id) => ({ id, person, ...(targets ? { dupGroup: personKey(targets[id]) ?? `#${id}` } : {}) }))
+    .filter((e) => !s.excluded.includes(e.id));
   const first = compareRoster(students, entries);
   // 老師按「是同一人」的列，改用名單上那位的資料再比一次
   const accepted = acceptedStudents(s, students);
@@ -56,7 +60,7 @@ export function rosterComparison(s: Session): RosterComparison | null {
     students,
     entries.map((e) => {
       const st = accepted.get(e.id);
-      return st ? { id: e.id, person: { class: st.class, seat: st.seat, name: st.name } } : e;
+      return st ? { ...e, person: { class: st.class, seat: st.seat, name: st.name } } : e;
     }),
   );
 }
