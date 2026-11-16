@@ -47,7 +47,7 @@ function CommentRow({ item, review }: { item: CommentItem; review: Review }) {
           <p class={st === 'hide' ? 'cm-text hidden' : 'cm-text'}>{shown}</p>
           {st === 'rewrite' && <p class="hint">{extra().review.original}{item.text}</p>}
           <div class="btn-row">
-            <button class="btn secondary small" type="button" disabled={st === 'adopt'} onClick={() => updateReview((r) => setComment(r, item.key, 'adopt'))}>
+            <button class="btn small" type="button" disabled={st === 'adopt'} onClick={() => updateReview((r) => setComment(r, item.key, 'adopt'))}>
               {R.adopt}
             </button>
             <button class="btn secondary small" type="button" disabled={st === 'hide'} onClick={() => updateReview((r) => setComment(r, item.key, 'hide'))}>
