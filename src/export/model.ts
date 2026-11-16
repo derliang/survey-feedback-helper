@@ -128,6 +128,17 @@ export function fillVars(text: string, vars: Record<string, string | number | un
   return text.replace(/\{([^{}]+)\}/g, (_, k: string) => String(vars[k] ?? ''));
 }
 
+/** 去掉表單檔名帶來的「(回覆)」「(Responses)」「(Form Responses 1)」與多餘空白（#144）。 */
+export function cleanTopic(topic: string): string {
+  return topic.replace(/\s*\((回覆|responses|form responses \d*)\)/gi, '').replace(/\s+/g, ' ').trim();
+}
+
+/** 填完變數後的標題整理：頭尾空白去掉；事項名稱本身已含「回饋單」時，不再重複結尾的「回饋單」（#144）。 */
+export function tidyFilled(text: string): string {
+  const t = text.trim();
+  return /回饋單.*回饋單$/.test(t) ? t.slice(0, -3) : t;
+}
+
 /** 序列化成 JSON（圖片轉 base64）。文件模型存進設定檔、或日後預覽用。 */
 export function serializeDoc(doc: DocModel): string {
   return JSON.stringify(doc, (_k, v: unknown) => (v instanceof Uint8Array ? { $png: toBase64(v) } : v));

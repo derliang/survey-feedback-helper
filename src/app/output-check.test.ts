@@ -105,6 +105,17 @@ describe('文件文字（預覽簽章的來源）', () => {
   });
 });
 
+describe('驗收 #149：老師評語直接輸入 {姓名}', () => {
+  it('輸出時一律換成該生姓名', () => {
+    let r = emptyReview('s1');
+    for (const t of summary.targets) r = setTeacher(r, t.key, '{姓名}這次很棒，{姓名}加油');
+    for (const p of personalInputs(s, summary, r, 'teacher', raters)) {
+      expect(p.input.teacherComment).not.toContain('{');
+      expect(p.input.teacherComment).toBe(`${p.input.student.name}這次很棒，${p.input.student.name}加油`);
+    }
+  });
+});
+
 describe('老師的話的人名提示', () => {
   const people = allPeople(s, summary, raters);
   it('標出名單上其他人的姓名，不標被評者本人', () => {

@@ -23,6 +23,8 @@ export interface PersonalFeedbackInput {
   teacherComment?: string;
   /** 已畫好的圖表（PNG）。 */
   chartPng?: Uint8Array;
+  /** 圖的高度（寬固定 440）；沒給就用 190。題數多時圖較高，不能寫死（#144）。 */
+  chartH?: number;
   /** 標題、副標的範本，可含變數 {姓名}{座號}{班級}{事項}。 */
   titleTemplate?: string;
   /** 摘要數字列用的統計；沒有的欄位在輸出時略過。名次只在老師版顯示（compile 處理）。 */
@@ -72,7 +74,7 @@ export function personalFeedbackDoc(inp: PersonalFeedbackInput): DocModel {
       after: 12,
     },
   ];
-  if (inp.chartPng) blocks.push({ type: 'image', png: inp.chartPng, w: 440, h: 190, after: 12 });
+  if (inp.chartPng) blocks.push({ type: 'image', png: inp.chartPng, w: 440, h: inp.chartH ?? 190, after: 12 });
   if (inp.praise.length) {
     blocks.push({ type: 'heading', text: inp.praiseTitle ?? '同學的優點回饋', size: 14, color: NAVY, before: 6, after: 6 });
     blocks.push({ type: 'bullets', items: inp.praise, size: 11, after: 10 });

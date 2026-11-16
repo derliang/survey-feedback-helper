@@ -22,6 +22,27 @@ const input = (over: Partial<PersonalFeedbackInput> = {}): PersonalFeedbackInput
 const texts = (d: { blocks: { type: string; text?: string; items?: string[] }[] }) => d.blocks.flatMap((b) => [b.text ?? '', ...(b.items ?? [])]);
 const [personal, summary] = builtinTemplates() as [EditorTemplate, EditorTemplate];
 
+describe('驗收 #144 標題與圖高', () => {
+  it('事項名稱帶「(回覆)」且已含「回饋單」時，標題不重複', () => {
+    const d = personalDocFromTemplate(personal, input({ topic: '同儕回饋單 10_29 (回覆)' }), { version: 'teacher' });
+    expect(texts(d).join('|')).toContain('林小宇 的同儕回饋單 10_29');
+    expect(texts(d)[0]).toBe('林小宇 的同儕回饋單 10_29');
+    expect(texts(d).join('|')).not.toContain('回覆');
+    expect(d.title).toBe('林小宇 的同儕回饋單 10_29');
+  });
+  it('圖片高度依 chartH 計算，不寫死 190', () => {
+    const png = new Uint8Array([1, 2, 3]);
+    const d = personalDocFromTemplate(personal, input({ chartPng: png, chartH: 222 }), { version: 'teacher' });
+    const img = d.blocks.find((b) => b.type === 'image') as { w: number; h: number };
+    expect(img.h / img.w).toBeCloseTo(222 / 440, 5);
+  });
+  it('班級總表標題在沒有班級時前面不留空白', () => {
+    const inp: ClassSummaryInput = { className: '', topic: '小組報告', items: ['內容'], students: [], classMeans: [4], classOverall: 4 };
+    const d = classDocFromTemplate(summary, inp, { version: 'teacher' });
+    expect(texts(d)[0]).toBe('小組報告 班級總表');
+  });
+});
+
 describe('輸出接線：範本 → DocModel', () => {
   it('內建個人回饋單填入真實資料', () => {
     const d = personalDocFromTemplate(personal, input(), { version: 'teacher', school: '○○國中' });

@@ -464,7 +464,7 @@ export const strings = {
     flagWord: (w: string[]) => `提醒：含「${w.join('」「')}」`,
     noComments: '這裡沒有留言。',
     teacherTitle: '老師評語',
-    teacherHelp: '這段老師評語會放在個人回饋單末尾；請先確認是否真的適合提供給目前所選的閱讀對象。',
+    teacherHelp: '這段老師評語會放在個人回饋單末尾；請先確認是否真的適合提供給目前所選的閱讀對象。文字裡的 {姓名} 輸出時會換成這位學生的姓名。',
     phrases: {
       title: '常用評語',
       help: '點選評語後，會插入目前輸入位置；「{姓名}」會自動替換成這位學生的姓名。',
@@ -571,7 +571,8 @@ export const strings = {
     noFeedbackTargets: '沒有可輸出的被評對象。',
     noteNoRank: '回饋單不顯示名次。',
     templateTitle: '輸出用範本',
-    templateHint: '選一份範本；要改版面請按「編輯範本」。',
+    templateHint: '選一份範本；要改版面請按「編輯範本」。縮圖用的是示意範例資料（林小宇、項目 1～3），不是目前問卷的結果。',
+    templateSample: '範例預覽',
     templateCurrent: '目前選用',
     templateEdit: '編輯範本',
     templateLoading: '範本載入中⋯',

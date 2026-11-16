@@ -1,6 +1,6 @@
 // 編譯：範本 ＋ 某位學生的資料 → 輸出器讀的 DocModel。條件、變數、單一學生覆寫都在這裡套用。
 import * as advanced from '../export/advanced';
-import { A4_LANDSCAPE, A4_PORTRAIT, fillVars, type Block, type DocModel, type PageDeco, type PageSetup } from '../export/model';
+import { A4_LANDSCAPE, A4_PORTRAIT, fillVars, tidyFilled, type Block, type DocModel, type PageDeco, type PageSetup } from '../export/model';
 import { evalCondition } from './condition';
 import { applyOverrides, type StudentOverride } from './overrides';
 import { PAGE_SIZES, STAT_KEYS, type BulletsEB, type CalloutEB, type CompareEB, type DataEB, type EBlock, type EditorTemplate, type PageSpec, type ReportVersion } from './types';
@@ -32,7 +32,7 @@ export function compile(template: EditorTemplate, ctx: CompileContext): DocModel
   const t = applyOverrides(template, ctx.override);
   const vars = { ...ctx.vars, ...(ctx.override?.vars ?? {}) };
   const cond = { version: ctx.version, vars };
-  const fill = (s: string) => fillVars(s, vars);
+  const fill = (s: string) => tidyFilled(fillVars(s, vars));
   const spacing = (b: EBlock) => ({ ...(b.before !== undefined ? { before: b.before } : {}), ...(b.after !== undefined ? { after: b.after } : {}) });
 
   const emit = (list: EBlock[]): Block[] => {

@@ -419,7 +419,7 @@ export const enMore: DeepPartial<Strings> = {
     flagWord: (w) => `Note: contains "${w.join('", "')}"`,
     noComments: 'No comments here.',
     teacherTitle: 'Teacher comment',
-    teacherHelp: 'This teacher comment is placed at the end of the personal feedback sheet; first check that it is suitable for the audience you have selected.',
+    teacherHelp: 'This teacher comment is placed at the end of the personal feedback sheet; first check that it is suitable for the audience you have selected. {姓名} in the text is replaced with the student name on output.',
     phrases: {
       title: 'Stock comments',
       help: 'Click a comment to insert it at the cursor; the student name is filled in automatically where the comment calls for it.',
@@ -525,7 +525,8 @@ export const enMore: DeepPartial<Strings> = {
     noFeedbackTargets: 'There is nobody to output.',
     noteNoRank: 'The feedback sheet does not show ranks.',
     templateTitle: 'Output template',
-    templateHint: 'Pick a template; to change the layout press "Edit template".',
+    templateHint: 'Pick a template; to change the layout press "Edit template". Thumbnails use made-up sample data, not your current survey results.',
+    templateSample: 'Sample preview',
     templateCurrent: 'In use',
     templateEdit: 'Edit template',
     templateLoading: 'Loading template…',

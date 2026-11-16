@@ -23,6 +23,7 @@ export default function OutputPicker() {
             <input type="radio" name="out-template" checked={t.id === cur} onChange={() => setOutputTemplate(t.id)} aria-label={t.name} />
             <div class="out-thumb" aria-hidden="true">
               <Preview t={t} thumb />
+              <span class="out-thumb-tag">{S.output.templateSample}</span>
             </div>
             <b>{t.name}</b>
             {t.id === cur && <span class="tag ok">{S.output.templateCurrent}</span>}
