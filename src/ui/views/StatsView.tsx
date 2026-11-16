@@ -101,7 +101,7 @@ function FeedbackMain({ summary, sel, wide }: { summary: FeedbackSummary; sel: s
     return (
       <>
         <div class="tiles">
-          <Tile label={S.stats.classMean} value={f1(summary.classMean.value)} note={summary.classMean.label} />
+          <Tile label={S.stats.classMean} value={f1(summary.classMean.value)} note={S.stats.classMeanNote(summary.classMean.included, summary.classMean.total)} />
           <Tile label={extra().stats.targets} value={S.stats.people(summary.targets.length)} />
         </div>
         {summary.problems.length > 0 && <Notice kind="warn">{S.stats.problems(summary.problems.length)}</Notice>}
@@ -113,7 +113,7 @@ function FeedbackMain({ summary, sel, wide }: { summary: FeedbackSummary; sel: s
           )}
         />
         <div class="table-wrap">
-          <table class="roster-table">
+          <table class="roster-table stats-table">
             <thead>
               <tr>
                 <th>{extra().stats.rank}</th>

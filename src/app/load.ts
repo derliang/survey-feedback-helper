@@ -92,6 +92,8 @@ export async function sheetsFromFile(file: FileLike): Promise<LoadedSheets> {
     if (e instanceof LoadError) throw e;
     throw new LoadError('unreadable');
   }
+  // .txt 讀不出表格（例如只有一行字）時，老師多半是拿錯檔，說「不支援」比「沒有問卷回覆」準確
+  if (/\.txt$/.test(lower) && out.sheets.every((s) => s.table.headers.length === 0 || s.table.rows.length === 0)) throw new LoadError('unsupported');
   if (out.sheets.length === 0 || out.sheets.every((s) => s.table.headers.length === 0 || s.table.rows.length === 0)) throw new LoadError('empty');
   return out;
 }

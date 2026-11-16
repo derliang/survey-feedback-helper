@@ -26,28 +26,39 @@ export function personKey(p: PersonRef | undefined): string | null {
   return `${normalizeClass(p?.class)}|${name}`;
 }
 
+/** 比對鍵（班級|姓名）取出姓名。 */
+function nameOfKey(k: string): string {
+  return k.split('|').slice(1).join('|') || k;
+}
+
 export interface DuplicateGroup {
   key: string;
   ids: number[];
   /** 這幾份的座號互不相同：可能是同班同名的兩位學生，只能標「疑似重複」請老師核對，不能直接建議刪除。 */
   seatConflict: boolean;
+  /** 給人看的名稱：填寫者姓名；報告回饋為「填寫者 → 被評對象」（不含內部分隔符）。 */
+  label: string;
 }
 
 /** 重複填答：同一位填寫者（報告回饋時為「填寫者＋被評對象」）出現多份。 */
 export function findDuplicates(records: readonly CheckRecord[], withTarget: boolean): DuplicateGroup[] {
   const groups = new Map<string, number[]>();
+  const labels = new Map<string, string>();
   const seatOf = new Map<number, number | null>();
   for (const r of records) {
     seatOf.set(r.id, normalizeSeat(r.respondent?.seat));
     const who = personKey(r.respondent);
     if (who === null) continue;
     let key = who;
+    let label = nameOfKey(who);
     if (withTarget) {
       const t = personKey(r.target);
       if (t === null) continue;
       key = `${who}→${t}`;
+      label = `${nameOfKey(who)} → ${nameOfKey(t)}`;
     }
     groups.set(key, [...(groups.get(key) ?? []), r.id]);
+    labels.set(key, label);
   }
   return [...groups]
     .filter(([, ids]) => ids.length > 1)
@@ -55,7 +66,7 @@ export function findDuplicates(records: readonly CheckRecord[], withTarget: bool
       const seats = ids.map((id) => seatOf.get(id) ?? null);
       // 每份都填了座號且至少兩種 → 座號不同；有人沒填座號就無從判斷，仍照重複處理
       const seatConflict = seats.every((s) => s !== null) && new Set(seats).size > 1;
-      return { key, ids, seatConflict };
+      return { key, ids, seatConflict, label: labels.get(key) ?? key };
     });
 }
 

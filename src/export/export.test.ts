@@ -11,6 +11,7 @@ import { collectChars, fillVars, parseDoc, serializeDoc } from './model';
 import { renderPdf } from './pdf';
 import { classSummaryDoc, personalFeedbackDoc } from './templates';
 import { fakeClassSummary, fakeFeedback, nodeFontSource, RARE_BMP, RARE_OUTSIDE_FONT, stressFeedback } from './test-support';
+import { seatCell } from './seatcell';
 import { buildXlsx, classSummaryXlsx, colName, safeSheetName } from './xlsx';
 
 describe('文件模型', () => {
@@ -71,6 +72,14 @@ describe('xlsx 輸出', () => {
     expect(rows[3]![1]).toBe(inp.students[0]!.name);
     expect(rows[3]![2]).toBe(inp.students[0]!.values[0]);
     expect(rows.at(-1)![1]).toBe('班級平均');
+  });
+  it('座號存成數字；前導 0 或非數字保留文字（#137）', async () => {
+    expect(seatCell('5')).toBe(5);
+    expect(seatCell(12)).toBe(12);
+    expect(seatCell('05')).toEqual({ v: '05', s: 'text' });
+    expect(seatCell('A3')).toEqual({ v: 'A3', s: 'text' });
+    const rows = (await xlsxSource(classSummaryXlsx(fakeClassSummary(3))).sheets())[0]!.rows;
+    expect(typeof rows[3]![0]).toBe('number');
   });
   it('特殊字元會跳脫、不合法的控制字元被去掉', async () => {
     const bytes = buildXlsx([{ name: 'a/b', rows: [['<&>"\u0001x', 1.25, null]] }]);

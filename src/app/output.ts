@@ -119,6 +119,8 @@ export function classSummaryInput(s: Session, summary: FeedbackSummary): ClassSu
 /* ───────── 意見調查與票選：xlsx 表與簡單報告 ───────── */
 
 const pct = (x: number): string => `${Math.round(x * 100)}%`;
+/** 複選題的比例說明：以作答人數為基準，一人可選多項，所以加總會超過 100%（驗收 #134）。 */
+const MULTI_NOTE = '複選題：比例是「選這一項的人數 ÷ 作答人數」，一人可選多項，所以加總可能超過 100%。';
 
 export function opinionSheets(qs: Question[], review: Review, scaleMin: number): XSheet[] {
   const summary: XSheet = { name: '統計摘要', rows: [[{ v: '題目', s: 'header' }, { v: '類型', s: 'header' }, { v: '結果', s: 'header' }]], colWidths: [40, 12, 60] };
@@ -130,7 +132,7 @@ export function opinionSheets(qs: Question[], review: Review, scaleMin: number):
       summary.rows.push([q.col.label, '評分', st.n === 0 ? '沒有有效分數' : `平均 ${st.mean!.toFixed(1)}，中位數 ${st.median}，共 ${st.n} 人`]);
       st.distribution.forEach((n, i) => detail.rows.push([q.col.label, String(scaleMin + i), n, '']));
     } else if (q.kind === 'choice') {
-      summary.rows.push([q.col.label, q.multi ? '複選題' : '單選題', `${q.stat.answered} 人作答`]);
+      summary.rows.push([q.col.label, q.multi ? '複選題' : '單選題', `${q.stat.answered} 人作答${q.multi ? `。${MULTI_NOTE}` : ''}`]);
       for (const c of q.stat.counts) detail.rows.push([q.col.label, c.option, c.count, pct(c.share)]);
     } else {
       const texts = q.stat.answers
@@ -182,7 +184,7 @@ export function opinionReport(s: Session, qs: Question[], review: Review): DocMo
         return { heading: q.col.label, lines: [st.n === 0 ? '沒有有效分數。' : `平均 ${st.mean!.toFixed(1)}（${s.scale.min}～${s.scale.max} 分），中位數 ${st.median}，共 ${st.n} 人。`] };
       }
       if (q.kind === 'choice') {
-        return { heading: q.col.label, table: { header: ['選項', '人數', '比例'], rows: q.stat.counts.map((c) => [c.option, String(c.count), pct(c.share)]) } };
+        return { heading: q.col.label, ...(q.multi ? { lines: [MULTI_NOTE] } : {}), table: { header: ['選項', '人數', '比例'], rows: q.stat.counts.map((c) => [c.option, String(c.count), pct(c.share)]) } };
       }
       const texts = q.stat.answers
         .map((a) => finalText(review, openKey(q.col.index, a.row), a.text, 'teacher'))

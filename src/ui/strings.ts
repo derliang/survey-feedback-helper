@@ -386,7 +386,7 @@ export const strings = {
     rank: (n: number | null) => (n === null ? '—' : `第 ${n} 名`),
     total: '總分（加權）',
     classMean: '班級平均',
-    classMeanNote: (inc: number) => `已計入 ${inc} 組`,
+    classMeanNote: (inc: number, total?: number | null) => (total == null ? `已計入 ${inc} 組` : `已計入 ${inc} 組／共 ${total} 組`),
     raters: (n: number) => `${n} 位同學評分`,
     mine: '這位同學',
     classAvg: '班級平均',

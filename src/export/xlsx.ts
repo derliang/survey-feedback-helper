@@ -1,6 +1,7 @@
 // xlsx 輸出：自寫（fflate 打包 zip）。沒有用 ExcelJS，原因見 docs/decisions/2026-11-01-xlsx輸出與分支保護.md。
 // 支援：多工作表、欄寬、凍結列、固定幾種儲存格樣式（標題、表頭、文字、數字 0.0、強調列）；文字用內嵌字串。
 import { zipSync, strToU8 } from 'fflate';
+import { seatCell } from './seatcell';
 import type { ClassSummaryInput } from './templates';
 
 export type XStyle = 'title' | 'header' | 'text' | 'num' | 'emphText' | 'emphNum';
@@ -150,7 +151,7 @@ export function classSummaryXlsx(inp: ClassSummaryInput): Uint8Array {
     [{ v: `${inp.className} ${inp.topic} 班級總表`, s: 'title' }],
     [],
     ['座號', '姓名', ...inp.items, '平均'].map((v) => ({ v, s: 'header' as const })),
-    ...inp.students.map((s) => [{ v: String(s.seat), s: 'text' as const }, { v: s.name, s: 'text' as const }, ...s.values.map(n), n(s.mean)]),
+    ...inp.students.map((s) => [seatCell(s.seat), { v: s.name, s: 'text' as const }, ...s.values.map(n), n(s.mean)]),
     [{ v: '', s: 'emphText' as const }, { v: '班級平均', s: 'emphText' as const }, ...inp.classMeans.map(en), en(inp.classOverall)],
   ];
   return buildXlsx([{ name: '班級總表', rows, colWidths: [8, 14, ...inp.items.map(() => 14), 10], freezeRows: 3 }]);
