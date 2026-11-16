@@ -1,6 +1,8 @@
 // 常用評語（R-021、R-022、R-042）：內建六類各 5 句（docs/design/預設常用評語草稿.md，使用者 2026-11-01 裁示照草稿定稿）。
 // 老師可新增、改寫、刪除、排序、新增分類；整句可含 {姓名}。不做分數推薦。
 import type { Phrase, PhraseCategory } from '../storage';
+import { currentLang } from '../ui/locale';
+import { DEFAULT_PHRASES_EN } from './phrases.en';
 
 export const NAME_TOKEN = '{姓名}';
 /** 每類句數上限（設計規範：每類 5～8 句）。 */
@@ -80,13 +82,13 @@ export const DEFAULT_PHRASES: readonly PhraseCategory[] = [
 
 /** 老師的評語庫：沒自訂過就用內建六類（複製一份，避免改到常數）。 */
 export function phraseLibrary(saved: readonly PhraseCategory[] | undefined): PhraseCategory[] {
-  const src = saved ?? DEFAULT_PHRASES;
+  const src = saved ?? (currentLang() === 'en' ? DEFAULT_PHRASES_EN : DEFAULT_PHRASES);
   return src.map((c) => ({ ...c, phrases: c.phrases.map((p) => ({ ...p })) }));
 }
 
 /** 把 {姓名} 換成這位同學的名字；沒有名字時換成「這位同學」。 */
 export function fillName(text: string, name: string | undefined): string {
-  return text.split(NAME_TOKEN).join(name && name.trim() !== '' ? name.trim() : '這位同學');
+  return text.split(NAME_TOKEN).join(name && name.trim() !== '' ? name.trim() : currentLang() === 'en' ? 'this student' : '這位同學');
 }
 
 /** 把文字插在游標處（有選取就取代選取）。回傳新文字與插入後的游標位置。 */
@@ -105,7 +107,9 @@ export function toTemplate(text: string, names: readonly string[]): string {
 
 /** 籌碼短標題：取句首 6 個字（去掉 {姓名}）。 */
 export function autoTitle(text: string): string {
-  const t = [...text.split(NAME_TOKEN).join('').trim()];
+  const plain = text.split(NAME_TOKEN).join('').trim();
+  if (!/[一-鿿]/.test(plain)) return plain.split(/\s+/).slice(0, 3).join(' ');
+  const t = [...plain];
   return t.slice(0, 6).join('');
 }
 
@@ -126,7 +130,7 @@ export function addPhrase(lib: readonly PhraseCategory[], categoryId: string, te
   if (!cat) {
     cat = next.find((c) => c.id === MINE_ID);
     if (!cat) {
-      cat = { id: MINE_ID, name: '我的', phrases: [] };
+      cat = { id: MINE_ID, name: currentLang() === 'en' ? 'Mine' : '我的', phrases: [] };
       next = [...next, cat];
     }
   }
