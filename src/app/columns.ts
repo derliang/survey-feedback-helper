@@ -18,6 +18,12 @@ import { extra } from '../ui/strings-extra';
 
 export type Role = FieldRole;
 
+/** 顯示名稱預設：去掉欄名結尾的冒號（半形／全形）與空白；原欄名仍保留給比對（Issue #164）。 */
+export function defaultLabel(header: string): string {
+  const t = header.replace(/[\s:：]+$/u, '');
+  return t === '' ? header : t;
+}
+
 export interface ColumnInfo {
   index: number;
   header: string;
@@ -90,7 +96,7 @@ export function analyzeColumns(table: Table): ColumnInfo[] {
         unsorted = confirm;
       }
     }
-    const col: ColumnInfo = { index, header, label: header, role, confirm, samples: samplesOf(table, index) };
+    const col: ColumnInfo = { index, header, label: defaultLabel(header), role, confirm, samples: samplesOf(table, index) };
     if (unsorted) col.unsorted = true;
     return col;
   });
@@ -149,7 +155,7 @@ export function applySavedMapping(table: Table, saved: SavedMapping, labels: Rec
       }
     });
   }
-  return base.map((c) => ({ ...c, label: labels[c.header] ?? c.header }));
+  return base.map((c) => ({ ...c, label: labels[c.header] ?? defaultLabel(c.header) }));
 }
 
 /** 由目前的欄位選擇建立可存的對應（角色 → 欄位原標題）。 */
@@ -169,7 +175,7 @@ export function toSavedMapping(cols: readonly ColumnInfo[]): SavedMapping {
 
 export function toSavedLabels(cols: readonly ColumnInfo[]): Record<string, string> {
   const out: Record<string, string> = {};
-  for (const c of cols) if (c.label.trim() !== '' && c.label !== c.header) out[c.header] = c.label.trim();
+  for (const c of cols) if (c.label.trim() !== '' && c.label !== defaultLabel(c.header)) out[c.header] = c.label.trim();
   return out;
 }
 

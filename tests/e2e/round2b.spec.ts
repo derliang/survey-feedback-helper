@@ -37,9 +37,9 @@ test('設定頁：預設輸出的範圍用下拉，與內容分段控制區隔�
   await page.goto('./');
   await page.getByRole('button', { name: '設定', exact: true }).click();
   const card = page.getByTestId('defaults-card');
-  const scope = card.getByLabel('套用範圍');
+  const scope = card.getByRole('radiogroup', { name: '套用範圍' });
   await expect(scope).toBeVisible();
-  await scope.selectOption({ label: '問卷類型' });
+  await scope.getByRole('radio', { name: '問卷類型' }).click();
   await expect(card.getByLabel('問卷類型', { exact: true })).toBeVisible();
   // 「預設給誰看」仍是分段控制
   await expect(card.getByRole('radio', { name: '老師版' })).toBeVisible();

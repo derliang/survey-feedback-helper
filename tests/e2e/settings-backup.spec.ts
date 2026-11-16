@@ -22,13 +22,13 @@ test('三層設定：切層、標出來源、還原到上一層、不橫向捲�
   await expect(card.getByText('目前的值')).toHaveCount(0);
   await card.getByLabel('學校名稱').fill('範例國中');
   await expect(card.locator('.tag', { hasText: '已自訂' })).toHaveCount(1);
-  await card.getByLabel('套用範圍').selectOption({ label: '問卷類型' });
+  await card.getByRole('radio', { name: '問卷類型' }).click();
   await card.locator('#def-kind').selectOption({ label: '票選' });
   await card.getByRole('radio', { name: '學生版' }).click();
   await expect(card.getByText('沿用全域預設').first()).toBeVisible();
-  await card.getByLabel('套用範圍').selectOption({ label: '這次輸出' });
+  await card.getByRole('radio', { name: '這次輸出' }).click();
   await expect(card.getByText('只對這一次輸出有效')).toBeVisible();
-  await card.getByLabel('套用範圍').selectOption({ label: '全域預設' });
+  await card.getByRole('radio', { name: '全域預設' }).click();
   await card.getByRole('button', { name: '改回上一層的設定值' }).first().click();
   await expect(card.getByLabel('學校名稱')).toHaveValue('');
 });

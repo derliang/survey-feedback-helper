@@ -656,7 +656,7 @@ export function OutputView() {
         </Sheet>
       )}
 
-      <ActBar>
+      <ActBar fixed>
         <button class="btn secondary grow" type="button" onClick={() => go('stats')}>
           {S.output.back}
         </button>
