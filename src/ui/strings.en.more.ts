@@ -397,6 +397,7 @@ export const enMore: DeepPartial<Strings> = {
     reseed: 'Change the draw number and draw again',
     invalidVotes: (n) => `${n} ballot(s) name someone outside the list (invalid)`,
     abstain: (n) => `${n} ballot(s) left this position blank`,
+    rowOrder: (n) => `${n} repeat ballot(s) have unreadable timestamps, so the sheet's row order decides which one counts. Please check.`,
     votes: (n) => `${n} vote(s)`,
   },
   review: {
