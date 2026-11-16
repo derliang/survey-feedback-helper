@@ -107,3 +107,54 @@ test('票選輸出表：真實題目與同票備註在 390 寬不被切、不需
   expect(over).toBeLessThanOrEqual(0);
   await noOverflow(page);
 });
+
+test('投影唱票：全螢幕、全部候選人同列，+1／數字鍵／空白票／Ctrl+Z／離開，唱完與統計核對（#174）', async ({ page }) => {
+  await openVote(page, [
+    ['2026-10-04 12:00:00', '', '甲小明'],
+    ['2026-10-04 12:01:00', '', '乙小華'],
+    ['2026-10-04 12:02:00', '', '甲小明'],
+  ]);
+  await step(page, '統計').click();
+  await page.getByRole('button', { name: '投影唱票' }).click();
+  const tally = page.getByTestId('tally-projector');
+  await expect(tally).toBeVisible();
+  await expect(page.getByTestId('tally-progress')).toHaveText('已唱 0／3 票');
+  // 同列、數字從 0 開始、不露結果
+  await expect(page.getByTestId('tally-count-0')).toHaveText('0');
+  await expect(page.getByTestId('tally-count-1')).toHaveText('0');
+  const boxes = await tally.locator('.tally-col').evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().top)));
+  if ((page.viewportSize()?.width ?? 0) > 700) expect(new Set(boxes).size).toBe(1);
+  // 候選人依姓名排（不依票數，避免洩漏名次）；用名稱找出甲小明是第幾欄
+  const names = await tally.locator('.tally-name').allTextContents();
+  const ming = names.findIndex((n) => n.includes('甲小明'));
+  const hua = names.findIndex((n) => n.includes('乙小華'));
+  await tally.getByRole('button', { name: '甲小明 加一票' }).click();
+  await expect(page.getByTestId(`tally-count-${ming}`)).toHaveText('1');
+  await page.keyboard.press(String(ming + 1));
+  await page.keyboard.press(String(hua + 1));
+  await expect(page.getByTestId('tally-progress')).toHaveText('已唱 3／3 票');
+  await expect(page.getByTestId('tally-done')).toContainText('與統計結果相符');
+  await page.keyboard.press('Control+z');
+  await expect(page.getByTestId('tally-progress')).toHaveText('已唱 2／3 票');
+  await page.keyboard.press('b');
+  await expect(page.getByTestId('tally-done')).toContainText('與統計結果不同');
+  await noOverflow(page);
+  await page.keyboard.press('Escape');
+  await expect(tally).toHaveCount(0);
+});
+
+test('防弊閘門也擋輸出頁：未確認時下載鈕停用並有「回統計頁確認」，確認後可下載（#175）', async ({ page }) => {
+  await openVote(page, [
+    ['2026-10-04 12:00:00', '甲小明', '甲小明'],
+    ['2026-10-04 12:01:00', '乙小華', '甲小明'],
+  ]);
+  await step(page, '輸出').click();
+  const out = page.getByTestId('vote-output');
+  await expect(out).toContainText('還有 1 項防弊檢查要決定');
+  await expect(out.getByRole('button', { name: /^Excel/ })).toBeDisabled();
+  await out.getByRole('button', { name: '回統計頁確認' }).click();
+  await page.getByTestId('guard-self').getByRole('button').first().click();
+  await page.getByRole('button', { name: '確認這樣處理' }).click();
+  await step(page, '輸出').click();
+  await expect(page.getByTestId('vote-output').getByRole('button', { name: /^Excel/ })).toBeEnabled();
+});
