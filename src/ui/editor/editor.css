@@ -389,6 +389,21 @@
 .blk-mv {
   display: flex;
 }
+.blk-ic {
+  flex: none;
+  width: 1.4em;
+  text-align: center;
+  color: var(--ink3);
+}
+.blk-nm {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* 桌機左欄只有 220px：上下移動箭頭只在滑鼠停留或鍵盤焦點的區塊顯示，名稱才放得下（Issue #163；鍵盤 ↑↓ 仍可移動） */
+.ed-left .blk:not(:hover):not(:focus-within) .blk-mv {
+  display: none;
+}
 .props {
   display: flex;
   flex-direction: column;

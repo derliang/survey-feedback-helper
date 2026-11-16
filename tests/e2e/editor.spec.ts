@@ -73,6 +73,7 @@ test('編輯：區塊清單用按鈕上移；多欄與頁面設定', async ({ pa
   if (!wide) await page.getByRole('button', { name: '區塊清單' }).click();
   const names = () => page.locator('.blk-name').allTextContents();
   const before = await names();
+  await page.locator('.blk-name').first().click(); // 桌機左欄的上下鈕只在停留或焦點列顯示
   await page.getByRole('button', { name: '下移「標題」' }).first().click();
   const after = await names();
   expect(after[1]).toBe(before[0]);
@@ -88,9 +89,9 @@ test('手機：預設捲動模式不能選取，打開編輯後可以', async ({
   test.skip(info.project.name === 'desktop', '桌機沒有模式切換');
   await openLibrary(page);
   await page.getByRole('button', { name: '編輯「個人回饋單」' }).click();
-  await expect(page.getByText('沒有選取區塊')).toBeVisible();
+  await expect(page.getByText('沒有選取區塊')).toHaveCount(0); // 編輯關：底部不顯示選取列（Issue #163）
   await page.locator('.eb').first().click({ force: true });
-  await expect(page.getByText('沒有選取區塊')).toBeVisible();
+  await expect(page.getByText(/已選取：/)).toHaveCount(0);
   await page.getByRole('button', { name: '編輯', exact: true }).click();
   await page.locator('.eb').first().click();
   await expect(page.getByText(/已選取：/)).toBeVisible();
@@ -104,7 +105,8 @@ test('個別學生版本：改一位學生的文字，範本不變，可逐項�
   const wide = info.project.name === 'desktop';
   await openLibrary(page);
   await page.getByRole('button', { name: '編輯「個人回饋單」' }).click();
-  await page.getByRole('button', { name: wide ? /^單一學生的專屬版面/ : '單一學生', exact: false }).first().click();
+  if (!wide) await page.getByRole('button', { name: '頁面', exact: true }).click(); // 手機：單一學生在「頁面」面板內
+  await page.getByRole('button', { name: /^單一學生的專屬版面/ }).first().click();
   await page.getByRole('dialog').getByRole('button', { name: /林小宇/ }).click();
   await expect(page.getByText('個別版本', { exact: true }).first()).toBeVisible();
   if (!wide) await page.getByRole('button', { name: '區塊清單' }).click();
@@ -112,7 +114,8 @@ test('個別學生版本：改一位學生的文字，範本不變，可逐項�
   if (!wide) await page.getByRole('button', { name: '編輯屬性' }).click();
   await page.getByLabel('內容', { exact: true }).fill('只給這位同學的話');
   if (!wide) await page.getByRole('button', { name: '完成' }).click();
-  await page.getByRole('button', { name: wide ? /^單一學生的專屬版面/ : '單一學生' }).first().click();
+  if (!wide) await page.getByRole('button', { name: '頁面', exact: true }).click();
+  await page.getByRole('button', { name: /^單一學生的專屬版面/ }).first().click();
   await expect(page.getByRole('dialog')).toContainText('開場白：改了 text');
   await page.getByRole('dialog').getByRole('button', { name: '還原' }).click();
   await expect(page.getByRole('dialog')).toContainText('還沒有');
@@ -235,6 +238,7 @@ test('桌機（5.26）：圖示鈕工具提示懸停 500ms、鍵盤焦點立即�
   test.skip(info.project.name !== 'desktop', '工具提示與鍵盤拖曳驗桌機');
   await openLibrary(page);
   await page.getByRole('button', { name: '編輯「個人回饋單」' }).click();
+  await page.locator('.blk-list .blk-name').first().click(); // 上下移動鈕只在選取的區塊顯示
   const mv = page.locator('.blk-mv .icbtn').nth(1);
   const tip = () => mv.evaluate((el) => ({ o: getComputedStyle(el, '::after').opacity, c: getComputedStyle(el, '::after').content }));
   expect((await tip()).o).toBe('0');
@@ -258,7 +262,7 @@ test('桌機（5.26）：圖示鈕工具提示懸停 500ms、鍵盤焦點立即�
   await expect.poll(names).toEqual(before);
 });
 
-test('設計落地 G9：手機底部操作列四顆按鈕夠大、字不被截', async ({ page }, info) => {
+test('設計落地 G9：手機底部操作列按鈕夠大、字不被截（編輯關只有兩顆，Issue #163）', async ({ page }, info) => {
   test.skip(info.project.name !== 'phone', '只有手機版有底部操作列');
   await openLibrary(page);
   await page.getByRole('button', { name: '編輯「個人回饋單」' }).click();
@@ -268,7 +272,7 @@ test('設計落地 G9：手機底部操作列四顆按鈕夠大、字不被截',
       return { t: el.textContent?.trim(), w: r.width, h: r.height, clipped: el.scrollWidth > el.clientWidth };
     }),
   );
-  expect(btns.map((b) => b.t)).toEqual(['頁面', '單一學生', '加入', '編輯屬性']);
+  expect(btns.map((b) => b.t)).toEqual(['頁面', '加入']);
   for (const b of btns) {
     expect(b.w, b.t).toBeGreaterThanOrEqual(44);
     expect(b.h, b.t).toBeGreaterThanOrEqual(44);

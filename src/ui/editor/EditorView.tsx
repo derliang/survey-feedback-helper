@@ -52,6 +52,9 @@ function pageCount(t: EditorTemplate): number {
   return n;
 }
 
+/** 區塊清單的類型圖示（Issue #163、稿 11a：清單列有類型圖示）；純裝飾，名稱仍是文字。 */
+const KIND_GLYPH: Record<string, string> = { heading: 'H', text: '¶', data: '▦', bullets: '•', hero: '★', stats: '#', callout: '❝', compare: '⇄', columns: '▥', image: '▣', divider: '—', pageBreak: '⤓' };
+
 function Library({ e }: { e: ES }) {
   const st = useApp();
   const [filter, setFilter] = useState<'all' | 'builtin' | 'mine'>('all');
@@ -374,7 +377,8 @@ function Edit({ e }: { e: ES }) {
             )}
             <span class="blk-main">
               <button type="button" class="blk-name" onClick={() => select(id)} aria-pressed={sel === id}>
-                {blockName(b)}
+                <span class="blk-ic" aria-hidden="true">{KIND_GLYPH[b.kind] ?? '▪'}</span>
+                <span class="blk-nm">{blockName(b)}</span>
                 {b.when && <span class="tag">{ed().condCond}</span>}
               </button>
               {blockSummary(b) && <span class="blk-sum">{blockSummary(b)}</span>}
@@ -403,6 +407,8 @@ function Edit({ e }: { e: ES }) {
   );
 
   const wnotes = wordNotes(t0);
+  /** 手機底部列：只在編輯模式或區塊清單才顯示選取列與「編輯屬性」，其餘只留「頁面」「加入」（稿 11a／11c）。 */
+  const showEdit = e.editMode || e.view === 'list';
   const header = (
     <div class="ed-bar">
       <button type="button" class="btn ghost small" aria-label={ed().backLib} onClick={backToLibrary}>
@@ -455,6 +461,11 @@ function Edit({ e }: { e: ES }) {
           {!wide && (
             <button type="button" class="btn secondary" disabled={trial.busy} onClick={doTrial}>
               {ed().trialPdf}
+            </button>
+          )}
+          {!wide && (
+            <button type="button" class="btn secondary" onClick={() => setPanel('student')}>
+              {e.student ? ed().singleLayoutOn : ed().singleLayout}
             </button>
           )}
           <PagePanel t={t0} images={images} />
@@ -539,9 +550,9 @@ function Edit({ e }: { e: ES }) {
       </div>
       {e.view === 'preview' ? (
         <>
-          <Zoom e={e} pages={pageCount(t0)} />
           {e.editMode && <p class="hint">{ed().editHint}</p>}
           {pages}
+          <Zoom e={e} pages={pageCount(t0)} />
         </>
       ) : (
         <>
@@ -550,21 +561,20 @@ function Edit({ e }: { e: ES }) {
         </>
       )}
       <div class="actbar ed-act">
-        {e.editMode && <div class="ed-sel">{selBlock ? ed().selected(blockName(selBlock)) : ed().noSel}</div>}
+        {showEdit && <div class="ed-sel">{selBlock ? ed().selected(blockName(selBlock)) : ed().noSel}</div>}
         <button type="button" class="btn secondary" onClick={() => setPanel('page')}>
           {ed().page}
-        </button>
-        <button type="button" class="btn secondary" onClick={() => setPanel('student')}>
-          {ed().singleShort}
         </button>
         {!e.student && (
           <button type="button" class="btn secondary" onClick={() => setPanel('add')}>
             {ed().add}
           </button>
         )}
-        <button type="button" class="btn" disabled={!selBlock} onClick={() => setPanel('props')}>
-          {ed().editProps}
-        </button>
+        {showEdit && (
+          <button type="button" class="btn" disabled={!selBlock} onClick={() => setPanel('props')}>
+            {ed().editProps}
+          </button>
+        )}
       </div>
       {sheets}
     </main>
