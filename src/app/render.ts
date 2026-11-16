@@ -3,7 +3,7 @@ import { builtinTemplates, SLOTS } from '../editor/builtin';
 import { compile, pageSetup, type SlotBlock } from '../editor/compile';
 import type { StudentOverride } from '../editor/overrides';
 import { walk } from '../editor/ops';
-import type { EditorTemplate, ReportVersion } from '../editor/types';
+import { chartKey, type EditorTemplate, type ReportVersion } from '../editor/types';
 import * as advanced from '../export/advanced';
 import { cleanTopic, contentWidth, tidyFilled, type Block, type DocModel } from '../export/model';
 import type { ClassSummaryInput, PersonalFeedbackInput } from '../export';
@@ -131,9 +131,11 @@ export function personalDocFromTemplate(t: EditorTemplate, inp: PersonalFeedback
       case SLOTS.scoreTable:
         return [scoreTable(inp, width)];
       case SLOTS.chart: {
-        if (!inp.chartPng) return [];
+        const pick = inp.charts?.[chartKey(b as { chartType?: string; compareLine?: boolean; colors?: string[] })];
+        const png = pick?.png ?? inp.chartPng;
+        if (!png) return [];
         const w = Math.min(440, width);
-        return [{ type: 'image', png: inp.chartPng, w, h: ((inp.chartH ?? 190) * w) / 440 }];
+        return [{ type: 'image', png, w, h: ((pick?.h ?? inp.chartH ?? 190) * w) / 440 }];
       }
       case SLOTS.praise:
         return inp.praise.length ? [{ type: 'bullets', items: inp.praise, size }] : [];

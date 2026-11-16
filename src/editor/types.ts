@@ -163,3 +163,11 @@ export const KIND_NAMES: Record<EBlockKind, string> = {
   callout: '稱讚提示',
   compare: '自評對照表',
 };
+
+/** 圖表類型：長條、對照條、分布、堆疊。沒設定或不認得就是對照條（原本一律的畫法）。 */
+export type ChartKind = 'bar' | 'compare' | 'dist' | 'stacked';
+export const CHART_KINDS: readonly ChartKind[] = ['bar', 'compare', 'dist', 'stacked'];
+export const asChartKind = (t: string | undefined): ChartKind => ((CHART_KINDS as readonly string[]).includes(t ?? '') ? (t as ChartKind) : 'compare');
+/** 一張圖的辨識鍵（類型、參考線、顏色）：同一位學生同一組設定只畫一次，編譯時用同一把鍵取圖。 */
+export const chartKey = (b: { chartType?: string | undefined; compareLine?: boolean | undefined; colors?: string[] | undefined }): string =>
+  `${asChartKind(b.chartType)}|${b.compareLine ? 1 : 0}|${(b.colors ?? []).join(',')}`;
