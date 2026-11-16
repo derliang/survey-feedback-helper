@@ -402,6 +402,11 @@ export const strings = {
     selfUnknown: '—',
     gapNote: '系統比較自評與同學評分平均值；兩者相差超過 1 分時才標示「自評高於同學評分」或「自評低於同學評分」。這是分數差異，不能直接判定學生的自我認識。',
     problems: (n: number) => `${n} 筆分數無效（不是數字或超出量表），沒有計入。`,
+    suspectScoreCol: (label: string) => `「${label}」目前被當成選擇題，但多數答案是數字，可能其實是評分欄，所以統計裡沒有這一欄。`,
+    suspectScoreBtn: (label: string) => `改為評分：${label}`,
+    scaleSuspect: (outliers: number, total: number) => `目前量表是 0～10，但 ${total} 筆分數裡只有 ${outliers} 筆超過 5，其餘都在 1～5，量表可能其實是 1～5。`,
+    scaleSuspectBtn: '改為 1～5 分',
+    scaleSuspectKeep: '維持 0～10',
     rankMayChange: '有些被評對象的有效回覆不足，名次可能隨資料補齊而改變；請避免直接以暫時名次做決定。',
     // 設定
     settingsTitle: '統計設定',

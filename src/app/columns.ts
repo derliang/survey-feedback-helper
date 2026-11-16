@@ -446,3 +446,36 @@ export function gridGroup(cols: readonly ColumnInfo[]): GridGroup | null {
   const unmatched = cols.filter((c) => c.role !== 'preference' && (GRID.exec(c.header.normalize('NFKC'))?.[1] ?? '').trim() === question);
   return { question, members, unmatched };
 }
+
+/**
+ * 報告回饋：被判成選擇題、但多數答案其實是數字的欄位（疑似評分欄，Issue #145）。
+ * 例如評分欄混了「缺」「五分」或 11 這類值，內容猜測就退成選擇題，統計頁會少一欄、名次全部並列。
+ */
+export function suspectScoreColumns(table: Table, cols: readonly ColumnInfo[]): ColumnInfo[] {
+  return cols.filter((c) => {
+    if (c.role !== 'choice') return false;
+    const vals = columnValues(table, c.index);
+    if (vals.length < 3) return false;
+    return vals.filter((v) => parseNumber(v) !== null).length / vals.length >= 0.5;
+  });
+}
+
+export interface ScaleSuspect {
+  /** 目前量表上限是 10，但幾乎所有分數都在 1～5。 */
+  outliers: number;
+  total: number;
+}
+
+/**
+ * 量表疑似不符：目前是 0～10（含預設），但 95% 以上的分數都落在 1～5，只有零星超過 5（Issue #145）。
+ * 老師已確認量表時不再提醒。
+ */
+export function scaleSuspect(table: Table, cols: readonly ColumnInfo[], scale: Scale, confirmed: boolean): ScaleSuspect | null {
+  if (confirmed || scale.max !== 10) return null;
+  const st = scoreStats(table, cols);
+  if (st.total === 0 || st.min < 1) return null;
+  let outliers = 0;
+  for (const [score, n] of st.counts) if (score > 5) outliers += n;
+  if (outliers === 0 || (st.total - outliers) / st.total < 0.95) return null;
+  return { outliers, total: st.total };
+}

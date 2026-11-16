@@ -10,10 +10,11 @@ import {
   runVote,
 } from '../../app/analysis';
 import { canGoStats } from '../../app/progress';
+import { detectScale, scaleSuspect, scoreSignature, suspectScoreColumns, withRole } from '../../app/columns';
 import { feedbackKey, openKey } from '../../app/output';
 import { reviewCounts, setTeacher } from '../../app/review';
 import { blankColumns } from '../../app/analysis';
-import { downloadReview, go, loadReview, set, setStats, updateReview, useApp } from '../../app/store';
+import { downloadReview, go, loadReview, set, setSession, setStats, updateReview, useApp } from '../../app/store';
 import { isTouchDevice } from '../../storage';
 import { barsSvg, columnsSvg, pairedBarsSvg, svgSize, svgTitle, toPrintSvg } from '../chart-svg';
 import { svgToJpg } from '../chart-png';
@@ -105,6 +106,7 @@ function FeedbackMain({ summary, sel, wide }: { summary: FeedbackSummary; sel: s
           <Tile label={extra().stats.targets} value={S.stats.people(summary.targets.length)} />
         </div>
         {summary.problems.length > 0 && <Notice kind="warn">{S.stats.problems(summary.problems.length)}</Notice>}
+        <ScoreHints />
         {summary.rankMayChange && <Notice kind="info">{S.stats.rankMayChange}</Notice>}
         <Chart
           svg={barsSvg(
@@ -697,5 +699,53 @@ export function StatsView() {
         </button>
       </ActBar>
     </main>
+  );
+}
+
+/** 報告回饋統計頁的資料提示：疑似評分欄被當成選擇題、量表疑似不符（Issue #145）。 */
+function ScoreHints() {
+  const s = useApp().session;
+  if (!s || s.kind !== 'feedback') return null;
+  const suspects = suspectScoreColumns(s.table, s.cols);
+  const sus = scaleSuspect(s.table, s.cols, s.scale, s.scaleConfirmed);
+  if (suspects.length === 0 && !sus) return null;
+  const toScore = (index: number) =>
+    setSession((cur) => {
+      const cols = withRole(cur.cols, index, 'score');
+      return scoreSignature(cols) === scoreSignature(cur.cols) ? { cols } : { cols, scaleConfirmed: false, scale: detectScale(cur.table, cols) };
+    });
+  return (
+    <div data-testid="score-hints">
+      {suspects.map((c) => (
+        <Notice
+          key={c.index}
+          kind="warn"
+          actions={
+            <button class="btn primary small" type="button" onClick={() => toScore(c.index)}>
+              {S.stats.suspectScoreBtn(c.label)}
+            </button>
+          }
+        >
+          {S.stats.suspectScoreCol(c.label)}
+        </Notice>
+      ))}
+      {sus && (
+        <Notice
+          kind="warn"
+          actions={
+            <>
+              <button class="btn primary small" type="button" onClick={() => setSession({ scale: { min: 1, max: 5 }, scaleConfirmed: true })}>
+                {S.stats.scaleSuspectBtn}
+              </button>
+              <button class="btn secondary small" type="button" onClick={() => setSession({ scaleConfirmed: true })}>
+                {S.stats.scaleSuspectKeep}
+              </button>
+            </>
+          }
+        >
+          {S.stats.scaleSuspect(sus.outliers, sus.total)}
+        </Notice>
+      )}
+    </div>
   );
 }
