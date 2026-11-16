@@ -2,6 +2,9 @@ import { expect, test } from '@playwright/test';
 import { settledBox, surveyFile } from './fixtures';
 
 // 載入失敗共用元件（DESIGN 5.34 C）：擋掉延遲載入的 chunk 模擬斷網。資料皆為虛構。
+// 必須封鎖 Service Worker：它會預先快取全部 JS 並接管頁面，一旦啟用（機器忙時啟用時間點不固定），
+// 畫面程式檔就由它直接回應，page.route 攔不到，「載入失敗」就不會出現（原本偶發失敗的根因）。
+test.use({ serviceWorkers: 'block' });
 
 test('載入失敗：按鈕不跑版、無橫向溢出；「回上一步」不會停在原地', async ({ page }) => {
   await page.route(/assets\/Prepare-.*\.js/, (r) => r.abort());
