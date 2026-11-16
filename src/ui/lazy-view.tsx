@@ -49,7 +49,7 @@ export function LoadFailedPage({ onRetry }: { onRetry: () => void }) {
             <button class="btn primary small" type="button" onClick={onRetry}>
               {L.retry}
             </button>
-            <button class="btn secondary small" type="button" onClick={() => go(st.session ? 'prepare' : 'home')}>
+            <button class="btn secondary small" type="button" onClick={() => go(st.session && st.route !== 'prepare' ? 'prepare' : 'home')}>
               {L.back}
             </button>
           </>
