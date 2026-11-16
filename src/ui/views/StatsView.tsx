@@ -29,6 +29,7 @@ import { TeacherComment } from './Phrases';
 import { extra } from '../strings-extra';
 import { vt } from '../strings-vote';
 import { VoteGuard } from './VoteGuard';
+import { TallyProjector } from './TallyProjector';
 
 const ui = () => extra().statsUi;
 
@@ -324,6 +325,7 @@ function SeatStepper({ value, onChange }: { value: number; onChange: (n: number)
 
 function VoteMain({ v, sel }: { v: VoteResult; sel: string; wide: boolean }) {
   const st = useApp();
+  const [tallying, setTallying] = useState(false);
   const p = v.positions.find((x) => String(x.col.index) === sel) ?? v.positions[0];
   if (!p) return <p class="hint">{S.stats.noData}</p>;
   const counts = { multi: 0, self: 0, time: 0, blank: 0 };
@@ -340,6 +342,8 @@ function VoteMain({ v, sel }: { v: VoteResult; sel: string; wide: boolean }) {
   const total = rows.reduce((n, r) => n + r.votes, 0);
   const maxVotes = Math.max(1, ...rows.map((r) => r.votes));
   const pct = (n: number) => (total === 0 ? 0 : Math.round((n / total) * 100));
+  // 唱票的候選人用姓名順序排，不用票數排，避免一開場就洩漏名次
+  const tallyNames = p.tally.rows.filter((r) => r.votes > 0).map((r) => r.name).sort((a, b) => a.localeCompare(b, 'zh-Hant', { numeric: true }));
   const electedText = p.election.elected.join('、') || '—';
   const imgSvg = barsSvg(
     rows.map((r) => ({ label: r.name, value: r.votes, note: S.stats.votes(r.votes), strong: elected.has(r.name) })),
@@ -416,7 +420,22 @@ function VoteMain({ v, sel }: { v: VoteResult; sel: string; wide: boolean }) {
           </p>
         )}
         <ImageSave svg={imgSvg} />
+        <div class="tally-open" data-testid="tally-open">
+          <button class="btn secondary" type="button" onClick={() => setTallying(true)}>
+            {vt().tally.open}
+          </button>
+          <span class="hint">{vt().tally.openHelp}</span>
+        </div>
       </section>
+      )}
+      {tallying && (
+        <TallyProjector
+          title={p.col.label}
+          names={tallyNames}
+          expected={tallyNames.map((n) => p.tally.rows.find((r) => r.name === n)?.votes ?? 0)}
+          total={p.tally.validBallots}
+          onClose={() => setTallying(false)}
+        />
       )}
       {!any && (
         <p class="ok-line" data-testid="vote-no-issue">

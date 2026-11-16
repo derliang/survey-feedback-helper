@@ -1,6 +1,6 @@
 import type { ComponentType } from 'preact';
 import { useEffect, useMemo, useState } from 'preact/hooks';
-import { feedbackRecords, opinionQuestions, runFeedback, runVote } from '../../app/analysis';
+import { feedbackRecords, opinionQuestions, runFeedback, runVote, voteGuardPending } from '../../app/analysis';
 import {
   AUDIENCE_NAMES,
   type Audience,
@@ -29,6 +29,7 @@ import { svgToPng } from '../chart-png';
 import { strings as S } from '../strings';
 import { ActBar, Icon, Notice, OptionGroup, Sheet } from '../parts/parts';
 import { extra } from '../strings-extra';
+import { vt } from '../strings-vote';
 
 type Fmt = 'xlsx' | 'docx' | 'pdf';
 
@@ -345,6 +346,7 @@ export function OutputView() {
     });
 
   const dis = busy !== null;
+  const voteGate = vote ? voteGuardPending(vote, st.stats).length : 0;
   /** 正在跑的那顆按鈕立刻改字（不等狀態提示的延遲），其他按鈕維持原字且停用。 */
   const lbl = (key: string, text: string) => (busy === key ? (key === 'batch' && prog ? prog : S.output.working) : text);
   /** 下載成功／失敗與進行中的提示：浮在畫面下方，不推擠版面，連點按鈕不會點空（#146）。 */
@@ -468,7 +470,20 @@ export function OutputView() {
           <div class="out-main">
             <section class="card">
               <h2>{S.output.voteContent}</h2>
-              <div class="table-wrap">
+              {voteGate > 0 && (
+                <Notice
+                  kind="warn"
+                  title={vt().guard.gateTitle(voteGate)}
+                  actions={
+                    <button class="btn secondary small" type="button" onClick={() => go('stats')}>
+                      {vt().guard.backToStats}
+                    </button>
+                  }
+                >
+                  {vt().guard.gateBody}
+                </Notice>
+              )}
+              <div class="table-wrap" hidden={voteGate > 0}>
                 <table class="roster-table vote-sum">
                   <thead>
                     <tr>
@@ -502,13 +517,13 @@ export function OutputView() {
               <h2>{S.output.voteDownload}</h2>
               {status}
               <div class="out-pers">
-                <button class="btn primary out-main-btn" type="button" disabled={dis} onClick={() => void report('docx')}>
+                <button class="btn primary out-main-btn" type="button" disabled={dis || voteGate > 0} onClick={() => void report('docx')}>
                   {lbl('report-docx', S.output.downloadWord)}
                 </button>
-                <button class="btn secondary" type="button" disabled={dis} onClick={() => void report('pdf')}>
+                <button class="btn secondary" type="button" disabled={dis || voteGate > 0} onClick={() => void report('pdf')}>
                   {lbl('report-pdf', S.output.pdf)}
                 </button>
-                <button class="btn secondary" type="button" disabled={dis} onClick={() => void report('xlsx')}>
+                <button class="btn secondary" type="button" disabled={dis || voteGate > 0} onClick={() => void report('xlsx')}>
                   {lbl('report-xlsx', S.output.fmtShort.xlsx)}
                 </button>
               </div>

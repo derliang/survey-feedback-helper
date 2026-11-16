@@ -3399,3 +3399,120 @@ ul.chips {
   white-space: normal;
   overflow-wrap: anywhere;
 }
+
+/* 投影唱票（Issue #174）：全螢幕、高對比、候選人同列，字級隨視窗放大 */
+.tally-full {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-5);
+  background: var(--ink);
+  color: var(--paper);
+  overflow: auto;
+}
+.tally-full:focus {
+  outline: none;
+}
+.tally-top {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+.tally-top h2 {
+  flex: 1;
+  margin: 0;
+  font-size: clamp(18px, 2.4vw, 36px);
+}
+.tally-progress {
+  font-size: clamp(16px, 2vw, 28px);
+  font-weight: 700;
+}
+.tally-cols {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  gap: var(--sp-4);
+  min-height: 0;
+}
+@media (max-width: 700px) and (orientation: portrait) {
+  .tally-cols {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.tally-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  border: 2px solid var(--paper);
+  border-radius: var(--r-md);
+  padding: var(--sp-3);
+  min-width: 0;
+}
+.tally-name {
+  font-size: clamp(22px, 4vw, 72px);
+  font-weight: 700;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.tally-key {
+  display: inline-block;
+  min-width: 1.4em;
+  margin-inline-end: 0.3em;
+  border: 2px solid var(--paper);
+  border-radius: var(--r-sm);
+  font-size: 0.45em;
+  vertical-align: middle;
+}
+.tally-count {
+  font-size: clamp(56px, 14vw, 240px);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.tally-plus {
+  width: 100%;
+  min-height: clamp(56px, 9vh, 96px);
+  border: 0;
+  border-radius: var(--r-md);
+  background: var(--accent);
+  color: var(--on-accent);
+  font: inherit;
+  font-size: clamp(28px, 4vw, 64px);
+  font-weight: 700;
+  cursor: pointer;
+}
+.tally-plus:focus-visible,
+.tally-full .btn:focus-visible {
+  outline: 4px solid var(--warn-bar);
+  outline-offset: 2px;
+}
+.tally-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.tally-done {
+  margin: 0;
+  font-size: clamp(16px, 2vw, 28px);
+  font-weight: 700;
+}
+.tally-keys {
+  margin: 0 0 0 auto;
+  font-size: var(--fs-sm);
+  opacity: 0.85;
+}
+.tally-empty {
+  font-size: clamp(18px, 2.4vw, 32px);
+}
+.tally-open {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2) var(--sp-3);
+}
