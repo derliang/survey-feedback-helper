@@ -27,7 +27,7 @@ export function CheckView() {
           <p class="hint">{S.check.leadDup}</p>
           <ul class="issue-list">
             {report.duplicates.map((g) => {
-              const who = g.key.split('|').slice(1).join('|') || g.key;
+              const who = g.label;
               const sorted = [...g.ids].sort((a, b) => a - b);
               return (
                 <li key={g.key} class="issue">

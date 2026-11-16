@@ -1,6 +1,6 @@
 // 選課分組志願的輸出：分組名單、待安排名單、志願命中統計（xlsx 工作表資料，純函式）。
 import { cleanPrefs } from '../core';
-import type { XSheet } from '../export';
+import { seatCell, type XSheet } from '../export';
 import { courseApplicants, courseList, courseSummary, stampTaipei } from './course-app';
 import type { Session } from './store';
 
@@ -51,7 +51,7 @@ export function listSheets(s: Session): XSheet[] {
     freezeRows: 1,
     rows: [
       [H('座號'), H('姓名'), H('課程'), H('第幾志願'), H('備註')],
-      ...all.map((r) => [r.seat, r.name, r.asg?.course ?? '（待安排）', r.asg?.course ? rankText(r.asg.rank) : '', r.asg?.manual ? '手動調整' : r.priority ? '優先' : '']),
+      ...all.map((r) => [seatCell(r.seat), r.name, r.asg?.course ?? '（待安排）', r.asg?.course ? rankText(r.asg.rank) : '', r.asg?.manual ? '手動調整' : r.priority ? '優先' : '']),
     ],
   };
   const per = courseList(s, s.course).map((co): XSheet => oneSheet(s, co.name));
@@ -66,7 +66,7 @@ function oneSheet(s: Session, course: string): XSheet {
     freezeRows: 1,
     rows: [
       [H('座號'), H('姓名'), H('第幾志願'), H('優先'), H('手動調整')],
-      ...mine.map((r) => [r.seat, r.name, rankText(r.asg?.rank ?? null), r.priority ? '是' : '', r.asg?.manual ? '是' : '']),
+      ...mine.map((r) => [seatCell(r.seat), r.name, rankText(r.asg?.rank ?? null), r.priority ? '是' : '', r.asg?.manual ? '是' : '']),
     ],
   };
 }
@@ -87,7 +87,7 @@ export function pendingSheets(s: Session): XSheet[] {
       freezeRows: 1,
       rows: [
         [H('座號'), H('姓名'), H('原因'), ...Array.from({ length: n }, (_, i) => H(`第 ${i + 1} 志願`))],
-        ...pend.map((r) => [r.seat, r.name, r.asg?.reason === 'noPrefs' ? '沒填志願' : '志願都滿了', ...Array.from({ length: n }, (_, i) => r.prefs[i] ?? '')]),
+        ...pend.map((r) => [seatCell(r.seat), r.name, r.asg?.reason === 'noPrefs' ? '沒填志願' : '志願都滿了', ...Array.from({ length: n }, (_, i) => r.prefs[i] ?? '')]),
       ],
     },
   ];

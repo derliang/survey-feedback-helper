@@ -34,6 +34,11 @@ describe('開檔', () => {
     await expect(tableFromFile(file('a.xls', 'x'))).rejects.toBeInstanceOf(LoadError);
     await expect(tableFromFile(file('a.xls', 'x'))).rejects.toMatchObject({ reason: 'oldExcel' });
   });
+  it('.docx 與讀不出表格的 .txt 都說不支援，不說「沒有問卷回覆」（#136）', async () => {
+    await expect(tableFromFile(file('a.docx', 'PK'))).rejects.toMatchObject({ reason: 'unsupported' });
+    await expect(tableFromFile(file('a.txt', 'hello'))).rejects.toMatchObject({ reason: 'unsupported' });
+    await expect(tableFromFile(file('a.csv', '標題\n'))).rejects.toMatchObject({ reason: 'empty' });
+  });
   it('空檔案與損毀的 xlsx', async () => {
     await expect(tableFromFile(file('a.csv', '標題\n'))).rejects.toMatchObject({ reason: 'empty' });
     await expect(tableFromFile(file('a.xlsx', new Uint8Array([1, 2, 3, 4])))).rejects.toMatchObject({ reason: 'unreadable' });

@@ -6,7 +6,7 @@ const rec = (id: number, o: Partial<CheckRecord> = {}): CheckRecord => ({ id, ..
 describe('findDuplicates', () => {
   it('同一位填寫者多份（容忍空白）', () => {
     const d = findDuplicates([rec(0, { respondent: { name: '王小明' } }), rec(1, { respondent: { name: ' 王 小明' } }), rec(2, { respondent: { name: '李小華' } })], false);
-    expect(d).toEqual([{ key: '|王小明', ids: [0, 1], seatConflict: false }]);
+    expect(d).toEqual([{ key: '|王小明', ids: [0, 1], seatConflict: false, label: '王小明' }]);
   });
   it('報告回饋以「填寫者＋被評對象」為單位：評不同人不算重複', () => {
     const rows = [
@@ -19,6 +19,12 @@ describe('findDuplicates', () => {
   it('沒填姓名的不參與重複判斷；空輸入無結果', () => {
     expect(findDuplicates([rec(0), rec(1)], false)).toEqual([]);
     expect(findDuplicates([], true)).toEqual([]);
+  });
+  it('報告回饋的重複填答：給人看的名稱不含內部分隔符（#131）', () => {
+    const d = findDuplicates([rec(0, { respondent: { class: '301', name: '陳家豪' }, target: { class: '301', name: '王大明' } }), rec(1, { respondent: { class: '301', name: '陳家豪' }, target: { class: '301', name: '王大明' } })], true);
+    expect(d[0]!.label).toBe('陳家豪 → 王大明');
+    expect(d[0]!.label).not.toContain('|');
+    expect(findDuplicates([rec(0, { respondent: { name: '王小明' } }), rec(1, { respondent: { name: '王小明' } })], false)[0]!.label).toBe('王小明');
   });
   it('不同班同名不算重複', () => {
     expect(findDuplicates([rec(0, { respondent: { class: '301', name: 'A' } }), rec(1, { respondent: { class: '302', name: 'A' } })], false)).toEqual([]);

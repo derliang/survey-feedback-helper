@@ -3,6 +3,7 @@
 export type { DocModel, Block, PageSetup } from './model';
 export type { PersonalFeedbackInput, ClassSummaryInput } from './templates';
 export type { XSheet, XCell } from './xlsx';
+export { seatCell } from './seatcell';
 export type { BatchItem } from './batch';
 export type { FontSource } from '../fonts/loader';
 export { WORD_FONT_NOTE } from '../fonts/word-fonts';
