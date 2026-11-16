@@ -9,6 +9,7 @@ import {
   matchCourseNames,
   moveApplicant,
   readPrefs,
+  readPrefSlots,
   summarize,
 } from '../core';
 import { prefColumns } from './columns';
@@ -32,6 +33,8 @@ export interface CourseState {
   /** 還沒按「開始分配」前是 null */
   result: Assignment[] | null;
   ranAt: string | null;
+  /** 分配當時的輸入快照（名額、優先名單、各人志願）；舊檔沒有時是 null，只比對報名者 */
+  basis: string | null;
   /** 按了「固定結果」：不能再重新抽籤 */
   fixed: boolean;
   /** 老師按了「納入」的名單外填答者（資料列索引）；沒按的不進分配 */
@@ -39,7 +42,7 @@ export interface CourseState {
 }
 
 export function emptyCourseState(): CourseState {
-  return { capacity: {}, minSize: {}, merges: {}, declined: [], priority: [], seed: newSeed(), result: null, ranAt: null, fixed: false, included: [] };
+  return { capacity: {}, minSize: {}, merges: {}, declined: [], priority: [], seed: newSeed(), result: null, ranAt: null, basis: null, fixed: false, included: [] };
 }
 
 export const courseFileName = (surveyId: string): string => `選課分組-${surveyId}.json`;
@@ -66,6 +69,7 @@ export function parseCourse(text: string): CourseState {
     seed: typeof o.seed === 'string' && o.seed !== '' ? o.seed : base.seed,
     result,
     ranAt: typeof o.ranAt === 'string' ? o.ranAt : null,
+    basis: typeof o.basis === 'string' ? o.basis : null,
     fixed: o.fixed === true,
     included: strs(o.included),
   };
@@ -177,7 +181,8 @@ export function courseApplicants(s: Session, c: CourseState): Applicants {
   s.table.rows.forEach((r, i) => {
     if (gone.has(i) || outside.has(String(i))) return;
     const id = String(i);
-    const prefs = readPrefs(r, cols).map((v) => mergedName(c, v));
+    const prefs = readPrefSlots(r, cols).map((v) => (v === '' ? v : mergedName(c, v)));
+    while (prefs.length > 0 && prefs[prefs.length - 1] === '') prefs.pop();
     list.push({ id, prefs, ...(pri.has(id) ? { priority: true } : {}) });
     people.set(id, { id, seat: seatCol === null ? '' : cellText(r[seatCol]), name: nameCol === null ? '' : cellText(r[nameCol]) });
   });
@@ -237,7 +242,16 @@ export function cannotRun(i: CourseIssues): string | null {
 export function runAllocation(s: Session, c: CourseState): CourseState {
   const { list } = courseApplicants(s, c);
   const r = allocate(list, courseList(s, c), c.seed);
-  return { ...c, result: r.assignments, ranAt: new Date().toISOString() };
+  return { ...c, result: r.assignments, ranAt: new Date().toISOString(), basis: allocationBasis(s, c) };
+}
+
+/** 影響分配結果的輸入快照：各課程名額、優先名單、每人（合併後）志願。最少人數不影響分配，不列入。 */
+export function allocationBasis(s: Session, c: CourseState): string {
+  const { list } = courseApplicants(s, c);
+  return JSON.stringify([
+    courseList(s, c).map((x) => [x.name, x.capacity]),
+    list.map((a) => [a.id, a.priority === true, a.prefs]),
+  ]);
 }
 
 export function moveTo(s: Session, c: CourseState, id: string, course: string | null): CourseState {
@@ -251,11 +265,12 @@ export function courseSummary(s: Session, c: CourseState): AllocationSummary | n
   return summarize(c.result, courseApplicants(s, c).list, courseList(s, c));
 }
 
-/** 結果是否還對得上目前的資料（新增了回覆或改了合併後要重新分配）。 */
+/** 結果是否還對得上目前的資料（新增了回覆，或改了名額、優先名單、合併、志願後要重新分配）。 */
 export function resultStale(s: Session, c: CourseState): boolean {
   if (!c.result) return false;
   const ids = new Set(courseApplicants(s, c).list.map((a) => a.id));
-  return c.result.length !== ids.size || c.result.some((a) => !ids.has(a.id));
+  if (c.result.length !== ids.size || c.result.some((a) => !ids.has(a.id))) return true;
+  return c.basis !== null && c.basis !== allocationBasis(s, c);
 }
 
 /** 一門課的學生（座號小到大）；null＝待安排。 */
