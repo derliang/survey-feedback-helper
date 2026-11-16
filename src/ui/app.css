@@ -910,10 +910,12 @@ button.tile {
   gap: var(--sp-2);
   /* 內容很長時（例如 Google 登入前提示卡），主要按鈕仍固定在面板底部，不用捲到最下面才找得到 */
   position: sticky;
-  bottom: 0;
+  bottom: calc(-1 * (var(--sp-4) + env(safe-area-inset-bottom)));
   z-index: 1;
   background: var(--card);
   padding-top: var(--sp-2);
+  padding-bottom: calc(var(--sp-4) + env(safe-area-inset-bottom));
+  margin-bottom: calc(-1 * (var(--sp-4) + env(safe-area-inset-bottom)));
   box-shadow: 0 -1px 0 var(--line-soft);
 }
 .opt-list {
