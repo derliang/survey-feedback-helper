@@ -165,6 +165,44 @@ export function clusterTitles(records: readonly CheckRecord[]): TitleCluster[] {
   return out;
 }
 
+export interface SingleTarget {
+  /** 只有一筆回覆的被評對象（給人看的姓名）。 */
+  name: string;
+  id: number;
+  /** 名字最像的其他被評對象（二字組相似度 ≥ 0.5）；找不到為 null。 */
+  similarTo: string | null;
+}
+
+const TARGET_SIMILARITY = 0.5;
+
+/**
+ * 報告回饋：被評對象只有 1 筆回覆（而其他人有多筆）時，疑似同學打錯被評者姓名。
+ * 只提示，不改資料、不影響其他人的名次；大家都只有 1 筆（例如一人一份）時不提示。
+ */
+export function findSingleReplyTargets(records: readonly CheckRecord[]): SingleTarget[] {
+  const byKey = new Map<string, { name: string; ids: number[] }>();
+  for (const r of records) {
+    const k = personKey(r.target);
+    if (k === null) continue;
+    const e = byKey.get(k) ?? { name: nameOfKey(k), ids: [] };
+    e.ids.push(r.id);
+    byKey.set(k, e);
+  }
+  const all = [...byKey.values()];
+  if (!all.some((e) => e.ids.length >= 2)) return [];
+  const multi = all.filter((e) => e.ids.length >= 2);
+  return all
+    .filter((e) => e.ids.length === 1)
+    .map((e) => {
+      let best: { name: string; sim: number } | null = null;
+      for (const m of multi) {
+        const sim = diceSimilarity(normalizeName(e.name), normalizeName(m.name));
+        if (sim >= TARGET_SIMILARITY && (best === null || sim > best.sim)) best = { name: m.name, sim };
+      }
+      return { name: e.name, id: e.ids[0] as number, similarTo: best?.name ?? null };
+    });
+}
+
 export interface CheckOptions {
   withTarget?: boolean;
   scale?: ScoreScale;
@@ -177,6 +215,8 @@ export interface CheckReport {
   invalidScores: ScoreIssue[];
   badTimestamps: number[];
   titleClusters: TitleCluster[];
+  /** 只有 1 筆回覆的被評對象（僅報告回饋）。 */
+  singleTargets: SingleTarget[];
 }
 
 /** 資料檢查總表：重複、空白、無效分數、時間格式異常、書名多種寫法。 */
@@ -188,5 +228,6 @@ export function runChecks(records: readonly CheckRecord[], opts: CheckOptions = 
     invalidScores: opts.scale ? findInvalidScores(records, opts.scale) : [],
     badTimestamps: findBadTimestamps(records),
     titleClusters: clusterTitles(records),
+    singleTargets: opts.withTarget ? findSingleReplyTargets(records) : [],
   };
 }

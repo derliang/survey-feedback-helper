@@ -182,7 +182,7 @@ export function summarizeFeedback(
   const ranked = targets.filter((t) => t.total !== null).sort((a, b) => (b.total as number) - (a.total as number));
   ranked.forEach((t, i) => {
     const prev = ranked[i - 1];
-    t.rank = prev && prev.total === t.total ? (prev.rank as number) : i + 1;
+    t.rank = prev && Math.abs((prev.total as number) - (t.total as number)) < 1e-9 ? (prev.rank as number) : i + 1;
   });
 
   const totals = targets.map((t) => t.total).filter((v): v is number => v !== null);
