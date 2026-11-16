@@ -1,6 +1,6 @@
 // 第二輪版面改版（第二批）：準備資料桌機寬、頂列檔名、確認視窗置中、意見調查輸出摘要、設定範圍下拉。
 import { expect, test } from '@playwright/test';
-import { surveyFile } from './fixtures';
+import { settledBox, surveyFile } from './fixtures';
 
 test('準備資料桌機：右欄撐到 1240 容器右緣（S11）；<1100 頂列不顯示檔名', async ({ page }, info) => {
   await page.goto('./');
@@ -21,8 +21,10 @@ test('準備資料桌機：右欄撐到 1240 容器右緣（S11）；<1100 頂�
 test('重新開始確認：平板與桌機置中、寬不超過 480；手機為底部面板', async ({ page }) => {
   await page.goto('./');
   await page.getByTestId('file-input').setInputFiles(surveyFile());
+  // 先等準備資料頁出現再點，避免機器忙時點到尚未就緒的畫面；再等對話框滑入動畫結束才量
+  await expect(page.getByRole('heading', { level: 1, name: /讀書報告回饋/ })).toBeVisible();
   await page.getByRole('button', { name: '重新開始' }).click();
-  const box = (await page.getByRole('dialog').boundingBox())!;
+  const box = await settledBox(page.getByRole('dialog'));
   const vw = page.viewportSize()!.width;
   if (vw >= 600) {
     expect(box.width).toBeLessThanOrEqual(521);

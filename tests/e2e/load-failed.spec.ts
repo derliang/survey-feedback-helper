@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { surveyFile } from './fixtures';
+import { settledBox, surveyFile } from './fixtures';
 
 // 載入失敗共用元件（DESIGN 5.34 C）：擋掉延遲載入的 chunk 模擬斷網。資料皆為虛構。
 
@@ -12,7 +12,7 @@ test('載入失敗：按鈕不跑版、無橫向溢出；「回上一步」不�
   await expect(alert).toContainText('你的資料還在');
   const retry = alert.getByRole('button', { name: '重新載入' });
   const back = alert.getByRole('button', { name: '回上一步' });
-  for (const b of [retry, back]) expect((await b.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  for (const b of [retry, back]) expect((await settledBox(b)).height).toBeGreaterThanOrEqual(44);
   const width = page.viewportSize()!.width;
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
   // 目前就是「準備資料」失敗，回上一步要回首頁而不是停在原地
