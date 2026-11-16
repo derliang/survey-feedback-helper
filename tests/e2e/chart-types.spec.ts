@@ -28,6 +28,12 @@ async function openChartPanel(page: Page, wide: boolean) {
 
 const preview = (page: Page) => page.locator('.ph-svg svg').first();
 
+/** 手機／平板：預覽模式沒有「編輯屬性」，回區塊清單再開（選取的區塊仍在）。 */
+async function reopen(page: Page) {
+  await page.getByRole('button', { name: '區塊清單' }).click();
+  await page.getByRole('button', { name: '編輯屬性' }).click();
+}
+
 test('編輯器：圖表類型與參考線改了，預覽立刻換成對應的圖', async ({ page }, info) => {
   const wide = info.project.name === 'desktop';
   await toOutput(page);
@@ -40,7 +46,7 @@ test('編輯器：圖表類型與參考線改了，預覽立刻換成對應的�
     await page.getByRole('button', { name: '預覽', exact: true }).click();
   }
   const compare = await preview(page).innerHTML();
-  if (!wide) await page.getByRole('button', { name: '編輯屬性' }).click();
+  if (!wide) await reopen(page);
 
   await page.getByRole('button', { name: '堆疊', exact: true }).click();
   await expect(page.getByTestId('chart-hint')).toContainText('100% 堆疊');
@@ -56,14 +62,14 @@ test('編輯器：圖表類型與參考線改了，預覽立刻換成對應的�
   // 內建範本的參考線預設是開的
   expect(stacked).toContain('stroke-dasharray');
 
-  if (!wide) await page.getByRole('button', { name: '編輯屬性' }).click();
+  if (!wide) await reopen(page);
   await toggle.click();
   if (!wide) {
     await page.getByRole('button', { name: '完成' }).click();
     await page.getByRole('button', { name: '預覽', exact: true }).click();
   }
   expect(await preview(page).innerHTML()).not.toContain('stroke-dasharray');
-  if (!wide) await page.getByRole('button', { name: '編輯屬性' }).click();
+  if (!wide) await reopen(page);
   await toggle.click();
   await page.getByRole('button', { name: '分布', exact: true }).click();
   if (!wide) {
