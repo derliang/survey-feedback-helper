@@ -23,6 +23,11 @@ describe('文件模型', () => {
     const back = parseDoc(serializeDoc(doc));
     expect(back).toEqual(doc);
   });
+  it('差距極小的負值不顯示 -0.0（#152）', () => {
+    const near = personalFeedbackDoc({ ...fakeFeedback(), items: [{ label: '表達', mine: 5, classMean: 5.04 }], average: { mine: 5, classMean: 5.04 } });
+    expect(JSON.stringify(near.blocks)).not.toContain('-0.0');
+    expect(JSON.stringify(near.blocks)).toContain('+0.0');
+  });
   it('個人回饋單有平均列且被標為強調列', () => {
     const doc = personalFeedbackDoc(fakeFeedback());
     const table = doc.blocks.find((b) => b.type === 'table');

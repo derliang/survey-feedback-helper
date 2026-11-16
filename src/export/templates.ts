@@ -3,7 +3,10 @@ import { A4_LANDSCAPE, A4_PORTRAIT, type DocModel, type Block, contentWidth, fil
 
 const NAVY = '#1f4e79';
 const fmt1 = (n: number | null | undefined): string => (n === null || n === undefined || !Number.isFinite(n) ? '—' : n.toFixed(1));
-const signed = (n: number): string => (n >= 0 ? '+' : '') + n.toFixed(1);
+const signed = (n: number): string => {
+  const s = n.toFixed(1);
+  return Number(s) === 0 ? '+0.0' : (n > 0 ? '+' : '') + s;
+};
 
 export interface PersonalFeedbackInput {
   school?: string;

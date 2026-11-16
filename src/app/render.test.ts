@@ -86,6 +86,17 @@ describe('輸出接線：範本 → DocModel', () => {
   });
 });
 
+describe('差距欄不出現負零（#152）', () => {
+  it('差距極小的負值顯示 +0.0，不是 -0.0', () => {
+    const inp = input({ items: [{ label: '表達清晰', mine: 5, classMean: 5.04 }], average: { mine: 5, classMean: 5.04 } });
+    const d = personalDocFromTemplate(personal, inp, { version: 'teacher' });
+    const table = d.blocks.find((b) => b.type === 'table');
+    const rows = table && 'rows' in table ? table.rows : [];
+    expect(rows[0]?.[3]).toBe('+0.0');
+    expect(JSON.stringify(rows)).not.toContain('-0.0');
+  });
+});
+
 describe('進階範本接線', () => {
   const adv = builtinTemplates().find((t) => t.id === 'builtin-personal-adv')!;
   const types = (d: { blocks: { type: string }[] }) => d.blocks.map((b) => b.type);

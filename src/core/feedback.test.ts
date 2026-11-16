@@ -141,3 +141,16 @@ describe('累積讀取差異', () => {
     expect(diffAccumulated([], [])).toMatchObject({ added: 0, removed: 0, firstRead: false });
   });
 });
+
+describe('名次並列用容差（#143）', () => {
+  it('浮點相加順序造成的 1e-16 差不拆並列', () => {
+    const one = (t: string, a: number[]): FeedbackRecord => rec(0, `r-${t}`, t, a);
+    const rows = [one('甲', [0.1, 0.2, 0.3, 0.4, 0.5]), one('乙', [0.5, 0.4, 0.3, 0.2, 0.1]), one('丙', [0.3, 0.3, 0.3, 0.3, 0.3]), one('丁', [0.9, 0.9, 0.9, 0.9, 0.9])];
+    const r = summarizeFeedback(rows, items);
+    const ranks = Object.fromEntries(r.targets.map((t) => [t.person.name, t.rank]));
+    expect(ranks['丁']).toBe(1);
+    expect(ranks['甲']).toBe(2);
+    expect(ranks['乙']).toBe(2);
+    expect(ranks['丙']).toBe(2);
+  });
+});
