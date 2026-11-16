@@ -1,3 +1,8 @@
+# 稿件總覽成品頁（2026-11-16）
+
+- 私人頁面「問卷回饋稿件總覽」：https://claude.ai/artifact/1Wk2AA7QSTQ3gg3f6Qg97k 。把 `docs/design/mockups/` 全部 69 份模擬頁依 [DESIGN.md](../DESIGN.md)〈11. 頁面清單〉整理成左側目錄加右側預覽，標示現行定案、待使用者確認與已取代。依據 `main@929865c`。
+- 更新：清單來源是 DESIGN.md 的頁面清單；模擬頁有增減時，重新整理頁面清單再重發同一網址（發佈時 `files` 把每份模擬頁映射到 `m/…`）。
+
 # 設計系統成品頁（2026-10-31；2026-11-01 第四輪另發新頁）
 
 - **目前使用的帳號（derliang@gmail.com，2026-11-04 新發，私人）**：https://claude.ai/artifact/7GBgP9Ubuqeo191QNem34J 。由 `main@6c7bdd3` 以 `node docs/design/build/ds.mjs` 重建，圖示 51 個已在此頁重傳（圖示 id 屬於此頁，`assets.json` 仍是舊頁的）。下方 EwXdcUYGxE5LbytqbYuY2W 在另一帳號，這個帳號打不開；要在此帳號更新，請改發布到這個新網址。
