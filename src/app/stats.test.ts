@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { tableFromCsv } from '../core';
-import { type StatsOpts, blankColumns, defaultStatsOpts, looksMulti, opinionQuestions, runFeedback, runVote } from './analysis';
+import { DEFAULT_VOTE_RULES, tableFromCsv } from '../core';
+import { type StatsOpts, blankColumns, defaultStatsOpts, looksMulti, opinionQuestions, runFeedback, runVote, voteGuardPending } from './analysis';
 import { analyzeColumns, detectScale } from './columns';
 import { AUDIENCE_NAMES, classSummaryInput, opinionReport, opinionSheets, personalInputs, voteSheets } from './output';
 import { commentState, emptyReview, finalText, flaggedWords, parseReview, reviewCounts, serializeReview, setComment, setKeywords, setRewrite, setTeacher } from './review';
@@ -138,6 +138,29 @@ describe('意見調查與票選', () => {
     expect(p.tally.rows.find((r) => r.name === '甲')!.votes).toBe(1);
     expect(runVote(s, o).positions[0]!.election.elected).toEqual(p.election.elected);
     expect(voteSheets(v)[0]!.rows.length).toBe(2);
+  });
+});
+
+describe('票選防弊與計票規則（#175）', () => {
+  const head = '時間戳記,填寫者,班長';
+  it('每人每職位限投一票：複選的該職位視為無效；關閉後照舊', () => {
+    const csv = [head, '2026/10/01 10:00:00,甲,乙、丙', '2026/10/01 10:01:00,丁,乙'].join('\n');
+    const s = session(csv, { 時間戳記: 'timestamp', 填寫者: 'respondentName', 班長: 'choice' }, 'vote');
+    const on = runVote(s, defaultStatsOpts()).positions[0]!;
+    expect(on.multiPick).toBe(1);
+    expect(on.tally.rows.map((r) => [r.name, r.votes])).toEqual([['乙', 1]]);
+    const off = runVote(s, { ...defaultStatsOpts(), voteRules: { ...DEFAULT_VOTE_RULES, oneVote: false } }).positions[0]!;
+    expect(off.multiPick).toBe(0);
+  });
+  it('逐張覆寫與閘門：有可疑票且未確認時待決定，確認後解除', () => {
+    const csv = [head, '2026/10/01 10:00:00,甲,甲', '2026/10/01 10:01:00,乙,甲'].join('\n');
+    const s = session(csv, { 時間戳記: 'timestamp', 填寫者: 'respondentName', 班長: 'choice' }, 'vote');
+    const o = defaultStatsOpts();
+    const v = runVote(s, o);
+    expect(voteGuardPending(v, o)).toEqual(['self']);
+    expect(voteGuardPending(v, { ...o, guardDone: ['self'] })).toEqual([]);
+    const v2 = runVote(s, { ...o, ballotOverrides: { 0: false } });
+    expect(v2.positions[0]!.tally.rows[0]).toMatchObject({ name: '甲', votes: 1 });
   });
 });
 

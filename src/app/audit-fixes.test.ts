@@ -1,6 +1,6 @@
 // ChatGPT 稽核 Issue #117／#118／#121／#123／#124／#126 的回歸測試（全是虛構資料）。
 import { describe, expect, it } from 'vitest';
-import { type Ballot, decideInclusion, detectVoteIssues, parseTimestamp, tableFromRows, tallyPosition } from '../core';
+import { type Ballot, DEFAULT_VOTE_RULES, decideInclusion, detectVoteIssues, parseTimestamp, tableFromRows, tallyPosition } from '../core';
 import { defaultStatsOpts, runFeedback, runVote } from './analysis';
 import { analyzeColumns, detectScale } from './columns';
 import { checkReport, rosterComparison } from './progress';
@@ -174,21 +174,21 @@ describe('#126 同人多票時間缺失', () => {
   it('兩張都沒時間：依列順序；first 保留第一張；人工覆寫優先', () => {
     const bs = [mk(1, null, '甲'), mk(2, '昨天', '乙')];
     const issues = detectVoteIssues(bs);
-    const last = decideInclusion(bs, issues, { multi: 'last', self: 'count', time: 'keep' });
+    const last = decideInclusion(bs, issues, { ...DEFAULT_VOTE_RULES, multi: 'last', time: 'keep' });
     expect(last.decisions.map((d) => d.included)).toEqual([false, true]);
-    const first = decideInclusion(bs, issues, { multi: 'first', self: 'count', time: 'keep' });
+    const first = decideInclusion(bs, issues, { ...DEFAULT_VOTE_RULES, multi: 'first', time: 'keep' });
     expect(first.decisions.map((d) => d.included)).toEqual([true, false]);
-    const man = decideInclusion(bs, issues, { multi: 'last', self: 'count', time: 'keep' }, new Map([[1, true]]));
+    const man = decideInclusion(bs, issues, { ...DEFAULT_VOTE_RULES, multi: 'last', time: 'keep' }, new Map([[1, true]]));
     expect(man.decisions.map((d) => d.included)).toEqual([true, true]);
     expect(man.manualCount).toBe(1);
   });
   it('multi none／all 與 time exclude 的組合', () => {
     const bs = [mk(1, '2026/11/16 09:00', '甲'), mk(2, null, '乙')];
     const issues = detectVoteIssues(bs);
-    expect(decideInclusion(bs, issues, { multi: 'none', self: 'count', time: 'keep' }).decisions.map((d) => d.included)).toEqual([false, false]);
-    expect(decideInclusion(bs, issues, { multi: 'all', self: 'count', time: 'keep' }).decisions.map((d) => d.included)).toEqual([true, true]);
+    expect(decideInclusion(bs, issues, { ...DEFAULT_VOTE_RULES, multi: 'none', time: 'keep' }).decisions.map((d) => d.included)).toEqual([false, false]);
+    expect(decideInclusion(bs, issues, { ...DEFAULT_VOTE_RULES, multi: 'all', time: 'keep' }).decisions.map((d) => d.included)).toEqual([true, true]);
     // 缺時間票被排除時，剩下那張自然保留
-    const ex = decideInclusion(bs, issues, { multi: 'last', self: 'count', time: 'exclude' });
+    const ex = decideInclusion(bs, issues, { ...DEFAULT_VOTE_RULES, multi: 'last', time: 'exclude' });
     expect(ex.decisions.map((d) => d.included)).toEqual([false, false]); // 缺時間票時間異常被排除；另一張因多票規則被排除（列順序）
   });
 });

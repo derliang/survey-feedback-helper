@@ -194,6 +194,10 @@ test('票選：同人多票且時間無法判讀時，統計頁提示「依資�
   await page.getByRole('button', { name: '確認，下一步：欄位對應' }).click();
   await page.getByRole('button', { name: '完成對應，下一步' }).click();
   await step(page, '統計').click();
+  // 有同人多票：防弊檢查要先決定，才看得到正式結果（#175）
+  await expect(page.getByTestId('vote-gate')).toBeVisible();
+  await page.getByTestId('guard-multi').getByRole('button').first().click();
+  await page.getByRole('button', { name: '確認這樣處理' }).click();
   await expect(page.getByTestId('row-order-hint')).toContainText('依資料列順序判定');
   await noOverflow(page);
 });

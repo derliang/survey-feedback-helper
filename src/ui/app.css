@@ -3269,3 +3269,121 @@ ul.chips {
     grid-template-columns: 170px minmax(0, 1fr);
   }
 }
+
+/* 票選防弊（Issue #175）：同人多票兩份並排、單選圓點、防弊四項成組畫面 */
+.dup-copies {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--sp-2);
+}
+.dup-copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: var(--sp-3);
+  background: var(--card);
+}
+.dup-copy.on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.dup-copy .plain-list {
+  margin: 0;
+}
+.dup-choices {
+  display: grid;
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
+}
+.dup-radio {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: var(--tap-min);
+  text-align: left;
+  border: 1px solid var(--ctl);
+  border-radius: var(--r-sm);
+  background: var(--card);
+  color: var(--ink);
+  padding: var(--sp-2) var(--sp-3);
+  cursor: pointer;
+  font: inherit;
+}
+.dup-radio.on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.dup-radio .dot {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--ctl);
+  background: var(--card);
+}
+.dup-radio.on .dot {
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: inset 0 0 0 3px var(--card);
+}
+.guard-card .guard-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: var(--tap-min);
+}
+.guard-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--sp-2);
+}
+.guard-row {
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--card);
+}
+.guard-row.attn {
+  border: 2px solid var(--warn-bar);
+}
+.guard-row .rowbtn {
+  border: 0;
+  background: transparent;
+}
+.guard-detail {
+  padding: var(--sp-3);
+  display: grid;
+  gap: var(--sp-2);
+  border-top: 1px solid var(--line-soft);
+}
+.guard-ballot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2) var(--sp-3);
+  min-height: var(--tap-min);
+}
+.guard-ballot .who {
+  flex: 1 1 160px;
+  min-width: 0;
+}
+.guard-ballot label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: var(--tap-min);
+}
+.guard-gate {
+  border: 2px solid var(--warn-bar);
+}
+.rule-preview {
+  display: grid;
+  gap: var(--sp-1);
+}
+.manual-pick {
+  display: grid;
+  gap: var(--sp-2);
+}
