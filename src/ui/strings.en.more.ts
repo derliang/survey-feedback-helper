@@ -842,7 +842,7 @@ export const enMore: DeepPartial<Strings> = {
     count: (n) => `${n} questions`,
     kindNames: { opinion: 'Opinion survey', vote: 'Election', feedback: 'Presentation feedback' },
     anonymous: 'No name question',
-    named: 'Named',
+    named: 'Has name question',
     audience: (a) => `Audience: ${a}`,
     scaleLabel: (s) => `Scale: ${s}`,
     defaultsTitle: 'Default approach',

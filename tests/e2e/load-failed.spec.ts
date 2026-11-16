@@ -1,7 +1,10 @@
 import { expect, test } from '@playwright/test';
-import { surveyFile } from './fixtures';
+import { settledBox, surveyFile } from './fixtures';
 
 // 載入失敗共用元件（DESIGN 5.34 C）：擋掉延遲載入的 chunk 模擬斷網。資料皆為虛構。
+// 必須封鎖 Service Worker：它會預先快取全部 JS 並接管頁面，一旦啟用（機器忙時啟用時間點不固定），
+// 畫面程式檔就由它直接回應，page.route 攔不到，「載入失敗」就不會出現（原本偶發失敗的根因）。
+test.use({ serviceWorkers: 'block' });
 
 test('載入失敗：按鈕不跑版、無橫向溢出；「回上一步」不會停在原地', async ({ page }) => {
   await page.route(/assets\/Prepare-.*\.js/, (r) => r.abort());
@@ -12,7 +15,7 @@ test('載入失敗：按鈕不跑版、無橫向溢出；「回上一步」不�
   await expect(alert).toContainText('你的資料還在');
   const retry = alert.getByRole('button', { name: '重新載入' });
   const back = alert.getByRole('button', { name: '回上一步' });
-  for (const b of [retry, back]) expect((await b.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  for (const b of [retry, back]) expect((await settledBox(b)).height).toBeGreaterThanOrEqual(44);
   const width = page.viewportSize()!.width;
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
   // 目前就是「準備資料」失敗，回上一步要回首頁而不是停在原地
