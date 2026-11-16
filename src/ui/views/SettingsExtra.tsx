@@ -8,7 +8,7 @@ import { type BackupSummary, type EditorData, bundleBackup, EditorDataError, mer
 import { type Layer, type ReportSettings, resolveSettings, settingSources } from '../../editor/settings';
 import type { ReportVersion } from '../../editor/types';
 import { applyEditorData, es, layers, load, setLayerValue, useEditor } from '../editor/state';
-import { Notice } from '../parts/parts';
+import { Notice, OptionGroup } from '../parts/parts';
 import { backupText, defaultsText } from '../strings-backup';
 
 type Kind = 'feedback' | 'opinion' | 'vote';
@@ -66,7 +66,7 @@ export function DefaultsCard() {
       <label class="check">
         <input type="checkbox" checked={value[k]} onChange={(e) => setLayerValue(layer, kind, k, (e.target as HTMLInputElement).checked)} />
         <span>
-          {D.toggles[k]}（{value[k] ? D.on : D.off}）
+          {D.toggles[k]}
         </span>
       </label>
       <Tag k={k} />
@@ -79,16 +79,8 @@ export function DefaultsCard() {
       <p class="hint">{D.intro}</p>
       <div class="scope-row">
         <div class="field">
-          <label class="label" for="def-scope">
-            {D.scopeLabel}
-          </label>
-          <select id="def-scope" class="input" value={layer} onChange={(e) => setLayer((e.target as HTMLSelectElement).value as Layer)}>
-            {(['global', 'kind', 'run'] as Layer[]).map((x) => (
-              <option key={x} value={x}>
-                {D.layers[x]}
-              </option>
-            ))}
-          </select>
+          <span class="label">{D.scopeLabel}</span>
+          <OptionGroup label={D.scopeLabel} value={layer} options={(['global', 'kind', 'run'] as Layer[]).map((x) => ({ value: x, label: D.layers[x] }))} onChange={(v) => setLayer(v)} />
         </div>
         {layer === 'kind' && (
           <div class="field">

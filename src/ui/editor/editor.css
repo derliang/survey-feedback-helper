@@ -14,7 +14,7 @@
   padding: var(--sp-3);
 }
 .lib-thumb {
-  height: 190px;
+  height: 164px;
   overflow: hidden;
   border: 1px solid var(--line-soft);
   border-radius: var(--r-sm);

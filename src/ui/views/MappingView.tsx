@@ -5,6 +5,7 @@ import {
   countToConfirm,
   detectScale,
   gridGroup,
+  defaultLabel,
   isPending,
   mappingProblems,
   movePref,
@@ -68,7 +69,7 @@ export function MappingView() {
         value={c.label}
         onInput={(e) => update(c.index, { label: e.currentTarget.value })}
         onBlur={() => {
-          if (c.label.trim() === '') update(c.index, { label: c.header });
+          if (c.label.trim() === '') update(c.index, { label: defaultLabel(c.header) });
           setRenaming(null);
         }}
         onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}

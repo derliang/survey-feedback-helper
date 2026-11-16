@@ -346,13 +346,10 @@ select {
 .top-banner-in {
   flex-wrap: wrap;
 }
-/* 手機：文字佔一整行，動作與「關閉」排下一行靠右 */
+/* 手機：文字與動作同一列（Issue #159：不再把按鈕擠到第二列），放不下才折行 */
 @media (max-width: 599px) {
   .top-banner-text {
-    flex-basis: calc(100% - 40px);
-  }
-  .top-banner-in {
-    justify-content: flex-end;
+    flex-basis: 7rem;
   }
 }
 .card {
@@ -678,8 +675,10 @@ select {
   line-height: 1.5;
   resize: vertical;
 }
+/* 行內改名：另起一列、全寬（Issue #164：不把名稱擠成直排） */
 .input.rename {
-  max-width: 14rem;
+  flex: 1 1 100%;
+  max-width: none;
 }
 .rcards {
   display: grid;
@@ -1151,7 +1150,7 @@ button.tile {
     display: flex;
   }
   .open-buttons {
-    grid-template-columns: 1.6fr 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr)); /* Issue #167：窄欄自動換行，不把標籤擠成兩行 */
   }
   .prep-grid {
     grid-template-columns: 300px minmax(0, 1fr);
@@ -1313,8 +1312,8 @@ button.tile {
   margin: var(--sp-4) 0 0;
 }
 .phrase-tabs {
-  overflow-x: auto;
-  flex-wrap: nowrap;
+  flex-wrap: wrap; /* Issue #162：分類換行排列，不再橫向捲動被截斷 */
+  gap: var(--sp-1);
 }
 .phrase-tabs button {
   white-space: nowrap;
@@ -2230,6 +2229,7 @@ details[open] > :not(summary) {
 }
 .pc-name {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--sp-1);
 }
@@ -2420,7 +2420,7 @@ details[open] > :not(summary) {
 
 /* 設定頁（5.33 C／D）：分組、左側導覽、桌機固定底部操作列 */
 .settings-page {
-  max-width: 984px; /* 導覽 240＋間距 24＋內容 720 */
+  max-width: 1032px; /* 導覽 240＋間距 24＋內容 720＋左右 padding 各 24（Issue #166：內容欄實測 720） */
 }
 .set-cols {
   display: flex;
@@ -3245,4 +3245,9 @@ ul.chips {
   color: var(--paper);
   font-size: 12px;
   line-height: 20px;
+}
+
+.seg .count {
+  margin-inline-start: var(--sp-1);
+  font-size: var(--fs-sm);
 }

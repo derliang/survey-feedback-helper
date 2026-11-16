@@ -55,7 +55,8 @@ function pageCount(t: EditorTemplate): number {
 function Library({ e }: { e: ES }) {
   const st = useApp();
   const [filter, setFilter] = useState<'all' | 'builtin' | 'mine'>('all');
-  const list = allTemplates(e.data).filter((t) => filter === 'all' || (filter === 'builtin') === t.builtin);
+  const all = allTemplates(e.data);
+  const list = all.filter((t) => filter === 'all' || (filter === 'builtin') === t.builtin);
   const menu = e.menuFor ? allTemplates(e.data).find((t) => t.id === e.menuFor) : undefined;
   return (
     <>
@@ -68,11 +69,11 @@ function Library({ e }: { e: ES }) {
       <div class="seg" role="group" aria-label={ed().libFilter}>
         {(
           [
-            ['all', ed().all],
-            ['builtin', ed().builtin],
-            ['mine', ed().mine],
+            ['all', ed().all, all.length],
+            ['mine', ed().mine, all.filter((t) => !t.builtin).length],
+            ['builtin', ed().builtin, all.filter((t) => t.builtin).length],
           ] as const
-        ).map(([k, n]) => (
+        ).map(([k, n, c]) => (
           <button
             key={k}
             type="button"
@@ -80,7 +81,7 @@ function Library({ e }: { e: ES }) {
             aria-pressed={filter === k}
             onClick={() => setFilter(k)}
           >
-            {n}
+            {n} <span class="count" aria-hidden="true">{c}</span>
           </button>
         ))}
       </div>
@@ -88,7 +89,7 @@ function Library({ e }: { e: ES }) {
         {list.map((t) => (
           <div key={t.id} class="lib-card" data-testid="template-card">
             <button type="button" class="lib-thumb" aria-label={ed().editNamed(t.name)} onClick={() => openEditor(t.id)}>
-              <Preview t={t} scale={0.14} thumb />
+              <Preview t={t} scale={0.13} thumb />
             </button>
             <div class="lib-meta">
               <strong>{t.name}</strong>

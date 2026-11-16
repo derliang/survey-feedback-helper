@@ -61,7 +61,7 @@ function Tile({ label, value, note }: { label: string; value: string; note?: str
   return (
     <div class="tile">
       <span class="tile-l">{label}</span>
-      <span class={`tile-n${[...value].length > 7 ? ' long' : ''}`}>{value}</span>
+      <span class={`tile-n${[...value].length > 4 ? ' long' : ''}`}>{value}</span>
       {note && <span class="hint">{note}</span>}
     </div>
   );

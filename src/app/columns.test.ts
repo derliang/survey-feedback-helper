@@ -28,3 +28,13 @@ describe('疑似評分欄與量表不符的提示（#145）', () => {
     expect(scaleSuspect(wide, wc, detectScale(wide, wc), false)).toBeNull();
   });
 });
+
+describe('defaultLabel（Issue #164）', () => {
+  it('去掉結尾的半形與全形冒號、空白；全是冒號時保留原樣', async () => {
+    const { defaultLabel } = await import('./columns');
+    expect(defaultLabel('簡報內容（充實度）：')).toBe('簡報內容（充實度）');
+    expect(defaultLabel('優點: ')).toBe('優點');
+    expect(defaultLabel('姓名')).toBe('姓名');
+    expect(defaultLabel('：')).toBe('：');
+  });
+});
