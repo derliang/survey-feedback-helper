@@ -53,7 +53,7 @@ export function defaultStatsOpts(): StatsOpts {
 }
 
 export function newSeed(): string {
-  return `抽籤-${Date.now().toString(36)}`;
+  return `draw-${Date.now().toString(36)}`;
 }
 
 function activeRows(s: Session): number[] {

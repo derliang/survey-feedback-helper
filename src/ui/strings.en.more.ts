@@ -345,7 +345,7 @@ export const enMore: DeepPartial<Strings> = {
     rank: (n) => (n === null ? '—' : `Rank ${n}`),
     total: 'Total (weighted)',
     classMean: 'Class mean',
-    classMeanNote: (inc) => `${inc} group(s) included`,
+    classMeanNote: (inc, total) => (total == null ? `${inc} group(s) included` : `${inc} of ${total} group(s) included`),
     raters: (n) => `Rated by ${n} classmate(s)`,
     mine: 'This student',
     classAvg: 'Class mean',

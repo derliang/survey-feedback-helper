@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { tableFromCsv } from '../core';
 import { type StatsOpts, blankColumns, defaultStatsOpts, looksMulti, opinionQuestions, runFeedback, runVote } from './analysis';
 import { analyzeColumns, detectScale } from './columns';
-import { AUDIENCE_NAMES, classSummaryInput, opinionSheets, personalInputs, voteSheets } from './output';
+import { AUDIENCE_NAMES, classSummaryInput, opinionReport, opinionSheets, personalInputs, voteSheets } from './output';
 import { commentState, emptyReview, finalText, flaggedWords, parseReview, reviewCounts, serializeReview, setComment, setKeywords, setRewrite, setTeacher } from './review';
 import type { Session } from './store';
 import { emptyCourseState } from './course-app';
@@ -124,6 +124,9 @@ describe('意見調查與票選', () => {
     expect(looksMulti(['a', 'b'])).toBe(false);
     const sheets = opinionSheets(qs, emptyReview('s1'), s.scale.min);
     expect(sheets.map((x) => x.name)).toContain('開放意見');
+    // #134：複選題的摘要與 Word/PDF 都要說明比例加總可超過 100%
+    expect(JSON.stringify(sheets[0]!.rows)).toContain('加總可能超過 100%');
+    expect(JSON.stringify(opinionReport(s, qs, emptyReview('s1')))).toContain('加總可能超過 100%');
   });
   it('票選：同人多票只算最後一張，同票可重現抽籤', () => {
     const csv = ['填寫者,班長', 'A同學,甲', 'A同學,乙', 'B同學,乙', 'C同學,甲', 'D同學,丙'].join('\n');

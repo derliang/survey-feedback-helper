@@ -755,6 +755,13 @@ select {
   border: 1px solid var(--line-soft);
   border-radius: var(--r-sm);
 }
+.stats-table td,
+.stats-table th {
+  white-space: nowrap;
+}
+.stats-table th {
+  min-width: 5em;
+}
 .roster-table {
   border-collapse: collapse;
   width: 100%;
@@ -2068,6 +2075,11 @@ details[open] > :not(summary) {
 .pref-row .pr-name {
   flex: 1 1 auto;
   min-width: 0;
+}
+/* 窄寬（320）不被壓扁：上移／下移維持 44px 觸控目標（驗收 #133） */
+.pref-row .icbtn {
+  flex: none;
+  min-width: var(--tap-min);
 }
 .out-grid {
   display: grid;
