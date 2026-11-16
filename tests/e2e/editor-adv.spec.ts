@@ -48,6 +48,9 @@ test('桌機：直接在頁面上拖曳區塊換位置', async ({ page }, info) 
 test('試印 PDF：用示範資料輸出目前範本', async ({ page }) => {
   await openAdv(page);
   const popup = page.context().waitForEvent('page', { timeout: 60_000 }).catch(() => null);
+  // 手機：試印 PDF 在「頁面」面板內（頂列只留返回、名稱、復原重做；Issue #163）
+  const pageBtn = page.getByRole('button', { name: '頁面', exact: true });
+  if (await pageBtn.isVisible()) await pageBtn.click();
   await page.getByRole('button', { name: '試印 PDF' }).click();
   await expect(page.getByTestId('trial-msg')).toContainText('試印完成', { timeout: 60_000 });
   const p = await popup;

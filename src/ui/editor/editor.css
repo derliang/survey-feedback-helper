@@ -445,10 +445,17 @@
   min-height: 44px;
 }
 
+.ed-ic-g {
+  display: none;
+}
 @media (max-width: 899px) {
-  /* S6：頂列分兩列——上列返回＋名稱（名稱吃滿剩餘寬度），下列復原／重做／試印 PDF 等分 */
+  .ed-ic-g {
+    display: inline;
+    font-size: var(--fs-lg);
+  }
+  /* 手機頂列壓成一列（Issue #163、稿 11a／11c）：返回＋名稱＋復原／重做圖示；試印 PDF 移到「頁面」面板 */
   .ed-bar {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
   }
   .ed-bar .lbl {
     display: none;
@@ -456,11 +463,15 @@
   .ed-name {
     min-width: 0;
     max-width: none;
-    flex: 1 1 calc(100% - 64px);
+    flex: 1 1 auto;
   }
-  .ed-bar > .btn.secondary {
-    flex: 1 1 0;
-    white-space: nowrap;
+  .ed-ic {
+    flex: none;
+    min-width: var(--tap-min);
+    padding: 0;
+  }
+  .ed-ic-t {
+    display: none;
   }
   .ed-act {
     flex-wrap: wrap;

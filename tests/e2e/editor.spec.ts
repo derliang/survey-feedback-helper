@@ -276,3 +276,14 @@ test('設計落地 G9：手機底部操作列四顆按鈕夠大、字不被截',
   }
   await noOverflow(page);
 });
+
+test('手機編輯器頂列只有一列：返回、名稱、復原、重做（Issue #163）', async ({ page }, info) => {
+  test.skip(info.project.name !== 'phone', '只有手機版頂列壓成一列');
+  await openLibrary(page);
+  await page.getByRole('button', { name: '編輯「個人回饋單」' }).click();
+  const tops = await page.$$eval('.ed-bar > *:not(.sr)', (els) => els.map((el) => { const r = el.getBoundingClientRect(); return Math.round(r.top + r.height / 2); }));
+  expect(Math.max(...tops) - Math.min(...tops)).toBeLessThanOrEqual(2);
+  await expect(page.getByRole('button', { name: '復原' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '試印 PDF' })).toHaveCount(0);
+  await noOverflow(page);
+});
