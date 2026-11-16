@@ -399,6 +399,12 @@ function VoteMain({ v, sel }: { v: VoteResult; sel: string; wide: boolean }) {
         )}
         {p.tally.invalid > 0 && <p class="hint">{S.stats.invalidVotes(p.tally.invalid)}</p>}
         {p.tally.abstain > 0 && <p class="hint">{S.stats.abstain(p.tally.abstain)}</p>}
+        {v.inclusion.rowOrderBallots.length > 0 && (
+          <p class="hint" data-testid="row-order-hint">
+            <Icon name="info" />
+            <span>{S.stats.rowOrder(v.inclusion.rowOrderBallots.length)}</span>
+          </p>
+        )}
         <ImageSave svg={imgSvg} />
       </section>
       {!any && (

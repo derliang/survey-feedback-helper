@@ -441,6 +441,7 @@ export const strings = {
     reseed: '更換抽籤編號並重新抽籤',
     invalidVotes: (n: number) => `${n} 張投給名單以外的人（無效票）`,
     abstain: (n: number) => `${n} 張這個職位沒投`,
+    rowOrder: (n: number) => `有 ${n} 張同人多票的票因時間無法判讀，依資料列順序判定哪張算數，請確認。`,
     votes: (n: number) => `${n} 票`,
   },
 
