@@ -168,6 +168,10 @@ export interface AppState {
   statSel: string | null;
   /** 選課分組結果存不進資料夾（沒有資料夾或寫入失敗）。 */
   courseUnsaved: boolean;
+  /** Service Worker 有新版本在等待。 */
+  updateReady: boolean;
+  /** 使用者已按「稍後再說」。 */
+  updateDismissed: boolean;
 }
 
 const initial: AppState = {
@@ -193,6 +197,8 @@ const initial: AppState = {
   reviewUnsaved: false,
   statSel: null,
   courseUnsaved: false,
+  updateReady: false,
+  updateDismissed: false,
 };
 
 let state: AppState = initial;
