@@ -521,7 +521,7 @@ function ReviewCard(props: { items: { key: string; text: string }[]; total: numb
           <TeacherComment value={props.teacher.value} onChange={props.teacher.onChange} studentName={props.teacher.name} allNames={props.teacher.allNames} />
         </div>
       )}
-      {!st.reviewUnsaved && <p class="hint">{R.savedFolder}</p>}
+      {!st.reviewUnsaved && st.folder.state === 'ready' && <p class="hint">{R.savedFolder}</p>}
     </section>
   );
 }

@@ -247,7 +247,7 @@ export function tallyPosition(
     if (!display.has(k)) display.set(k, cellText(raw));
     counts.set(k, (counts.get(k) ?? 0) + 1);
   }
-  const sorted = [...counts].sort((a, b) => b[1] - a[1] || (display.get(a[0]) as string).localeCompare(display.get(b[0]) as string, 'zh-Hant'));
+  const sorted = [...counts].sort((a, b) => b[1] - a[1] || (display.get(a[0]) as string).localeCompare(display.get(b[0]) as string, 'zh-Hant', { numeric: true }));
   const rows: TallyRow[] = [];
   sorted.forEach(([k, votes], i) => {
     const prev = rows[i - 1];
@@ -294,7 +294,7 @@ export function elect(tally: PositionTally, seats: number, seed: string): Electi
   }
   const certain = rows.filter((r) => r.votes > cutVotes).map((r) => r.name);
   const tiedRows = rows.filter((r) => r.votes === cutVotes);
-  const base = tiedRows.map((r) => r.name).sort((a, b) => a.localeCompare(b, 'zh-Hant'));
+  const base = tiedRows.map((r) => r.name).sort((a, b) => a.localeCompare(b, 'zh-Hant', { numeric: true }));
   const order = seededShuffle(base, seed);
   const slots = seats - certain.length;
   return {

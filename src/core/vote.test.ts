@@ -170,3 +170,13 @@ describe('elect 與可重現抽籤', () => {
     expect(makeSeed()).toMatch(/^[0-9a-f]{8}$/);
   });
 });
+
+describe('同票名單自然排序（#150）', () => {
+  it('1方馨 排在 19 號之前，不依字串排序', () => {
+    const bs = ['19陳', '1方馨', '2李', '10王'].map((n, i) => ballot(i, `v${i}`, { 班長: n }));
+    const tally = tallyPosition(bs, decideInclusion(bs, detectVoteIssues(bs)), '班長');
+    expect(tally.rows.map((r) => r.name)).toEqual(['1方馨', '2李', '10王', '19陳']);
+    const e = elect(tally, 2, 's');
+    expect(e.tied).toEqual(['1方馨', '2李', '10王', '19陳']);
+  });
+});
