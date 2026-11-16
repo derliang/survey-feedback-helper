@@ -797,7 +797,7 @@ export const strings = {
     questionsTitle: '預設題目',
     count: (n: number) => `${n} 題`,
     kindNames: { opinion: '意見調查', vote: '票選幹部', feedback: '報告回饋' } as Record<string, string>,
-    anonymous: '匿名',
+    anonymous: '無姓名題',
     named: '具名',
     audience: (a: string) => `對象：${a}`,
     scaleLabel: (s: string) => `量表：${s}`,

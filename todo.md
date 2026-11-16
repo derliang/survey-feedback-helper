@@ -80,6 +80,7 @@
 
 ## v0.3 編輯器與設定
 
+- [ ] **範本編輯器「圖表類型」四選項（長條／對照條／分布／堆疊）與「在圖表顯示班級平均參考線」開關尚未影響輸出，需實作**（使用者 2026-11-16 裁示：不拿掉選項，要真的做出圖表類型）。證據：輸出一律呼叫 `pairedBarsSvg`（`src/ui/views/OutputView.tsx:234`，我 vs 班級平均對照條），`chartFor`（`src/app/output.ts:90`）不看 `chartType`，`compareLine` 只被編輯器讀寫；家長版不放圖（`OutputView.tsx:231`）。詳見 [語意高風險核實](docs/analysis/2026-11-16-語意高風險核實.md) R1。需設計員出各圖型樣式。負責：待派
 - [~] （2026-11-01，editor-v02b 已做：預覽／區塊清單分開、捲動與編輯模式、長按把手拖曳＋上下鈕、底部屬性面板、縮放按鈕、復原重做；2026-11-01 分支 impl-editor-adv 補雙指縮放手勢〔`pinchZoom` 單元測試＋e2e 模擬雙指〕；**仍待使用者實機**：雙指縮放手感、長按拖曳、鍵盤彈出與捲動衝突，步驟見 [real-device-checklist B4](docs/real-device-checklist.md)）手機完整編輯器
 
 ## v0.4 Google 登入軌（軌一）
