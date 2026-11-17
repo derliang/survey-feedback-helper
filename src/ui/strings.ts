@@ -900,6 +900,7 @@ export const strings = {
     pendingLead: '待安排名單是目前未分到任何志願課程的學生；可檢查原因，再人工決定是否調整名額或安排其他課程。',
     fullLine: (full: boolean, first: number, lost: number) => `${full ? '已滿 · ' : ''}第 1 志願 ${first} 人，其中 ${lost} 人沒抽中，往下一志願`,
     emptyCourse: '還沒有人分到這一課。',
+    noMatch: '沒有符合的學生。',
     reasonNone: '沒填志願',
     reasonFull: '填寫的志願課程均已額滿',
     dragHint: '按住拖到左邊的課程',

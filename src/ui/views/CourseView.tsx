@@ -464,7 +464,10 @@ function Roster(props: RosterProps) {
   const c = s.course;
   const { list, people } = useMemo(() => courseApplicants(s, c), [s, c]);
   const sum = courseSummary(s, c)!;
-  const rows = (c.result ?? []).filter((a) => a.course === props.name);
+  const [q, setQ] = useState('');
+  const all = (c.result ?? []).filter((a) => a.course === props.name);
+  const qq = q.trim();
+  const rows = qq === '' ? all : all.filter((a) => personLabel(people.get(a.id)).includes(qq));
   const info = props.name === null ? null : sum.courses.find((x) => x.name === props.name);
   const lost = props.name === null ? 0 : (info?.firstChoice ?? 0) - rows.filter((a) => a.rank === 1).length;
   const pri = new Set(c.priority);
@@ -484,13 +487,13 @@ function Roster(props: RosterProps) {
     <div class="roster-panel" data-testid="roster-panel">
       <div class="roster-head">
         <h3>
-          {props.name ?? C.pending} <span class="hint">{props.name === null ? C.people(rows.length) : `${rows.length}／${info?.capacity ?? 0}`}</span>
+          {props.name ?? C.pending} <span class="hint">{props.name === null ? C.people(all.length) : `${all.length}／${info?.capacity ?? 0}`}</span>
         </h3>
         {props.name !== null && info && (info.full || info.over > 0) && (
           <span class="tag warn">{info.over > 0 ? C.overTag(info.over) : C.fullTag}</span>
         )}
         {props.exportable && props.name !== null && (
-          <button class="btn secondary small" type="button" disabled={busy || rows.length === 0} onClick={() => void exportOne()}>
+          <button class="btn secondary small" type="button" disabled={busy || all.length === 0} onClick={() => void exportOne()}>
             {C.exportOne}
           </button>
         )}
@@ -500,8 +503,11 @@ function Roster(props: RosterProps) {
       ) : (
         <p class="hint">{lost > 0 && info ? C.fullLine(info.full, info.firstChoice, lost) : info ? C.firstCount(info.firstChoice) : ''}</p>
       )}
+      {all.length > 0 && (
+        <input class="input roster-search" type="search" aria-label={C.search} placeholder={C.search} value={q} onInput={(e) => setQ(e.currentTarget.value)} data-testid="roster-search" />
+      )}
       <ul class="plain-ul srows">
-        {rows.length === 0 && <li class="hint">{C.emptyCourse}</li>}
+        {rows.length === 0 && <li class="hint">{all.length === 0 ? C.emptyCourse : C.noMatch}</li>}
         {rows.map((a) => {
           const reason = a.reason === 'noPrefs' ? C.reasonNone : C.reasonFull;
           return (
@@ -530,7 +536,7 @@ function Roster(props: RosterProps) {
           );
         })}
       </ul>
-      {list.length > 0 && rows.length > 30 && <p class="hint">{C.scrollAll(rows.length)}</p>}
+      {list.length > 0 && all.length > 30 && <p class="hint">{C.scrollAll(all.length)}</p>}
     </div>
   );
 }
