@@ -85,7 +85,7 @@ export function MappingView() {
       <button type="button" class={`rowbtn${c.confirm ? ' needs' : ''}`} onClick={() => setEditing(c)} aria-label={`${c.label}：${S.mapping.roles[c.role ?? 'ignore']}`}>
         <span class="rb-main">
           <strong>{c.label}</strong>
-          <span class="rb-note">{c.samples.slice(0, 3).join(extra().mapping.sep) || extra().mapping.noData}</span>
+          <span class="rb-note">{c.samples.slice(0, c.role === 'preference' ? 1 : 3).join(extra().mapping.sep) || extra().mapping.noData}</span>
         </span>
         <span class="rb-tags">
           {c.confirm && <span class="tag warn">{S.mapping.confirmTag}</span>}
@@ -311,7 +311,7 @@ export function MappingView() {
                   >
                     <span class="rb-main">
                       <strong>{c.label}</strong>
-                      <span class="rb-note">{c.samples.slice(0, 3).join(extra().mapping.sep) || extra().mapping.noData}</span>
+                      <span class="rb-note">{c.samples.slice(0, c.role === 'preference' ? 1 : 3).join(extra().mapping.sep) || extra().mapping.noData}</span>
                     </span>
                   </button>
                 </li>
