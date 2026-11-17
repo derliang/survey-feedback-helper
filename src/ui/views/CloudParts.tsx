@@ -9,10 +9,10 @@ export function saveMessage(kind: SaveFailure, hasFolder: boolean): string {
 }
 
 /** 四句說明：登入前卡與開啟確認卡一字不差（DESIGN.md 5.28）。 */
-export function CloudExplain() {
+export function CloudExplain(props: { title?: string; boxed?: boolean }) {
   return (
-    <div class="g-cloud-explain">
-      <h3>{S.cloud.cardTitle}</h3>
+    <div class={props.boxed ? "g-cloud-explain g-box" : "g-cloud-explain"}>
+      <h3>{props.title ?? S.cloud.cardTitle}</h3>
       <ul class="plain-list">
         <li>{S.cloud.s1}</li>
         <li>{S.cloud.s2}</li>

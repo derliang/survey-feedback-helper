@@ -14,8 +14,10 @@ function when(ts: number): string {
 /** 設定頁「雲端備份（選用）」：關／開且運作中／開但這次還沒登入／暫停 */
 export function CloudCard() {
   const st = useApp();
-  const [ask, setAsk] = useState<"on" | "off" | "login" | null>(null);
+  const [ask, setAsk] = useState<"on" | "off" | "login" | "where" | null>(null);
   const [alsoDisconnect, setAlsoDisconnect] = useState(false);
+  /** 未登入就打開開關：先登入，成功後才跳確認卡（DESIGN 5.28 Y1b）。 */
+  const [loginFirst, setLoginFirst] = useState(false);
   if (!googleConfigured()) return null;
   const on = st.prefs.cloudBackup;
   const signed = hasCloudToken();
@@ -26,7 +28,8 @@ export function CloudCard() {
         on={on}
         onChange={(v) => {
           setAlsoDisconnect(false);
-          setAsk(v ? "on" : "off");
+          setLoginFirst(v && !signed);
+          setAsk(v ? (signed ? "on" : "login") : "off");
         }}
       />
       {!on && <p class="hint">{S.cloud.offStatus}</p>}
@@ -42,7 +45,7 @@ export function CloudCard() {
       )}
       {on && signed && !st.cloud.paused && (
         <p class="hint">
-          {S.cloud.onStatus}{" "}
+          <strong>{S.cloud.running}</strong> {S.cloud.onStatus}{" "}
           {st.cloud.lastSaved
             ? S.cloud.lastSaved(when(st.cloud.lastSaved))
             : S.cloud.neverSaved}{" "}
@@ -75,17 +78,21 @@ export function CloudCard() {
         </div>
       )}
       <p class="hint">{S.cloud.order}</p>
+      <button class="btn ghost" type="button" data-testid="cloud-where" onClick={() => setAsk("where")}>
+        {S.cloud.whereTitle}
+      </button>
       {ask === "on" && (
         <Sheet
+          confirm
           title={S.cloud.confirmTitle}
           onClose={() => setAsk(null)}
           footer={
             <>
-              <button class="btn secondary" type="button" onClick={() => setAsk(null)}>
+              <button class="btn secondary grow" type="button" onClick={() => setAsk(null)}>
                 {S.cloud.confirmNo}
               </button>
               <button
-                class="btn primary"
+                class="btn primary grow"
                 type="button"
                 data-testid="cloud-confirm-on"
                 onClick={() => {
@@ -98,20 +105,22 @@ export function CloudCard() {
             </>
           }
         >
-          <CloudExplain />
+          <p>{S.cloud.confirmLead}</p>
+          <CloudExplain boxed title={S.cloud.confirmBoxTitle} />
         </Sheet>
       )}
       {ask === "off" && (
         <Sheet
+          confirm
           title={S.cloud.offTitle}
           onClose={() => setAsk(null)}
           footer={
             <>
-              <button class="btn secondary" type="button" onClick={() => setAsk(null)}>
+              <button class="btn secondary grow" type="button" onClick={() => setAsk(null)}>
                 {S.cloud.offKeep}
               </button>
               <button
-                class="btn primary"
+                class="btn primary grow"
                 type="button"
                 data-testid="cloud-confirm-off"
                 onClick={() => {
@@ -124,6 +133,7 @@ export function CloudCard() {
             </>
           }
         >
+          <p>{S.cloud.offLead}</p>
           <ul class="plain-list">
             <li>{S.cloud.offBody1}</li>
             <li>{S.cloud.offBody2}</li>
@@ -144,7 +154,34 @@ export function CloudCard() {
           loginOnly
           onClose={() => setAsk(null)}
           onExcel={() => setAsk(null)}
+          onSignedIn={() => loginFirst && setAsk("on")}
         />
+      )}
+      {ask === "where" && (
+        <Sheet
+          wide
+          title={S.cloud.whereTitle}
+          onClose={() => setAsk(null)}
+          footer={
+            <button class="btn primary grow" type="button" onClick={() => setAsk(null)}>
+              {S.cloud.gotIt}
+            </button>
+          }
+        >
+          <ul class="plain-list">
+            {S.cloud.whereList.map((t) => (
+              <li key={t}>{t}</li>
+            ))}
+          </ul>
+          <h3>{S.cloud.whereCases}</h3>
+          <ul class="plain-list">
+            {S.cloud.whereCaseList.map((t) => (
+              <li key={t}>{t}</li>
+            ))}
+          </ul>
+          <p>{S.cloud.whereRestore}</p>
+          <p class="hint">{S.cloud.whereOverwrite}</p>
+        </Sheet>
       )}
     </section>
   );

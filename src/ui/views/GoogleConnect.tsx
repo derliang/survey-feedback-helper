@@ -41,6 +41,8 @@ export function GoogleConnectDialog(props: {
   onExcel: () => void;
   /** 只登入、不選試算表（設定頁與備份失敗提示用）。 */
   loginOnly?: boolean;
+  /** 只登入模式登入成功（已關閉視窗）後呼叫，例如設定頁「先登入、再確認開啟」。 */
+  onSignedIn?: () => void;
 }) {
   const app = useApp();
   const [svc, setSvc] = useState<GoogleServices | null>(null);
@@ -117,7 +119,10 @@ export function GoogleConnectDialog(props: {
       token = r.token;
       setCloudToken(r.token);
       void backupToDrive();
-      if (props.loginOnly) return props.onClose();
+      if (props.loginOnly) {
+        props.onClose();
+        return props.onSignedIn?.();
+      }
       await read(svc, r.token);
     });
   };
