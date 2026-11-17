@@ -152,6 +152,38 @@ function LookCard() {
   );
 }
 
+const REPO = 'https://github.com/derliang/survey-feedback-helper';
+
+/** 關於（D54、5.15）：版本、授權、原始碼、第三方元件授權、回報問題。 */
+function AboutCard() {
+  const X = extra().about;
+  return (
+    <section class="card" data-testid="about-card">
+      <h2>{X.title}</h2>
+      <p>{X.version(__APP_VERSION__)}</p>
+      <p>{X.license}</p>
+      <ul class="plain-list">
+        <li>
+          <a href={REPO} target="_blank" rel="noopener">
+            {X.source}
+          </a>
+        </li>
+        <li>
+          <a href={`${REPO}/blob/main/docs/third-party.md`} target="_blank" rel="noopener">
+            {X.thirdParty}
+          </a>
+        </li>
+        <li>
+          <a href={`${REPO}/issues`} target="_blank" rel="noopener">
+            {X.report}
+          </a>
+        </li>
+      </ul>
+      <p class="hint">{X.note}</p>
+    </section>
+  );
+}
+
 /** 安裝到主畫面或桌面（D51／12a）：Chrome、Edge 與 Safari 兩組編號步驟。 */
 function InstallHelp() {
   const X = extra().install;
@@ -187,6 +219,7 @@ function HelpCards() {
           ))}
         </ul>
       </section>
+      <AboutCard />
       <details class="card help-acc" data-testid="help-card">
         <summary>
           <span class="help-t">
