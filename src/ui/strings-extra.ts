@@ -7,6 +7,16 @@ export const extraZh = {
   skip: '跳到主要內容',
   chrome: { steps: '步驟', templateAria: '範本與版面', templateLabel: '範本', brand: '問卷回饋小幫手', stepNames: ['開啟問卷', '準備資料', '統計', '輸出'], courseStep: '名額與分配', restart: '重新開始' },
   update: { title: '有新版本', body: '更新會重新載入頁面，目前載入的問卷資料與還沒保存的內容會清掉。', exportFirst: '先輸出，再更新', later: '稍後再說', now: '現在更新（資料會清掉）', banner: '有新版本可以更新。', bannerAction: '看更新選項' },
+  loadError: { repick: '重新選擇', howExport: '看匯出教學' },
+  about: {
+    title: '關於這個程式',
+    version: (v: string) => `版本 ${v}`,
+    license: '授權：GPL-3.0。你可以自由使用、修改與散布，修改後的版本也要用同樣的授權公開。',
+    source: '開啟原始碼頁面',
+    thirdParty: '第三方元件與授權',
+    report: '回報問題',
+    note: '連結會在新分頁開啟 GitHub；本程式不會因此傳送任何問卷資料。',
+  },
   offline: {
     banner: '目前沒有網路。已載入的畫面可以繼續用；輸出用的字型若還沒存過，輸出可能失敗。',
     ready: '已可離線使用：程式已存在這個瀏覽器，沒有網路也能開。',
@@ -151,6 +161,16 @@ export const extraEn: Extra = {
   skip: 'Skip to main content',
   chrome: { steps: 'Steps', templateAria: 'Templates and layout', templateLabel: 'Templates', brand: 'Feedback Helper', stepNames: ['Open', 'Prepare', 'Stats', 'Output'], courseStep: 'Quota', restart: 'Restart' },
   update: { title: 'A new version is available', body: 'Updating reloads the page, so the survey data loaded now and anything not yet saved will be cleared.', exportFirst: 'Export first, then update', later: 'Later', now: 'Update now (clears data)', banner: 'A new version is available.', bannerAction: 'See options' },
+  loadError: { repick: 'Choose again', howExport: 'How to export' },
+  about: {
+    title: 'About this app',
+    version: (v) => `Version ${v}`,
+    license: 'License: GPL-3.0. You may use, modify and share it freely; modified versions must be published under the same license.',
+    source: 'Open the source page',
+    thirdParty: 'Third-party components and licenses',
+    report: 'Report a problem',
+    note: 'Links open GitHub in a new tab; no survey data is sent by this app.',
+  },
   offline: {
     banner: 'You are offline. Screens already loaded keep working; export may fail if the export fonts have not been saved yet.',
     ready: 'Ready for offline use: the app is saved in this browser and opens without a network.',
