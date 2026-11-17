@@ -1,7 +1,6 @@
 // 離線提示：目前有沒有網路，以及第一次快取完成時的「已可離線使用」（只提示一次，DESIGN 5.15、D52／12b）。
 import { useEffect, useState } from 'preact/hooks';
 import { set } from './store';
-import { extra } from '../ui/strings-extra';
 
 const READY_KEY = 'sfh-offline-ready-shown';
 
@@ -13,7 +12,8 @@ export function announceOfflineReady(): void {
   } catch {
     /* 讀寫不了就照樣提示一次 */
   }
-  set({ toast: extra().offline.ready });
+  set({ offlineReady: true });
+  setTimeout(() => set({ offlineReady: false }), 8000);
 }
 
 /** 目前是否離線（跟著瀏覽器的 online／offline 事件更新）。 */

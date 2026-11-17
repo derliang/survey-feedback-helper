@@ -19,6 +19,14 @@ export function SaveBanners() {
   const offline = useOffline();
   return (
     <>
+      {st.offlineReady && !offline && (
+        <div class="top-banner offline-banner" role="status" data-testid="banner-offline-ready">
+          <div class="top-banner-in">
+            <Icon name="check" />
+            <span class="top-banner-text">{extra().offline.ready}</span>
+          </div>
+        </div>
+      )}
       {offline && (
         <div class="top-banner offline-banner" role="status" data-testid="banner-offline">
           <div class="top-banner-in">
