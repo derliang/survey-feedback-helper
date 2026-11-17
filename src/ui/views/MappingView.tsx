@@ -113,7 +113,7 @@ export function MappingView() {
       <p class="hint">{S.mapping.lead}</p>
       <PendingCard s={s} setCols={setCols} rename={renameCtl} onMore={setEditing} />
       {doubt && <ScaleCard s={s} doubt={doubt} />}
-      {toConfirm > 0 ? <Notice kind="warn">{S.mapping.toConfirm(toConfirm)}</Notice> : pending.length === 0 && <Notice kind="ok">{S.mapping.allGood}</Notice>}
+      {toConfirm > 0 ? <Notice kind="warn">{S.mapping.toConfirm(toConfirm)}</Notice> : pending.length === 0 && problems.length === 0 && <Notice kind="ok">{S.mapping.allGood}</Notice>}
       <ul class="map-list">{ordered.map(row)}</ul>
       {isCourse && (
         <button type="button" class="btn secondary" onClick={() => setAdding(true)} data-testid="add-pref">
