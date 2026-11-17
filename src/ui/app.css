@@ -1979,7 +1979,7 @@ details[open] > :not(summary) {
   gap: var(--sp-2);
 }
 .course-table td {
-  vertical-align: top;
+  vertical-align: middle;
   padding: var(--sp-1) var(--sp-2);
 }
 .merge-list {
@@ -2164,6 +2164,15 @@ details[open] > :not(summary) {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: var(--sp-1) var(--sp-2);
+}
+.hit-rank {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding-block: var(--sp-1);
+}
+.roster-search {
+  width: 100%;
 }
 .hit-course .cbar {
   grid-column: 1 / -1;

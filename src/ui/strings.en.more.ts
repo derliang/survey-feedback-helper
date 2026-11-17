@@ -662,6 +662,7 @@ export const enMore: DeepPartial<Strings> = {
     pendingLead: 'Students who currently got none of their choices. Check the reasons, then decide by hand whether to adjust capacity or arrange another course.',
     fullLine: (full, first, lost) => `${full ? 'Full · ' : ''}${first} chose it first, ${lost} missed the draw and went to their next choice`,
     emptyCourse: 'Nobody is in this course yet.',
+    noMatch: 'No matching students.',
     reasonNone: 'No choices given',
     reasonFull: 'All listed choices are full',
     dragHint: 'Hold and drag to a course on the left',
