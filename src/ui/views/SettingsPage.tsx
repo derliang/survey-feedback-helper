@@ -1,6 +1,7 @@
 // 設定頁（DESIGN.md 5.33 C／D，使用者 2026-11-14 裁示方案 A）：
 // 分「常用」（資料夾、預設輸出）與「進階與資訊」（備份與還原、外觀與語言、說明與隱私）。
 // 手機（<600）頂端分段控制二選一；平板、桌機（≥600）左側導覽四項。內容最寬 720，底部固定操作列。
+import { extra } from '../strings-extra';
 import { useEffect, useState } from 'preact/hooks';
 import { downloadSettings, forgetThisFolder, go, reauthorize, set, updatePrefs, useApp } from '../../app/store';
 import { type Lang, type Theme, isTouchDevice } from '../../storage';
@@ -151,6 +152,38 @@ function LookCard() {
   );
 }
 
+const REPO = 'https://github.com/derliang/survey-feedback-helper';
+
+/** 關於（D54、5.15）：版本、授權、原始碼、第三方元件授權、回報問題。 */
+function AboutCard() {
+  const X = extra().about;
+  return (
+    <section class="card" data-testid="about-card">
+      <h2>{X.title}</h2>
+      <p>{X.version(__APP_VERSION__)}</p>
+      <p>{X.license}</p>
+      <ul class="plain-list">
+        <li>
+          <a href={REPO} target="_blank" rel="noopener">
+            {X.source}
+          </a>
+        </li>
+        <li>
+          <a href={`${REPO}/blob/main/docs/third-party.md`} target="_blank" rel="noopener">
+            {X.thirdParty}
+          </a>
+        </li>
+        <li>
+          <a href={`${REPO}/issues`} target="_blank" rel="noopener">
+            {X.report}
+          </a>
+        </li>
+      </ul>
+      <p class="hint">{X.note}</p>
+    </section>
+  );
+}
+
 function HelpCards() {
   return (
     <>
@@ -162,6 +195,7 @@ function HelpCards() {
           ))}
         </ul>
       </section>
+      <AboutCard />
       <details class="card help-acc" data-testid="help-card">
         <summary>
           <span class="help-t">

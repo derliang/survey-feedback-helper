@@ -1,7 +1,7 @@
 import { SaveBanners } from './parts/SaveBanners';
 import { useEffect } from 'preact/hooks';
 import { CloudAlert } from './views/CloudBackup';
-import { boot, set, useApp } from '../app/store';
+import { boot, go, set, useApp } from '../app/store';
 import { strings as S } from './strings';
 import { Notice } from './parts/parts';
 import { TopBar } from './parts/Chrome';
@@ -32,6 +32,17 @@ export function App() {
     return () => clearTimeout(t);
   }, [st.toast]);
 
+  /** 檔案讀不了時「重新選擇」：直接再開檔案挑選視窗（不在首頁就先回首頁）。 */
+  const repick = () => {
+    set({ error: null });
+    const open = () => document.querySelector<HTMLInputElement>('[data-testid="file-input"]')?.click();
+    if (document.querySelector('[data-testid="file-input"]')) open();
+    else {
+      go('home');
+      setTimeout(open, 0);
+    }
+  };
+
   if (!st.ready) return <div class="boot" aria-busy="true" />;
 
   return (
@@ -51,9 +62,28 @@ export function App() {
           <Notice
             kind="bad"
             actions={
-              <button class="btn secondary small" type="button" onClick={() => set({ error: null })}>
-                {S.close}
-              </button>
+              <>
+                {st.error !== 'settings' && (
+                  <>
+                    <button class="btn primary small" type="button" data-testid="error-repick" onClick={repick}>
+                      {extra().loadError.repick}
+                    </button>
+                    <button
+                      class="btn secondary small"
+                      type="button"
+                      onClick={() => {
+                        set({ error: null });
+                        go('guide');
+                      }}
+                    >
+                      {extra().loadError.howExport}
+                    </button>
+                  </>
+                )}
+                <button class="btn ghost small" type="button" onClick={() => set({ error: null })}>
+                  {S.close}
+                </button>
+              </>
             }
           >
             {st.error === 'settings' ? S.load.settings : S.load[st.error]}

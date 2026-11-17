@@ -40,7 +40,11 @@ function precachePlugin(): Plugin {
 }
 
 // 部署在 https://derliang.github.io/survey-feedback-helper/，所以正式建置要用子路徑
+const pkg = JSON.parse(readFileSync('package.json', 'utf8')) as { version: string };
+
 export default defineConfig(({ command }) => ({
+  // 關於卡顯示的版本號（與發布的 version.json 同源：package.json）
+  define: { __APP_VERSION__: JSON.stringify(pkg.version) },
   base: command === 'build' ? '/survey-feedback-helper/' : '/',
   plugins: [preact(), precachePlugin()],
   build: { target: 'es2022', sourcemap: false },
