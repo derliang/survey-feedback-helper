@@ -1,5 +1,5 @@
 import type { ComponentType } from 'preact';
-import { useEffect, useMemo, useState } from 'preact/hooks';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { feedbackRecords, opinionQuestions, runFeedback, runVote, voteGuardPending } from '../../app/analysis';
 import {
   AUDIENCE_NAMES,
@@ -131,6 +131,56 @@ function FlaggedComment({ text, itemKey, hiddenHere, onHide }: { text: string; i
   );
 }
 
+class Cancelled extends Error {}
+
+type Stage = 'prepare' | 'fonts' | 'render' | 'zip';
+
+/** 失敗原因（D31）：網路（程式區塊或字型下載不到）、記憶體不足、其他。 */
+function failReason(e: unknown): 'net' | 'mem' | 'other' {
+  const m = e instanceof Error ? `${e.name} ${e.message}` : String(e);
+  if (/memory|allocation|array length|RangeError/i.test(m)) return 'mem';
+  if (/fetch|dynamically imported|import|network|load failed|NetworkError|下載失敗/i.test(m)) return 'net';
+  return 'other';
+}
+
+/** 輸出進行中（D27）：階段、進度條、剩餘時間、「請不要關閉這個頁面」與「取消」。 */
+function ProgressNotice(props: { stage: Stage; progN: { d: number; t: number } | null; startedAt: number; onCancel: () => void; fallback: string }) {
+  const X = extra().output;
+  const [, tick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => tick((n) => n + 1), 1000);
+    return () => clearInterval(id);
+  }, []);
+  const { stage, progN } = props;
+  const label = stage === 'render' && progN ? X.stageRender(progN.d, progN.t) : X.stages[stage];
+  let eta = '';
+  if (stage === 'render' && progN && progN.d > 0) {
+    const secs = Math.max(1, Math.round(((Date.now() - props.startedAt) / progN.d) * (progN.t - progN.d) / 1000));
+    eta = X.eta(secs);
+  }
+  const pct = progN && progN.t > 0 ? Math.round((progN.d / progN.t) * 100) : null;
+  return (
+    <Notice
+      kind="info"
+      role="status"
+      actions={
+        <button class="btn secondary small" type="button" data-testid="out-cancel" onClick={props.onCancel}>
+          {X.cancel}
+        </button>
+      }
+    >
+      <span data-testid="out-stage">{progN || stage !== 'prepare' ? label : props.fallback}</span>
+      {eta && <span> · {eta}</span>}
+      {pct !== null && (
+        <span class="out-prog" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label={X.stages.render}>
+          <i style={{ width: `${pct}%` }} />
+        </span>
+      )}
+      <span class="hint out-keep">{X.keepOpen}</span>
+    </Notice>
+  );
+}
+
 export function OutputView() {
   const st = useApp();
   const s = st.session;
@@ -141,7 +191,12 @@ export function OutputView() {
   /** 批次產生的進度字串（「產生中 3 / 20」）；busy 仍是工作代號，按鈕才認得出是哪一顆在跑。 */
   const [prog, setProg] = useState<string | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
-  const [msg, setMsg] = useState<{ kind: 'ok' | 'bad' | 'warn'; text: string } | null>(null);
+  const [msg, setMsg] = useState<{ kind: 'ok' | 'bad' | 'warn'; text: string; retry?: () => void } | null>(null);
+  /** 輸出進度（D27）：目前階段、第幾份／共幾份、開始時間；取消旗標。 */
+  const [stage, setStage] = useState<Stage>('prepare');
+  const [progN, setProgN] = useState<{ d: number; t: number } | null>(null);
+  const startedAt = useRef(0);
+  const cancelRef = useRef(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   /** 確認過的預覽：fast＝留言與老師的話（決定按鈕能不能按）；docs＝每位學生文件的全部文字（產生檔案前逐份比對）。 */
@@ -228,16 +283,28 @@ export function OutputView() {
   async function run(label: string, job: () => Promise<{ name: string; bytes: Uint8Array; mime: string; missing?: string[] }>) {
     setBusy(label);
     setMsg(null);
+    setStage('prepare');
+    setProgN(null);
+    cancelRef.current = false;
+    startedAt.current = Date.now();
     try {
       const out = await job();
+      if (cancelRef.current) throw new Cancelled();
       downloadBytes(out.name, out.bytes, out.mime);
       const missing = out.missing ?? [];
       setMsg({ kind: missing.length > 0 ? 'warn' : 'ok', text: S.output.done(out.name) + (missing.length > 0 ? ` ${S.output.missingChars(missing.join(''))}` : '') });
     } catch (e) {
-      staleOrFail(e, S.output.failed);
+      if (e instanceof Cancelled) setMsg({ kind: 'warn', text: extra().output.cancelled });
+      else if (e instanceof PreviewStale) staleOrFail(e, S.output.failed);
+      else {
+        const X = extra().output;
+        const at = progN && progN.d < progN.t ? ` ${X.failedAt(progN.d + 1, progN.t)}` : '';
+        setMsg({ kind: 'bad', text: `${S.output.failed.replace('，請再試一次。', '。')}${at} ${X.reasons[failReason(e)]} ${X.alt}`, retry: () => void run(label, job) });
+      }
     } finally {
       setBusy(null);
       setProg(null);
+      setProgN(null);
     }
   }
 
@@ -318,13 +385,28 @@ export function OutputView() {
       const list = await withCharts();
       const tools = await docTools();
       const { renderBatchZip, loadFonts } = await loadPdf();
+      setStage('fonts');
       const items = list.map((p) => {
         const doc = tools.personal(p.input, audience);
         guard(p.key, doc);
         return { name: `${p.fileName} ${AUDIENCE_NAMES[audience]}`, doc };
       });
       const missing = new Set<string>();
-      const bytes = await renderBatchZip(items, await loadFonts(), (d, t) => setProg(S.output.progress(d, t)), (cs) => cs.forEach((c) => missing.add(c)));
+      const fonts = await loadFonts();
+      if (cancelRef.current) throw new Cancelled();
+      setStage('render');
+      setProgN({ d: 0, t: items.length });
+      const bytes = await renderBatchZip(
+        items,
+        fonts,
+        (d, t) => {
+          setProg(S.output.progress(d, t));
+          setProgN({ d, t });
+          if (d === t) setStage('zip');
+          else if (cancelRef.current) throw new Cancelled();
+        },
+        (cs) => cs.forEach((c) => missing.add(c)),
+      );
       return { name: `${base} 個人回饋單 ${AUDIENCE_NAMES[audience]}.zip`, bytes, mime: MIME.zip, missing: [...missing] };
     });
 
@@ -353,12 +435,28 @@ export function OutputView() {
   const status =
     msg || busy ? (
       <div class="out-status" data-testid="out-status">
-        {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
-        {busy && (
-          <Notice kind="info" role="status">
-            {prog ?? S.output.working}
+        {msg && (
+          <Notice
+            kind={msg.kind}
+            actions={
+              msg.kind === 'bad' ? (
+                <>
+                  {msg.retry && (
+                    <button class="btn secondary small" type="button" data-testid="out-retry" onClick={msg.retry}>
+                      {extra().output.retry}
+                    </button>
+                  )}
+                  <button class="btn ghost small" type="button" onClick={() => setMsg(null)}>
+                    {S.close}
+                  </button>
+                </>
+              ) : undefined
+            }
+          >
+            {msg.text}
           </Notice>
         )}
+        {busy && <ProgressNotice stage={stage} progN={progN} startedAt={startedAt.current} onCancel={() => (cancelRef.current = true)} fallback={prog ?? S.output.working} />}
       </div>
     ) : null;
   const personalDis = dis || !previewed || personal.length === 0;
