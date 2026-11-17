@@ -1,6 +1,7 @@
 // 設定頁（DESIGN.md 5.33 C／D，使用者 2026-11-14 裁示方案 A）：
 // 分「常用」（資料夾、預設輸出）與「進階與資訊」（備份與還原、外觀與語言、說明與隱私）。
 // 手機（<600）頂端分段控制二選一；平板、桌機（≥600）左側導覽四項。內容最寬 720，底部固定操作列。
+import { extra } from '../strings-extra';
 import { useEffect, useState } from 'preact/hooks';
 import { downloadSettings, forgetThisFolder, go, reauthorize, set, updatePrefs, useApp } from '../../app/store';
 import { type Lang, type Theme, isTouchDevice } from '../../storage';
@@ -151,6 +152,30 @@ function LookCard() {
   );
 }
 
+/** 安裝到主畫面或桌面（D51／12a）：Chrome、Edge 與 Safari 兩組編號步驟。 */
+function InstallHelp() {
+  const X = extra().install;
+  return (
+    <div data-testid="install-help">
+      <h3>{X.title}</h3>
+      <p>{X.lead}</p>
+      <h4>{X.chromeTitle}</h4>
+      <ol>
+        {X.chrome.map((t) => (
+          <li key={t}>{t}</li>
+        ))}
+      </ol>
+      <h4>{X.safariTitle}</h4>
+      <ol>
+        {X.safari.map((t) => (
+          <li key={t}>{t}</li>
+        ))}
+      </ol>
+      <p class="hint">{X.note}</p>
+    </div>
+  );
+}
+
 function HelpCards() {
   return (
     <>
@@ -174,6 +199,7 @@ function HelpCards() {
             <h3>{S.settingsPage.offlineTitle}</h3>
             <p>{S.settingsPage.offlineBody}</p>
           </div>
+          <InstallHelp />
           <div>
             <h3>{S.settingsPage.shortcutsTitle}</h3>
             <p>{S.settingsPage.shortcutsBody}</p>
