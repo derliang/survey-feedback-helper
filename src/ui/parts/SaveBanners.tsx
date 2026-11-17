@@ -1,7 +1,9 @@
 import { downloadReview, downloadSettings, reauthorize, set, useApp } from '../../app/store';
 import { isTouchDevice } from '../../storage';
 import { strings as S } from '../strings';
-import { TopBanner } from './parts';
+import { Icon, TopBanner } from './parts';
+import { useOffline } from '../../app/offline';
+import { extra } from '../strings-extra';
 
 /**
  * 全站共用的「還沒存好」頁頂橫幅（G1）。放在頂端列正下方，不佔頁面內容的位置。
@@ -14,8 +16,17 @@ export function SaveBanners() {
   const noFolder = st.folder.state !== 'ready';
   const onReviewPage = st.route === 'stats' || st.route === 'output';
   const f = st.folder;
+  const offline = useOffline();
   return (
     <>
+      {offline && (
+        <div class="top-banner offline-banner" role="status" data-testid="banner-offline">
+          <div class="top-banner-in">
+            <Icon name="info" />
+            <span class="top-banner-text">{extra().offline.banner}</span>
+          </div>
+        </div>
+      )}
       {f.state === 'needsPermission' && st.route !== 'home' && (
         <TopBanner
           id="reauth"

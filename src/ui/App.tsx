@@ -14,16 +14,47 @@ import { EditorRoute } from './editor/Loader';
 import { GuideRoute } from './guide/Loader';
 import { CourseRoute } from './views/CourseLoader';
 import { extra } from './strings-extra';
+import { hasUnsavedWork } from '../app/update';
 
 const MethodView = lazyView(() => import('./views/MethodView').then((m) => m.MethodView));
 const OutputView = lazyView(() => import('./views/OutputView').then((m) => m.OutputView));
 const StatsView = lazyView(() => import('./views/StatsView').then((m) => m.StatsView));
 const Prepare = lazyView(() => import('./views/Prepare').then((m) => m.Prepare));
 
+/** 第一次載入畫面（D55／12e）：品牌、進度、骨架與「不含學生資料」說明；index.html 內有同樣的靜態版，JS 還沒載入時就看得到。 */
+function Boot() {
+  const B = extra().boot;
+  return (
+    <div class="boot" aria-busy="true" data-testid="boot">
+      <div class="boot-brand">{B.title}</div>
+      <div>{B.preparing}</div>
+      <div class="boot-bar" aria-hidden="true">
+        <i />
+      </div>
+      <div class="boot-skel" aria-hidden="true">
+        <i />
+        <i />
+        <i />
+      </div>
+      <p class="hint">{B.note}</p>
+    </div>
+  );
+}
+
 export function App() {
   const st = useApp();
   useEffect(() => {
     void boot();
+  }, []);
+  // 離開前確認：有載入的資料或沒存的內容時，關閉分頁或重新整理前由瀏覽器問一次（自訂文字瀏覽器不允許）
+  useEffect(() => {
+    const warn = (e: BeforeUnloadEvent) => {
+      if (!hasUnsavedWork()) return;
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
   }, []);
   // 提示訊息 5 秒後自動收起
   useEffect(() => {
@@ -32,7 +63,7 @@ export function App() {
     return () => clearTimeout(t);
   }, [st.toast]);
 
-  if (!st.ready) return <div class="boot" aria-busy="true" />;
+  if (!st.ready) return <Boot />;
 
   return (
     <>

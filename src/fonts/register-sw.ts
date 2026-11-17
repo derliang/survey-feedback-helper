@@ -1,11 +1,14 @@
 // 註冊 Service Worker（快取字型與 wasm）。不支援或失敗時靜默略過：輸出照常運作，只是每次都重新下載。
 // onWaiting：已有舊版在運作、新版裝好在等待時呼叫（第一次安裝不會呼叫，新版直接啟用）。
-export async function registerAssetCache(onWaiting?: (apply: () => void) => void): Promise<boolean> {
+export async function registerAssetCache(onWaiting?: (apply: () => void) => void, onFirstReady?: () => void): Promise<boolean> {
   if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return false;
   try {
     const base = import.meta.env.BASE_URL;
+    const firstTime = !navigator.serviceWorker.controller;
     const reg = await navigator.serviceWorker.register(`${base}sw.js`, { scope: base });
     if (onWaiting) watchWaiting(reg, onWaiting);
+    // 第一次安裝完成（程式已快取）：通知頁面顯示一次「已可離線使用」
+    if (firstTime && onFirstReady) void navigator.serviceWorker.ready.then(onFirstReady, () => undefined);
     return true;
   } catch {
     return false;
