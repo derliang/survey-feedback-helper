@@ -20,7 +20,7 @@ test('設定「說明」：有 Chrome／Edge 與 Safari 兩組編號安裝步驟
   const help = page.getByTestId('install-help');
   await expect(help.getByRole('heading', { name: '安裝到主畫面或桌面' })).toBeVisible();
   await expect(help.locator('ol')).toHaveCount(2);
-  await expect(help.locator('ol').nth(1)).toContainText('加入主畫面');
+  await expect(help.locator('ol').nth(1)).toContainText('分享選單');
 });
 
 test('第一次載入：主程式延遲時看得到品牌、準備中與「不含學生資料」說明', async ({ page }) => {
