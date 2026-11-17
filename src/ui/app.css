@@ -122,6 +122,14 @@ select {
   background: var(--card);
   border-bottom-color: var(--line);
 }
+.offline-ready {
+  /* 只出現幾秒的一次性提示：浮在頁頂，不推擠版面 */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 70;
+}
 .offline-banner .ic {
   color: var(--ink3);
 }

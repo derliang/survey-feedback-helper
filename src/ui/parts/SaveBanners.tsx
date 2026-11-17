@@ -20,7 +20,7 @@ export function SaveBanners() {
   return (
     <>
       {st.offlineReady && !offline && (
-        <div class="top-banner offline-banner" role="status" data-testid="banner-offline-ready">
+        <div class="top-banner offline-banner offline-ready" role="status" data-testid="banner-offline-ready">
           <div class="top-banner-in">
             <Icon name="check" />
             <span class="top-banner-text">{extra().offline.ready}</span>
