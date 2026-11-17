@@ -12,7 +12,7 @@ import { wordNotes } from '../../editor/word';
 import { Icon, Notice, Sheet, TopBanner, useWide } from '../parts/parts';
 import './editor.css';
 import { useDragSort } from './drag';
-import { AddPanel, BlockProps, PagePanel, StudentPanel } from './Panels';
+import { AddPanel, BlockProps, KIND_GLYPH, PagePanel, StudentPanel } from './Panels';
 import { Preview } from './Preview';
 import {
   type ES, allTemplates, backToLibrary, currentOverrides, deleteBlock, doRedo, doUndo, dropSel, downloadBackup, duplicate, exportOne, importFile, load, moveSel, newTemplate, overrideBlock,
@@ -52,8 +52,6 @@ function pageCount(t: EditorTemplate): number {
   return n;
 }
 
-/** 區塊清單的類型圖示（Issue #163、稿 11a：清單列有類型圖示）；純裝飾，名稱仍是文字。 */
-const KIND_GLYPH: Record<string, string> = { heading: 'H', text: '¶', data: '▦', bullets: '•', hero: '★', stats: '#', callout: '❝', compare: '⇄', columns: '▥', image: '▣', divider: '—', pageBreak: '⤓' };
 
 function Library({ e }: { e: ES }) {
   const st = useApp();
@@ -452,7 +450,7 @@ function Edit({ e }: { e: ES }) {
   const sheets = (
     <>
       {e.panel === 'add' && (
-        <Sheet title={ed().addBlock} onClose={() => setPanel(null)}>
+        <Sheet title={ed().addBlock} onClose={() => setPanel(null)} footer={<button type="button" class="btn secondary grow" onClick={() => setPanel(null)}>{ed().cancel}</button>}>
           <AddPanel selName={selBlock ? blockName(selBlock) : null} onDone={() => (wide ? setPanel(null) : setPanel('props'))} />
         </Sheet>
       )}

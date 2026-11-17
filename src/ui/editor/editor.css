@@ -445,12 +445,22 @@
   gap: var(--sp-2);
 }
 .add-tile {
-  min-height: 64px;
+  min-height: 84px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--sp-1);
+  padding: var(--sp-2);
   border: 1px solid var(--ctl);
   border-radius: var(--r-md);
   background: var(--card);
   cursor: pointer;
   font-weight: 600;
+}
+.add-ic {
+  font-size: var(--fs-lg);
+  color: var(--ink3);
+  line-height: 1;
 }
 .ov-row {
   display: flex;

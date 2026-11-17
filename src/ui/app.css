@@ -1013,6 +1013,7 @@ button.tile {
 }
 .sheet-foot {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--sp-2);
   /* 內容很長時（例如 Google 登入前提示卡），主要按鈕仍固定在面板底部，不用捲到最下面才找得到 */
   position: sticky;
@@ -1023,6 +1024,10 @@ button.tile {
   padding-bottom: calc(var(--sp-4) + env(safe-area-inset-bottom));
   margin-bottom: calc(-1 * (var(--sp-4) + env(safe-area-inset-bottom)));
   box-shadow: 0 -1px 0 var(--line-soft);
+}
+.sheet-why {
+  flex: 1 1 100%;
+  margin: 0;
 }
 .opt-list {
   display: grid;
@@ -3109,6 +3114,10 @@ details[open] > :not(summary) {
 
 /* 手機底部面板：標題列右側「✕」（所有 .sheet 共用） */
 .sheet-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--card);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -3227,6 +3236,16 @@ ul.chips {
   .scrim:has(.sheet-confirm) {
     justify-content: center;
     align-items: center;
+  }
+  /* 稿 5.34 C：確認視窗取消在左、動作在右，兩顆靠右、不鋪滿，沒有 ✕（Esc、點遮罩仍可關） */
+  .sheet-confirm .sheet-foot {
+    justify-content: flex-end;
+  }
+  .sheet-confirm .sheet-foot .btn {
+    flex: 0 0 auto;
+  }
+  .sheet-confirm .sheet-x {
+    display: none;
   }
   .sheet.sheet-confirm {
     width: 480px;
