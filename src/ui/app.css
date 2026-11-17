@@ -997,6 +997,23 @@ button.tile {
   gap: var(--sp-2);
   box-shadow: 0 4px 16px rgb(0 0 0 / 18%);
 }
+.out-prog {
+  display: block;
+  height: 6px;
+  margin-top: var(--sp-1);
+  border-radius: 3px;
+  background: var(--line-soft);
+  overflow: hidden;
+}
+.out-prog i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+.out-keep {
+  display: block;
+  margin-top: var(--sp-1);
+}
 .toast {
   position: fixed;
   /* Issue #179：left:50% 會把可用寬度砍半、手機被擠成窄條；改成左右置中、寬度跟內容 */
@@ -1188,9 +1205,12 @@ button.tile {
   .page {
     padding-bottom: var(--sp-6);
   }
-  .toast,
-  .out-status {
+  .toast {
     bottom: var(--sp-5);
+  }
+  /* 輸出頁有固定底部操作列，狀態浮層要停在它上方（有按鈕時比較高，不能被蓋住） */
+  .out-status {
+    bottom: 88px;
   }
   .tiles {
     grid-template-columns: repeat(4, 1fr);
