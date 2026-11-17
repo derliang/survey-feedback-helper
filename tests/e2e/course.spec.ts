@@ -177,6 +177,35 @@ test('優先分配名單與建議停開', async ({ page }) => {
   await closePanelIfSheet(page);
 });
 
+test('名單搜尋、志願欄範例值只放一個、輸出頁志願命中長條（#177、#178）', async ({ page }) => {
+  await mapped(page);
+  await step(page, '名額與分配').click();
+  await fillRules(page);
+  await page.getByTestId('course-start').click();
+  await expect(page.getByTestId('tile-assigned')).toBeVisible();
+  await openRoster(page, /微積分/);
+  const rows = page.getByTestId('srow');
+  const all = await rows.count();
+  expect(all).toBeGreaterThan(1);
+  const first = await rows.first().locator('.sr-name').innerText();
+  await page.getByTestId('roster-search').fill(first);
+  await expect(rows).toHaveCount(1);
+  await page.getByTestId('roster-search').fill('查無此人');
+  await expect(rows).toHaveCount(0);
+  await expect(page.getByTestId('roster-panel')).toContainText('沒有符合的學生');
+  await page.getByTestId('roster-search').fill('');
+  await expect(rows).toHaveCount(all);
+  await closePanelIfSheet(page);
+  await page.getByTestId('course-next').click();
+  expect(await page.getByTestId('hit-preview').locator('.cbar').count()).toBeGreaterThanOrEqual(2);
+});
+
+test('志願欄範例值只放一個', async ({ page }) => {
+  await toMapping(page);
+  await page.getByRole('button', { name: '確認，下一步：欄位對應' }).click();
+  await expect(page.getByRole('button', { name: /^第一志願：/ }).locator('.rb-note')).not.toContainText('、');
+});
+
 test('桌機：拖曳與鍵盤移人', async ({ page }, info) => {
   test.skip(info.project.name !== 'desktop', '拖曳只在桌機滑鼠開放');
   await page.setViewportSize({ width: 1280, height: 1200 }); // 拖曳起點與目標要都在畫面內
