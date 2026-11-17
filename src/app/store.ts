@@ -172,6 +172,8 @@ export interface AppState {
   updateReady: boolean;
   /** 使用者已按「稍後再說」。 */
   updateDismissed: boolean;
+  /** 程式第一次存進瀏覽器：頁頂顯示一次「已可離線使用」（不佔用提示浮層，避免蓋掉其他提示）。 */
+  offlineReady: boolean;
 }
 
 const initial: AppState = {
@@ -199,6 +201,7 @@ const initial: AppState = {
   courseUnsaved: false,
   updateReady: false,
   updateDismissed: false,
+  offlineReady: false,
 };
 
 let state: AppState = initial;

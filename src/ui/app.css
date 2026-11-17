@@ -71,6 +71,67 @@ select {
 }
 .boot {
   min-height: 100vh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-5) var(--sp-4);
+  text-align: center;
+  color: var(--ink2);
+}
+.boot-brand {
+  font-size: var(--fs-lg, 1.25rem);
+  font-weight: 700;
+  color: var(--ink);
+}
+.boot-bar {
+  width: min(280px, 70vw);
+  height: 6px;
+  border-radius: 3px;
+  background: var(--line-soft);
+  overflow: hidden;
+}
+.boot-bar i {
+  display: block;
+  width: 40%;
+  height: 100%;
+  background: var(--accent, #2554d8);
+  animation: boot-slide 1.2s ease-in-out infinite;
+}
+@keyframes boot-slide {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(250%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .boot-bar i { animation: none; width: 100%; opacity: 0.5; }
+}
+.boot-skel {
+  width: min(320px, 80vw);
+  display: grid;
+  gap: var(--sp-2);
+}
+.boot-skel i {
+  display: block;
+  height: 14px;
+  border-radius: 4px;
+  background: var(--line-soft);
+}
+.boot-skel i:nth-child(2) { width: 80%; }
+.boot-skel i:nth-child(3) { width: 60%; }
+.offline-banner {
+  background: var(--card);
+  border-bottom-color: var(--line);
+}
+.offline-ready {
+  /* 只出現幾秒的一次性提示：浮在頁頂，不推擠版面 */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 70;
+}
+.offline-banner .ic {
+  color: var(--ink3);
 }
 .hint {
   font-size: var(--fs-xs);
@@ -952,6 +1013,7 @@ button.tile {
 }
 .sheet-foot {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--sp-2);
   /* 內容很長時（例如 Google 登入前提示卡），主要按鈕仍固定在面板底部，不用捲到最下面才找得到 */
   position: sticky;
@@ -962,6 +1024,10 @@ button.tile {
   padding-bottom: calc(var(--sp-4) + env(safe-area-inset-bottom));
   margin-bottom: calc(-1 * (var(--sp-4) + env(safe-area-inset-bottom)));
   box-shadow: 0 -1px 0 var(--line-soft);
+}
+.sheet-why {
+  flex: 1 1 100%;
+  margin: 0;
 }
 .opt-list {
   display: grid;
@@ -3048,6 +3114,10 @@ details[open] > :not(summary) {
 
 /* 手機底部面板：標題列右側「✕」（所有 .sheet 共用） */
 .sheet-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--card);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -3166,6 +3236,16 @@ ul.chips {
   .scrim:has(.sheet-confirm) {
     justify-content: center;
     align-items: center;
+  }
+  /* 稿 5.34 C：確認視窗取消在左、動作在右，兩顆靠右、不鋪滿，沒有 ✕（Esc、點遮罩仍可關） */
+  .sheet-confirm .sheet-foot {
+    justify-content: flex-end;
+  }
+  .sheet-confirm .sheet-foot .btn {
+    flex: 0 0 auto;
+  }
+  .sheet-confirm .sheet-x {
+    display: none;
   }
   .sheet.sheet-confirm {
     width: 480px;

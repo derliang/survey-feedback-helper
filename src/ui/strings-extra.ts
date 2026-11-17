@@ -17,6 +17,20 @@ export const extraZh = {
     report: '回報問題',
     note: '連結會在新分頁開啟 GitHub；本程式不會因此傳送任何問卷資料。',
   },
+  offline: {
+    banner: '目前沒有網路。已載入的畫面可以繼續用；輸出用的字型若還沒存過，輸出可能失敗。',
+    ready: '已可離線使用：程式已存在這個瀏覽器，沒有網路也能開。',
+  },
+  install: {
+    title: '安裝到主畫面或桌面',
+    lead: '安裝後像一般程式一樣從主畫面或桌面開啟，也不需要每次輸入網址。不安裝也能照常使用。',
+    chromeTitle: 'Chrome、Edge（電腦、Android）',
+    chrome: ['用 Chrome 或 Edge 開啟這個網站。', '在網址列或瀏覽器選單裡，找「安裝」或「加入主畫面」這類功能（名稱依瀏覽器版本不同）。', '依畫面指示確認安裝。'],
+    safariTitle: 'Safari（iPhone、iPad）',
+    safari: ['用 Safari 開啟這個網站。', '在分享選單裡，找「加入主畫面」這類功能（名稱依系統版本不同）。', '依畫面指示確認。'],
+    note: '各瀏覽器的按鈕名稱不同，這裡只寫通用做法；安裝的只是網頁程式本身，不含任何學生資料。',
+  },
+  boot: { title: '問卷回饋小幫手', preparing: '正在準備…', note: '載入的是網頁程式本身，不含任何學生資料。' },
   loadState: { loading: '載入中…', failTitle: '這個畫面沒有載入成功', failBody: '可能是網路中斷。你的資料還在，按「重新載入」再試一次。', retry: '重新載入', back: '回上一步' },
   loadFail: { view: '畫面載入失敗，請檢查網路後重新整理。', guide: '教學頁載入失敗，請檢查網路後重新整理。', editor: '編輯器載入失敗，請檢查網路後重新整理。' },
   check: { rows: (list: string) => `第 ${list} 列`, more: (n: number) => `…還有 ${n} 筆`, sep: '、' },
@@ -29,6 +43,7 @@ export const extraZh = {
   google: { offline: '連不上 Google，請檢查網路後再試，或改用 Excel 檔。' },
   mapping: { noData: '（沒有資料）', sep: '、' },
   output: {
+    whyTick: '勾選「我已逐則看過預覽…」後才能按「預覽過了」。', whyLoading: '正在整理預覽，完成後才能按。',
     previewFirst: (who: string) => `先預覽${who}`,
     stages: { prepare: '準備資料與圖表', fonts: '準備字型', render: '產生 PDF', zip: '打包 zip' },
     stageRender: (d: number, t: number) => `產生 PDF（${d}／${t}）`,
@@ -156,6 +171,20 @@ export const extraEn: Extra = {
     report: 'Report a problem',
     note: 'Links open GitHub in a new tab; no survey data is sent by this app.',
   },
+  offline: {
+    banner: 'You are offline. Screens already loaded keep working; export may fail if the export fonts have not been saved yet.',
+    ready: 'Ready for offline use: the app is saved in this browser and opens without a network.',
+  },
+  install: {
+    title: 'Install to your home screen or desktop',
+    lead: 'Once installed it opens like any app, without typing the address. Installing is optional.',
+    chromeTitle: 'Chrome, Edge (computer, Android)',
+    chrome: ['Open this site in Chrome or Edge.', 'In the address bar or the browser menu, look for an “install” or “add to home screen” function (the name varies by browser version).', 'Follow the on-screen prompt to confirm.'],
+    safariTitle: 'Safari (iPhone, iPad)',
+    safari: ['Open this site in Safari.', 'In the share menu, look for an “add to home screen” function (the name varies by system version).', 'Follow the on-screen prompt to confirm.'],
+    note: 'Button names differ between browsers, so only the general steps are given. Only the web app itself is installed, with no student data.',
+  },
+  boot: { title: 'Survey Feedback Helper', preparing: 'Getting ready…', note: 'What is loading is the web app itself, with no student data.' },
   loadState: { loading: 'Loading…', failTitle: 'This screen did not load', failBody: 'The network may have dropped. Your data is still here; press Reload to try again.', retry: 'Reload', back: 'Back' },
   loadFail: {
     view: 'This screen could not be loaded. Please check your network and reload.',
@@ -172,6 +201,7 @@ export const extraEn: Extra = {
   google: { offline: 'Cannot reach Google. Check your network and try again, or use an Excel file instead.' },
   mapping: { noData: '(no data)', sep: ', ' },
   output: {
+    whyTick: 'Tick “I have gone through the preview…” before you can press “Previewed”.', whyLoading: 'The preview is still being prepared. You can press it when that finishes.',
     previewFirst: (who) => `Preview ${who} first`,
     stages: { prepare: 'Preparing data and charts', fonts: 'Preparing fonts', render: 'Generating PDFs', zip: 'Packing the zip' },
     stageRender: (d, t) => `Generating PDFs (${d} of ${t})`,

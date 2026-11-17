@@ -184,6 +184,30 @@ function AboutCard() {
   );
 }
 
+/** 安裝到主畫面或桌面（D51／12a）：Chrome、Edge 與 Safari 兩組編號步驟。 */
+function InstallHelp() {
+  const X = extra().install;
+  return (
+    <div data-testid="install-help">
+      <h3>{X.title}</h3>
+      <p>{X.lead}</p>
+      <h4>{X.chromeTitle}</h4>
+      <ol>
+        {X.chrome.map((t) => (
+          <li key={t}>{t}</li>
+        ))}
+      </ol>
+      <h4>{X.safariTitle}</h4>
+      <ol>
+        {X.safari.map((t) => (
+          <li key={t}>{t}</li>
+        ))}
+      </ol>
+      <p class="hint">{X.note}</p>
+    </div>
+  );
+}
+
 function HelpCards() {
   return (
     <>
@@ -208,6 +232,7 @@ function HelpCards() {
             <h3>{S.settingsPage.offlineTitle}</h3>
             <p>{S.settingsPage.offlineBody}</p>
           </div>
+          <InstallHelp />
           <div>
             <h3>{S.settingsPage.shortcutsTitle}</h3>
             <p>{S.settingsPage.shortcutsBody}</p>

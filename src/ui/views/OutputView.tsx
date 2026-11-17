@@ -698,6 +698,11 @@ export function OutputView() {
           onClose={() => setPreviewOpen(false)}
           footer={
             <>
+              {(!confirmed || ready === null) && (
+                <p class="hint sheet-why" data-testid="preview-why">
+                  {ready === null ? extra().output.whyLoading : extra().output.whyTick}
+                </p>
+              )}
               <button class="btn secondary" type="button" onClick={() => setPreviewOpen(false)}>
                 {S.close}
               </button>
