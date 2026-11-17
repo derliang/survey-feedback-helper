@@ -8,9 +8,24 @@
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <link rel="icon" type="image/png" href="/icons/icon-192.png" />
     <title>問卷回饋小幫手</title>
+    <style>
+      .boot-static{min-height:100vh;display:grid;align-content:center;justify-items:center;gap:12px;padding:24px 16px;text-align:center;font-family:system-ui,sans-serif;color:#444b5a;background:#f6f7f9}
+      .bs-brand{font-size:1.25rem;font-weight:700;color:#14171f}
+      .bs-bar{width:min(280px,70vw);height:6px;border-radius:3px;background:#cfd3dc}
+      .bs-note{font-size:.8rem;color:#5b6373;margin:0}
+      @media (prefers-color-scheme:dark){.boot-static{background:#0f1115;color:#b9bfcc}.bs-brand{color:#eceef3}.bs-bar{background:#2b303a}.bs-note{color:#8f97a8}}
+    </style>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <!-- 第一次載入畫面：JS 載入前的靜態版，載入後由程式取代（只寫程式本身的說明，不含任何資料） -->
+      <div class="boot-static">
+        <div class="bs-brand">問卷回饋小幫手</div>
+        <div>正在準備…</div>
+        <div class="bs-bar"></div>
+        <p class="bs-note">載入的是網頁程式本身，不含任何學生資料。</p>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

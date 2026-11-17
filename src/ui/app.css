@@ -71,6 +71,67 @@ select {
 }
 .boot {
   min-height: 100vh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-5) var(--sp-4);
+  text-align: center;
+  color: var(--ink2);
+}
+.boot-brand {
+  font-size: var(--fs-lg, 1.25rem);
+  font-weight: 700;
+  color: var(--ink);
+}
+.boot-bar {
+  width: min(280px, 70vw);
+  height: 6px;
+  border-radius: 3px;
+  background: var(--line-soft);
+  overflow: hidden;
+}
+.boot-bar i {
+  display: block;
+  width: 40%;
+  height: 100%;
+  background: var(--accent, #2554d8);
+  animation: boot-slide 1.2s ease-in-out infinite;
+}
+@keyframes boot-slide {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(250%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .boot-bar i { animation: none; width: 100%; opacity: 0.5; }
+}
+.boot-skel {
+  width: min(320px, 80vw);
+  display: grid;
+  gap: var(--sp-2);
+}
+.boot-skel i {
+  display: block;
+  height: 14px;
+  border-radius: 4px;
+  background: var(--line-soft);
+}
+.boot-skel i:nth-child(2) { width: 80%; }
+.boot-skel i:nth-child(3) { width: 60%; }
+.offline-banner {
+  background: var(--card);
+  border-bottom-color: var(--line);
+}
+.offline-ready {
+  /* 只出現幾秒的一次性提示：浮在頁頂，不推擠版面 */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 70;
+}
+.offline-banner .ic {
+  color: var(--ink3);
 }
 .hint {
   font-size: var(--fs-xs);

@@ -197,6 +197,7 @@ test('名單搜尋、志願欄範例值只放一個、輸出頁志願命中長�
   await expect(rows).toHaveCount(all);
   await closePanelIfSheet(page);
   await page.getByTestId('course-next').click();
+  await expect(page.getByTestId('hit-preview').locator('.cbar').first()).toBeVisible();
   expect(await page.getByTestId('hit-preview').locator('.cbar').count()).toBeGreaterThanOrEqual(2);
 });
 
