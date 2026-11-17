@@ -1,7 +1,7 @@
 // Service Worker：讓程式離線也能開（PWA），並快取輸出用的大型靜態檔。
 // 只快取「程式本身」：建置時產生的檔案清單（precache.json，JS、CSS、首頁、圖示）與字型、wasm。
 // 不快取、也不攔截任何問卷資料：問卷資料不經過網路（只在記憶體），也不蒐集任何資料。
-// 版本：建置時把下面的 9b0be1b5872a 換成檔案清單的雜湊，sw.js 內容一變，瀏覽器就會更新。
+// 版本：建置時把下面的 b967eecc6486 換成檔案清單的雜湊，sw.js 內容一變，瀏覽器就會更新。
 const BUILD = '__BUILD_ID__';
 const APP_CACHE = `sfh-app-${BUILD}`;
 const ASSET_CACHE = 'sfh-assets-v1';
@@ -15,11 +15,16 @@ self.addEventListener('install', (event) => {
       const files = await res.json();
       const cache = await caches.open(APP_CACHE);
       await cache.addAll(files.map((f) => new Request(`${BASE}${f}`, { cache: 'reload' })));
-      await self.skipWaiting();
+      // 不自動 skipWaiting：開著的分頁還在用舊版程式，換版會刪掉舊快取，之後才載入的舊版區塊會失敗。
+      // 由頁面顯示「有新版本」，使用者選「現在更新」才傳 SKIP_WAITING（DESIGN 5.15、D53）。
     })().catch(() => {
       /* 清單抓不到（例如開發模式）就不快取，下次再試 */
     }),
   );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') void self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {

@@ -1,1 +1,0 @@
-import{n as e}from"./rolldown-runtime-XKyaHtl9.js";import{t}from"./chart-svg-Cdxu79ec.js";import{t as n}from"./strings-dKYbuLSt.js";var r=e({chartPalette:()=>a,chartText:()=>i});function i(){return{title:n.stats.itemsTitle,mine:n.stats.mine,classAvg:n.stats.classAvg,...n.stats.chart}}function a(e,n=t){return e&&e.length>=2?{...n,a:e[0],b:e[1]}:n}export{i as n,r,a as t};
