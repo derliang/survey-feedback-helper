@@ -125,9 +125,19 @@ export default function CourseOutput() {
           <h2>{O.previewTitle}</h2>
           <ul class="plain-ul hit-list" data-testid="hit-preview">
             {sum.rankCounts.map((n, i) => (
-              <li key={i}>{O.rankLine(i + 1, n, pct(n))}</li>
+              <li key={i} class="hit-rank">
+                <span>{O.rankLine(i + 1, n, pct(n))}</span>
+                <div class="cbar" aria-hidden="true">
+                  <span style={{ width: `${pct(n)}%` }} />
+                </div>
+              </li>
             ))}
-            <li>{O.pendingLine(sum.unassigned, pct(sum.unassigned))}</li>
+            <li class="hit-rank">
+              <span>{O.pendingLine(sum.unassigned, pct(sum.unassigned))}</span>
+              <div class="cbar bad" aria-hidden="true">
+                <span style={{ width: `${pct(sum.unassigned)}%` }} />
+              </div>
+            </li>
           </ul>
           <ul class="plain-ul">
             {sum.courses.map((x) => (
