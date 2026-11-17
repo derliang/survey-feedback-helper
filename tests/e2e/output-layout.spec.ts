@@ -2,6 +2,13 @@
 import { type Page, expect, test } from '@playwright/test';
 import { surveyFile } from './fixtures';
 
+// 桌機專案不能被主機環境影響：isTouchDevice() 看 navigator.maxTouchPoints，接了觸控螢幕的電腦會回 10，
+// 讓「更多」等桌機專屬按鈕消失（Playwright 的 hasTouch:false 與 --touch-events=disabled 都擋不住主機值）。
+// 所以桌機專案在載入前把它固定成 0；平板、手機專案用 hasTouch 模擬，不動。
+test.beforeEach(async ({ page }, info) => {
+  if (info.project.name === 'desktop') await page.addInitScript(() => Object.defineProperty(navigator, 'maxTouchPoints', { get: () => 0 }));
+});
+
 async function toOutput(page: Page) {
   await page.goto('./');
   await page.getByTestId('file-input').setInputFiles(surveyFile());
