@@ -33,6 +33,7 @@ export const extraZh = {
   google: { offline: '連不上 Google，請檢查網路後再試，或改用 Excel 檔。' },
   mapping: { noData: '（沒有資料）', sep: '、' },
   output: {
+    whyTick: '勾選「我已逐則看過預覽…」後才能按「預覽過了」。', whyLoading: '正在整理預覽，完成後才能按。',
     previewFirst: (who: string) => `先預覽${who}`,
     stages: { prepare: '準備資料與圖表', fonts: '準備字型', render: '產生 PDF', zip: '打包 zip' },
     stageRender: (d: number, t: number) => `產生 PDF（${d}／${t}）`,
@@ -180,6 +181,7 @@ export const extraEn: Extra = {
   google: { offline: 'Cannot reach Google. Check your network and try again, or use an Excel file instead.' },
   mapping: { noData: '(no data)', sep: ', ' },
   output: {
+    whyTick: 'Tick “I have gone through the preview…” before you can press “Previewed”.', whyLoading: 'The preview is still being prepared. You can press it when that finishes.',
     previewFirst: (who) => `Preview ${who} first`,
     stages: { prepare: 'Preparing data and charts', fonts: 'Preparing fonts', render: 'Generating PDFs', zip: 'Packing the zip' },
     stageRender: (d, t) => `Generating PDFs (${d} of ${t})`,
