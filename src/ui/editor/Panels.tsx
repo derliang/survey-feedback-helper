@@ -368,6 +368,9 @@ function Swatches(props: { label: string; value: string; opts: [string, string][
   );
 }
 
+/** 區塊類型圖示（區塊清單與「加入區塊」方塊共用；純裝飾，名稱仍是文字）。 */
+export const KIND_GLYPH: Record<string, string> = { heading: 'H', text: '¶', data: '▦', bullets: '•', hero: '★', stats: '#', callout: '❝', compare: '⇄', columns: '▥', image: '▣', divider: '—', pageBreak: '⤓' };
+
 const ADDABLE = (): { name: string; kind: EBlockKind; preset?: Partial<EBlock> }[] => [
   { name: ed().nHeading, kind: 'heading' },
   { name: ed().nText, kind: 'text' },
@@ -403,7 +406,8 @@ export function AddPanel(props: { selName: string | null; onDone: () => void }) 
               props.onDone();
             }}
           >
-            {a.name}
+            <span class="add-ic" aria-hidden="true">{KIND_GLYPH[a.kind] ?? '▪'}</span>
+            <span>{a.name}</span>
           </button>
         ))}
       </div>
@@ -419,7 +423,8 @@ export function AddPanel(props: { selName: string | null; onDone: () => void }) 
               props.onDone();
             }}
           >
-            {a.name}
+            <span class="add-ic" aria-hidden="true">{KIND_GLYPH[a.kind] ?? '▪'}</span>
+            <span>{a.name}</span>
           </button>
         ))}
       </div>
