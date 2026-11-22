@@ -90,7 +90,7 @@ export const extraZh = {
     advRules: '計票規則',
     blankCols: (names: string[]) => `${names.map((n) => `「${n}」`).join('、')}整欄沒有人填寫，所以沒有列入統計。`,
   },
-  stats: { targets: '被評對象', rank: '名次', seat: '座號', name: '姓名', rating: '評分', question: '題目', self: '自評', others: '他評', gap: '落差', valid: '有效', answered: '作答', ballots: '計入票數', classOverview: '全班統計總覽' },
+  stats: { targets: '被評對象', rank: '名次', seat: '座號', name: '姓名', rating: '評分', question: '題目', self: '自評', others: '他評', gap: '落差', valid: '有效', topShare: (lo: number, hi: number) => `${lo}–${hi} 分比例`, topShareNote: (n: number, of: number) => `${n} ／ ${of} 人`, answered: '作答', ballots: '計入票數', classOverview: '全班統計總覽' },
   editorState: {
     skipped: (n: number) => `有 ${n} 份範本無法讀取，已略過。`,
     unreadable: '範本檔讀不出來，先用空白的。原檔沒有被改動。',
@@ -249,7 +249,7 @@ export const extraEn: Extra = {
     advRules: 'Counting rules',
     blankCols: (names) => `${names.map((n) => `"${n}"`).join(', ')}: nobody filled in this column, so it is not in the statistics.`,
   },
-  stats: { targets: 'People rated', rank: 'Rank', seat: 'Seat', name: 'Name', rating: 'Rating', question: 'Question', self: 'Self', others: 'Others', gap: 'Gap', valid: 'Valid', answered: 'Answered', ballots: 'Ballots counted', classOverview: 'Whole-class overview' },
+  stats: { targets: 'People rated', rank: 'Rank', seat: 'Seat', name: 'Name', rating: 'Rating', question: 'Question', self: 'Self', others: 'Others', gap: 'Gap', valid: 'Valid', topShare: (lo: number, hi: number) => `Share scoring ${lo}–${hi}`, topShareNote: (n: number, of: number) => `${n} of ${of}`, answered: 'Answered', ballots: 'Ballots counted', classOverview: 'Whole-class overview' },
   editorState: {
     skipped: (n) => `${n} template(s) could not be read and were skipped.`,
     unreadable: 'The template file could not be read, so a blank one is used. The original file was not changed.',

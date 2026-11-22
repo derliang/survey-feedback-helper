@@ -2771,6 +2771,9 @@ details[open] > :not(summary) {
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
   box-shadow: 0 4px 12px var(--shadow);
+  width: max-content;
+  max-width: min(320px, calc(100vw - 2 * var(--sp-4)));
+  white-space: nowrap;
 }
 .out-tpls {
   display: flex;
@@ -3635,6 +3638,10 @@ ul.chips {
   font-size: clamp(28px, 4vw, 64px);
   font-weight: 700;
   cursor: pointer;
+}
+.tally-full .btn.secondary:not(:disabled) {
+  /* 覆蓋層底色是 --ink，按鈕底是 --card：文字要用 --ink，不能繼承覆蓋層的 --paper（#219） */
+  color: var(--ink);
 }
 .tally-plus:focus-visible,
 .tally-full .btn:focus-visible {

@@ -31,3 +31,10 @@ if (total > BUDGET_BYTES) {
   console.error('效能預算超標：首頁 gzip 超過 150 KB。請把大型功能（xlsx、docx、PDF、字型）改為延遲載入。');
   process.exit(1);
 }
+
+// #221：dist/sw.js 的 BUILD 常數必須已換成建置雜湊（否則離線快取名稱不隨版本變）
+const sw = readFileSync(join(DIST, 'sw.js'), 'utf8');
+if (sw.includes('__BUILD_ID__') || !/const BUILD = '[0-9a-f]{12}';/.test(sw)) {
+  console.error("dist/sw.js 的 BUILD 沒有被換成 12 碼雜湊（#221）");
+  process.exit(1);
+}

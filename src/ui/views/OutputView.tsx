@@ -13,7 +13,7 @@ import {
 } from '../../app/output';
 import { canGoStats } from '../../app/progress';
 import { emptyReview, reviewCounts } from '../../app/review';
-import { go, loadReview, useApp } from '../../app/store';
+import { go, loadReview, setSession, useApp } from '../../app/store';
 import { loadDocx, loadPdf, loadPrint, loadXlsx, registerAssetCache } from '../../export';
 import type { ClassSummaryInput, DocModel, PersonalFeedbackInput } from '../../export';
 import { downloadBytes, isTouchDevice } from '../../storage';
@@ -292,7 +292,7 @@ export function OutputView() {
       if (cancelRef.current) throw new Cancelled();
       downloadBytes(out.name, out.bytes, out.mime);
       const missing = out.missing ?? [];
-      setMsg({ kind: missing.length > 0 ? 'warn' : 'ok', text: S.output.done(out.name) + (missing.length > 0 ? ` ${S.output.missingChars(missing.join(''))}` : '') });
+      setMsg({ kind: missing.length > 0 ? 'warn' : 'ok', text: S.output.done(out.name) + (missing.length > 0 ? ` ${S.output.missingChars(missing.slice(0, 8).join(''), missing.length)}` : '') });
     } catch (e) {
       if (e instanceof Cancelled) setMsg({ kind: 'warn', text: extra().output.cancelled });
       else if (e instanceof PreviewStale) staleOrFail(e, S.output.failed);
@@ -488,6 +488,11 @@ export function OutputView() {
           <div class="out-main">
           <section class="card">
             <h2>{S.output.stepWho}</h2>
+            <label class="field">
+              <span class="label">{S.output.topicName}</span>
+              <input class="input" type="text" data-testid="topic-name" value={s.name} onChange={(e) => setSession({ name: (e.target as HTMLInputElement).value.replace(/\s+/g, ' ').trim() || s.name })} />
+              <span class="hint">{S.output.topicHint}</span>
+            </label>
             <OptionGroup label={S.output.audienceTitle} value={audience} options={(['teacher', 'student', 'parent'] as Audience[]).map((a) => ({ value: a, label: S.output.audiences[a] }))} onChange={setAudience} />
             <p class="hint">{S.output.audienceNotes[audience]}</p>
             {audience !== 'teacher' && counts.pending > 0 && <Notice kind="info">{S.output.unreviewed(counts.pending)}</Notice>}

@@ -67,9 +67,15 @@ test('防弊四項：有自投時先決定才看得到正式結果；逐人名�
   await page.getByLabel('投影時隱藏「投給誰」').check();
   await expect(page.getByTestId('guard-self')).toContainText('（已隱藏）');
   await expect(page.getByTestId('guard-self')).not.toContainText('你推薦誰當班長？：甲小明');
+  // #213：被排除的票有「已排除」文字；確認後清單自動收合、結果在視窗內
+  await page.getByTestId('guard-self').getByLabel('計入').first().uncheck();
+  await expect(page.getByTestId('guard-self')).toContainText('已排除');
+  await page.getByTestId('guard-self').getByLabel('計入').first().check();
   await page.getByRole('button', { name: '確認這樣處理' }).click();
   await expect(page.getByTestId('vote-gate')).toHaveCount(0);
   await expect(page.getByTestId('vote-result')).toBeVisible();
+  await expect(page.getByTestId('guard-self').getByRole('button', { name: '確認這樣處理' })).toHaveCount(0);
+  await expect(page.getByTestId('vote-result')).toBeInViewport();
   await noOverflow(page);
 });
 
@@ -139,6 +145,19 @@ test('投影唱票：全螢幕、全部候選人同列，+1／數字鍵／空白
   await page.keyboard.press('b');
   await expect(page.getByTestId('tally-done')).toContainText('與統計結果不同');
   await noOverflow(page);
+  // #219：離開、空白票按鈕的文字與底色要有足夠對比（不能白底白字）
+  const lum = (c: string) => {
+    const [r = 0, g = 0, b = 0] = c.match(/\d+(\.\d+)?/g)!.slice(0, 3).map((v) => {
+      const x = Number(v) / 255;
+      return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  for (const name of ['離開唱票', '空白票 ＋1']) {
+    const [fg, bg] = await tally.getByRole('button', { name }).evaluate((e) => [getComputedStyle(e).color, getComputedStyle(e).backgroundColor]);
+    const [a = 0, b = 0] = [lum(fg), lum(bg)].sort((x, y) => y - x);
+    expect((a + 0.05) / (b + 0.05), `${name} 對比`).toBeGreaterThanOrEqual(4.5);
+  }
   await page.keyboard.press('Escape');
   await expect(tally).toHaveCount(0);
 });

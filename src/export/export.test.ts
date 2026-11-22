@@ -8,7 +8,7 @@ import { BatchPartialError, renderBatchZip, safeFileName, uniqueNames } from './
 import { renderDocx } from './docx';
 import { wrap } from './layout';
 import { collectChars, fillVars, parseDoc, serializeDoc } from './model';
-import { renderPdf } from './pdf';
+import { dropBlankBullets, renderPdf } from './pdf';
 import { classSummaryDoc, personalFeedbackDoc } from './templates';
 import { fakeClassSummary, fakeFeedback, nodeFontSource, RARE_BMP, RARE_OUTSIDE_FONT, stressFeedback } from './test-support';
 import { seatCell } from './seatcell';
@@ -278,5 +278,21 @@ describe('班級總表評分人數欄（Issue #215）', () => {
     expect(JSON.stringify(doc.blocks)).toContain('評分人數很少');
     const plain = classSummaryDoc(fakeClassSummary(3));
     expect((plain.blocks.find((b) => b.type === 'table') as { header: string[] }).header).not.toContain('評分人數');
+  });
+});
+
+describe('PDF 缺字的留言（#214）', () => {
+  it('只有字型缺的字（表情符號）的項目不畫，其餘留言保留', () => {
+    const miss = new Set(['😀', '👍']);
+    const out = dropBlankBullets([{ type: 'bullets', size: 11, items: ['😀', ' 👍 😀 ', '很棒😀', '清楚'] }], miss);
+    expect((out[0] as { items: string[] }).items).toEqual(['很棒😀', '清楚']);
+  });
+  it('實際渲染：表情符號留言不再讓缺字檢查之外多出空白項目（不當掉、仍回報缺字）', async () => {
+    const fonts = await loadFonts(nodeFontSource);
+    const inp = fakeFeedback();
+    inp.praise = ['😀', ...inp.praise];
+    const r = await renderPdf(personalFeedbackDoc(inp), fonts);
+    expect(r.missingChars).toContain('😀');
+    expect(strFromU8(r.bytes.subarray(0, 5))).toBe('%PDF-');
   });
 });

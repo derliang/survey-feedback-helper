@@ -20,7 +20,15 @@ export function VoteGuard({ v }: { v: VoteResult }) {
 
   const toggle = (id: string | number, include: boolean) =>
     setStats({ ballotOverrides: { ...st.stats.ballotOverrides, [Number(id)]: include } });
-  const mark = (k: VoteIssueKind, on: boolean) => setStats({ guardDone: on ? [...new Set([...done, k])] : done.filter((x) => x !== k) });
+  const mark = (k: VoteIssueKind, on: boolean) => {
+    setStats({ guardDone: on ? [...new Set([...done, k])] : done.filter((x) => x !== k) });
+    if (!on) return;
+    // 決定後自動收合清單；全部決定完就捲到結果，不讓結果被長清單推到螢幕外（#213）
+    setOpen(null);
+    if (pending <= 1 && !done.includes(k)) {
+      setTimeout(() => document.querySelector('[data-testid="vote-result"]')?.scrollIntoView({ block: 'start', behavior: 'smooth' }), 50);
+    }
+  };
   const ruleText = (k: VoteIssueKind): string => {
     const r = st.stats.voteRules;
     return k === 'multi' ? G.rule.multi[r.multi] : k === 'self' ? G.rule.self[r.self] : k === 'time' ? G.rule.time[r.time] : G.rule.blank;
@@ -73,6 +81,7 @@ export function VoteGuard({ v }: { v: VoteResult }) {
                             {' ・ '}
                             {hide ? G.hidden : picks || '—'}
                           </span>
+                          {!d.included && <span class="tag warn">{G.excluded}</span>}
                         </span>
                         <label>
                           <input type="checkbox" checked={d.included} onChange={(e) => toggle(id, (e.target as HTMLInputElement).checked)} />
