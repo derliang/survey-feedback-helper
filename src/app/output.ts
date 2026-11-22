@@ -170,6 +170,14 @@ export function opinionSheets(qs: Question[], review: Review, scaleMin: number):
   return [summary, detail, open].filter((sh) => sh.rows.length > 1);
 }
 
+/** 輸出只列有票或當選的候選人，0 票者收成一行註明人數（#216，保守做法：檔內有註明，不是悄悄略過）。 */
+export function listedVoteRows(p: VoteResult['positions'][number]): { rows: typeof p.tally.rows; omitted: number } {
+  const elected = new Set(p.election.elected);
+  const rows = p.tally.rows.filter((r) => r.votes > 0 || elected.has(r.name));
+  return { rows, omitted: p.tally.rows.length - rows.length };
+}
+const omittedNote = (n: number): string => `其餘 ${n} 位 0 票，未列出`;
+
 export function voteSheets(v: VoteResult): XSheet[] {
   const sheets: XSheet[] = [];
   const sum: XSheet = { name: '當選結果', rows: [[{ v: '職位', s: 'header' }, { v: '當選', s: 'header' }, { v: '抽籤', s: 'header' }]], colWidths: [24, 40, 50] };
@@ -179,7 +187,11 @@ export function voteSheets(v: VoteResult): XSheet[] {
   }
   sheets.push(sum);
   const det: XSheet = { name: '得票數', rows: [[{ v: '職位', s: 'header' }, { v: '名次', s: 'header' }, { v: '姓名', s: 'header' }, { v: '票數', s: 'header' }]], colWidths: [24, 8, 20, 8] };
-  for (const p of v.positions) for (const r of p.tally.rows) det.rows.push([p.col.label, r.rank, r.name, r.votes]);
+  for (const p of v.positions) {
+    const { rows, omitted } = listedVoteRows(p);
+    for (const r of rows) det.rows.push([p.col.label, r.rank, r.name, r.votes]);
+    if (omitted > 0) det.rows.push([p.col.label, '', omittedNote(omitted), '']);
+  }
   sheets.push(det);
   return sheets;
 }
@@ -222,11 +234,14 @@ export function opinionReport(s: Session, qs: Question[], review: Review): DocMo
 export function voteReport(s: Session, v: VoteResult): DocModel {
   return reportDoc(
     `${s.name} 票選結果`,
-    v.positions.map((p) => ({
-      heading: `${p.col.label}（名額 ${p.seats}）`,
-      lines: [`當選：${p.election.elected.join('、') || '（無人）'}`, ...(p.election.draw ? [`同票抽籤，抽籤編號「${displaySeed(p.election.draw.seed)}」。`] : [])],
-      table: { header: ['姓名', '票數'], rows: p.tally.rows.map((r) => [r.name, String(r.votes)]) },
-    })),
+    v.positions.map((p) => {
+      const { rows, omitted } = listedVoteRows(p);
+      return {
+        heading: `${p.col.label}（名額 ${p.seats}）`,
+        lines: [`當選：${p.election.elected.join('、') || '（無人）'}`, ...(p.election.draw ? [`同票抽籤，抽籤編號「${displaySeed(p.election.draw.seed)}」。`] : []), ...(omitted > 0 ? [`${omittedNote(omitted)}。`] : [])],
+        table: { header: ['姓名', '票數'], rows: rows.map((r) => [r.name, String(r.votes)]) },
+      };
+    }),
   );
 }
 
