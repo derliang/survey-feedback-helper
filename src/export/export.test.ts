@@ -4,7 +4,7 @@ import { strFromU8, unzipSync } from 'fflate';
 import { xlsxSource } from '../core/xlsx';
 import { subsetFor, loadFonts, resetFontCache } from '../fonts/loader';
 import { wordFontFor } from '../fonts/word-fonts';
-import { renderBatchZip, safeFileName, uniqueNames } from './batch';
+import { BatchPartialError, renderBatchZip, safeFileName, uniqueNames } from './batch';
 import { renderDocx } from './docx';
 import { wrap } from './layout';
 import { collectChars, fillVars, parseDoc, serializeDoc } from './model';
@@ -244,5 +244,15 @@ describe.skipIf(!process.env.EXPORT_DUMP_DIR)('輸出檔傾印（手動）', () 
     writeFileSync(`${dir}/罕用字超長留言.docx`, await renderDocx(personalFeedbackDoc(stressFeedback())));
     writeFileSync(`${dir}/罕用字超長留言.pdf`, (await renderPdf(personalFeedbackDoc(stressFeedback()), fonts)).bytes);
     writeFileSync(`${dir}/批次.zip`, await renderBatchZip([1, 2, 3].map((n) => ({ name: `0${n} 示範`, doc: personalFeedbackDoc(fakeFeedback(n)) })), fonts));
+  }, 60_000);
+
+  it('批次 zip 中途失敗：保留已完成的檔案（P3）', async () => {
+    const fonts = await loadFonts(nodeFontSource);
+    const good = personalFeedbackDoc(fakeFeedback(1));
+    const items = [{ name: 'A', doc: good }, { name: 'B', doc: good }, { name: 'C', doc: null as never }];
+    const err = (await renderBatchZip(items, fonts).catch((e: unknown) => e)) as BatchPartialError;
+    expect(err).toBeInstanceOf(BatchPartialError);
+    expect([err.done, err.total, err.failedName]).toEqual([2, 3, 'C.pdf']);
+    expect(Object.keys(unzipSync(err.partialZip!)).sort()).toEqual(['A.pdf', 'B.pdf']);
   }, 60_000);
 });

@@ -34,6 +34,20 @@ export interface BatchItem {
   doc: DocModel;
 }
 
+/** 批次中途失敗（DESIGN 5.39 P3）：已完成的檔案不丟掉，連同 zip 一起帶出去讓使用者下載。 */
+export class BatchPartialError extends Error {
+  constructor(
+    public readonly done: number,
+    public readonly total: number,
+    /** 已完成那幾份的 zip；一份都沒完成時為 null。 */
+    public readonly partialZip: Uint8Array | null,
+    public readonly failedName: string,
+    public readonly cause: unknown,
+  ) {
+    super(`批次輸出在第 ${done + 1}／${total} 份中斷`);
+  }
+}
+
 /** 每位學生一個 PDF 的 zip。每份之間讓出執行緒，介面不會卡死；`onProgress(done, total)`。 */
 export async function renderBatchZip(items: BatchItem[], fonts: Fonts, onProgress?: (done: number, total: number) => void, onMissing?: (chars: string[]) => void): Promise<Uint8Array> {
   const names = uniqueNames(
@@ -42,7 +56,12 @@ export async function renderBatchZip(items: BatchItem[], fonts: Fonts, onProgres
   );
   const files: Record<string, Uint8Array> = {};
   for (let i = 0; i < items.length; i++) {
-    const r = await renderPdf(items[i]!.doc, fonts);
+    let r;
+    try {
+      r = await renderPdf(items[i]!.doc, fonts);
+    } catch (e) {
+      throw new BatchPartialError(i, items.length, i > 0 ? zipSync(files, { level: 0 }) : null, names[i]!, e);
+    }
     files[names[i]!] = r.bytes;
     if (r.missingChars.length > 0) onMissing?.(r.missingChars);
     onProgress?.(i + 1, items.length);

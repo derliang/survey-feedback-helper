@@ -83,13 +83,12 @@ test('教學頁：展開「遇到問題」後仍無橫向溢出、圖不被裁�
   await noOverflow(page);
 });
 
-test('圖解步驟的欄數跟著卡片寬度：手機一欄、平板兩欄、桌機前置三欄', async ({ page }) => {
+test('圖解步驟的欄數跟著卡片寬度：手機與平板一欄、桌機前置三欄', async ({ page }) => {
   await openGuide(page);
   const w = page.viewportSize()!.width;
   const cols = await page.locator('#g1 .dsteps').evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length);
   if (w >= 1024) expect(cols).toBe(3);
-  else if (w >= 600) expect(cols).toBe(2);
-  else expect(cols).toBe(1);
+  else expect(cols).toBe(1); // 平板改單欄（DESIGN 5.39 C1／P1）
 });
 
 for (const scheme of ['light', 'dark'] as const) {

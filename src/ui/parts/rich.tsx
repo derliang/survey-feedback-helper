@@ -6,7 +6,8 @@ import { strings } from '../strings';
  * [[v]] ＝ 「待核對」標籤（文字取自 strings.guide.verifyTag）。字串集中在 strings，標記只在這裡解析。
  */
 export function rich(text: string): ComponentChildren {
-  return text.split(/(\*\*[^*]+\*\*|\{\{[^}]+\}\}|\[\[v\]\])/g).map((part, i) => {
+  const parts = text.split(/(\*\*[^*]+\*\*|\{\{[^}]+\}\}|\[\[v\]\])/g);
+  return parts.map((part, i) => {
     if (part.startsWith('**')) {
       return (
         <b class="u" key={i}>
@@ -16,16 +17,21 @@ export function rich(text: string): ComponentChildren {
     }
     if (part.startsWith('{{')) {
       const items = part.slice(2, -2).split('>');
+      // 後面緊接的標點（句號、逗號…）併進最後一個小標，不會在行首落單；每個「›」與它前一詞綁成不斷行（DESIGN 5.39 P2）
+      const next = parts[i + 1] ?? '';
+      const tail = /^[。，、；：！？．,.;:!?)）」』]+/.exec(next)?.[0] ?? '';
+      if (tail) parts[i + 1] = next.slice(tail.length);
       return (
         <span class="mp" key={i}>
           {items.map((m, j) => (
             <span key={j} class="mp-part">
-              {j > 0 && (
+              <span class="mpi">{m}</span>
+              {j < items.length - 1 && (
                 <span class="mps" aria-hidden="true">
                   ›
                 </span>
               )}
-              <span class="mpi">{m}</span>
+              {j === items.length - 1 && tail}
             </span>
           ))}
         </span>

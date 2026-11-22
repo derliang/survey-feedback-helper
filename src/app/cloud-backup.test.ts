@@ -1,13 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const saveToDrive = vi.fn();
+const setCloudToken = vi.fn();
 vi.mock("./cloud", () => ({
   saveToDrive: (...a: unknown[]) => saveToDrive(...a),
-  setCloudToken: vi.fn(),
+  setCloudToken: (t: unknown) => setCloudToken(t),
   hasCloudToken: () => true,
 }));
 
-import { backupToDrive, getState, set, setCloudBackup } from "./store";
+import { backupToDrive, disconnectGoogle, getState, set, setCloudBackup } from "./store";
 
 vi.stubGlobal("document", {
   documentElement: { setAttribute() {}, removeAttribute() {} },
@@ -65,5 +66,14 @@ describe("雲端自動備份（DESIGN.md 5.28）", () => {
     expect(getState().cloudAlert).toBeNull();
     await backupToDrive();
     expect(saveToDrive).not.toHaveBeenCalled();
+  });
+
+  it("中斷 Google 連線（P10）：清掉登入與狀態，但開關維持開著、不需確認", () => {
+    set({ cloud: { lastSaved: 5, paused: "auth" }, cloudAlert: "auth", prefs: { ...getState().prefs, cloudBackup: true } });
+    disconnectGoogle();
+    expect(setCloudToken).toHaveBeenCalledWith(null);
+    expect(getState().prefs.cloudBackup).toBe(true);
+    expect(getState().cloud).toEqual({ lastSaved: null, paused: null });
+    expect(getState().cloudAlert).toBeNull();
   });
 });

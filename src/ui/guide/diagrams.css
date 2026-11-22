@@ -1,6 +1,8 @@
 /* 教學圖解（設計稿 5.32）：全部走 tokens，淺色深色自動成立；只隨教學頁／LazyFig 載入，不進首頁 bundle。 */
 /* ===== 圖解步驟：每一步＝一張圖＋一兩句短字；欄數跟著卡片寬度自動排（手機 1 欄、平板 2 欄、桌機前置 3 欄） ===== */
-.dsteps{list-style:none;margin:0;padding:0;display:grid;gap:var(--sp-4);grid-template-columns:repeat(auto-fill,minmax(232px,1fr));align-items:start}
+.dsteps{list-style:none;margin:0;padding:0;display:grid;gap:var(--sp-4);grid-template-columns:minmax(0,1fr);align-items:start}
+/* 600–1023 單欄（DESIGN 5.39 P1）；桌機（≥1024）共同前置三欄 */
+@media (min-width:1024px){.dsteps{grid-template-columns:repeat(auto-fill,minmax(232px,1fr))}}
 .dstep{display:grid;gap:var(--sp-2);min-width:0}
 .dtx{display:flex;gap:var(--sp-2);align-items:flex-start}
 .dtx p{min-width:0}
@@ -85,4 +87,4 @@
 @media (prefers-reduced-motion:reduce){.dg *{transition:none!important}}
 .typewrap{display:grid;gap:var(--sp-3);grid-template-columns:minmax(0,1fr);min-width:0}
 .typewrap>*{min-width:0}
-@media (min-width:600px){.typewrap{grid-template-columns:minmax(0,1fr) 220px;align-items:start}}
+@media (min-width:1024px){.typewrap{grid-template-columns:minmax(0,1fr) 220px;align-items:start}}

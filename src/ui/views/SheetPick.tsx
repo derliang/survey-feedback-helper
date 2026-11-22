@@ -58,8 +58,8 @@ export function SheetPick() {
           {change && <Notice kind="warn">{S.sheet.changeWarn}</Notice>}
         </div>
         {shown && (
-          <section class="sp-preview" aria-label={S.sheet.preview(shown.table.rows.length)}>
-            <h2 class="small">{S.sheet.preview(shown.table.rows.length)}</h2>
+          <section class="sp-preview" aria-label={S.sheet.preview(label(shown.name), shown.table.rows.length)}>
+            <h2 class="small">{S.sheet.preview(label(shown.name), shown.table.rows.length)}</h2>
             <div class="table-wrap" tabIndex={0}>
               <table class="roster-table">
                 <thead>
