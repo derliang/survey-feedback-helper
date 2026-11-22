@@ -18,6 +18,7 @@ export const voteZh = {
     apply: '照這樣決定',
     pickLegend: (who: string) => `${who}：這幾份要採用哪一份？`,
   },
+  multiElected: (list: string) => `同一人同時當選多個職位：${list}。系統不會自動處理，請自行決定（例如讓他擇一，由候補遞補）。`,
   guard: {
     title: '防弊檢查',
     lead: '系統只列出可疑的票，由你決定怎麼算。每一項決定後，才會顯示正式結果。',
@@ -107,6 +108,7 @@ export const voteEn: VoteStrings = {
     apply: 'Use this choice',
     pickLegend: (who) => `${who}: which response should count?`,
   },
+  multiElected: (list) => `The same person won more than one position: ${list}. The app does not change anything; decide yourself (for example let them pick one and promote the alternate).`,
   guard: {
     title: 'Anti-fraud checks',
     lead: 'The app only lists suspicious ballots; you decide how to count them. The official result is shown after every item is decided.',

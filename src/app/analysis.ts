@@ -208,6 +208,13 @@ export interface VoteResult {
   positions: PositionResult[];
 }
 
+/** 同一人當選多個職位（不阻擋，只提示；Issue #211）。依姓名在各職位當選名單中出現的次數判斷。 */
+export function multiElected(positions: readonly PositionResult[]): { name: string; positions: string[] }[] {
+  const map = new Map<string, string[]>();
+  for (const p of positions) for (const name of new Set(p.election.elected)) map.set(name, [...(map.get(name) ?? []), p.col.label]);
+  return [...map].filter(([, ps]) => ps.length >= 2).map(([name, ps]) => ({ name, positions: ps }));
+}
+
 export function voteBallots(s: Session): Ballot[] {
   const resp = respondentRefs(s);
   const choiceCols = colsOf(s, 'choice');

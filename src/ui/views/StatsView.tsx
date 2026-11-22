@@ -10,6 +10,7 @@ import {
   runFeedback,
   runVote,
   voteGuardPending,
+  multiElected,
 } from '../../app/analysis';
 import { canGoStats } from '../../app/progress';
 import { detectScale, scaleSuspect, scoreSignature, suspectScoreColumns, withRole } from '../../app/columns';
@@ -339,6 +340,7 @@ function VoteMain({ v, sel }: { v: VoteResult; sel: string; wide: boolean }) {
   const any = counts.multi + counts.self + counts.time + counts.blank > 0;
   const pendingGuard = voteGuardPending(v, st.stats);
   const gated = pendingGuard.length > 0;
+  const multi = multiElected(v.positions);
   const elected = new Set(p.election.elected);
   const tied = new Set(p.election.tied);
   const alts = new Set(p.election.alternates);
@@ -358,6 +360,7 @@ function VoteMain({ v, sel }: { v: VoteResult; sel: string; wide: boolean }) {
   return (
     <>
       {any && <VoteGuard v={v} />}
+      {!gated && multi.length > 0 && <Notice kind="warn">{vt().multiElected(multi.map((m) => `${m.name}（${m.positions.join('、')}）`).join('；'))}</Notice>}
       {gated ? (
         <section class="card guard-gate" data-testid="vote-gate">
           <Notice kind="warn" title={vt().guard.gateTitle(pendingGuard.length)}>
