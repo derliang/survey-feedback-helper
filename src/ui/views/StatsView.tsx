@@ -1,6 +1,6 @@
 import type { ComponentChildren } from 'preact';
 import { useEffect, useMemo, useState } from 'preact/hooks';
-import { type FeedbackSummary, type TargetResult, cellText, selfVsOthers } from '../../core';
+import { type FeedbackSummary, type TargetResult, cellText, isLowSample, selfVsOthers } from '../../core';
 import {
   type Question,
   type PositionResult,
@@ -112,6 +112,9 @@ function FeedbackMain({ summary, sel, wide }: { summary: FeedbackSummary; sel: s
         </div>
         {summary.problems.length > 0 && <Notice kind="warn">{S.stats.problems(summary.problems.length)}</Notice>}
         <ScoreHints />
+        {summary.targets.some((t) => isLowSample(t.raters)) && (
+          <Notice kind="warn">{S.stats.lowRatersNote(summary.targets.filter((t) => isLowSample(t.raters)).length)}</Notice>
+        )}
         {summary.rankMayChange && <Notice kind="info">{S.stats.rankMayChange}</Notice>}
         <Chart
           svg={barsSvg(
@@ -136,6 +139,7 @@ function FeedbackMain({ summary, sel, wide }: { summary: FeedbackSummary; sel: s
                   <th key={i.id}>{i.label}</th>
                 ))}
                 <th>{S.stats.total}</th>
+                <th>{S.stats.ratersCol}</th>
               </tr>
             </thead>
             <tbody>
@@ -156,6 +160,7 @@ function FeedbackMain({ summary, sel, wide }: { summary: FeedbackSummary; sel: s
                   <td>
                     <strong>{f1(r.total)}</strong>
                   </td>
+                  <td>{isLowSample(r.raters) ? <span class="tag warn">{S.stats.lowRaters(r.raters)}</span> : r.raters}</td>
                 </tr>
               ))}
               <tr class="flag">

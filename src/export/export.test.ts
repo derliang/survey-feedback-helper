@@ -256,3 +256,27 @@ describe.skipIf(!process.env.EXPORT_DUMP_DIR)('輸出檔傾印（手動）', () 
     expect(Object.keys(unzipSync(err.partialZip!)).sort()).toEqual(['A.pdf', 'B.pdf']);
   }, 60_000);
 });
+
+describe('班級總表評分人數欄（Issue #215）', () => {
+  const withRaters = () => {
+    const inp = fakeClassSummary(3);
+    inp.students = inp.students.map((s, i) => ({ ...s, raters: i === 0 ? 1 : 5, lowSample: i === 0 }));
+    return inp;
+  };
+  it('xlsx 多一欄「評分人數」，人數少的加＊並附註', async () => {
+    const rows = (await xlsxSource(classSummaryXlsx(withRaters())).sheets())[0]!.rows;
+    expect(rows[2]!.at(-1)).toBe('評分人數');
+    expect(rows[3]!.at(-1)).toBe('1＊');
+    expect(rows[4]!.at(-1)).toBe(5);
+    expect(JSON.stringify(rows)).toContain('評分人數很少');
+  });
+  it('Word／PDF 表格也有評分人數欄與註腳；沒給人數時維持原樣', () => {
+    const doc = classSummaryDoc(withRaters());
+    const tbl = doc.blocks.find((b) => b.type === 'table') as { header: string[]; rows: string[][] };
+    expect(tbl.header.at(-1)).toBe('評分人數');
+    expect(tbl.rows[0]!.at(-1)).toBe('1＊');
+    expect(JSON.stringify(doc.blocks)).toContain('評分人數很少');
+    const plain = classSummaryDoc(fakeClassSummary(3));
+    expect((plain.blocks.find((b) => b.type === 'table') as { header: string[] }).header).not.toContain('評分人數');
+  });
+});

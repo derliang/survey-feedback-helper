@@ -147,12 +147,15 @@ export function buildXlsx(sheets: XSheet[]): Uint8Array {
 export function classSummaryXlsx(inp: ClassSummaryInput): Uint8Array {
   const n = (v: number | null): XCell => ({ v, s: 'num' });
   const en = (v: number | null): XCell => ({ v, s: 'emphNum' });
+  const withN = inp.students.some((s) => s.raters !== undefined);
+  const lowAny = inp.students.some((s) => s.lowSample);
   const rows: XCell[][] = [
     [{ v: `${inp.className} ${inp.topic} 班級總表`, s: 'title' }],
     [],
-    ['座號', '姓名', ...inp.items, '平均'].map((v) => ({ v, s: 'header' as const })),
-    ...inp.students.map((s) => [seatCell(s.seat), { v: s.name, s: 'text' as const }, ...s.values.map(n), n(s.mean)]),
+    ['座號', '姓名', ...inp.items, '平均', ...(withN ? ['評分人數'] : [])].map((v) => ({ v, s: 'header' as const })),
+    ...inp.students.map((s) => [seatCell(s.seat), { v: s.name, s: 'text' as const }, ...s.values.map(n), n(s.mean), ...(withN ? [s.raters === undefined ? '' : s.lowSample ? { v: `${s.raters}＊`, s: 'text' as const } : { v: s.raters, s: 'text' as const }] : [])]),
     [{ v: '', s: 'emphText' as const }, { v: '班級平均', s: 'emphText' as const }, ...inp.classMeans.map(en), en(inp.classOverall)],
+    ...(lowAny ? [[], ['＊評分人數很少，名次與平均僅供參考。']] : []),
   ];
-  return buildXlsx([{ name: '班級總表', rows, colWidths: [8, 14, ...inp.items.map(() => 14), 10], freezeRows: 3 }]);
+  return buildXlsx([{ name: '班級總表', rows, colWidths: [8, 14, ...inp.items.map(() => 14), 10, ...(withN ? [10] : [])], freezeRows: 3 }]);
 }

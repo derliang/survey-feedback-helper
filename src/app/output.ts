@@ -10,6 +10,7 @@ import {
   pseudonymize,
   selfVsOthers,
   type ViewKind,
+  isLowSample,
 } from '../core';
 import type { BatchItem, ClassSummaryInput, DocModel, PersonalFeedbackInput, XSheet } from '../export';
 import { rosterStudents } from './progress';
@@ -134,7 +135,7 @@ export function classSummaryInput(s: Session, summary: FeedbackSummary): ClassSu
     className: classText(sorted[0]?.person ?? ref('')),
     topic: s.name,
     items: summary.items.map((i) => i.label),
-    students: sorted.map((t) => ({ seat: seatText(t.person), name: nameText(t.person), values: t.averageRow, mean: t.total })),
+    students: sorted.map((t) => ({ seat: seatText(t.person), name: nameText(t.person), values: t.averageRow, mean: t.total, raters: t.raters, lowSample: isLowSample(t.raters) })),
     classMeans: summary.classItemMeans,
     classOverall: summary.classMean.value,
   };

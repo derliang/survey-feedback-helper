@@ -107,7 +107,7 @@ export interface ClassSummaryInput {
   /** 題項名稱（欄）。 */
   items: string[];
   /** 每位學生一列：各題項的平均與總平均。 */
-  students: { seat: number | string; name: string; values: (number | null)[]; mean: number | null }[];
+  students: { seat: number | string; name: string; values: (number | null)[]; mean: number | null; /** 他評人數；有給才多一欄「評分人數」 */ raters?: number; /** 評分人數太少（名次僅供參考） */ lowSample?: boolean }[];
   /** 班級平均列。 */
   classMeans: (number | null)[];
   classOverall: number | null;
@@ -120,22 +120,26 @@ export function classSummaryDoc(inp: ClassSummaryInput): DocModel {
   const seatW = 40,
     nameW = 70,
     meanW = 56;
-  const itemW = (w - seatW - nameW - meanW) / Math.max(1, inp.items.length);
-  const rows = inp.students.map((s) => [String(s.seat), s.name, ...s.values.map(fmt1), fmt1(s.mean)]);
-  rows.push(['', '班級平均', ...inp.classMeans.map(fmt1), fmt1(inp.classOverall)]);
+  const withN = inp.students.some((s) => s.raters !== undefined);
+  const lowAny = inp.students.some((s) => s.lowSample);
+  const itemW = (w - seatW - nameW - meanW * (withN ? 2 : 1)) / Math.max(1, inp.items.length);
+  const nCell = (s: { raters?: number; lowSample?: boolean }): string[] => (withN ? [s.raters === undefined ? '' : s.lowSample ? `${s.raters}＊` : String(s.raters)] : []);
+  const rows = inp.students.map((s) => [String(s.seat), s.name, ...s.values.map(fmt1), fmt1(s.mean), ...nCell(s)]);
+  rows.push(['', '班級平均', ...inp.classMeans.map(fmt1), fmt1(inp.classOverall), ...(withN ? [''] : [])]);
   const blocks: Block[] = [
     { type: 'heading', text: `${inp.className} ${inp.topic} 班級總表`, size: 18, color: NAVY, after: 8 },
     {
       type: 'table',
-      widths: [seatW, nameW, ...inp.items.map(() => itemW), meanW],
-      header: ['座號', '姓名', ...inp.items, '平均'],
+      widths: [seatW, nameW, ...inp.items.map(() => itemW), meanW, ...(withN ? [meanW] : [])],
+      header: ['座號', '姓名', ...inp.items, '平均', ...(withN ? ['評分人數'] : [])],
       rows,
       emphasisRows: [rows.length - 1],
-      align: ['center', 'left', ...inp.items.map(() => 'center' as const), 'center'],
+      align: ['center', 'left', ...inp.items.map(() => 'center' as const), 'center', ...(withN ? ['center' as const] : [])],
       rowH: 22,
       size: 10,
-      after: 0,
+      after: lowAny ? 8 : 0,
     },
+    ...(lowAny ? [{ type: 'text' as const, text: '＊評分人數很少，名次與平均僅供參考。', size: 10, color: '#5b6b7b', after: 0 }] : []),
   ];
   return {
     blocks,
