@@ -117,3 +117,23 @@ describe('compareRoster 的重複判斷（#147）', () => {
     expect(c.duplicates).toHaveLength(1);
   });
 });
+
+describe('姓名欄座號＋姓名連寫（#207）', () => {
+  const roster = [
+    { class: '', seat: 1, name: '甲生' },
+    { class: '', seat: 12, name: '乙生' },
+  ];
+  it('「12乙生」對到 12 號乙生，重複也能抓到', () => {
+    expect(matchPerson(roster, { name: '12乙生' }).status).toBe('ok');
+    expect(matchPerson(roster, { name: '12 乙生' }).student?.seat).toBe(12);
+    expect(matchPerson(roster, { name: '5號乙生' }).status).toBe('seatMismatch');
+    const c = compareRoster(roster, [
+      { id: 0, person: { name: '12乙生' } },
+      { id: 1, person: { name: '12乙生' } },
+      { id: 2, person: { name: '1甲生' } },
+    ]);
+    expect(c.unknown).toHaveLength(0);
+    expect(c.duplicates).toHaveLength(1);
+    expect(c.missing).toHaveLength(0);
+  });
+});

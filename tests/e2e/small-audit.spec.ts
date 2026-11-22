@@ -43,11 +43,11 @@ test('儲存警示（G1、#90）：沒有審稿變更不顯示；改了才在頁
   await expect(banner).toHaveCount(0);
 });
 
-test('學生名單（S4）：底部列只有「上一步」「下一步」，略過改成卡內連結', async ({ page }) => {
+test('學生名單（S4）：沒有名單時底部列是「上一步」＋「這次先不匯入名單」（#212）', async ({ page }) => {
   await prepared(page);
   const bar = page.locator('.actbar');
   await expect(bar.getByRole('button')).toHaveCount(2);
-  await expect(page.locator('.roster-skip').getByRole('button', { name: '這次先不匯入名單' })).toBeVisible();
+  await expect(page.getByTestId('roster-skip')).toBeVisible();
   // 「開啟名單檔」排在停用的「加入名單」前面
   await expect(page.locator('.btn-row .btn').first()).toBeVisible();
   const order = await page.locator('.btn-row .btn').allTextContents();

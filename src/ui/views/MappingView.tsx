@@ -104,7 +104,9 @@ export function MappingView() {
       mappingConfirmed: true,
     }));
     void saveSurvey();
-    go('prepare', 'roster');
+    // 名單已決定（匯入或略過）時，從資料檢查回來改對應不必再走一次名單步驟（Issue #212）
+    const rosterDecided = (s.rosterRows?.length ?? 0) > 0 || s.rosterSkipped;
+    go('prepare', rosterDecided ? 'check' : 'roster');
   };
 
   return (

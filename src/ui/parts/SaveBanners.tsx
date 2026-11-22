@@ -8,6 +8,7 @@ import { extra } from '../strings-extra';
 /**
  * 全站共用的「還沒存好」頁頂橫幅（G1）。放在頂端列正下方，不佔頁面內容的位置。
  * ① 設定有更新但沒有資料夾可寫；② 審稿進度改了卻沒存進資料夾（只在統計與輸出頁，且必須真的有改動，Issue #90）。
+ * 兩條同時成立時只顯示審稿那條（頁頂最多一條存檔橫幅，Issue #218）。
  * 範本編輯器的「範本還沒存進資料夾」在 EditorView 內用同一個元件。
  */
 export function SaveBanners() {
@@ -16,6 +17,7 @@ export function SaveBanners() {
   const noFolder = st.folder.state !== 'ready';
   const onReviewPage = st.route === 'stats' || st.route === 'output';
   const f = st.folder;
+  const showReview = onReviewPage && !!st.review && st.reviewUnsaved;
   const offline = useOffline();
   return (
     <>
@@ -47,7 +49,7 @@ export function SaveBanners() {
           {S.folder.reauthBanner(f.name)}
         </TopBanner>
       )}
-      {noFolder && st.dirty && (
+      {noFolder && st.dirty && !showReview && (
         <TopBanner
           id="settings"
           action={
@@ -66,7 +68,7 @@ export function SaveBanners() {
           {S.folder.dirtyTitle}
         </TopBanner>
       )}
-      {onReviewPage && st.review && st.reviewUnsaved && (
+      {showReview && (
         <TopBanner
           id="review"
           action={

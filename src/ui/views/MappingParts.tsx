@@ -4,6 +4,7 @@ import {
   type Role,
   type ScaleDoubt,
   ignoreAllPending,
+  setAllPendingRole,
   pendingCols,
   pendingFacts,
   sortedCols,
@@ -70,6 +71,11 @@ export function PendingCard(props: {
               </div>
             );
           })}
+          {pending.length >= 2 && (
+            <button type="button" class="btn secondary" onClick={() => setCols((cols) => setAllPendingRole(cols, 'choice'))} data-testid="pend-all-choice">
+              {M.pendAllChoice(pending.length)}
+            </button>
+          )}
           {pending.length >= 2 && (
             <button type="button" class="btn secondary" onClick={() => setCols(ignoreAllPending)} data-testid="pend-all-ignore">
               {M.pendAllIgnore(pending.length)}
