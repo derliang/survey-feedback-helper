@@ -90,6 +90,10 @@ export function analyzeColumns(table: Table): ColumnInfo[] {
         role = g.role;
         confirm = g.confirm;
       } else {
+        // 標題是「1.班長」「2、副班長」這類編號開頭（票選幹部的職位欄）：視為選擇題，仍請老師確認（Issue #208）
+        if (/^\d{1,2}\s*[.、．]\s*\S/.test(header.normalize('NFKC')) && columnValues(table, index).length > 0) {
+          return { index, header, label: defaultLabel(header), role: 'choice' as Role, confirm: true, samples: samplesOf(table, index) } as ColumnInfo;
+        }
         // 有內容卻猜不出題型：標「請確認」，不默默當成不分析
         role = 'ignore';
         confirm = columnValues(table, index).length > 0;
@@ -245,6 +249,11 @@ export function pendingFacts(table: Table, index: number): { filled: number; dis
 /** 改回「待分類」：角色回到不使用、標待確認。 */
 export function withPending(cols: readonly ColumnInfo[], index: number): ColumnInfo[] {
   return compactRanks(cols.map((c) => (c.index === index ? { ...c, role: 'ignore' as Role, confirm: true, unsorted: true } : c)));
+}
+
+/** 待分類欄一次設成同一種題型（老師明確按下，算已處理；Issue #208「全部設為選擇題」）。 */
+export function setAllPendingRole(cols: readonly ColumnInfo[], role: Role): ColumnInfo[] {
+  return cols.map((c) => (isPending(c) ? { ...c, role, confirm: false } : c));
 }
 
 /** 其餘待分類欄一次設成「不使用」（老師明確按下，算已處理）。 */

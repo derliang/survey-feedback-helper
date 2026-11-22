@@ -206,6 +206,7 @@ export const enMore: DeepPartial<Strings> = {
     pendSamples: (s) => `Answers: ${s}`,
     pendChoices: { choice: 'Multiple choice', comment: 'Open comment', score: 'Rating', ignore: 'Do not use' },
     pendMore: 'Other types…',
+    pendAllChoice: (n) => `Set all ${n} columns to multiple choice`,
     pendAllIgnore: (n) => `Do not use the other ${n} columns`,
     pendDoneTitle: (n) => `To sort: all ${n} column(s) handled`,
     pendDoneTag: 'Done',

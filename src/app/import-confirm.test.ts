@@ -6,6 +6,7 @@ import {
   countToConfirm,
   detectScale,
   ignoreAllPending,
+  setAllPendingRole,
   isPending,
   pendingCols,
   pendingFacts,
@@ -59,6 +60,20 @@ describe('SUR-04 待分類', () => {
     expect(pendingCols(cols)).toHaveLength(0);
     expect(sortedCols(cols)).toHaveLength(2);
     expect(sortedCols(cols).every((c) => c.role === 'ignore')).toBe(true);
+  });
+});
+
+describe('#208 票選幹部職位欄', () => {
+  it('「1.班長」這類編號開頭的欄自動視為選擇題；其他待分類欄可一次設為選擇題', () => {
+    const rows = Array.from({ length: 12 }, (_, i) => `甲生${i},乙生${i},詞${i}`);
+    const cols = analyzeColumns(tableFromCsv(['1.班長,2、副班長,雜項', ...rows].join('\n')));
+    expect(cols[0]!.role).toBe('choice');
+    expect(cols[1]!.role).toBe('choice');
+    expect(isPending(cols[0]!)).toBe(false);
+    expect(pendingCols(cols).map((c) => c.header)).toEqual(['雜項']);
+    const all = setAllPendingRole(cols, 'choice');
+    expect(pendingCols(all)).toHaveLength(0);
+    expect(all[2]!.role).toBe('choice');
   });
 });
 

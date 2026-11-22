@@ -225,6 +225,7 @@ export const strings = {
     pendSamples: (s: string) => `答案：${s}`,
     pendChoices: { choice: '選擇題', comment: '開放意見', score: '評分', ignore: '不使用' } as Record<string, string>,
     pendMore: '其他類型…',
+    pendAllChoice: (n: number) => `全部 ${n} 欄設為選擇題`,
     pendAllIgnore: (n: number) => `其餘 ${n} 欄都不使用`,
     pendDoneTitle: (n: number) => `待分類：${n} 欄都處理好了`,
     pendDoneTag: '已完成',
