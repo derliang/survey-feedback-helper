@@ -141,7 +141,7 @@ test('投影唱票：全螢幕、全部候選人同列，+1／數字鍵／空白
   await noOverflow(page);
   // #219：離開、空白票按鈕的文字與底色要有足夠對比（不能白底白字）
   const lum = (c: string) => {
-    const [r, g, b] = c.match(/\d+(\.\d+)?/g)!.slice(0, 3).map((v) => {
+    const [r = 0, g = 0, b = 0] = c.match(/\d+(\.\d+)?/g)!.slice(0, 3).map((v) => {
       const x = Number(v) / 255;
       return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4;
     });
@@ -149,7 +149,7 @@ test('投影唱票：全螢幕、全部候選人同列，+1／數字鍵／空白
   };
   for (const name of ['離開唱票', '空白票 ＋1']) {
     const [fg, bg] = await tally.getByRole('button', { name }).evaluate((e) => [getComputedStyle(e).color, getComputedStyle(e).backgroundColor]);
-    const [a, b] = [lum(fg), lum(bg)].sort((x, y) => y - x);
+    const [a = 0, b = 0] = [lum(fg), lum(bg)].sort((x, y) => y - x);
     expect((a + 0.05) / (b + 0.05), `${name} 對比`).toBeGreaterThanOrEqual(4.5);
   }
   await page.keyboard.press('Escape');
