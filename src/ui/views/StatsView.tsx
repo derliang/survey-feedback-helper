@@ -241,12 +241,15 @@ function QuestionMain({ q, wide, reviewTotal }: { q: Question; wide: boolean; re
   const scale = st.session!.scale;
   if (q.kind === 'score') {
     const x = q.stat;
+    // 「最高兩級」比例（稿件與 DESIGN「統計誠實」：量表題同時給 4–5 分比例，#217）
+    const top2 = scale.max - scale.min >= 2 && x.n > 0 ? (x.distribution.at(-1) ?? 0) + (x.distribution.at(-2) ?? 0) : null;
     return (
       <>
         <div class="tiles">
           <Tile label={S.stats.mean} value={f1(x.mean)} />
           <Tile label={S.stats.median} value={f1(x.median)} />
           <Tile label={S.stats.sd} value={f1(x.sd)} />
+          {top2 !== null && <Tile label={extra().stats.topShare(scale.max - 1, scale.max)} value={`${Math.round((top2 / x.n) * 100)}%`} note={extra().stats.topShareNote(top2, x.n)} />}
           <Tile label={extra().stats.valid} value={S.stats.people(x.n)} note={S.stats.blank(x.blank)} />
         </div>
         {x.invalid > 0 && <Notice kind="warn">{S.stats.invalid(x.invalid)}</Notice>}

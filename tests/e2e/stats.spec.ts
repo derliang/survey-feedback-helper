@@ -212,3 +212,18 @@ test('整欄空白的評分題：統計頁給可見提示（Issue #94）', async
   await expect(page.locator('.wb-main')).toContainText('「滿意度」整欄沒有人填寫，所以沒有列入統計');
   await noOverflow(page);
 });
+
+test('意見調查量表題：數字磚含「4–5 分比例」（稿件差異 #217）', async ({ page }) => {
+  const csv = ['時間戳記,滿意度,建議', '2026-10-10 10:00:00,5,好', '2026-10-10 10:01:00,4,好', '2026-10-10 10:02:00,2,普通', '2026-10-10 10:03:00,3,普通'].join('\n');
+  await page.goto('./');
+  await page.getByTestId('file-input').setInputFiles({ name: '量表.csv', mimeType: 'text/csv', buffer: Buffer.from(csv, 'utf8') });
+  await page.locator('.rail').getByRole('button', { name: /^\d?\s*問卷類型/ }).click();
+  await page.getByRole('radio', { name: /意見調查/ }).click();
+  await page.getByRole('button', { name: '確認，下一步：欄位對應' }).click();
+  await page.getByRole('button', { name: '完成對應，下一步' }).click();
+  await step(page, '統計').click();
+  const tile = page.locator('.tiles .tile', { hasText: '4–5 分比例' });
+  await expect(tile).toContainText('50%');
+  await expect(tile).toContainText('2 ／ 4 人');
+  await noOverflow(page);
+});
