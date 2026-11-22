@@ -42,6 +42,16 @@
 
 - [~] **載入速度**（硬規則 9）：效能預算與 CI 檢查已做；輸出與字型延遲載入、Service Worker 快取已做；輸出頁進入時已呼叫 `registerAssetCache()`（2026-11-01 確認）；首屏已用 `scripts/measure-first-screen.mjs` 量（Fast 4G＋4× 降速約 1.85 秒，Slow 4G 第一次造訪 2.1～3.5 秒略超過，見 [docs/performance.md](docs/performance.md)）。（2026-11-04：統計／輸出／準備資料／方法說明改為進入時才載入，首頁入口 127→47 KB 未壓縮，Slow 4G 模擬中位數 2.10→1.68 秒，已低於 2 秒，見 [docs/performance.md](docs/performance.md)）（2026-11-07 重測：首頁 76.4 KB gzip 不變；模擬 Slow 4G 中位數 1.8～2.4 秒、Fast 4G 0.8～1.2 秒，量測時機器同時忙碌，雜訊大，11-04 的 1.68 秒未重現但也不代表退步，見 [docs/performance.md](docs/performance.md)）**待做**：真機量測 負責：使用者（需手機）；要乾淨的模擬數字須在機器空閒時重跑
 
+## 遠端分支清理候選（2026-11-22 逐支比對，尚未刪除）
+
+> 查法：`git cherry` 找獨有 commit、逐檔比對內容是否已在 `main`、對照已併 PR。三支都不再需要，**等使用者同意才刪**（刪除遠端分支可由 commit SHA 還原）。
+
+| 分支 | 獨有 commit | 結論 |
+|---|---|---|
+| `origin/chart-types` | db41137「圖表類型…（進行中，e2e 待修）」 | WIP 舊版，已由 PR #172（`chart-types-v2`）與 #190 取代並上線 v0.2.17；候選刪除 |
+| `origin/perf/lazy-routes-en-g9` | 969c321、36bcc80 | 969c321 已以 squash 併入 PR #66（2026-11-04）；36bcc80 的文案（「固定抽籤結果」、快速範本不提雷達圖／熱圖）已在 `main` 的 `strings.ts`／`quick-templates.ts`；候選刪除 |
+| `origin/backup/uncommitted-2026-11-19` | 1260060 | 只含 `_repro_tmp.mjs`（19 行重現腳本），與本機未追蹤檔內容相同；候選刪除 |
+
 ## 暫緩（有使用者裁示）
 
 - 黑白列印模式（2026-10-31：單一配色先上，模式列為後續進階）
