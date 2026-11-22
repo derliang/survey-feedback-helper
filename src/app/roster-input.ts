@@ -9,7 +9,7 @@ export interface RosterRow {
 
 /**
  * 貼上的名單：一列一位，「座號 姓名」；混班為「班級 座號 姓名」；
- * 沒有座號只有姓名時，依序補 1、2、3…。分隔可為空白、Tab、逗號。
+ * 同班格式沒有座號只有姓名時，依序補 1、2、3…；混班格式不補，缺的欄位留空待確認。分隔可為空白、Tab、逗號。
  */
 export function parsePastedRoster(text: string, mixed: boolean, defaultClass = ''): RosterRow[] {
   const lines = text
@@ -22,8 +22,10 @@ export function parsePastedRoster(text: string, mixed: boolean, defaultClass = '
     const parts = line.split(/[\s,，、\t]+/).filter((p) => p !== '');
     if (mixed) {
       if (parts.length >= 3) rows.push({ class: parts[0] as string, seat: parts[1] as string, name: parts.slice(2).join('') });
-      else if (parts.length === 2) rows.push({ class: parts[0] as string, seat: String(++auto), name: parts[1] as string });
-      else rows.push({ class: defaultClass, seat: String(++auto), name: parts[0] as string });
+      // 混班格式不完整的行（缺班級、座號或姓名）不自動補值，留空讓名單檢查標出「請確認」（Issue #225）
+      else if (parts.length === 2 && /^\d+$/.test(parts[1] as string)) rows.push({ class: parts[0] as string, seat: parts[1] as string, name: '' });
+      else if (parts.length === 2) rows.push({ class: parts[0] as string, seat: '', name: parts[1] as string });
+      else rows.push({ class: defaultClass, seat: '', name: parts[0] as string });
     } else if (parts.length >= 2 && /^\d+$/.test(parts[0] as string)) {
       rows.push({ class: defaultClass, seat: parts[0] as string, name: parts.slice(1).join('') });
     } else {

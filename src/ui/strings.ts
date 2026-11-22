@@ -292,7 +292,7 @@ export const strings = {
     saved: '選擇先前儲存的學生名單',
     preview: (n: number, dup: number) => `預覽（點格子可改）· ${n} 人${dup > 0 ? ` · ${dup} 組同名` : ''}`,
     cols: ['班級', '座號', '姓名'],
-    problem: { duplicateSeat: '座號重複，請確認', duplicateName: '同名，請確認', badSeat: '座號無效', blankName: '姓名空白' },
+    problem: { duplicateSeat: '座號重複，請確認', duplicateName: '同名，請確認', badSeat: '座號無效或缺少，請確認', blankName: '姓名空白，請確認' },
     skip: '這次先不匯入名單',
     compare: '下一步：名單對照',
     clear: '清空名單',

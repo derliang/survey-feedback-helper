@@ -269,7 +269,7 @@ export const enMore: DeepPartial<Strings> = {
     saved: 'Choose a previously saved roster',
     preview: (n, dup) => `Preview (click a cell to edit) · ${n} students${dup > 0 ? ` · ${dup} duplicate name(s)` : ''}`,
     cols: ['Class', 'Seat', 'Name'],
-    problem: { duplicateSeat: 'Duplicate seat number, please check', duplicateName: 'Same name, please check', badSeat: 'Invalid seat number', blankName: 'Name is empty' },
+    problem: { duplicateSeat: 'Duplicate seat number, please check', duplicateName: 'Same name, please check', badSeat: 'Seat number invalid or missing, please check', blankName: 'Name is empty, please check' },
     skip: 'Skip the roster this time',
     compare: 'Next: compare with roster',
     clear: 'Clear roster',

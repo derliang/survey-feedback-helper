@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { analyzeColumns, applySavedMapping, detectScale, inferKind, mappingProblems, toSavedMapping } from './columns';
 import { LoadError, decodeCsv, guessDelimiter, surveyNameFromFile, tableFromFile } from './load';
-import { parsePastedRoster, rosterRowsFromTable } from './roster-input';
+import { parsePastedRoster, rosterFromRows, rosterRowsFromTable } from './roster-input';
 import { tableFromCsv } from '../core';
 import { emptyFolderData, mergeFolderData, parseFolderData, recentSurveys, serializeFolderData, upsertSurvey } from '../storage';
 import type { SavedSurvey } from '../storage';
@@ -133,5 +133,16 @@ describe('設定檔', () => {
   it('缺欄位的舊檔也能讀', () => {
     const data = parseFolderData('{"version":1,"surveys":[{"id":"x","headers":["h"]}]}');
     expect(data.surveys[0]).toMatchObject({ id: 'x', name: '未命名問卷', kind: 'opinion', scale: { min: 1, max: 5 } });
+  });
+});
+
+describe('混班貼上：格式不完整的行不自動補值（#225）', () => {
+  it('缺座號、缺姓名的行留空，並被名單檢查標出', () => {
+    const rows = parsePastedRoster('二年乙班 1 甲生\n亂碼一行\n二年乙班 2', true);
+    expect(rows[1]).toEqual({ class: '', seat: '', name: '亂碼一行' });
+    expect(rows[2]).toEqual({ class: '二年乙班', seat: '2', name: '' });
+    const { students, problems } = rosterFromRows(rows);
+    expect(students).toHaveLength(1);
+    expect(problems.map((p) => p.kind).sort()).toEqual(['badSeat', 'blankName']);
   });
 });
