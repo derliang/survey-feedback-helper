@@ -84,9 +84,15 @@ function nearest(candidates: readonly Student[], name: string): Student | null {
 
 /** 把問卷裡的一個人對到名單。有填班級時只在該班比對；姓名優先於座號。 */
 export function matchPerson(roster: readonly Student[], ref: PersonRef): PersonMatch {
-  const name = normalizeName(ref.name);
-  const seat = normalizeSeat(ref.seat);
+  let name = normalizeName(ref.name);
+  let seat = normalizeSeat(ref.seat);
   const cls = normalizeClass(ref.class);
+  // 填寫者把「座號＋姓名」連寫在姓名欄（如「12乙生」「5號王小明」）：拆成座號與姓名（Issue #207）。
+  const glued = /^(\d{1,3})號?[.、\-:：]?(\D.*)$/.exec(name);
+  if (glued) {
+    name = glued[2] as string;
+    if (seat === null) seat = Number(glued[1]) >= 1 ? Number(glued[1]) : null;
+  }
   const pool = cls === '' ? roster : roster.filter((s) => s.class === cls);
 
   if (name === '' && seat === null) return { status: 'blank', student: null, suggestion: null };
