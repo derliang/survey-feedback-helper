@@ -45,6 +45,18 @@ test('輸出頁：三段標題、版面不橫向溢出、下載面板在第一�
   if (process.env.SHOT_DIR) await page.screenshot({ path: `${process.env.SHOT_DIR}/output-${info.project.name}.png`, fullPage: true });
 });
 
+test('「⋯」更多選項：選單寬度夠放一行字、不直排、不超出視窗（桌機，#220）', async ({ page }, info) => {
+  test.skip(info.project.name !== 'desktop', '「⋯」只在非觸控桌機出現');
+  await toOutput(page);
+  await page.getByRole('button', { name: '更多' }).click();
+  const pop = page.locator('.out-pop');
+  await expect(pop).toBeVisible();
+  const box = (await pop.boundingBox())!;
+  expect(box.width).toBeGreaterThan(120);
+  expect(box.height).toBeLessThan(90);
+  expect(box.x + box.width).toBeLessThanOrEqual(page.viewportSize()!.width);
+});
+
 test('範本縮圖：頁尾文字在縮圖框內、字級縮小後不蓋住版面（G4）', async ({ page }) => {
   await toOutput(page);
   const thumb = page.locator('.out-thumb').first();
