@@ -244,6 +244,7 @@ function QuestionMain({ q, wide, reviewTotal }: { q: Question; wide: boolean; re
           <Tile label={extra().stats.valid} value={S.stats.people(x.n)} note={S.stats.blank(x.blank)} />
         </div>
         {x.invalid > 0 && <Notice kind="warn">{S.stats.invalid(x.invalid)}</Notice>}
+        <ScoreHints />
         <Chart svg={columnsSvg(x.distribution, x.distribution.map((_, i) => String(scale.min + i)), { title: q.col.label, w, h: 220 })} />
       </>
     );
@@ -798,8 +799,9 @@ export function StatsView() {
 /** 報告回饋統計頁的資料提示：疑似評分欄被當成選擇題、量表疑似不符（Issue #145）。 */
 function ScoreHints() {
   const s = useApp().session;
-  if (!s || s.kind !== 'feedback') return null;
-  const suspects = suspectScoreColumns(s.table, s.cols);
+  if (!s || (s.kind !== 'feedback' && s.kind !== 'opinion')) return null;
+  // 疑似評分欄的提示只在報告回饋；量表疑似不符兩種都提醒（Issue #210）
+  const suspects = s.kind === 'feedback' ? suspectScoreColumns(s.table, s.cols) : [];
   const sus = scaleSuspect(s.table, s.cols, s.scale, s.scaleConfirmed);
   if (suspects.length === 0 && !sus) return null;
   const toScore = (index: number) =>
