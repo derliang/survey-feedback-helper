@@ -39,6 +39,7 @@ export const voteZh = {
     hidePicks: '投影時隱藏「投給誰」',
     hidden: '（已隱藏）',
     include: '計入',
+    excluded: '已排除',
     anon: '（沒填姓名）',
     noTime: '沒有時間',
     rule: {
@@ -129,6 +130,7 @@ export const voteEn: VoteStrings = {
     hidePicks: 'Hide “voted for” when projecting',
     hidden: '(hidden)',
     include: 'Count',
+    excluded: 'Excluded',
     anon: '(no name)',
     noTime: 'no time',
     rule: {
