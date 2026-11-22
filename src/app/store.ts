@@ -694,6 +694,7 @@ export function restart(): void {
     error: null,
     pendingRecent: null,
     review: null,
+    reviewUnsaved: false,
     statSel: null,
   });
 }

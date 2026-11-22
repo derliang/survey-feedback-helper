@@ -208,3 +208,11 @@ describe('完成對應的閘門', () => {
     expect(mappingReady(getState().session!)).toBe(true);
   });
 });
+
+describe('#218 重新開始清掉審稿未存狀態', () => {
+  it('restart 後 reviewUnsaved 歸零', () => {
+    set({ reviewUnsaved: true });
+    restart();
+    expect(getState().reviewUnsaved).toBe(false);
+  });
+});
