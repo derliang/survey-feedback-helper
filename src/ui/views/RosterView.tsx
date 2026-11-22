@@ -191,11 +191,16 @@ export function RosterView() {
         <p class="empty">{S.roster.empty}</p>
       )}
 
-      {students.length === 0 && (
-        <p class="roster-skip">
+      <ActBar fixed>
+        <button class="btn secondary" type="button" onClick={() => go('prepare')}>
+          {S.back}
+        </button>
+        {students.length === 0 ? (
+          // 還沒有名單時，略過鈕就是主要出口，放在固定操作列（不用捲到頁底；Issue #212）
           <button
-            class="btn ghost small"
+            class="btn primary grow"
             type="button"
+            data-testid="roster-skip"
             onClick={() => {
               setSession({ rosterSkipped: true });
               go('prepare', 'check');
@@ -203,24 +208,18 @@ export function RosterView() {
           >
             {S.roster.skip}
           </button>
-        </p>
-      )}
-
-      <ActBar fixed>
-        <button class="btn secondary" type="button" onClick={() => go('prepare')}>
-          {S.back}
-        </button>
-        <button
-          class="btn primary grow"
-          type="button"
-          disabled={students.length === 0}
-          onClick={() => {
-            void saveSurvey();
-            go('prepare', 'compare');
-          }}
-        >
-          {S.roster.compare}
-        </button>
+        ) : (
+          <button
+            class="btn primary grow"
+            type="button"
+            onClick={() => {
+              void saveSurvey();
+              go('prepare', 'compare');
+            }}
+          >
+            {S.roster.compare}
+          </button>
+        )}
       </ActBar>
     </div>
   );
