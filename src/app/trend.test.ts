@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { tableFromCsv } from '../core';
 import { consecutiveDrops, summaryFromTable, trendOf } from './trend';
+import { analyzeColumns, withRole } from './columns';
 import { linesSvg } from '../ui/chart-svg';
 
 // 全部是虛構資料
@@ -27,5 +28,18 @@ describe('歷次趨勢接線', () => {
     const svg = linesSvg([{ label: '內容', values: [9, 8, 6] }], ['a', 'b', 'c'], { title: '圖', max: 10 });
     expect(svg).toContain('內容 6');
     expect(svg).toContain('aria-label="圖"');
+  });
+});
+
+describe('較早問卷沿用目前欄位對應（Issue #222）', () => {
+  // 「內容完整」欄混入文字雜訊，自動判斷不會當評分；目前問卷已手動改為評分
+  const noisy = ['我的名字,被回饋者姓名,台風,內容完整', '甲,丙,6,5', '乙,丙,7,6', '丁,丙,5,abc', '甲,戊,6,7', '乙,戊,7,xx', '丁,戊,8,6'].join('\n');
+  it('同題名欄位沿用目前問卷的題型', () => {
+    const t = tableFromCsv(noisy);
+    const cur = analyzeColumns(t);
+    const fixed = withRole(cur, cur.find((c) => c.header === '內容完整')!.index, 'score');
+    const withRef = summaryFromTable(t, { cols: fixed, scale: { min: 0, max: 10 } })!;
+    expect(withRef.items.map((i) => i.label)).toContain('內容完整');
+    expect(summaryFromTable(t)?.items.map((i) => i.label) ?? []).not.toContain('內容完整');
   });
 });
