@@ -67,9 +67,15 @@ test('防弊四項：有自投時先決定才看得到正式結果；逐人名�
   await page.getByLabel('投影時隱藏「投給誰」').check();
   await expect(page.getByTestId('guard-self')).toContainText('（已隱藏）');
   await expect(page.getByTestId('guard-self')).not.toContainText('你推薦誰當班長？：甲小明');
+  // #213：被排除的票有「已排除」文字；確認後清單自動收合、結果在視窗內
+  await page.getByTestId('guard-self').getByLabel('計入').first().uncheck();
+  await expect(page.getByTestId('guard-self')).toContainText('已排除');
+  await page.getByTestId('guard-self').getByLabel('計入').first().check();
   await page.getByRole('button', { name: '確認這樣處理' }).click();
   await expect(page.getByTestId('vote-gate')).toHaveCount(0);
   await expect(page.getByTestId('vote-result')).toBeVisible();
+  await expect(page.getByTestId('guard-self').getByRole('button', { name: '確認這樣處理' })).toHaveCount(0);
+  await expect(page.getByTestId('vote-result')).toBeInViewport();
   await noOverflow(page);
 });
 
