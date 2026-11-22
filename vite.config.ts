@@ -34,7 +34,11 @@ function precachePlugin(): Plugin {
       const id = hash.digest('hex').slice(0, 12);
       writeFileSync(join(outDir, 'precache.json'), JSON.stringify(files));
       const swPath = join(outDir, 'sw.js');
-      writeFileSync(swPath, readFileSync(swPath, 'utf8').replace('__BUILD_ID__', id));
+      const swSrc = readFileSync(swPath, 'utf8').split('__BUILD_ID__').join(id);
+      if (swSrc.includes('__BUILD_ID__') || !swSrc.includes(`const BUILD = '${id}';`)) {
+        throw new Error('sw.js 的 BUILD 常數沒有被換成建置雜湊（#221）');
+      }
+      writeFileSync(swPath, swSrc);
     },
   };
 }
