@@ -142,3 +142,22 @@ describe('text 工具', () => {
     expect(cellText(new Date('x'))).toBe('');
   });
 });
+
+describe('欄名列偵測（#209）', () => {
+  it('上方有標題文字、下方有平均列時，取真正的欄名列並排除平均列', () => {
+    const t = tableFromRows([
+      ['115-1讀書心得上台分享 同學回饋單', null, null, null],
+      ['班級', '報告者', '簡報內容', '台風'],
+      ['301', '甲生', 9, 8],
+      ['301', '乙生', 10, 9],
+      ['平均', null, 9.5, 8.5],
+    ]);
+    expect(t.headers).toEqual(['班級', '報告者', '簡報內容', '台風']);
+    expect(t.rows).toHaveLength(2);
+  });
+  it('一般檔案（第一列就是欄名）不受影響', () => {
+    const t = tableFromRows([['a', 'b', 'c'], [1, 2, 3], [4, 5, 6]]);
+    expect(t.headers).toEqual(['a', 'b', 'c']);
+    expect(t.rows).toHaveLength(2);
+  });
+});
