@@ -286,6 +286,7 @@ export const strings = {
     pasteHintSame: '每行一位，格式為「座號 姓名」。若省略座號，系統將依輸入順序自動編號；確認名單前請檢查編號。',
     pasteHintMixed: '一列一位：班級 座號 姓名',
     pasteAction: '加入名單',
+    fileAdded: (name: string, n: number) => `已從「${name}」加入名單，共 ${n} 人；下方可直接修改。`,
     openFile: '開啟名單檔',
     openFileHint: '支援 Excel（.xlsx）或 CSV（.csv）；第一列須包含座號與姓名欄。',
     noNameCol: '名單檔裡找不到「姓名」欄，請確認第一列是欄位標題。',

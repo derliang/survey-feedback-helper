@@ -88,6 +88,7 @@ export function RosterView() {
           disabled={paste.trim() === ''}
           onClick={() => {
             setRows(parsePastedRoster(paste, s.rosterMixed, defaultClass));
+            setSession({ rosterName: '' });
             setPaste('');
             setError('');
           }}
@@ -120,6 +121,11 @@ export function RosterView() {
       </div>
       <p class="hint">{S.roster.openFileHint}</p>
       {error && <Notice kind="bad">{error}</Notice>}
+      {rows.length > 0 && paste.trim() === '' && s.rosterName && (
+        <Notice kind="ok">
+          {S.roster.fileAdded(s.rosterName, students.length)}
+        </Notice>
+      )}
 
       {saved.length > 0 && (
         <div class="saved-rosters">

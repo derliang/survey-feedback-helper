@@ -263,6 +263,7 @@ export const enMore: DeepPartial<Strings> = {
     pasteHintSame: 'One student per line, as "seat name". If you leave out seat numbers they are numbered in input order; check the numbers before confirming the roster.',
     pasteHintMixed: 'One student per line: class seat name',
     pasteAction: 'Add to roster',
+    fileAdded: (name, n) => `Roster added from "${name}" (${n} students); you can edit it below.`,
     openFile: 'Open roster file',
     openFileHint: 'Excel (.xlsx) or CSV (.csv); the first row must contain seat and name columns.',
     noNameCol: 'No "name" column found in the roster file. Check that the first row is the column titles.',
