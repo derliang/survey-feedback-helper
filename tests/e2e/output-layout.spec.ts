@@ -57,6 +57,15 @@ test('「⋯」更多選項：選單寬度夠放一行字、不直排、不超�
   expect(box.x + box.width).toBeLessThanOrEqual(page.viewportSize()!.width);
 });
 
+test('輸出頁可改問卷名稱，回饋單標題用它而不是檔名（#214）', async ({ page }) => {
+  await toOutput(page);
+  const input = page.getByTestId('topic-name');
+  await expect(input).toBeVisible();
+  await input.fill('國文課心得');
+  await input.blur();
+  await expect(page.locator('.prep-head .meta')).toHaveText('國文課心得');
+});
+
 test('範本縮圖：頁尾文字在縮圖框內、字級縮小後不蓋住版面（G4）', async ({ page }) => {
   await toOutput(page);
   const thumb = page.locator('.out-thumb').first();

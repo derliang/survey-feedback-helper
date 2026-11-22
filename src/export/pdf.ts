@@ -21,6 +21,17 @@ export interface PdfResult {
 const roundedRect = (x: number, y: number, w: number, h: number, r: number): string =>
   `M ${x + r} ${y} H ${x + w - r} A ${r} ${r} 0 0 1 ${x + w} ${y + r} V ${y + h - r} A ${r} ${r} 0 0 1 ${x + w - r} ${y + h} H ${x + r} A ${r} ${r} 0 0 1 ${x} ${y + h - r} V ${y + r} A ${r} ${r} 0 0 1 ${x + r} ${y} Z`;
 
+/** 項目文字整串都是字型缺的字（例如只有表情符號的留言）時，不畫那一項，避免出現空白的「・」（#214）。 */
+export function dropBlankBullets(blocks: Block[], missing: Set<string>): Block[] {
+  if (missing.size === 0) return blocks;
+  const blank = (t: string) => [...t].every((c) => /\s/.test(c) || missing.has(c));
+  return blocks.map((b): Block => {
+    if (b.type === 'bullets') return { ...b, items: b.items.filter((t) => !blank(t)) };
+    if (b.type === 'columns') return { ...b, cols: b.cols.map((c) => dropBlankBullets(c, missing)) };
+    return b;
+  });
+}
+
 /** baseK：基線位置係數，0.5 為對照 Word 實測校準值。 */
 /** opts.embed：測試用，直接內嵌指定字型而不子集化（拿來當「完整字型」的對照組）。 */
 export async function renderPdf(doc: DocModel, fonts: Fonts, opts: { baseK?: number; embed?: { regular: Uint8Array; bold: Uint8Array } } = {}): Promise<PdfResult> {
@@ -306,7 +317,7 @@ export async function renderPdf(doc: DocModel, fonts: Fonts, opts: { baseK?: num
       await drawBlock(b, P.mx, CW, true, blocks[bi + 1]);
     }
   };
-  await flow(doc.blocks);
+  await flow(dropBlankBullets(doc.blocks, new Set(missingChars)));
 
   pages.forEach((p, i) => {
     p.drawText(`${doc.footerText}｜第 ${i + 1} 頁，共 ${pages.length} 頁`, { x: P.mx, y: P.footerFromBottom + 3, size: 9, font: regular, color: color('#8a97a5') });

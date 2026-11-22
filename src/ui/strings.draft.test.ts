@@ -9,3 +9,12 @@ describe('備份說明文案不含草稿註記', () => {
     expect(JSON.stringify(en)).not.toMatch(/not yet verified/);
   });
 });
+
+describe('缺字提示不再整串列出（#214）', () => {
+  it('超過 8 個時只列前面幾個並註明總數', () => {
+    const all = [...'😀😁😂🤣😃😄😅😆😉😊'];
+    const msg = strings.output.missingChars(all.slice(0, 8).join(''), all.length);
+    expect(msg).toContain('共 10 個');
+    expect(msg.length).toBeLessThan(80);
+  });
+});
