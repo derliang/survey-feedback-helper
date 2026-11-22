@@ -346,6 +346,12 @@ export function setCloudBackup(on: boolean, disconnect = false): void {
   }
 }
 
+/** 中斷 Google 連線（DESIGN 5.39 P10）：只清記憶體中的登入，開關與雲端檔不動，不需確認。 */
+export function disconnectGoogle(): void {
+  setCloudToken(null);
+  set({ cloud: { lastSaved: null, paused: null }, cloudAlert: null });
+}
+
 /** 保存設定檔：手機走分享選單的「儲存到檔案」，桌機與不支援分享的瀏覽器下載。 */
 export async function downloadSettings(): Promise<void> {
   const text = serializeFolderData(getState().data);

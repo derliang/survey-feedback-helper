@@ -81,7 +81,7 @@ export function TopBanner(props: { id: string; children: ComponentChildren; acti
 }
 
 /** 彈出面板：手機由下往上、平板靠右、桌機置中；點遮罩關閉。 */
-export function Sheet(props: { title: string; onClose: () => void; children: ComponentChildren; footer?: ComponentChildren; label?: string; wide?: boolean; confirm?: boolean }) {
+export function Sheet(props: { title: string; onClose: () => void; children: ComponentChildren; footer?: ComponentChildren; label?: string; wide?: boolean; confirm?: boolean; login?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const prev = document.activeElement as HTMLElement | null;
@@ -111,7 +111,7 @@ export function Sheet(props: { title: string; onClose: () => void; children: Com
   }, []);
   return (
     <div class="scrim" onClick={(e) => e.target === e.currentTarget && props.onClose()}>
-      <div class={props.wide ? 'sheet sheet-wide' : props.confirm ? 'sheet sheet-confirm' : 'sheet'} role="dialog" aria-modal="true" aria-label={props.label ?? props.title} tabIndex={-1} ref={ref}>
+      <div class={props.wide ? 'sheet sheet-wide' : props.login ? 'sheet sheet-login' : props.confirm ? 'sheet sheet-confirm' : 'sheet'} role="dialog" aria-modal="true" aria-label={props.label ?? props.title} tabIndex={-1} ref={ref}>
         <div class="sheet-handle" aria-hidden="true" />
         <div class="sheet-head">
           <h2 class="sheet-title">{props.title}</h2>
@@ -145,6 +145,31 @@ export function ActBar(props: { children: ComponentChildren; fixed?: boolean }) 
 }
 
 /** Google 選帳號畫面的示意圖（自畫、虛構帳號；「選這個」用文字加底色，不只靠顏色）。登入前提示卡與教學共用。 */
+/** ≥1024 寬（桌機版面）。 */
+export function useDesktop(): boolean {
+  const q = '(min-width: 1024px)';
+  const [on, setOn] = useState(() => window.matchMedia(q).matches);
+  useEffect(() => {
+    const m = window.matchMedia(q);
+    const f = () => setOn(m.matches);
+    m.addEventListener('change', f);
+    return () => m.removeEventListener('change', f);
+  }, []);
+  return on;
+}
+
+/** 登入前示意圖（DESIGN 5.39 P8）：手機與平板收成一列、點開才展開；桌機直接展開。 */
+export function ChooserFold() {
+  const desktop = useDesktop();
+  if (desktop) return <AccountChooser />;
+  return (
+    <details class="g-fold" data-testid="g-fold">
+      <summary>{strings.google.foldLabel}</summary>
+      <AccountChooser />
+    </details>
+  );
+}
+
 export function AccountChooser() {
   const G = strings.google;
   const row = (a: readonly string[], pick: boolean) => (
@@ -157,6 +182,7 @@ export function AccountChooser() {
   );
   return (
     <figure class="g-chooser" role="group" aria-label={G.chooserLabel}>
+      <strong class="g-title">{G.chooserTitle}</strong>
       {row(G.accountA, false)}
       {row(G.accountB, true)}
       <div class="g-row g-other">

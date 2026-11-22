@@ -191,7 +191,7 @@ export function OutputView() {
   /** 批次產生的進度字串（「產生中 3 / 20」）；busy 仍是工作代號，按鈕才認得出是哪一顆在跑。 */
   const [prog, setProg] = useState<string | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
-  const [msg, setMsg] = useState<{ kind: 'ok' | 'bad' | 'warn'; text: string; retry?: () => void } | null>(null);
+  const [msg, setMsg] = useState<{ kind: 'ok' | 'bad' | 'warn'; text: string; retry?: () => void; partial?: { name: string; bytes: Uint8Array; n: number } } | null>(null);
   /** 輸出進度（D27）：目前階段、第幾份／共幾份、開始時間；取消旗標。 */
   const [stage, setStage] = useState<Stage>('prepare');
   const [progN, setProgN] = useState<{ d: number; t: number } | null>(null);
@@ -299,7 +299,10 @@ export function OutputView() {
       else {
         const X = extra().output;
         const at = progN && progN.d < progN.t ? ` ${X.failedAt(progN.d + 1, progN.t)}` : '';
-        setMsg({ kind: 'bad', text: `${S.output.failed.replace('，請再試一次。', '。')}${at} ${X.reasons[failReason(e)]} ${X.alt}`, retry: () => void run(label, job) });
+        const pz = (e as { partialZip?: Uint8Array | null; done?: number; cause?: unknown }) ?? {};
+        const partial = pz.partialZip ? { name: `${base} 個人回饋單 ${AUDIENCE_NAMES[audience]}（已完成 ${pz.done} 份）.zip`, bytes: pz.partialZip, n: pz.done ?? 0 } : undefined;
+        const why = partial ? failReason(pz.cause) : failReason(e);
+        setMsg({ kind: 'bad', text: `${S.output.failed.replace('，請再試一次。', '。')}${at} ${X.reasons[why]} ${X.alt}`, retry: () => void run(label, job), partial });
       }
     } finally {
       setBusy(null);
@@ -444,6 +447,16 @@ export function OutputView() {
                   {msg.retry && (
                     <button class="btn secondary small" type="button" data-testid="out-retry" onClick={msg.retry}>
                       {extra().output.retry}
+                    </button>
+                  )}
+                  {msg.partial && (
+                    <button
+                      class="btn secondary small"
+                      type="button"
+                      data-testid="out-partial"
+                      onClick={() => msg.partial && downloadBytes(msg.partial.name, msg.partial.bytes, MIME.zip)}
+                    >
+                      {extra().output.savePartial(msg.partial.n)}
                     </button>
                   )}
                   <button class="btn ghost small" type="button" onClick={() => setMsg(null)}>

@@ -10,7 +10,7 @@ import { readGoogleConfig } from "../../google/config";
 import type { ConnectResult } from "../../google/session";
 import type { GoogleServices } from "../../google/types";
 import { strings as S } from "../strings";
-import { AccountChooser, Icon, Notice, Sheet, useWide } from "../parts/parts";
+import { AccountChooser, ChooserFold, Icon, Notice, Sheet, useWide } from "../parts/parts";
 import { LazyFig } from "../parts/LazyDiagram";
 import { CloudExplain, CloudSwitch } from "./CloudParts";
 import { extra } from "../strings-extra";
@@ -193,7 +193,7 @@ export function GoogleConnectDialog(props: {
   );
 
   return (
-    <Sheet title={title} onClose={props.onClose} footer={footer} label={title}>
+    <Sheet title={title} onClose={props.onClose} footer={footer} label={title} login>
       {phase === "reading" ? (
         <p role="status">{S.google.reading}</p>
       ) : isBlocked || isClosed ? (
@@ -215,7 +215,7 @@ export function GoogleConnectDialog(props: {
             {S.google.intro}
             <strong>{S.google.lead}</strong>
           </p>
-          <AccountChooser />
+          {phase === "intro" ? <ChooserFold /> : <AccountChooser />}
           {phase === "intro" && (
             <>
               <CloudExplain />

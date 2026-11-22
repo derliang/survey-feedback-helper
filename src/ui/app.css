@@ -1524,6 +1524,7 @@ button.tile {
   vertical-align: middle;
 }
 .mp-part {
+  white-space: nowrap;
   display: inline-flex;
   align-items: center;
   gap: var(--sp-1);
@@ -3664,4 +3665,51 @@ ul.chips {
   flex-wrap: wrap;
   align-items: center;
   gap: var(--sp-2) var(--sp-3);
+}
+
+/* 登入前卡（DESIGN 5.39 P8）：示意圖收成一列；平板寬 420、桌機寬 680 置中 */
+.g-fold > summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 600;
+}
+@media (min-width: 600px) {
+  .scrim:has(.sheet-login) {
+    justify-content: center;
+    align-items: center;
+  }
+  .sheet.sheet-login {
+    width: 420px;
+    max-width: calc(100vw - 32px);
+    height: auto;
+    max-height: 86vh;
+    border-radius: var(--r-md);
+  }
+}
+@media (min-width: 1024px) {
+  .sheet.sheet-login {
+    width: 680px;
+  }
+}
+.g-chooser .g-title{font-weight:700}
+
+/* 匯入確認「待分類」（DESIGN 5.39 P6）：桌機每欄一列、三欄對齊（欄名加答案例｜判斷依據｜類型籌碼） */
+.pc-id {
+  display: grid;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+.pc-id .hint,
+.pc-why {
+  margin: 0;
+}
+@media (min-width: 1024px) {
+  .pc-col {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1.4fr);
+    gap: var(--sp-4);
+    align-items: start;
+  }
 }

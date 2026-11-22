@@ -1,11 +1,17 @@
 import { useState } from "preact/hooks";
 import { hasCloudToken } from "../../app/cloud";
-import { backupToDrive, set, setCloudBackup, useApp } from "../../app/store";
+import { backupToDrive, disconnectGoogle, set, setCloudBackup, useApp } from "../../app/store";
 import { googleConfigured, GoogleConnectDialog } from "./GoogleConnect";
 import { CloudExplain, CloudSwitch, saveMessage } from "./CloudParts";
 import { SETTINGS_FILE } from "../../storage/folder-data";
 import { strings as S } from "../strings";
 import { Icon, Notice, Sheet } from "../parts/parts";
+
+function whenFull(ts: number): string {
+  return new Intl.DateTimeFormat("zh-TW", { timeZone: "Asia/Taipei", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false })
+    .format(new Date(ts))
+    .replace(/\//g, "-");
+}
 
 function when(ts: number): string {
   return new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -15,6 +21,7 @@ function when(ts: number): string {
 export function CloudCard() {
   const st = useApp();
   const [ask, setAsk] = useState<"on" | "off" | "login" | "where" | null>(null);
+  const [disconnected, setDisconnected] = useState(false);
   const [alsoDisconnect, setAlsoDisconnect] = useState(false);
   /** 未登入就打開開關：先登入，成功後才跳確認卡（DESIGN 5.28 Y1b）。 */
   const [loginFirst, setLoginFirst] = useState(false);
@@ -36,11 +43,15 @@ export function CloudCard() {
       {on && st.cloud.paused && (
         <Notice kind="warn" title={S.cloud.paused}>
           <p>{saveMessage(st.cloud.paused, st.folder.state === "ready")}</p>
+          <p data-testid="cloud-last-ok">
+            <strong>{st.cloud.lastSaved ? S.cloud.lastOk(whenFull(st.cloud.lastSaved)) : S.cloud.lastOkNone}</strong>
+          </p>
         </Notice>
       )}
       {on && !signed && !st.cloud.paused && (
         <Notice kind="warn">
           <p>{S.cloud.needLogin}</p>
+          {disconnected && <p data-testid="cloud-disconnected">{S.cloud.disconnected}</p>}
         </Notice>
       )}
       {on && signed && !st.cloud.paused && (
@@ -54,9 +65,9 @@ export function CloudCard() {
       )}
       {on && (
         <div class="btn-row">
-          {!signed && (
+          {(!signed || st.cloud.paused) && (
             <button class="btn primary" type="button" onClick={() => setAsk("login")}>
-              {S.cloud.login}
+              {st.cloud.paused ? S.cloud.relogin : S.cloud.login}
             </button>
           )}
           {signed && (
@@ -64,12 +75,14 @@ export function CloudCard() {
               {S.cloud.syncNow}
             </button>
           )}
-          {signed && (
+          {signed && !st.cloud.paused && (
             <button
               class="btn secondary"
               type="button"
+              data-testid="cloud-disconnect"
               onClick={() => {
-                setCloudBackup(false, true);
+                disconnectGoogle();
+                setDisconnected(true);
               }}
             >
               {S.cloud.disconnect}
@@ -154,7 +167,10 @@ export function CloudCard() {
           loginOnly
           onClose={() => setAsk(null)}
           onExcel={() => setAsk(null)}
-          onSignedIn={() => loginFirst && setAsk("on")}
+          onSignedIn={() => {
+            setDisconnected(false);
+            if (loginFirst) setAsk("on");
+          }}
         />
       )}
       {ask === "where" && (

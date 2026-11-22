@@ -37,3 +37,21 @@ test('「存到哪裡？先後順序」面板：四種情境與還原說明，�
   await dlg.getByRole('button', { name: '知道了' }).click();
   await expect(dlg).toBeHidden();
 });
+
+test('P8：登入前卡示意圖——手機／平板收成一列點開才展開，桌機直接展開；卡寬 420／680', async ({ page }) => {
+  const card = await openCard(page);
+  await card.getByTestId('cloud-switch').click();
+  const dlg = page.getByRole('dialog');
+  const w = page.viewportSize()!.width;
+  const fold = dlg.getByTestId('g-fold');
+  if (w >= 1024) {
+    await expect(fold).toHaveCount(0);
+    await expect(dlg.locator('.g-chooser')).toBeVisible();
+    expect((await dlg.boundingBox())!.width).toBeCloseTo(680, 0);
+  } else {
+    await expect(dlg.locator('.g-chooser')).toBeHidden();
+    await fold.locator('summary').click();
+    await expect(dlg.locator('.g-chooser')).toBeVisible();
+    if (w >= 600) expect((await dlg.boundingBox())!.width).toBeCloseTo(420, 0);
+  }
+});

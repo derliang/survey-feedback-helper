@@ -49,15 +49,14 @@ export function PendingCard(props: {
             const name = `${c.label}`;
             return (
               <div key={c.index} class="pc-col" data-testid="pending-col">
-                <div class="pc-name">
-                  <strong>{name}</strong>
-                  {props.rename(c)}
+                <div class="pc-id">
+                  <div class="pc-name">
+                    <strong>{name}</strong>
+                    {props.rename(c)}
+                  </div>
+                  <p class="hint">{M.pendSamples(c.samples.slice(0, 5).join(extra().mapping.sep) || extra().mapping.noData)}</p>
                 </div>
-                <p class="hint">
-                  {M.pendSamples(c.samples.slice(0, 5).join(extra().mapping.sep) || extra().mapping.noData)}
-                  <br />
-                  {M.pendWhy(facts.filled, facts.distinct)}
-                </p>
+                <p class="hint pc-why">{M.pendWhy(facts.filled, facts.distinct)}</p>
                 <div class="chips" role="radiogroup" aria-label={M.pickTitle(name)}>
                   {CHOICES.map((r) => (
                     <button key={r} type="button" role="radio" aria-checked={false} class="chip" onClick={() => setCols((cols) => withRole(cols, c.index, r))}>
