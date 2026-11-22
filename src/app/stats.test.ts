@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { DEFAULT_VOTE_RULES, tableFromCsv } from '../core';
 import { type StatsOpts, blankColumns, defaultStatsOpts, looksMulti, opinionQuestions, runFeedback, runVote, voteGuardPending } from './analysis';
 import { analyzeColumns, detectScale } from './columns';
-import { AUDIENCE_NAMES, classSummaryInput, opinionReport, opinionSheets, personalInputs, voteSheets } from './output';
+import { AUDIENCE_NAMES, classSummaryInput, opinionReport, opinionSheets, personalInputs, voteReport, voteSheets } from './output';
 import { commentState, emptyReview, finalText, flaggedWords, parseReview, reviewCounts, serializeReview, setComment, setKeywords, setRewrite, setTeacher } from './review';
 import type { Session } from './store';
 import { emptyCourseState } from './course-app';
@@ -203,5 +203,26 @@ describe('票選小問題（#150）', () => {
     const s = session(csv, { 時間戳記: 'timestamp', 填寫者: 'respondentName', 班長: 'choice' }, 'vote');
     const v = runVote(s, defaultStatsOpts());
     expect(v.issues.filter((i) => i.kind === 'time').flatMap((i) => i.ballotIds)).toEqual([0]);
+  });
+});
+
+describe('票選輸出不列 0 票候選人（#216）', () => {
+  const csv = ['時間戳記,填寫者,班長,副班長', '2026/10/01 10:00:00,甲,乙,丙', '2026/10/01 10:01:00,丁,乙,丁', '2026/10/01 10:02:00,戊,丙,丙'].join('\n');
+  const s = session(csv, { 時間戳記: 'timestamp', 填寫者: 'respondentName', 班長: 'choice', 副班長: 'choice' }, 'vote');
+  const v = runVote(s, defaultStatsOpts());
+  // 名單內沒人投的候選人（有名單時才會出現 0 票列）：直接補兩位虛構的 0 票列
+  for (const p of v.positions) p.tally.rows.push({ rank: 9, name: '零票甲', votes: 0 } as never, { rank: 9, name: '零票乙', votes: 0 } as never);
+  it('得票數工作表只列有票者，並註明其餘 0 票人數', () => {
+    const det = JSON.stringify(voteSheets(v)[1]!.rows);
+    expect(det).toContain('0 票，未列出');
+    for (const p of v.positions) {
+      const zero = p.tally.rows.filter((r) => r.votes === 0).length;
+      expect(zero).toBeGreaterThan(0);
+      expect(voteSheets(v)[1]!.rows.filter((r) => r[0] === p.col.label).length).toBe(p.tally.rows.length - zero + 1);
+    }
+  });
+  it('PDF／Word 報告同樣不列 0 票者並在文字註明', () => {
+    const doc = JSON.stringify(voteReport(s, v));
+    expect(doc).toContain('0 票，未列出');
   });
 });
