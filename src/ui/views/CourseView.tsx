@@ -469,7 +469,7 @@ function Roster(props: RosterProps) {
   const qq = q.trim();
   const rows = qq === '' ? all : all.filter((a) => personLabel(people.get(a.id)).includes(qq));
   const info = props.name === null ? null : sum.courses.find((x) => x.name === props.name);
-  const lost = props.name === null ? 0 : (info?.firstChoice ?? 0) - rows.filter((a) => a.rank === 1).length;
+  const lost = props.name === null ? 0 : info?.lostFirst ?? 0;
   const pri = new Set(c.priority);
   const [busy, setBusy] = useState(false);
   const exportOne = async () => {

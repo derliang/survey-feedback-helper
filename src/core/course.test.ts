@@ -135,3 +135,21 @@ describe('原始志願順位（Issue #120）', () => {
     expect(readPrefSlots(['', '生物實驗'], [0, 1])).toEqual(['', '生物實驗']);
   });
 });
+
+describe('沒抽中人數 lostFirst（Issue #223）', () => {
+  const cs: Course[] = [{ name: 'A', capacity: 25 }, { name: 'B', capacity: 25 }];
+  it('名額未滿、手動移走的人不算沒抽中', () => {
+    const list: Applicant[] = [ap('1', ['A', 'B']), ap('2', ['A', 'B'])];
+    const r = allocate(list, cs, 's');
+    expect(summarize(r.assignments, list, cs).courses[0]?.lostFirst).toBe(0);
+    const moved = moveApplicant(r.assignments, list, '1', 'B', cs);
+    const sum = summarize(moved, list, cs);
+    expect(sum.courses[0]?.firstChoice).toBe(2);
+    expect(sum.courses[0]?.lostFirst).toBe(0);
+  });
+  it('真的超額抽籤落選仍算沒抽中', () => {
+    const tight: Course[] = [{ name: 'A', capacity: 1 }, { name: 'B', capacity: 5 }];
+    const list: Applicant[] = [ap('1', ['A', 'B']), ap('2', ['A', 'B'])];
+    expect(summarize(allocate(list, tight, 's').assignments, list, tight).courses[0]?.lostFirst).toBe(1);
+  });
+});
