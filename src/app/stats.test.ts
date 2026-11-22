@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_VOTE_RULES, tableFromCsv } from '../core';
-import { type StatsOpts, blankColumns, defaultStatsOpts, looksMulti, opinionQuestions, runFeedback, runVote, voteGuardPending } from './analysis';
+import { type StatsOpts, blankColumns, defaultStatsOpts, multiElected, looksMulti, opinionQuestions, runFeedback, runVote, voteGuardPending } from './analysis';
 import { analyzeColumns, detectScale } from './columns';
 import { AUDIENCE_NAMES, classSummaryInput, opinionReport, opinionSheets, personalInputs, voteSheets } from './output';
 import { commentState, emptyReview, finalText, flaggedWords, parseReview, reviewCounts, serializeReview, setComment, setKeywords, setRewrite, setTeacher } from './review';
@@ -203,5 +203,17 @@ describe('票選小問題（#150）', () => {
     const s = session(csv, { 時間戳記: 'timestamp', 填寫者: 'respondentName', 班長: 'choice' }, 'vote');
     const v = runVote(s, defaultStatsOpts());
     expect(v.issues.filter((i) => i.kind === 'time').flatMap((i) => i.ballotIds)).toEqual([0]);
+  });
+});
+
+describe('同一人當選多個職位提示（Issue #211）', () => {
+  const pos = (label: string, elected: string[]) => ({ col: { label }, election: { elected } }) as unknown as Parameters<typeof multiElected>[0][number];
+  it('列出同時當選兩個以上職位的人；各當一個職位的不列', () => {
+    const r = multiElected([pos('班長', ['甲']), pos('副班長', ['甲', '乙']), pos('康樂', ['丙'])]);
+    expect(r).toEqual([{ name: '甲', positions: ['班長', '副班長'] }]);
+    expect(multiElected([pos('班長', ['甲']), pos('副班長', ['乙'])])).toEqual([]);
+  });
+  it('同一職位名單內重複姓名不算多職', () => {
+    expect(multiElected([pos('班長', ['甲', '甲'])])).toEqual([]);
   });
 });

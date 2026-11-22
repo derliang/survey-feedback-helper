@@ -18,6 +18,10 @@ export interface FeedbackScale {
 }
 
 /** 量表預設 0～10（樣本結構）。 */
+/** 評分人數少於此值的被評者，名次與平均僅供參考（Issue #215：只標示，不改排名規則）。 */
+export const LOW_RATERS = 3;
+export const isLowSample = (raters: number): boolean => raters < LOW_RATERS;
+
 export const DEFAULT_SCALE: FeedbackScale = { min: 0, max: 10 };
 
 /** 一份回饋：填寫者評被評對象（雙欄結構）。 */

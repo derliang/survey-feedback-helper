@@ -138,6 +138,8 @@ export interface CourseSummary {
   filled: number;
   /** 以第 1 志願報名人數 */
   firstChoice: number;
+  /** 第 1 志願報名但實際沒抽中（排除老師手動移走的人） */
+  lostFirst: number;
   /** 志願序中任一位報名人數 */
   anyChoice: number;
   full: boolean;
@@ -173,10 +175,16 @@ export function summarize(
     const filled = assignments.filter((a) => a.course === c.name).length;
     const cap = Math.max(0, Math.floor(c.capacity));
     let first = 0;
+    let lostFirst = 0;
     let any = 0;
+    const byId = new Map(assignments.map((x) => [x.id, x]));
     for (const a of applicants) {
       const p = rankedPrefs(a.prefs, courses);
-      if (p.some((x) => x.course === c.name && x.rank === 1)) first++;
+      if (p.some((x) => x.course === c.name && x.rank === 1)) {
+        first++;
+        const got = byId.get(a.id);
+        if (got && !(got.course === c.name && got.rank === 1) && !got.manual) lostFirst++;
+      }
       if (p.some((x) => x.course === c.name)) any++;
     }
     return {
@@ -184,6 +192,7 @@ export function summarize(
       capacity: cap,
       filled,
       firstChoice: first,
+      lostFirst,
       anyChoice: any,
       full: filled >= cap,
       over: Math.max(0, filled - cap),

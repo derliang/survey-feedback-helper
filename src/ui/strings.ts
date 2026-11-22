@@ -422,6 +422,9 @@ export const strings = {
     scaleSuspect: (outliers: number, total: number) => `目前量表是 0～10，但 ${total} 筆分數裡只有 ${outliers} 筆超過 5，其餘都在 1～5，量表可能其實是 1～5。`,
     scaleSuspectBtn: '改為 1～5 分',
     scaleSuspectKeep: '維持 0～10',
+    ratersCol: '評分人數',
+    lowRaters: (n: number) => `${n}（少）`,
+    lowRatersNote: (n: number) => `有 ${n} 位被評者的評分人數很少（少於 3 人），他們的名次與班均可能只反映一兩位同學的意見，請謹慎參考。`,
     rankMayChange: '有些被評對象的有效回覆不足，名次可能隨資料補齊而改變；請避免直接以暫時名次做決定。',
     // 設定
     settingsTitle: '統計設定',

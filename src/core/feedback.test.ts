@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { diffAccumulated, rowFingerprint } from './diff';
-import { effectiveWeights, equalWeights, formatWeights, summarizeFeedback, weightShortfall, type FeedbackItem, type FeedbackRecord } from './feedback';
+import { effectiveWeights, isLowSample, equalWeights, formatWeights, summarizeFeedback, weightShortfall, type FeedbackItem, type FeedbackRecord } from './feedback';
 
 const items: FeedbackItem[] = ['內容', '設計', '講述', '台風', '時間'].map((label, i) => ({ id: `q${i}`, label }));
 const rec = (id: number, rater: string, target: string, scores: (number | string | null)[], comment = ''): FeedbackRecord => ({
@@ -152,5 +152,11 @@ describe('名次並列用容差（#143）', () => {
     expect(ranks['甲']).toBe(2);
     expect(ranks['乙']).toBe(2);
     expect(ranks['丙']).toBe(2);
+  });
+});
+
+describe('評分人數少的標示（Issue #215）', () => {
+  it('少於 3 人視為樣本很少', () => {
+    expect([1, 2, 3, 10].map(isLowSample)).toEqual([true, true, false, false]);
   });
 });

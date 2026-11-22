@@ -1,6 +1,6 @@
 import type { ComponentType } from 'preact';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { feedbackRecords, opinionQuestions, runFeedback, runVote, voteGuardPending } from '../../app/analysis';
+import { feedbackRecords, multiElected, opinionQuestions, runFeedback, runVote, voteGuardPending } from '../../app/analysis';
 import {
   AUDIENCE_NAMES,
   type Audience,
@@ -593,6 +593,9 @@ export function OutputView() {
                 >
                   {vt().guard.gateBody}
                 </Notice>
+              )}
+              {voteGate === 0 && multiElected(vote.positions).length > 0 && (
+                <Notice kind="warn">{vt().multiElected(multiElected(vote.positions).map((m) => `${m.name}（${m.positions.join('、')}）`).join('；'))}</Notice>
               )}
               <div class="table-wrap" hidden={voteGate > 0}>
                 <table class="roster-table vote-sum">

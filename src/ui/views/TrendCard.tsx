@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'preact/hooks';
 import { type FeedbackSummary } from '../../core';
+import { useApp } from '../../app/store';
 import { tableFromFile } from '../../app/load';
 import { surveyNameFromFile } from '../../app/load';
 import { type ExtraWave, consecutiveDrops, summaryFromTable, trendOf } from '../../app/trend';
@@ -14,6 +15,7 @@ const DIR = { up: S.trend.up, down: S.trend.down, flat: S.trend.flat, unknown: S
 export function TrendCard({ current, label, max, wide }: { current: FeedbackSummary; label: string; max: number; wide: boolean }) {
   const [extras, setExtras] = useState<ExtraWave[]>([]);
   const [msg, setMsg] = useState<string | null>(null);
+  const session = useApp().session;
   const trend = useMemo(() => trendOf(extras, { label: `${label}（${S.trend.current}）`, summary: current }), [extras, current, label]);
   const enough = trend.labels.length >= 2;
 
@@ -24,7 +26,7 @@ export function TrendCard({ current, label, max, wide }: { current: FeedbackSumm
     for (const f of Array.from(files)) {
       const name = surveyNameFromFile(f.name);
       try {
-        const summary = summaryFromTable(await tableFromFile(f));
+        const summary = summaryFromTable(await tableFromFile(f), session ? { cols: session.cols, scale: session.scale } : undefined);
         if (!summary) setMsg(S.trend.notFeedback(name));
         else added.push({ id: `${Date.now()}-${added.length}-${name}`, label: name, summary });
       } catch {

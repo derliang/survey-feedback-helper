@@ -1,6 +1,6 @@
 import type { ComponentChildren } from 'preact';
 import { useEffect, useMemo, useState } from 'preact/hooks';
-import { type FeedbackSummary, type TargetResult, cellText, selfVsOthers } from '../../core';
+import { type FeedbackSummary, type TargetResult, cellText, isLowSample, selfVsOthers } from '../../core';
 import {
   type Question,
   type PositionResult,
@@ -10,6 +10,7 @@ import {
   runFeedback,
   runVote,
   voteGuardPending,
+  multiElected,
 } from '../../app/analysis';
 import { canGoStats } from '../../app/progress';
 import { detectScale, scaleSuspect, scoreSignature, suspectScoreColumns, withRole } from '../../app/columns';
@@ -112,6 +113,9 @@ function FeedbackMain({ summary, sel, wide }: { summary: FeedbackSummary; sel: s
         </div>
         {summary.problems.length > 0 && <Notice kind="warn">{S.stats.problems(summary.problems.length)}</Notice>}
         <ScoreHints />
+        {summary.targets.some((t) => isLowSample(t.raters)) && (
+          <Notice kind="warn">{S.stats.lowRatersNote(summary.targets.filter((t) => isLowSample(t.raters)).length)}</Notice>
+        )}
         {summary.rankMayChange && <Notice kind="info">{S.stats.rankMayChange}</Notice>}
         <Chart
           svg={barsSvg(
@@ -136,6 +140,7 @@ function FeedbackMain({ summary, sel, wide }: { summary: FeedbackSummary; sel: s
                   <th key={i.id}>{i.label}</th>
                 ))}
                 <th>{S.stats.total}</th>
+                <th>{S.stats.ratersCol}</th>
               </tr>
             </thead>
             <tbody>
@@ -156,6 +161,7 @@ function FeedbackMain({ summary, sel, wide }: { summary: FeedbackSummary; sel: s
                   <td>
                     <strong>{f1(r.total)}</strong>
                   </td>
+                  <td>{isLowSample(r.raters) ? <span class="tag warn">{S.stats.lowRaters(r.raters)}</span> : r.raters}</td>
                 </tr>
               ))}
               <tr class="flag">
@@ -244,6 +250,7 @@ function QuestionMain({ q, wide, reviewTotal }: { q: Question; wide: boolean; re
           <Tile label={extra().stats.valid} value={S.stats.people(x.n)} note={S.stats.blank(x.blank)} />
         </div>
         {x.invalid > 0 && <Notice kind="warn">{S.stats.invalid(x.invalid)}</Notice>}
+        <ScoreHints />
         <Chart svg={columnsSvg(x.distribution, x.distribution.map((_, i) => String(scale.min + i)), { title: q.col.label, w, h: 220 })} />
       </>
     );
@@ -333,6 +340,7 @@ function VoteMain({ v, sel }: { v: VoteResult; sel: string; wide: boolean }) {
   const any = counts.multi + counts.self + counts.time + counts.blank > 0;
   const pendingGuard = voteGuardPending(v, st.stats);
   const gated = pendingGuard.length > 0;
+  const multi = multiElected(v.positions);
   const elected = new Set(p.election.elected);
   const tied = new Set(p.election.tied);
   const alts = new Set(p.election.alternates);
@@ -352,6 +360,7 @@ function VoteMain({ v, sel }: { v: VoteResult; sel: string; wide: boolean }) {
   return (
     <>
       {any && <VoteGuard v={v} />}
+      {!gated && multi.length > 0 && <Notice kind="warn">{vt().multiElected(multi.map((m) => `${m.name}（${m.positions.join('、')}）`).join('；'))}</Notice>}
       {gated ? (
         <section class="card guard-gate" data-testid="vote-gate">
           <Notice kind="warn" title={vt().guard.gateTitle(pendingGuard.length)}>
@@ -798,8 +807,9 @@ export function StatsView() {
 /** 報告回饋統計頁的資料提示：疑似評分欄被當成選擇題、量表疑似不符（Issue #145）。 */
 function ScoreHints() {
   const s = useApp().session;
-  if (!s || s.kind !== 'feedback') return null;
-  const suspects = suspectScoreColumns(s.table, s.cols);
+  if (!s || (s.kind !== 'feedback' && s.kind !== 'opinion')) return null;
+  // 疑似評分欄的提示只在報告回饋；量表疑似不符兩種都提醒（Issue #210）
+  const suspects = s.kind === 'feedback' ? suspectScoreColumns(s.table, s.cols) : [];
   const sus = scaleSuspect(s.table, s.cols, s.scale, s.scaleConfirmed);
   if (suspects.length === 0 && !sus) return null;
   const toScore = (index: number) =>

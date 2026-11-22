@@ -265,3 +265,19 @@ test('重複回覆：同班同名但座號不同要提醒，不預設刪除；�
   await expect(page.getByText(/已排除 \d+ 筆回覆/)).toBeHidden();
   await expect(page.getByRole('button', { name: /^重複填答/ })).toBeEnabled();
 });
+
+test('意見調查：預設 0～10 但分數幾乎都在 1～5 時，統計頁提示量表可能是 1～5（Issue #210）', async ({ page }) => {
+  const rows = ['時間戳記,課程滿意度', ...Array.from({ length: 40 }, (_, i) => `2026-10-10 10:00:${String(i).padStart(2, '0')},${(i % 5) + 1}`), '2026-10-10 11:00:00,6'];
+  await page.goto('./');
+  await page.getByTestId('file-input').setInputFiles(csvFile('量表測試.csv', rows.join('\n')));
+  await rail(page, '問卷類型').click();
+  await page.getByRole('radio', { name: /意見調查/ }).click();
+  await page.getByRole('button', { name: '確認，下一步：欄位對應' }).click();
+  await page.getByRole('button', { name: '完成對應，下一步' }).click();
+  await step(page, '統計').click();
+  await page.locator('.wb-list').getByRole('button', { name: /課程滿意度/ }).click();
+  const hint = page.getByTestId('score-hints');
+  await expect(hint).toContainText('量表可能其實是 1～5');
+  await hint.getByRole('button', { name: '改為 1～5 分' }).click();
+  await expect(hint).toHaveCount(0);
+});
