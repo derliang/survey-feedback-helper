@@ -10,7 +10,18 @@ export interface CommentItem {
   text: string;
 }
 
-function CommentRow({ item, review }: { item: CommentItem; review: Review }) {
+/** 把符合搜尋字的片段標出來（稿 5f）；不使用 AI，只比對字串。 */
+function Marked({ text, mark }: { text: string; mark?: RegExp }) {
+  if (!mark) return <>{text}</>;
+  const parts = text.split(new RegExp(`(${mark.source})`, 'gi'));
+  return (
+    <>
+      {parts.map((p, i) => (i % 2 === 1 ? <mark key={i}>{p}</mark> : p))}
+    </>
+  );
+}
+
+function CommentRow({ item, review, mark }: { item: CommentItem; review: Review; mark?: RegExp }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(item.text);
   const st = commentState(review, item.key);
@@ -44,7 +55,9 @@ function CommentRow({ item, review }: { item: CommentItem; review: Review }) {
         </>
       ) : (
         <>
-          <p class={st === 'hide' ? 'cm-text hidden' : 'cm-text'}>{shown}</p>
+          <p class={st === 'hide' ? 'cm-text hidden' : 'cm-text'}>
+            <Marked text={shown} mark={mark} />
+          </p>
           {st === 'rewrite' && <p class="hint">{extra().review.original}{item.text}</p>}
           <div class="btn-row">
             <button class="btn small" type="button" disabled={st === 'adopt'} onClick={() => updateReview((r) => setComment(r, item.key, 'adopt'))}>
@@ -75,14 +88,14 @@ function CommentRow({ item, review }: { item: CommentItem; review: Review }) {
   );
 }
 
-export function CommentList({ items }: { items: CommentItem[] }) {
+export function CommentList({ items, mark }: { items: CommentItem[]; mark?: RegExp }) {
   const review = useApp().review;
   if (!review) return null;
   if (items.length === 0) return <p class="hint">{S.review.noComments}</p>;
   return (
     <ul class="cm-list">
       {items.map((it) => (
-        <CommentRow key={`${it.key}|${it.text}`} item={it} review={review} />
+        <CommentRow key={`${it.key}|${it.text}`} item={it} review={review} mark={mark} />
       ))}
     </ul>
   );

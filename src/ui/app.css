@@ -3724,3 +3724,63 @@ ul.chips {
     align-items: start;
   }
 }
+
+/* ───────── 意見調查：交叉分析熱圖與留言搜尋（稿 5g、5f，#217） ───────── */
+.cross {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+.heat-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-md);
+  background: var(--card);
+}
+.heat {
+  border-collapse: separate;
+  border-spacing: 2px;
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+  min-width: 100%;
+}
+.heat thead th {
+  padding: 6px;
+  color: var(--ink2);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  text-align: center;
+  min-width: 5.5em;
+  max-width: 9em;
+  vertical-align: bottom;
+}
+.heat thead th:first-child,
+.heat tbody th {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--card);
+  text-align: left;
+  min-width: 7.5em;
+}
+.heat tbody th {
+  padding: 8px;
+  font-weight: 600;
+}
+.heat tbody th .hint {
+  font-weight: 400;
+}
+.heat td {
+  padding: 8px 6px;
+  text-align: center;
+  font-weight: 600;
+  color: var(--ink);
+  min-width: 3.5em;
+}
+.cm-text mark {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  border-radius: 3px;
+  padding: 0 2px;
+}

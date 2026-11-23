@@ -164,3 +164,44 @@ export function crossTab(rowCells: readonly Cell[], colCells: readonly Cell[]): 
   for (const [r, c] of pairs) (counts[r] as number[])[c] = ((counts[r] as number[])[c] ?? 0) + 1;
   return { rowLabels, colLabels, counts, skipped };
 }
+
+export interface GroupMeans {
+  groupLabels: string[];
+  /** 各組有分組答案的人數（含沒回答量表題的人）。 */
+  sizes: number[];
+  /** means[g][q]：第 g 組在第 q 題的平均；該組沒人答這題為 null。 */
+  means: (number | null)[][];
+  /** counts[g][q]：該格實際計入的人數。 */
+  counts: number[][];
+  /** 分組題空白而未計入的人數。 */
+  skipped: number;
+}
+
+/** 交叉分析（稿 5g）：依一題單選分組，各組在每題量表的平均；平均沿用 summarizeLikert。 */
+export function groupMeans(groupCells: readonly Cell[], scoreCols: readonly (readonly Cell[])[], scale: { min: number; max: number }): GroupMeans {
+  const groupLabels: string[] = [];
+  const members: number[][] = [];
+  let skipped = 0;
+  groupCells.forEach((c, i) => {
+    const t = cellText(c);
+    if (t === '') {
+      skipped++;
+      return;
+    }
+    let g = groupLabels.indexOf(t);
+    if (g < 0) {
+      groupLabels.push(t);
+      members.push([]);
+      g = groupLabels.length - 1;
+    }
+    (members[g] as number[]).push(i);
+  });
+  const sums = members.map((rows) => scoreCols.map((col) => summarizeLikert(rows.map((r) => col[r] ?? null), scale)));
+  return {
+    groupLabels,
+    sizes: members.map((m) => m.length),
+    means: sums.map((row) => row.map((x) => x.mean)),
+    counts: sums.map((row) => row.map((x) => x.n)),
+    skipped,
+  };
+}

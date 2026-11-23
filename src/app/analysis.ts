@@ -24,6 +24,8 @@ import {
   detectVoteIssues,
   elect,
   isBlankCell,
+  groupMeans,
+  type GroupMeans,
   splitMulti,
   summarizeChoice,
   summarizeFeedback,
@@ -268,4 +270,24 @@ export const VOTE_GUARD_KINDS: readonly VoteIssueKind[] = ['multi', 'self', 'tim
 export function voteGuardPending(v: VoteResult, o: StatsOpts): VoteIssueKind[] {
   const c = countVoteIssues(v.issues);
   return VOTE_GUARD_KINDS.filter((k) => c[k] > 0 && !o.guardDone.includes(k));
+}
+
+/* ───────── 意見調查：交叉分析（稿 5g） ───────── */
+
+/** 可當分組依據的題目：單選題（非複選）。 */
+export function crossGroupCols(s: Session, o: StatsOpts): ColumnInfo[] {
+  const rows = activeRows(s);
+  return s.cols.filter((c) => c.role === 'choice' && !(o.multi[c.index] ?? looksMulti(colCells(s, c, rows))));
+}
+
+/** 依 groupCol 分組，各組在每一題量表（score）的平均。 */
+export function crossMeans(s: Session, groupCol: ColumnInfo): { scoreCols: ColumnInfo[]; result: GroupMeans } {
+  const rows = activeRows(s);
+  const scoreCols = colsOf(s, 'score');
+  const result = groupMeans(
+    colCells(s, groupCol, rows),
+    scoreCols.map((c) => colCells(s, c, rows)),
+    s.scale,
+  );
+  return { scoreCols, result };
 }

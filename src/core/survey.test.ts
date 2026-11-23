@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { crossTab, splitMulti, summarizeChoice, summarizeLikert, summarizeOpen } from './survey';
+import { crossTab, groupMeans, splitMulti, summarizeChoice, summarizeLikert, summarizeOpen } from './survey';
 
 describe('splitMulti', () => {
   it('無清單時依逗號（全形、頓號）拆並去重', () => {
@@ -89,5 +89,25 @@ describe('summarizeOpen / crossTab', () => {
   it('長度不同以較短者為準；空輸入', () => {
     expect(crossTab(['a', 'b'], ['x']).counts).toEqual([[1]]);
     expect(crossTab([], [])).toEqual({ rowLabels: [], colLabels: [], counts: [], skipped: 0 });
+  });
+});
+
+describe('groupMeans（交叉分析：各組平均）', () => {
+  const g = ['甲', '乙', '甲', '乙', '', '甲'];
+  const q1 = [5, 3, 4, 1, 5, 3];
+  const q2 = [1, 2, null, 4, 5, ''];
+  it('依分組算各題平均與人數，空白分組不計', () => {
+    const r = groupMeans(g, [q1, q2], { min: 1, max: 5 });
+    expect(r.groupLabels).toEqual(['甲', '乙']);
+    expect(r.sizes).toEqual([3, 2]);
+    expect(r.skipped).toBe(1);
+    expect(r.means[0]).toEqual([4, 1]);
+    expect(r.means[1]).toEqual([2, 3]);
+    expect(r.counts[0]).toEqual([3, 1]);
+  });
+  it('某組沒人答某題時為 null', () => {
+    const r = groupMeans(['甲', '乙'], [[4, null]], { min: 1, max: 5 });
+    expect(r.means).toEqual([[4], [null]]);
+    expect(r.counts[1]).toEqual([0]);
   });
 });
