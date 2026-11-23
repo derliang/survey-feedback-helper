@@ -13,6 +13,10 @@ export interface SavedSurvey {
   /** 老師改過的欄位顯示名稱：原標題 → 顯示名稱。 */
   labels: Record<string, string>;
   scale: { min: number; max: number };
+  /** 老師自訂的量表標籤（分數→文字，稿 11d）；沒有就用預設。 */
+  scaleLabels?: { value: number; label: string }[];
+  /** 留言主題（名稱＋關鍵詞，稿 5f）。 */
+  themes?: { name: string; keywords: string[] }[];
   /** 上次開啟的日期（ISO，只到日）。 */
   lastUsed: string;
   /** 上次讀到的回覆筆數，用來標「比上次多 N 筆」。 */

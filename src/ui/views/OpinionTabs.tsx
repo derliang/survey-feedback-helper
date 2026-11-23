@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'preact/hooks';
-import { isLowSample } from '../../core';
+import { type Theme, UNSORTED, isLowSample, parseKeywordInput, themeCounts, themesOf, validateThemes } from '../../core';
 import { type Question, crossGroupCols, crossMeans } from '../../app/analysis';
 import type { Session } from '../../app/store';
-import { useApp } from '../../app/store';
+import { setSession, useApp } from '../../app/store';
 import { strings as S } from '../strings';
 import { extra } from '../strings-extra';
 import { Notice } from '../parts/parts';
@@ -37,10 +37,22 @@ export function CrossView({ s }: { s: Session }) {
   const st = useApp();
   const groups = useMemo(() => crossGroupCols(s, st.stats), [s, st.stats]);
   const [sel, setSel] = useState(0);
+  const [picked, setPicked] = useState<number[] | null>(null); // 欄位編號；null＝全部
+  const [pickOpen, setPickOpen] = useState(false);
   const col = groups[Math.min(sel, groups.length - 1)];
   const data = useMemo(() => (col ? crossMeans(s, col) : null), [s, col]);
   if (!col || !data) return <Notice kind="info">{T().noGroup}</Notice>;
   if (data.scoreCols.length === 0) return <Notice kind="info">{T().noScore}</Notice>;
+  const qIdx = data.scoreCols.map((c, i) => i).filter((i) => picked === null || picked.includes((data.scoreCols[i] as { index: number }).index));
+  const cols = qIdx.map((i) => data.scoreCols[i] as (typeof data.scoreCols)[number]);
+  const toggle = (idx: number) => {
+    const all = data.scoreCols.map((c) => c.index);
+    const cur = picked ?? all;
+    const next = cur.includes(idx) ? cur.filter((x) => x !== idx) : [...cur, idx];
+    if (next.length === 0) return false;
+    setPicked(next.length === all.length ? null : next);
+    return true;
+  };
   const r = data.result;
   const order = r.groupLabels.map((_, i) => i).sort((a, b) => (r.sizes[b] ?? 0) - (r.sizes[a] ?? 0) || a - b);
   const shown = order.slice(0, MAX_GROUPS);
@@ -58,6 +70,37 @@ export function CrossView({ s }: { s: Session }) {
         </select>
         <span class="hint">{T().groupHelp}</span>
       </label>
+      <div class="field cross-pick">
+        <button class="rowbtn" type="button" aria-expanded={pickOpen} onClick={() => setPickOpen(!pickOpen)} data-testid="cross-pick">
+          <span>
+            <span class="nm">{T().pickQ}</span>
+            <span class="sm">{cols.length === data.scoreCols.length ? T().pickAll(data.scoreCols.length) : T().pickSome(cols.length, data.scoreCols.length)}</span>
+          </span>
+          <span class="tag accent">{pickOpen ? T().themeDone : T().pickChange}</span>
+        </button>
+        {pickOpen && (
+          <div class="pick-panel" role="group" aria-label={T().pickTitle}>
+            <div class="btn-row">
+              <button class="btn ghost small" type="button" onClick={() => setPicked(null)}>
+                {T().pickSelectAll}
+              </button>
+              <button class="btn ghost small" type="button" onClick={() => setPicked(cols.length > 0 ? [(cols[0] as { index: number }).index] : null)}>
+                {T().pickNone}
+              </button>
+            </div>
+            {data.scoreCols.map((c) => (
+              <label key={c.index} class="check">
+                <input type="checkbox" checked={picked === null || picked.includes(c.index)} onChange={(e) => {
+                    if (!toggle(c.index)) (e.target as HTMLInputElement).checked = true; // 最後一題不能取消：還原勾選
+                  }}
+                />
+                {c.label}
+              </label>
+            ))}
+            {picked !== null && picked.length === 1 && <p class="hint">{T().pickMin}</p>}
+          </div>
+        )}
+      </div>
       {r.skipped > 0 && <p class="hint">{T().skipped(r.skipped)}</p>}
       {order.length > shown.length && <p class="hint">{T().tooMany(order.length, shown.length)}</p>}
       <div class="heat-wrap">
@@ -65,7 +108,7 @@ export function CrossView({ s }: { s: Session }) {
           <thead>
             <tr>
               <th scope="col">{col.label}</th>
-              {data.scoreCols.map((c) => (
+              {cols.map((c) => (
                 <th key={c.index} scope="col" title={c.label}>
                   {c.label}
                 </th>
@@ -79,8 +122,8 @@ export function CrossView({ s }: { s: Session }) {
                   {r.groupLabels[g]} <span class="hint">{T().people(r.sizes[g] ?? 0)}</span>
                   {isLowSample(r.sizes[g] ?? 0) && <span class="tag warn">{T().lowSample(r.sizes[g] ?? 0)}</span>}
                 </th>
-                {data.scoreCols.map((c, q) => {
-                  const m = r.means[g]?.[q] ?? null;
+                {cols.map((c, qi) => {
+                  const m = r.means[g]?.[qIdx[qi] as number] ?? null;
                   const pctVal = m === null ? 0 : Math.round(Math.max(0, Math.min(1, (m - s.scale.min) / span)) * 60);
                   return (
                     <td key={c.index} data-testid="heat-cell" style={m === null ? undefined : { background: `color-mix(in srgb, var(--accent) ${pctVal}%, var(--card))` }}>
@@ -100,14 +143,24 @@ export function CrossView({ s }: { s: Session }) {
 
 const esc = (t: string): string => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-/** 留言分頁：所有開放題的留言放在一起，可搜尋，關鍵字在原文標出（不使用 AI）。 */
+/** 留言分頁：所有開放題的留言放在一起，可搜尋、依老師設定的主題篩選，關鍵字在原文標出（不使用 AI，稿 5f）。 */
 export function CommentsView({ qs, items }: { qs: Question[]; items: { key: string; text: string }[] }) {
+  const st = useApp();
+  const themes = st.session?.themes ?? [];
   const [draft, setDraft] = useState('');
   const [q, setQ] = useState('');
+  const [theme, setTheme] = useState<string | null>(null); // null＝全部
+  const [manage, setManage] = useState(false);
   const hasOpen = qs.some((x) => x.kind === 'comment');
   if (!hasOpen) return <Notice kind="info">{T().noOpen}</Notice>;
   const needle = q.trim();
-  const shown = needle === '' ? items : items.filter((i) => i.text.toLowerCase().includes(needle.toLowerCase()));
+  const counts = themeCounts(items.map((i) => i.text), themes);
+  const active = theme !== null && counts.some((c) => c.name === theme) ? theme : null;
+  const tagged = items.map((i) => ({ ...i, tags: themesOf(i.text, themes) }));
+  const byTheme = active === null ? tagged : tagged.filter((i) => (active === UNSORTED ? i.tags.length === 0 : i.tags.includes(active)));
+  const shown = needle === '' ? byTheme : byTheme.filter((i) => i.text.toLowerCase().includes(needle.toLowerCase()));
+  const setThemes = (next: Theme[]) => setSession({ themes: next });
+  const problems = validateThemes(themes);
   return (
     <section class="card" data-testid="comments-view">
       <form
@@ -122,6 +175,48 @@ export function CommentsView({ qs, items }: { qs: Question[]; items: { key: stri
           {T().searchBtn}
         </button>
       </form>
+      <div class="chips" role="group" aria-label={T().themeManage} data-testid="theme-chips">
+        <button class={`chip${active === null ? ' on' : ''}`} type="button" aria-pressed={active === null} onClick={() => setTheme(null)}>
+          {T().themeAll(items.length)}
+        </button>
+        {counts.map((c) => (
+          <button key={c.name} class={`chip${active === c.name ? ' on' : ''}`} type="button" aria-pressed={active === c.name} onClick={() => setTheme(c.name)}>
+            {T().themeChip(c.name === UNSORTED ? T().themeUnsorted : c.name, c.count)}
+          </button>
+        ))}
+        <button class="chip ghost" type="button" aria-expanded={manage} onClick={() => setManage(!manage)} data-testid="theme-manage">
+          {manage ? T().themeDone : T().themeManage}
+        </button>
+      </div>
+      {manage && (
+        <div class="theme-edit" data-testid="theme-edit">
+          <p class="hint">{T().themeHelp}</p>
+          {themes.length === 0 && <p class="hint">{T().themeEmpty}</p>}
+          {themes.map((th, i) => (
+            <div key={i} class="theme-row">
+              <input class="input" value={th.name} aria-label={T().themeName} placeholder={T().themeName} onInput={(e) => setThemes(themes.map((x, j) => (j === i ? { ...x, name: (e.target as HTMLInputElement).value } : x)))} />
+              <input
+                class="input"
+                defaultValue={th.keywords.join('、')}
+                aria-label={T().themeWords}
+                placeholder={T().themeWords}
+                onBlur={(e) => setThemes(themes.map((x, j) => (j === i ? { ...x, keywords: parseKeywordInput((e.target as HTMLInputElement).value) } : x)))}
+              />
+              <button class="btn ghost small" type="button" aria-label={T().themeDel(th.name)} onClick={() => setThemes(themes.filter((_, j) => j !== i))}>
+                ✕
+              </button>
+            </div>
+          ))}
+          {problems.length > 0 && (
+            <p class="hint" role="status">
+              {problems.join('；')}
+            </p>
+          )}
+          <button class="btn secondary small" type="button" onClick={() => setThemes([...themes, { name: '', keywords: [] }])}>
+            {T().themeAdd}
+          </button>
+        </div>
+      )}
       <p class="hint" role="status">
         {T().found(shown.length, items.length)}
       </p>

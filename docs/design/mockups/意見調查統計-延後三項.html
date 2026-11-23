@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>意見調查統計延後三項（模擬頁，虛構資料）</title>
+<style>
+/*
+ * 問卷回饋小幫手：設計 tokens（唯一來源）
+ * 說明見 docs/design/DESIGN.md。頁面與模擬頁要原樣放入下面三個色彩區塊。
+ * 色彩：淺色在 :root；深色在 prefers-color-scheme 與 [data-theme="dark"] 兩處，值必須相同。
+ */
+:root {
+  /* 色彩：表面 */
+  --paper: #f4f5f7;       /* 頁面底 */
+  --card: #ffffff;        /* 卡片、導覽列、輸入框底 */
+  --sunk: #eceef2;        /* 凹陷底：分段控制軌道、進度軌道、停用 */
+  /* 色彩：文字 */
+  --ink: #14171f;
+  --ink2: #444b5a;
+  --ink3: #5b6373;
+  /* 色彩：線 */
+  --line: #cfd3dc;
+  --line-soft: #e3e6ec;
+  /* 色彩：強調（鈷藍，唯一的強調色；深色版用較深的藍搭白字，不用粉彩色） */
+  --accent: #2554d8;
+  --on-accent: #ffffff;
+  --accent-soft: #e7edff;
+  --accent-ink: #1b3fa6;
+  /* 色彩：語意（不算強調色） */
+  --ok: #17713f;
+  --ok-soft: #dcf1e3;
+  --warn: #7a4f00;
+  --warn-soft: #fdf0d0;
+  --bad: #a8262b;
+  --bad-soft: #fbe2e0;
+  /* 色彩：圖表資料色（色盲友善；一定要搭配文字標籤，不單靠顏色） */
+  --d1: #2554d8;
+  --d2: #cf5f12;
+  --d3: #b3367a;
+  --d4: #0c7a88;
+  --d5: #8a6a0a;
+  --d0: #7b8494;          /* 其他、未分類 */
+  --warn-bar: #b97f00;       /* 同票、需處理的長條（對卡片 3.4:1） */
+  --bar-muted: #7f889b;   /* 未當選、未突顯的長條（對卡片 3.6:1） */
+  --ctl: #7f889b;         /* 控制項外框（選項卡、列按鈕）：對卡片與頁面底 3:1 以上 */
+  --ext-excel: #1d6f42;   /* 外部服務代表色：僅用於自畫的 Excel「X」圖示，不是品牌色 */
+  --scrim: rgba(12, 14, 20, 0.5);
+  --shadow: rgba(20, 24, 40, 0.16);
+  --shadow-sm: rgba(20, 24, 40, 0.08);   /* 卡片的細微層次 */
+
+  /* 字型：介面一律系統字型，不載入網路字型 */
+  --font: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Heiti TC", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Consolas, "Courier New", monospace;
+  --fs-xs: 13px;
+  --fs-sm: 14px;
+  --fs-md: 16px;   /* 手機輸入框不得小於 16，避免 iOS 自動放大 */
+  --fs-lg: 18px;
+  --fs-xl: 22px;
+  --fs-2xl: 28px;
+  --lh-body: 1.65;
+  --lh-tight: 1.3;
+
+  /* 間距（4 的倍數）、圓角、點擊區、動態 */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --r-sm: 8px;     /* 按鈕、輸入框、選項 */
+  --r-md: 12px;    /* 卡片、面板、提示 */
+  --r-lg: 20px;    /* 底部彈出面板上緣 */
+  --tap: 48px;     /* 手機預設點擊高度；任何可點元件不得低於 44px */
+  --tap-min: 44px;
+  --dur: 160ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0e1014;
+    --card: #171a20;
+    --sunk: #0b0c10;
+    --ink: #eceef3;
+    --ink2: #b9bfcc;
+    --ink3: #8f97a8;
+    --line: #2b303a;
+    --line-soft: #20242c;
+    --accent: #3d68f0;
+    --on-accent: #ffffff;
+    --accent-soft: #1a2850;
+    --accent-ink: #9db8ff;
+    --ok: #6fd39a;
+    --ok-soft: #12291c;
+    --warn: #f2c35c;
+    --warn-soft: #2e2410;
+    --bad: #ff9d96;
+    --bad-soft: #3a1b1d;
+    --d1: #6f93ff;
+    --d2: #f08a47;
+    --d3: #e579b3;
+    --d4: #3fc0d0;
+    --d5: #d6b43a;
+    --d0: #8f97a8;
+    --warn-bar: #f0b429;
+    --bar-muted: #6e7789;
+    --ctl: #6e7789;
+    --scrim: rgba(0, 0, 0, 0.65);
+    --shadow: rgba(0, 0, 0, 0.6);
+    --shadow-sm: rgba(0, 0, 0, 0.4);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper: #0e1014;
+  --card: #171a20;
+  --sunk: #0b0c10;
+  --ink: #eceef3;
+  --ink2: #b9bfcc;
+  --ink3: #8f97a8;
+  --line: #2b303a;
+  --line-soft: #20242c;
+  --accent: #3d68f0;
+  --on-accent: #ffffff;
+  --accent-soft: #1a2850;
+  --accent-ink: #9db8ff;
+  --ok: #6fd39a;
+  --ok-soft: #12291c;
+  --warn: #f2c35c;
+  --warn-soft: #2e2410;
+  --bad: #ff9d96;
+  --bad-soft: #3a1b1d;
+  --d1: #6f93ff;
+  --d2: #f08a47;
+  --d3: #e579b3;
+  --d4: #3fc0d0;
+  --d5: #d6b43a;
+  --d0: #8f97a8;
+  --warn-bar: #f0b429;
+  --bar-muted: #6e7789;
+  --ctl: #6e7789;
+  --scrim: rgba(0, 0, 0, 0.65);
+  --shadow: rgba(0, 0, 0, 0.6);
+  --shadow-sm: rgba(0, 0, 0, 0.4);
+  color-scheme: dark;
+}
+
+/*
+ * 輸出文件主題「溫暖」（個人回饋單預設）：紙張永遠是淺色，不隨深色模式改變。
+ * 用法：文件預覽與 PDF／Word 輸出的容器加 class="doc-warm"。
+ */
+.doc-warm {
+  --doc-paper: #fffdf9;
+  --doc-ink: #33291f;
+  --doc-ink2: #66554a;
+  --doc-line: #ead9c3;
+  --doc-accent: #a84f00;
+  --doc-accent-soft: #ffecd2;
+  --doc-leaf: #2f6f55;
+  --doc-leaf-soft: #e1f1e8;
+  --doc-card: #ffffff;
+  --doc-sunk: #efe8dc;
+  --doc-sunk2: #f4eee4;
+  --doc-blue-soft: #e3eaff;
+  --doc-blue-ink: #1b3fa6;
+  --doc-s1: #cf5f12;
+  --doc-s2: #eaa06a;
+  --doc-s3: #ddd5c8;
+  --doc-s4: #7f9be3;
+  --doc-s5: #2554d8;
+}
+
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 system-ui,"Noto Sans TC",sans-serif;padding:16px}
+h1{font-size:18px;margin:0 0 4px}.note{color:var(--ink2);font-size:14px;margin:0 0 16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line-soft);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.card h2{font-size:15px;margin:0}
+.rowbtn{display:flex;justify-content:space-between;align-items:center;min-height:44px;width:100%;border:1px solid var(--line);border-radius:12px;background:var(--card);padding:0 12px;color:var(--ink);font:inherit}
+.rowbtn .nm{display:block;font-weight:600}.rowbtn .sm{display:block;color:var(--ink2);font-size:14px}
+.tag{border-radius:999px;padding:0 8px;font-size:13px;background:var(--sunk);color:var(--ink2)}.tag.accent{color:var(--accent);border:1px solid var(--accent);background:transparent}
+.panel{border:1px solid var(--line-soft);border-radius:12px;padding:8px 12px;display:flex;flex-direction:column;gap:4px}
+.check{display:flex;gap:8px;min-height:44px;align-items:center}
+.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{min-height:44px;border-radius:999px;border:1px solid var(--line);background:var(--card);padding:0 16px;color:var(--ink);font:inherit}
+.chip.on{border-color:var(--accent);color:var(--accent);font-weight:600}.chip.ghost{border-style:dashed;color:var(--ink2)}
+.input{min-height:44px;border:1px solid var(--line);border-radius:8px;padding:0 10px;background:var(--card);color:var(--ink);font:inherit;min-width:0}
+.trow{display:grid;grid-template-columns:1fr 2fr auto;gap:8px;align-items:center}
+@media(max-width:599px){.trow{grid-template-columns:1fr auto}.trow .input:nth-child(2){grid-column:1/-1;grid-row:2}}
+.lab{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.lab label{display:flex;gap:8px;align-items:center}
+</style>
+</head>
+<body>
+<h1>意見調查統計：交叉「看哪些題」、留言主題、量表標籤</h1>
+<p class="note">設計規範 5.41 的模擬頁（Issue #217），使用虛構資料。規範見 docs/design/DESIGN.md。</p>
+<div class="grid">
+<section class="card"><h2>5g 交叉：看哪些題（展開）</h2>
+<button class="rowbtn" type="button" aria-expanded="true"><span><span class="nm">看哪些題</span><span class="sm">已選 2／3 題</span></span><span class="tag accent">完成</span></button>
+<div class="panel" role="group" aria-label="選要比較的量表題"><div class="chips"><button class="chip" type="button" style="min-height:36px">全選</button><button class="chip" type="button" style="min-height:36px">全不選</button></div>
+<label class="check"><input type="checkbox" checked>第 1 題　課程滿意度</label><label class="check"><input type="checkbox" checked>第 2 題　教材難度</label><label class="check"><input type="checkbox">第 3 題　作業量</label></div></section>
+<section class="card"><h2>5f 留言：主題籌碼與管理</h2>
+<div class="chips"><button class="chip on" type="button" aria-pressed="true">全部 28</button><button class="chip" type="button">戶外活動 11</button><button class="chip" type="button">時間安排 7</button><button class="chip" type="button">未分類 10</button><button class="chip ghost" type="button" aria-expanded="true">完成</button></div>
+<div class="panel"><p style="margin:0;color:var(--ink2);font-size:14px">自己設定主題與關鍵詞：留言含任一關鍵詞就歸入該主題，可同時歸入多個。不使用 AI，每次結果都一樣。</p>
+<div class="trow"><input class="input" value="戶外活動" aria-label="主題名稱"><input class="input" value="戶外、校外" aria-label="關鍵詞"><button class="chip" type="button" aria-label="刪除主題" style="min-height:44px">✕</button></div>
+<div class="trow"><input class="input" value="時間安排" aria-label="主題名稱"><input class="input" value="時間、太趕" aria-label="關鍵詞"><button class="chip" type="button" aria-label="刪除主題" style="min-height:44px">✕</button></div>
+<button class="chip" type="button" style="align-self:flex-start">新增主題</button></div></section>
+<section class="card"><h2>11d 量表標籤（題目頁，圖表下方）</h2>
+<details open><summary style="min-height:44px;display:flex;align-items:center;font-weight:600">量表標籤</summary>
+<div class="chips" role="group" aria-label="套用預設"><button class="chip" type="button">同意程度</button><button class="chip on" type="button">滿意度</button><button class="chip" type="button">頻率</button><button class="chip" type="button">自訂</button></div>
+<div class="lab" style="margin-top:8px"><label><b>1</b><input class="input" value="非常不滿意"></label><label><b>2</b><input class="input" value="不滿意"></label><label><b>3</b><input class="input" value="普通"></label><label><b>4</b><input class="input" value="滿意"></label><label><b>5</b><input class="input" value="非常滿意"></label></div></details></section>
+</div>
+</body>
+</html>

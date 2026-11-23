@@ -32,7 +32,7 @@ import { vt } from '../strings-vote';
 import { VoteGuard } from './VoteGuard';
 import { TallyProjector } from './TallyProjector';
 import { CommentsView, CrossView, type OpinionView, ViewTabs } from './OpinionTabs';
-import { LIKERT5_AGREE, labelOf } from '../../core';
+import { SCALE_PRESETS, type ScaleLabel, scoreText, validateLabels } from '../../core';
 
 const ui = () => extra().statsUi;
 
@@ -65,9 +65,58 @@ function Chart({ svg }: { svg: string }) {
   );
 }
 
-/** 量表分數的顯示文字：1～5 分用常見的同意度文字，其餘只顯示數字（自訂標籤屬量表標籤功能，稿 11d）。 */
-function scoreLabel(scale: { min: number; max: number }, v: number): string {
-  return scale.min === 1 && scale.max === 5 ? `${v} ${labelOf(v, LIKERT5_AGREE)}` : String(v);
+/** 量表標籤編輯（稿 11d）：1～5 分可套用同意程度／滿意度／頻率，也能逐分自訂；沒設定時 1～5 分用同意程度預設。 */
+function ScaleLabelsEditor() {
+  const st = useApp();
+  const s = st.session!;
+  const L = extra().scaleLabels;
+  const five = s.scale.min === 1 && s.scale.max === 5;
+  const cur: ScaleLabel[] = s.scaleLabels ?? (five ? [...SCALE_PRESETS.agree] : []);
+  const same = (a: readonly ScaleLabel[]) => a.length === cur.length && a.every((x) => cur.find((c) => c.value === x.value)?.label === x.label);
+  const presetKey = five ? (['agree', 'satisfy', 'freq'] as const).find((k) => same(SCALE_PRESETS[k])) ?? 'custom' : 'custom';
+  const values = Array.from({ length: s.scale.max - s.scale.min + 1 }, (_, i) => s.scale.min + i);
+  const dup = validateLabels(cur.filter((l) => l.label.trim() !== '')).some((m) => m.includes('重複') && !m.includes('分數'));
+  const setLabel = (v: number, text: string) => {
+    const next = values.map((x) => ({ value: x, label: x === v ? text : cur.find((c) => c.value === x)?.label ?? '' }));
+    setSession({ scaleLabels: next });
+  };
+  return (
+    <details class="card scale-labels" data-testid="scale-labels">
+      <summary>
+        <h3 style="display:inline">{L.title}</h3>
+      </summary>
+      <p class="hint">{L.help}</p>
+      {five && (
+        <div class="field">
+          <span class="label">{L.preset}</span>
+          <div class="seg" role="group" aria-label={L.preset}>
+            {(['agree', 'satisfy', 'freq'] as const).map((k) => (
+              <button key={k} type="button" class={presetKey === k ? 'on' : ''} aria-pressed={presetKey === k} onClick={() => setSession({ scaleLabels: [...SCALE_PRESETS[k]] })}>
+                {L[k]}
+              </button>
+            ))}
+            <button type="button" class={presetKey === 'custom' ? 'on' : ''} aria-pressed={presetKey === 'custom'} onClick={() => setSession({ scaleLabels: values.map((v) => ({ value: v, label: cur.find((c) => c.value === v)?.label ?? '' })) })}>
+              {L.custom}
+            </button>
+          </div>
+        </div>
+      )}
+      <div class="label-grid">
+        {values.map((v) => (
+          <label key={v} class="label-cell">
+            <b>{v}</b>
+            <input class="input" value={cur.find((c) => c.value === v)?.label ?? ''} aria-label={L.score(v)} onInput={(e) => setLabel(v, (e.target as HTMLInputElement).value)} />
+          </label>
+        ))}
+      </div>
+      {dup && <p class="hint" role="status">{L.dup}</p>}
+      {s.scaleLabels && (
+        <button class="btn ghost small" type="button" onClick={() => setSession({ scaleLabels: null })}>
+          {L.reset}
+        </button>
+      )}
+    </details>
+  );
 }
 
 function Tile({ label, value, note }: { label: string; value: string; note?: string }) {
@@ -265,11 +314,12 @@ function QuestionMain({ q, wide, reviewTotal }: { q: Question; wide: boolean; re
           svg={barsSvg(
             // 橫條：高分在上，帶量表文字（如「5 非常同意」）、人數與百分比（稿 12a／12c）
             x.distribution
-              .map((c, i) => ({ label: scoreLabel(scale, scale.min + i), value: c, note: `${S.stats.people(c)}・${x.n > 0 ? pct(c / x.n) : '0%'}` }))
+              .map((c, i) => ({ label: scoreText(scale, scale.min + i, st.session!.scaleLabels ?? null), value: c, note: `${S.stats.people(c)}・${x.n > 0 ? pct(c / x.n) : '0%'}` }))
               .reverse(),
             { title: q.col.label, max: Math.max(1, x.n), w },
           )}
         />
+        <ScaleLabelsEditor />
       </>
     );
   }

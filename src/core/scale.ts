@@ -21,6 +21,39 @@ export const LIKERT5_AGREE: readonly ScaleLabel[] = [
   { value: 5, label: '非常同意' },
 ];
 
+/** 五點量表的常用標籤組（稿 11d：同意程度、滿意度、頻率；另有「自訂」）。 */
+export const SCALE_PRESETS: Record<'agree' | 'satisfy' | 'freq', readonly ScaleLabel[]> = {
+  agree: LIKERT5_AGREE,
+  satisfy: [
+    { value: 1, label: '非常不滿意' },
+    { value: 2, label: '不滿意' },
+    { value: 3, label: '普通' },
+    { value: 4, label: '滿意' },
+    { value: 5, label: '非常滿意' },
+  ],
+  freq: [
+    { value: 1, label: '從不' },
+    { value: 2, label: '很少' },
+    { value: 3, label: '有時' },
+    { value: 4, label: '經常' },
+    { value: 5, label: '總是' },
+  ],
+};
+
+/** 讀檔用：把不明資料整理成合法的標籤清單（分數需為數字、標籤需為字串）。 */
+export function sanitizeScaleLabels(v: unknown): ScaleLabel[] | null {
+  if (!Array.isArray(v)) return null;
+  const out = v.filter((x): x is ScaleLabel => typeof x === 'object' && x !== null && typeof (x as ScaleLabel).value === 'number' && typeof (x as ScaleLabel).label === 'string');
+  return out.length > 0 ? out : null;
+}
+
+/** 統計頁顯示用：「5 非常同意」。老師有自訂就用自訂（沒填的分數只顯示數字）；沒自訂時 1～5 分用同意程度預設，其他量表只顯示分數。 */
+export function scoreText(scale: { min: number; max: number }, v: number, custom: readonly ScaleLabel[] | null): string {
+  const labels = custom ?? (scale.min === 1 && scale.max === 5 ? LIKERT5_AGREE : []);
+  const l = labels.find((x) => x.value === v)?.label.trim();
+  return l ? `${v} ${l}` : String(v);
+}
+
 /** 分數轉標籤；沒有對應標籤時回傳數字字串。 */
 export function labelOf(value: number | null, labels: readonly ScaleLabel[]): string {
   if (value === null) return '';

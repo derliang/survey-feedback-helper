@@ -3784,3 +3784,72 @@ ul.chips {
   border-radius: 3px;
   padding: 0 2px;
 }
+
+/* 意見調查統計：交叉「看哪些題」、留言主題、量表標籤（稿 5f／5g／11d；#217） */
+.chip.on {
+  background: var(--accent-soft, var(--card));
+  border-color: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+.chip.ghost {
+  border-style: dashed;
+  color: var(--ink2);
+}
+.cross-pick .rowbtn {
+  width: 100%;
+}
+.cross-pick .nm {
+  display: block;
+  font-weight: 600;
+}
+.cross-pick .sm {
+  display: block;
+  color: var(--ink2);
+  font-size: var(--fs-sm);
+}
+.pick-panel,
+.theme-edit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: var(--sp-3);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-md);
+  background: var(--card);
+}
+.theme-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto;
+  gap: var(--sp-2);
+  align-items: center;
+}
+@media (max-width: 599px) {
+  .theme-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .theme-row .input:nth-child(2) {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+.scale-labels summary {
+  cursor: pointer;
+  min-height: var(--tap-min);
+  display: flex;
+  align-items: center;
+}
+.label-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--sp-2);
+}
+.label-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.label-cell b {
+  min-width: 1.5em;
+  text-align: center;
+}
