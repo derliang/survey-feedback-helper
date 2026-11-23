@@ -1,4 +1,4 @@
-import type { Student } from '../core';
+import { type Student, sanitizeScaleLabels, sanitizeThemes } from '../core';
 import type { FolderData, PhraseCategory, SavedRoster, SavedSurvey, SurveyKind } from './types';
 
 /** 資料夾裡存設定與名單的檔名；副檔名 .sfh 為「設定檔」，內容是 JSON。 */
@@ -37,6 +37,8 @@ function parseSurvey(v: unknown): SavedSurvey | null {
     headers: o.headers.filter((h): h is string => typeof h === 'string'),
     mapping,
     labels,
+    ...(sanitizeScaleLabels(o.scaleLabels) ? { scaleLabels: sanitizeScaleLabels(o.scaleLabels) as { value: number; label: string }[] } : {}),
+    ...(sanitizeThemes(o.themes).length > 0 ? { themes: sanitizeThemes(o.themes) } : {}),
     scale: { min: typeof scale?.min === 'number' ? scale.min : 1, max: typeof scale?.max === 'number' ? scale.max : 5 },
     lastUsed: str(o.lastUsed),
     rowCount: typeof o.rowCount === 'number' ? o.rowCount : 0,

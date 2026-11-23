@@ -1,5 +1,5 @@
 import { useEffect, useReducer } from "preact/hooks";
-import { type Table, recognizeConfig } from "../core";
+import { type ScaleLabel, type Table, type Theme, recognizeConfig } from "../core";
 import {
   type FolderData,
   type FolderStatus,
@@ -94,6 +94,10 @@ export interface Session {
   scale: Scale;
   /** 老師確認過（或手動選過）量表上下限；之後不再被自動判斷覆蓋。 */
   scaleConfirmed: boolean;
+  /** 老師自訂的量表標籤；null 表示用預設（稿 11d）。 */
+  scaleLabels?: ScaleLabel[] | null;
+  /** 留言主題（老師設定的名稱＋關鍵詞，稿 5f）。 */
+  themes?: Theme[];
   mappingConfirmed: boolean;
   /** 這個檔有 2 張以上有資料的工作表時：全部候選、略過的空表與目前用哪一張；只有一張時是 null。 */
   sheetPool: SheetPool | null;
@@ -578,6 +582,8 @@ function startSession(
     kindConfirmed: false,
     scale: detectScale(table, cols),
     scaleConfirmed: false,
+    scaleLabels: null,
+    themes: [],
     mappingConfirmed: false,
     sheetPool: opts.pool && opts.pool.sheets.length >= 2 ? opts.pool : null,
     recognition:
@@ -631,6 +637,8 @@ export function acceptRecognition(): void {
     cols,
     scale: saved.scale,
     scaleConfirmed: true,
+    scaleLabels: saved.scaleLabels ?? null,
+    themes: saved.themes ?? [],
     mappingConfirmed: true,
     previousRows: saved.rowCount,
     rosterRows: roster
@@ -663,6 +671,8 @@ export async function saveSurvey(): Promise<void> {
     mapping: toSavedMapping(s.cols),
     labels: toSavedLabels(s.cols),
     scale: s.scale,
+    ...(s.scaleLabels ? { scaleLabels: s.scaleLabels } : {}),
+    ...(s.themes && s.themes.length > 0 ? { themes: s.themes } : {}),
     lastUsed: today(),
     rowCount: s.table.rows.length,
     rosterId: s.rosterRows ? `r-${s.surveyId}` : null,

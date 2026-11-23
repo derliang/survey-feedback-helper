@@ -8,6 +8,8 @@ import { extra } from '../strings-extra';
 export interface CommentItem {
   key: string;
   text: string;
+  /** 命中的留言主題名稱（稿 5f），有就在卡片上標出。 */
+  tags?: string[];
 }
 
 /** 把符合搜尋字的片段標出來（稿 5f）；不使用 AI，只比對字串。 */
@@ -32,6 +34,11 @@ function CommentRow({ item, review, mark }: { item: CommentItem; review: Review;
     <li class={`cm cm-${st}`} data-testid="comment">
       <div class="cm-head">
         <span class={`tag ${st === 'adopt' || st === 'rewrite' ? 'ok' : st === 'hide' ? '' : 'warn'}`}>{R.state[st]}</span>
+        {item.tags?.map((n) => (
+          <span key={n} class="tag accent">
+            {n}
+          </span>
+        ))}
         {words.length > 0 && <span class="tag warn">{R.flagWord(words)}</span>}
       </div>
       {editing ? (
