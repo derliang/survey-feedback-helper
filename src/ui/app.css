@@ -923,6 +923,10 @@ button.tile {
   font-size: var(--fs-sm);
   color: var(--ink2);
 }
+.tile-note {
+  font-size: var(--fs-xs, var(--fs-sm));
+  color: var(--ink2);
+}
 .tile-n {
   font-size: var(--fs-2xl);
   font-weight: 700;
