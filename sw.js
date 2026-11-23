@@ -2,7 +2,7 @@
 // 只快取「程式本身」：建置時產生的檔案清單（precache.json，JS、CSS、首頁、圖示）與字型、wasm。
 // 不快取、也不攔截任何問卷資料：問卷資料不經過網路（只在記憶體），也不蒐集任何資料。
 // 版本：建置時把下面 BUILD 常數的佔位字串換成檔案清單的雜湊，sw.js 內容一變，瀏覽器就會更新。
-const BUILD = '715f12373222';
+const BUILD = 'f341445b9fe9';
 const APP_CACHE = `sfh-app-${BUILD}`;
 const ASSET_CACHE = 'sfh-assets-v1';
 const FONT_OR_WASM = /\/fonts\/[^/]+\.woff2$|\.wasm$/;
