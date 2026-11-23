@@ -98,7 +98,7 @@ export function MappingView() {
 
   const finish = () => {
     setSession((cur) => ({
-      cols: cur.cols.map((c) => ({ ...c, confirm: false })),
+      cols: cur.cols.map((c) => ({ ...c, confirm: c.uncertain === true })), // 拿不準的欄保留「請確認」（Issue #226）
       // 老師確認或手動選過的量表不重算
       scale: cur.scaleConfirmed ? cur.scale : detectScale(cur.table, cur.cols),
       mappingConfirmed: true,

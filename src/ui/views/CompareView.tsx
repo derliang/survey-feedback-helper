@@ -4,7 +4,7 @@ import { rosterComparison, rosterStudents } from '../../app/progress';
 import { go, set, setSession, useApp } from '../../app/store';
 import { type PersonMatch, type Student, cellText } from '../../core';
 import { strings as S } from '../strings';
-import { ActBar, Notice } from '../parts/parts';
+import { ActBar, Notice, Sheet } from '../parts/parts';
 import { extra } from '../strings-extra';
 
 type Tab = 'missing' | 'confirm' | 'duplicate';
@@ -15,6 +15,7 @@ export function CompareView() {
   const app = useApp();
   const s = app.session;
   const [tab, setTab] = useState<Tab>('missing');
+  const [askAll, setAskAll] = useState(false);
   if (!s) return null;
   const students = rosterStudents(s);
   const c = rosterComparison(s);
@@ -49,6 +50,12 @@ export function CompareView() {
       resolutions: { ...cur.resolutions, [id]: how },
       excluded: how === 'exclude' ? [...cur.excluded, id] : cur.excluded,
     }));
+  // 一次確認所有「姓名對得上、只有座號不同」的項目（Issue #227）；名單找不到人或同名分不出的不動
+  const batchIds = c.seatMismatches.map((x) => Number(x.id)).filter((id) => s.resolutions[id] === undefined);
+  const acceptAll = () =>
+    setSession((cur) => ({ resolutions: { ...cur.resolutions, ...Object.fromEntries(batchIds.map((id) => [id, 'accept' as const])) } }));
+  const undoAll = () =>
+    setSession((cur) => ({ resolutions: Object.fromEntries(Object.entries(cur.resolutions).filter(([, v]) => v !== 'accept')) as typeof cur.resolutions }));
   const undo = (id: number) =>
     setSession((cur) => {
       const rest = { ...cur.resolutions };
@@ -73,6 +80,7 @@ export function CompareView() {
         {tiles.map(([name, n, t]) => (
           <button key={name} type="button" class={`tile${t && n > 0 && t !== 'missing' ? ' warn' : ''}${t === tab ? ' on' : ''}`} disabled={t === null} onClick={() => t && setTab(t)}>
             <span class="tile-l">{name}</span>
+            {t === 'confirm' && n > 0 && <span class="tile-note">{S.compare.toConfirmNote}</span>}
             <span class="tile-n">{n}</span>
           </button>
         ))}
@@ -111,6 +119,16 @@ export function CompareView() {
       {tab === 'confirm' && (
         <section>
           {confirmItems.length === 0 && accepted.length === 0 && <p class="empty">{S.compare.none}</p>}
+          {batchIds.length > 1 && (
+            <button class="btn primary" type="button" data-testid="accept-all" onClick={() => setAskAll(true)}>
+              {S.compare.sameAll(batchIds.length)}
+            </button>
+          )}
+          {accepted.length > 1 && (
+            <button class="btn ghost" type="button" data-testid="undo-all" onClick={undoAll}>
+              {S.compare.undoAll}
+            </button>
+          )}
           <ul class="issue-list">
             {confirmItems.map(({ id, match }) => (
               <li key={id} class="issue">
@@ -171,6 +189,35 @@ export function CompareView() {
           )}
           <p class="hint">{extra().compare.keepWhich}</p>
         </section>
+      )}
+
+      {askAll && (
+        <Sheet
+          confirm
+          title={S.compare.sameAllTitle}
+          onClose={() => setAskAll(false)}
+          footer={
+            <>
+              <button class="btn secondary grow" type="button" onClick={() => setAskAll(false)}>
+                {S.compare.sameAllNo}
+              </button>
+              <button
+                class="btn primary grow"
+                type="button"
+                data-testid="accept-all-yes"
+                onClick={() => {
+                  acceptAll();
+                  setAskAll(false);
+                  set({ toast: S.compare.sameAllDone(batchIds.length) });
+                }}
+              >
+                {S.compare.sameAllYes}
+              </button>
+            </>
+          }
+        >
+          <p>{S.compare.sameAllBody(batchIds.length)}</p>
+        </Sheet>
       )}
 
       <ActBar fixed>
