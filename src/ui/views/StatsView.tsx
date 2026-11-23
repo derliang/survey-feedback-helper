@@ -19,7 +19,7 @@ import { reviewCounts, setTeacher } from '../../app/review';
 import { blankColumns } from '../../app/analysis';
 import { downloadReview, go, loadReview, set, setSession, setStats, updateReview, useApp } from '../../app/store';
 import { isTouchDevice } from '../../storage';
-import { barsSvg, columnsSvg, pairedBarsSvg, svgSize, svgTitle, toPrintSvg } from '../chart-svg';
+import { barsSvg, pairedBarsSvg, svgSize, svgTitle, toPrintSvg } from '../chart-svg';
 import { svgToJpg } from '../chart-png';
 import { downloadBytes } from '../../storage';
 import { TrendCard } from './TrendCard';
@@ -31,6 +31,8 @@ import { extra } from '../strings-extra';
 import { vt } from '../strings-vote';
 import { VoteGuard } from './VoteGuard';
 import { TallyProjector } from './TallyProjector';
+import { CommentsView, CrossView, type OpinionView, ViewTabs } from './OpinionTabs';
+import { LIKERT5_AGREE, labelOf } from '../../core';
 
 const ui = () => extra().statsUi;
 
@@ -61,6 +63,11 @@ function Chart({ svg }: { svg: string }) {
       </figcaption>
     </figure>
   );
+}
+
+/** 量表分數的顯示文字：1～5 分用常見的同意度文字，其餘只顯示數字（自訂標籤屬量表標籤功能，稿 11d）。 */
+function scoreLabel(scale: { min: number; max: number }, v: number): string {
+  return scale.min === 1 && scale.max === 5 ? `${v} ${labelOf(v, LIKERT5_AGREE)}` : String(v);
 }
 
 function Tile({ label, value, note }: { label: string; value: string; note?: string }) {
@@ -254,7 +261,15 @@ function QuestionMain({ q, wide, reviewTotal }: { q: Question; wide: boolean; re
         </div>
         {x.invalid > 0 && <Notice kind="warn">{S.stats.invalid(x.invalid)}</Notice>}
         <ScoreHints />
-        <Chart svg={columnsSvg(x.distribution, x.distribution.map((_, i) => String(scale.min + i)), { title: q.col.label, w, h: 220 })} />
+        <Chart
+          svg={barsSvg(
+            // 橫條：高分在上，帶量表文字（如「5 非常同意」）、人數與百分比（稿 12a／12c）
+            x.distribution
+              .map((c, i) => ({ label: scoreLabel(scale, scale.min + i), value: c, note: `${S.stats.people(c)}・${x.n > 0 ? pct(c / x.n) : '0%'}` }))
+              .reverse(),
+            { title: q.col.label, max: Math.max(1, x.n), w },
+          )}
+        />
       </>
     );
   }
@@ -676,6 +691,7 @@ export function StatsView() {
   const st = useApp();
   const wide = useWide();
   const [bannerOff, setBannerOff] = useState(false);
+  const [view, setView] = useState<OpinionView>('q');
   const s = st.session;
   const ok = s !== null && canGoStats(s);
   useEffect(() => {
@@ -757,6 +773,10 @@ export function StatsView() {
         </p>
       </header>
       {showBanner && <TopBanner pending={total.pending} flagged={counts?.flaggedPending ?? 0} onClose={() => setBannerOff(true)} />}
+      {qs && <ViewTabs value={view} onChange={setView} />}
+      {qs && view === 'cross' && <CrossView s={s} />}
+      {qs && view === 'comments' && <CommentsView qs={qs} items={commentItems} />}
+      {(!qs || view === 'q') && (
       <div class={`wb${hasSide ? '' : ' wb-noside'}`}>
         <WorkList title={listTitle} entries={entries} sel={sel} />
         <section class="wb-main" aria-live="polite">
@@ -788,6 +808,7 @@ export function StatsView() {
           </aside>
         )}
       </div>
+      )}
       {hasAdvanced && (
         <Advanced summary={advSummary}>
           {fb && <FeedbackSettings summary={fb} />}
