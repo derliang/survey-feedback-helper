@@ -38,3 +38,32 @@ describe('defaultLabel（Issue #164）', () => {
     expect(defaultLabel('：')).toBe('：');
   });
 });
+
+describe('內容猜題型：完整句子傾向開放題（#226）', () => {
+  const guess = (header: string, answers: string[]) => {
+    const table = tableFromCsv([`填寫者,${header}`, ...answers.map((a, i) => `甲${i},${a}`)].join('\n'));
+    return analyzeColumns(table).find((c) => c.header === header);
+  };
+  it('只有 2 種答案的長句（案例 05 情形）→ 開放意見，且標「請確認」並在完成對應後仍保留', () => {
+    const answers = Array.from({ length: 20 }, (_, i) => (i % 2 ? '希望多一些自主學習的機會。' : '時間不夠'));
+    const col = guess('可以改進的地方', answers);
+    expect(col?.role).toBe('comment');
+    expect(col?.confirm).toBe(true);
+    expect(col?.uncertain).toBe(true);
+  });
+  it('含標點的短句（如「時間不夠，作業太多」）也傾向開放題', () => {
+    const col = guess('想說的話', Array.from({ length: 12 }, (_, i) => (i % 2 ? '時間不夠，作業太多' : '沒有')));
+    expect(col?.role).toBe('comment');
+  });
+  it('短選項（是／否、同意）仍判為選擇題，且不標拿不準', () => {
+    for (const opts of [['是', '否'], ['非常同意', '同意', '普通', '不同意']]) {
+      const col = guess('選項題', Array.from({ length: 20 }, (_, i) => opts[i % opts.length] as string));
+      expect(col?.role).toBe('choice');
+      expect(col?.uncertain).toBeUndefined();
+    }
+  });
+  it('含頓號的選項（國文、數學）不被當成句子', () => {
+    const col = guess('科目', Array.from({ length: 20 }, (_, i) => (i % 2 ? '國文、數學' : '英文、自然')));
+    expect(col?.role).toBe('choice');
+  });
+});

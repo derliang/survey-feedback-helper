@@ -35,6 +35,8 @@ export interface ColumnInfo {
   samples: string[];
   /** 志願欄才有：第幾志願（1 起算）。 */
   rank?: number;
+  /** 只靠內容猜、拿不準的欄（例如只有兩種長句答案）：按「完成對應」也不清掉「請確認」，老師自己改過用途才算確認（Issue #226）。 */
+  uncertain?: boolean;
   /** 系統看不出題型但有內容的欄（「待分類」）。老師還沒決定前 `confirm` 為 true；決定後 `confirm` 變 false，這個旗標留著，用來列「已處理」。 */
   unsorted?: boolean;
 }
@@ -58,8 +60,14 @@ function columnValues(table: Table, index: number): Cell[] {
   return table.rows.map((r) => r[index] ?? null).filter((c) => !isBlankCell(c));
 }
 
+/** 像完整句子的答案：含句末標點或全形逗號（不含頓號與半形逗號，避免把「國文、數學」「手機, 平板」複選答案判成句子），或長度達 15 字。 */
+export function isSentenceLike(text: string): boolean {
+  const t = text.trim();
+  return /[。！？!?，；]/.test(t) || t.length >= 15;
+}
+
 /** 只靠內容猜：整欄都是 0～10 的數字 → 評分；選項很少 → 選擇題；文字很長 → 開放意見。 */
-function guessByContent(values: Cell[]): { role: Role; confirm: boolean } | null {
+function guessByContent(values: Cell[]): { role: Role; confirm: boolean; uncertain?: boolean } | null {
   if (values.length === 0) return null;
   const nums = values.map((v) => parseNumber(v));
   // 九成以上是 0～10 的整數就當評分：偶有打錯的 11 或混入一筆文字（如「五分」）不該讓整欄被當成選擇題
@@ -71,8 +79,14 @@ function guessByContent(values: Cell[]): { role: Role; confirm: boolean } | null
   const texts = values.map((v) => cellText(v));
   const distinct = new Set(texts);
   const avgLen = texts.reduce((a, t) => a + t.length, 0) / texts.length;
-  if (avgLen >= 12) return { role: 'comment', confirm: true };
-  if (distinct.size <= Math.max(6, texts.length / 4) && avgLen <= 12) return { role: 'choice', confirm: true };
+  if (avgLen >= 12) return { role: 'comment', confirm: true, ...(distinct.size <= 3 ? { uncertain: true } : {}) };
+  // 完整句子傾向開放題：兩成以上的答案像句子，即使只有兩三種答案也不當選擇題（Issue #226）
+  const sentenceShare = texts.filter(isSentenceLike).length / texts.length;
+  if (sentenceShare >= 0.2) return { role: 'comment', confirm: true, uncertain: true };
+  if (distinct.size <= Math.max(6, texts.length / 4) && avgLen <= 12) {
+    // 選項偏長或混有個別句子：仍當選擇題，但標「請確認」，完成對應後也保留
+    return { role: 'choice', confirm: true, ...(sentenceShare > 0 || avgLen >= 8 ? { uncertain: true } : {}) };
+  }
   return null;
 }
 
@@ -84,11 +98,13 @@ export function analyzeColumns(table: Table): ColumnInfo[] {
     let role: Role | null = s?.role ?? null;
     let confirm = s?.confidence === 'low' && role !== null;
     let unsorted = false;
+    let uncertain = false;
     if (role === null) {
       const g = guessByContent(columnValues(table, index));
       if (g) {
         role = g.role;
         confirm = g.confirm;
+        uncertain = g.uncertain === true;
       } else {
         // 標題是「1.班長」「2、副班長」這類編號開頭（票選幹部的職位欄）：視為選擇題，仍請老師確認（Issue #208）
         if (/^\d{1,2}\s*[.、．]\s*\S/.test(header.normalize('NFKC')) && columnValues(table, index).length > 0) {
@@ -102,6 +118,7 @@ export function analyzeColumns(table: Table): ColumnInfo[] {
     }
     const col: ColumnInfo = { index, header, label: defaultLabel(header), role, confirm, samples: samplesOf(table, index) };
     if (unsorted) col.unsorted = true;
+    if (uncertain) col.uncertain = true;
     return col;
   });
   return assignRanks(cols);
@@ -401,6 +418,7 @@ export function withRole(cols: readonly ColumnInfo[], index: number, role: Role)
     cols.map((c) => {
       if (c.index !== index) return c;
       const next: ColumnInfo = { ...c, role, confirm: false };
+      delete next.uncertain;
       if (role === 'preference') next.rank = used + 1;
       return next;
     }),
