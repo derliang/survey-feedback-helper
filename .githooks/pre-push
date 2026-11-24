@@ -1,0 +1,8 @@
+#!/bin/sh
+# 本機 CI：push 前跑快速測試，沒過就擋下（不要用 --no-verify 繞過）。
+cd "$(git rev-parse --show-toplevel)" || exit 1
+# git 執行 hook 時會帶入 GIT_DIR 等變數；測試若會建暫存 git repo，不清掉就會操作到這個 repo。
+for v in $(env | sed -n 's/^\(GIT_[A-Za-z_]*\)=.*/\1/p'); do unset "$v"; done
+echo "[pre-push] 型別檢查與單元測試（npm run typecheck、npm test）…"
+{ npm run typecheck && npm test; } || { echo "[pre-push] 測試沒過，已擋下 push。修好再推。" >&2; exit 1; }
+echo "[pre-push] 通過"

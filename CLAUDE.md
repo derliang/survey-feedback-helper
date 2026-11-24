@@ -39,6 +39,8 @@ TypeScript + Vite + Preact + Vitest + Playwright；ExcelJS、docx、fflate；PDF
 | 發布 dry-run（先跑 `npm run ci`，再印出將發布到 `gh-pages` 的內容，不動遠端） | `npm run release` |
 | 正式發布（只有使用者說「發布」後才加 `--yes`；要求工作樹乾淨且 HEAD = `origin/main`） | `npm run release -- --yes` |
 
+本機 pre-push（`.githooks/pre-push`）：push 前自動跑 `npm run typecheck` 與 `npm test`（約 25 秒），沒過就擋下；不含 lint、建置與 e2e（那些仍由 `npm run ci` 負責）。`npm ci`／`npm install` 的 `prepare` 會自動設定 `core.hooksPath`；也可手動 `git config core.hooksPath .githooks`。
+
 沒有 GitHub Actions：PR 關卡就是在本機跑 `npm run ci`，結果貼在 PR 的測試證據；發布用 `scripts/release.mjs`。細節見[決定記錄〈PR 與發布關卡〉](docs/decisions/2026-10-30-技術選型與發布規則.md)與[Pages 改本機發布](docs/decisions/2026-11-01-Pages改本機發布.md)。引入新套件須先登錄 `docs/third-party.md`，`check:licenses` 會擋未登錄的直接相依。
 
 ## 工作流程
